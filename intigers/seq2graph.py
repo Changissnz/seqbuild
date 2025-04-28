@@ -1,0 +1,56 @@
+import numpy as np
+
+def diffvec(l): 
+    assert type(l) == np.ndarray and len(l.shape) == 1
+    d = []
+    for i in range(1,len(l)):
+        d.append(l[i] - l[i-1])
+    return np.array(d,dtype='int32')
+
+
+class IntSeq:
+
+    def __init__(self,l):
+        self.l = l 
+        self.load()
+
+    def load(self):
+        if type(self.l) == type(None): 
+            self.l = np.array([],"int32")
+        else: 
+            self.l = np.array(self.l,"int32")
+            assert len(self.l.shape) == 1 
+        return 
+
+    def append(self,q): 
+        if type(q) in [int,np.int32]: 
+            q = np.int32(q)
+            self.l = np.append(self.l,q)
+
+        for q_ in q: 
+            self.l = np.append(self.l,np.int32(q_))
+        return
+
+    '''
+    difference triangle 
+    '''
+    def difftri(self):
+        # get the first 
+        dvec = diffvec(self.l) 
+        l = len(dvec)
+        if l == 0: 
+            print("[!] NONE.")
+            return
+
+        x = np.zeros((l,l),dtype='int32') 
+        x[0] = np.copy(dvec)
+        lx = l - 1 
+
+        while lx > 0: 
+            dvec = diffvec(dvec) 
+            dx = l - lx 
+            nx = np.zeros((dx,))
+            dvec = np.append(nx,dvec) 
+            x[dx] = np.copy(dvec) 
+            lx -= 1
+        return x 
