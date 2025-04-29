@@ -11,7 +11,11 @@ def stdop_vec(l,operation,cast_type=np.int32):
     assert type(l) == np.ndarray and len(l.shape) == 1
     d = []
     for i in range(1,len(l)):
-        d.append(operation(l[i],l[i-1]))
+        try: 
+            q = operation(l[i],l[i-1])
+        except: 
+            q = np.nan   
+        d.append(q if not np.isinf(q) else np.nan)
     return np.array(d,dtype=cast_type)
 
 def diffvec(l,cast_type=np.int32): 

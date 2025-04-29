@@ -23,6 +23,9 @@ class IntSeq:
             self.l = np.append(self.l,np.int32(q_))
         return
 
+    """
+    upper-right hand triangle of operation-output values 
+    """
     def optri(self,operation,cast_type):
 
         # get the first 
@@ -32,7 +35,7 @@ class IntSeq:
             print("[!] NONE.")
             return
 
-        x = np.zeros((l,l),dtype='int32') 
+        x = np.zeros((l,l),dtype=cast_type) 
         x[0] = np.copy(dvec)
         lx = l - 1 
 
@@ -50,3 +53,9 @@ class IntSeq:
     '''
     def difftri(self,cast_type=np.int32): 
         return self.optri(sub,cast_type)
+
+    '''
+    dividor (multiple) triangle 
+    '''
+    def divtri(self,div_type=truediv,cast_type=np.float32): 
+        return self.optri(div_type,cast_type)
