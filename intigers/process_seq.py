@@ -41,6 +41,10 @@ def affine_fit_for_pair__multiple(i1,i2):
     if i1 == 0: return np.nan 
     return np.int32(ceil(i2/i1))
 
+"""
+Outputs a sequence of (multiple,additive) pairs for every 
+contiguous pair in integer sequence `l`. 
+"""
 class AffineFitCandidates: 
 
     def __init__(self,l):
@@ -69,9 +73,9 @@ class AffineFitCandidates:
         if not exclude_neg: 
             mx = -self.m 
             for i in range(mx,0): 
-                ds.append((i,v2 - (v1 * i))) 
+                ds.append((i,int(v2 - (v1 * i))))
         for i in range(1,self.m+1): 
-            ds.append((i,v2 - (v1 * i))) 
+            ds.append((i,int(v2 - (v1 * i))))
         return ds 
 
     def next_candidate_set(self,exclude_neg:bool=True): 

@@ -25,6 +25,20 @@ class ProcessSeqMethods(unittest.TestCase):
         sol_gvec3 = np.array([0, 1, 0, 1, 1], dtype=np.int32)
         assert (gvec3 == sol_gvec3).all() 
 
+    def test__AffineFitCandidates__candidates_at_index(self):
+
+        l = [-2,8,800,12,30,-90,50,5,25]
+        x = AffineFitCandidates(l)
+        d = x.candidates_at_index(1,False)
+        assert len(d) == 200 
+
+        d2 = x.candidates_at_index(1,True)
+        assert len(d2) == 100
+
+        for d_ in d: 
+            assert l[0] * d_[0] + d_[1] == l[1] 
+        return
+
 
 if __name__ == '__main__':
     unittest.main()
