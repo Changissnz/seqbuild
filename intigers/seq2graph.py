@@ -6,7 +6,7 @@ def diffvec(l,cast_type=np.int32):
     d = []
     for i in range(1,len(l)):
         d.append(l[i] - l[i-1])
-    return np.array(d,dtype=np.float32) 
+    return np.array(d,dtype=cast_type) 
 
 def gleqvec(l,rounding_depth=5): 
     assert type(l) == np.ndarray and len(l.shape) == 1
@@ -65,9 +65,9 @@ class IntSeq:
 
         while lx > 0: 
             dvec = diffvec(dvec) 
-            dx = l - lx 
+            dx = l - len(dvec) 
             nx = np.zeros((dx,))
-            dvec = np.append(nx,dvec) 
-            x[dx] = np.copy(dvec) 
+            dvec2 = np.append(nx,dvec)
+            x[dx] = np.copy(dvec2) 
             lx -= 1
         return x 
