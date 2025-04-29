@@ -1,0 +1,1 @@
+Folder contains code designed to aid in data-mining on small data (usually < 500). 
