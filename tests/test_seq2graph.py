@@ -6,7 +6,6 @@ import unittest
 python3 -m tests.test_seq2graph
 """
 ###
-
 class Seq2GraphMethods(unittest.TestCase):
 
     def test__IntSeq__difftri(self):
@@ -33,6 +32,6 @@ class Seq2GraphMethods(unittest.TestCase):
             [   0,    0,    0,    0,    0,    0,    0,    0,    0, -104]],\
             dtype=np.int32)
         assert (prod3 == sol3).all()
-        
+
 if __name__ == '__main__':
     unittest.main()
