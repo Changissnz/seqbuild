@@ -23,12 +23,10 @@ class IntSeq:
             self.l = np.append(self.l,np.int32(q_))
         return
 
-    '''
-    difference triangle 
-    '''
-    def difftri(self):
+    def optri(self,operation,cast_type):
+
         # get the first 
-        dvec = diffvec(self.l) 
+        dvec = stdop_vec(self.l,operation,cast_type) 
         l = len(dvec)
         if l == 0: 
             print("[!] NONE.")
@@ -39,10 +37,16 @@ class IntSeq:
         lx = l - 1 
 
         while lx > 0: 
-            dvec = diffvec(dvec) 
+            dvec = stdop_vec(dvec,operation,cast_type) 
             dx = l - len(dvec) 
             nx = np.zeros((dx,))
             dvec2 = np.append(nx,dvec)
             x[dx] = np.copy(dvec2) 
             lx -= 1
         return x 
+
+    '''
+    difference triangle 
+    '''
+    def difftri(self,cast_type=np.int32): 
+        return self.optri(sub,cast_type)
