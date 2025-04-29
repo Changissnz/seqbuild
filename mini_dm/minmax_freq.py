@@ -53,6 +53,9 @@ class MinMaxFreq:
         self.fin = self.prev_fin 
         return
 
+    """
+    main method 
+    """
     def count_one(self):
         if len(self.d[self.current_key]) == 0: 
             self.current_key = self.next_key() 
