@@ -3,14 +3,22 @@ file contains methods to aid in calculating analytical values on integer vectors
 """
 
 import numpy as np
+from operator import add,sub,mul,truediv,floordiv
 
-def diffvec(l,cast_type=np.int32):
-    assert cast_type in [np.int32,np.float32] 
+def stdop_vec(l,operation,cast_type=np.int32):
+    assert operation in {add,sub,mul,truediv,floordiv}
+    assert cast_type in {np.int32,np.float32} 
     assert type(l) == np.ndarray and len(l.shape) == 1
     d = []
     for i in range(1,len(l)):
-        d.append(l[i] - l[i-1])
-    return np.array(d,dtype=cast_type) 
+        d.append(operation(l[i],l[i-1]))
+    return np.array(d,dtype=cast_type)
+
+def diffvec(l,cast_type=np.int32): 
+    return stdop_vec(l,sub,cast_type)
+
+def divvec(l,div_type=truediv,cast_type=np.float32):
+    return stdop_vec(l,div_type,cast_type)
 
 def gleqvec(l,rounding_depth=5): 
     assert type(l) == np.ndarray and len(l.shape) == 1
