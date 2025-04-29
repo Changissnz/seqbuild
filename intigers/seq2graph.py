@@ -1,4 +1,5 @@
 from .process_seq import * 
+from mini_dm.minmax_freq import * 
 
 class IntSeq:
 
@@ -59,3 +60,35 @@ class IntSeq:
     '''
     def divtri(self,div_type=truediv,cast_type=np.float32): 
         return self.optri(div_type,cast_type)
+
+class AffineFitSearch: 
+
+    def __init__(self,l,exclude_neg:bool,log_revd:bool=False):
+        self.afc = AffineFitCandidates(l)
+        self.exclude_neg = exclude_neg
+        self.log_revd = log_revd 
+        self.d = defaultdict(list) 
+        self.mmf = None 
+        return 
+        '''
+        MinMaxFreq(d:dict,log_revd:bool)
+        '''
+
+    def load_all_candidates(self): 
+        i = self.afc.i
+        
+        while True: 
+            sx = self.afc.next_candidate_set(self.exclude_neg)
+            if type(sx) == type(None): 
+                break 
+            self.d[i] = sx 
+            i = self.afc.i 
+        self.load_mmf()
+        
+    def load_mmf(self):
+        self.mmf = MinMaxFreq(self.d,self.log_revd)
+
+    def count(self): 
+        while not self.mmf.fin:
+            self.mmf.count_one()
+        self.mmf.finalize_count() 

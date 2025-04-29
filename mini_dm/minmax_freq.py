@@ -14,6 +14,7 @@ class MinMaxFreq:
         self.sorted_counts = None
         self.current_key = None 
         self.fin = False 
+        self.prev_fin = False 
         return
 
     def next_key(self):
@@ -38,6 +39,7 @@ class MinMaxFreq:
             print("[!] already present")
             return 
         self.d[p[0]] = p[1]
+        self.prev_fin = self.fin 
         self.fin = False 
         self.add_pair_update()  
 
@@ -48,6 +50,7 @@ class MinMaxFreq:
             if self.log_revd: 
                 self.revd[v_].append(k) 
         v.clear() 
+        self.fin = self.prev_fin 
         return
 
     def count_one(self):
@@ -74,4 +77,5 @@ class MinMaxFreq:
 
     def finalize_count(self):
         self.sorted_counts = sorted(self.c,key=lambda x:x[1])
+        self.fin = True 
         return
