@@ -1,12 +1,12 @@
-from intigers.seq2graph import * 
+from intigers.seq_struct import * 
 import unittest
 
 ### lone file test 
 """
-python3 -m tests.test_seq2graph
+python3 -m tests.test_seq_struct
 """
 ###
-class Seq2GraphMethods(unittest.TestCase):
+class SeqStructMethods(unittest.TestCase):
 
     def test__IntSeq__difftri(self):
 
