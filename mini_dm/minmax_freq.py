@@ -79,6 +79,6 @@ class MinMaxFreq:
                 i += 1 
 
     def finalize_count(self):
-        self.sorted_counts = sorted(self.c,key=lambda x:x[1])
+        self.sorted_counts = sorted(self.c.items(),key=lambda x:x[1])
         self.fin = True 
         return

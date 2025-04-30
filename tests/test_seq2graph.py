@@ -33,5 +33,13 @@ class Seq2GraphMethods(unittest.TestCase):
             dtype=np.int32)
         assert (prod3 == sol3).all()
 
+    def test__AffineFitSearch__count(self): 
+        l = [2,4,8,16,3,6,12,3,9,27,81]
+        afs = AffineFitSearch(l,exclude_neg=True,log_revd=True)
+
+        afs.load_all_candidates()
+        afs.count()
+        assert afs.mmf.sorted_counts[-3:] == [((1, 6), 2), ((3, 0), 3), ((2, 0), 5)]
+
 if __name__ == '__main__':
     unittest.main()

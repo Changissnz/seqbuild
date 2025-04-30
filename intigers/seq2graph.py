@@ -92,3 +92,6 @@ class AffineFitSearch:
         while not self.mmf.fin:
             self.mmf.count_one()
         self.mmf.finalize_count() 
+
+    def frequency_count(self): 
+        return self.mmf.sorted_counts
