@@ -115,7 +115,8 @@ class AffineFitSearch:
         x = -1 
         sol = [] 
         while len(l) > 0: 
-            q = self.mmf.sorted_counts[x] 
+            q = self.mmf.sorted_counts[x]
+            x -= 1 
             indices = set(self.mmf.revd[q[0]])
             new_indices = set([i for i in indices if i in l])
             if len(new_indices) == 0: continue 

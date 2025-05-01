@@ -41,5 +41,15 @@ class SeqStructMethods(unittest.TestCase):
         afs.count()
         assert afs.mmf.sorted_counts[-3:] == [((1, 6), 2), ((3, 0), 3), ((2, 0), 5)]
 
+    def test__AffineFitSearch__default_affine_decomp(self):
+        l = [2,4,8,16,3,6,12,3,9,27,81]
+        afs = AffineFitSearch(l,exclude_neg=True,log_revd=True)
+
+        afs.load_all_candidates()
+        afs.count()
+        q = afs.default_affine_decomp()
+        sol = [((2, 0), {1, 2, 3, 5, 6}), ((3, 0), {8, 9, 10}), ((3, -33), {7}), ((3, -45), {4})]
+        assert q == sol 
+
 if __name__ == '__main__':
     unittest.main()
