@@ -139,6 +139,7 @@ class ModuloDecomp:
         assert type(l) == IntSeq 
         self.l = l 
         self.gleqvec_prt = self.gleqvec_partition()
+        self.afs_prt = None 
 
     def gleqvec_partition(self): 
         gv = gleqvec(self.l.l,rounding_depth=5)
@@ -166,4 +167,8 @@ class ModuloDecomp:
             q = afs.default_affine_decomp()
             d[(prev,x+1)] = q 
             prev = x + 1 
+        self.afs_prt = d 
         return d
+
+    def continuous_merge(self,i): 
+        return -1 
