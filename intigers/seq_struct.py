@@ -15,6 +15,9 @@ class IntSeq:
             assert len(self.l.shape) == 1 
         return 
 
+    def __len__(self): 
+        return len(self.l)
+
     def append(self,q): 
         if type(q) in [int,np.int32]: 
             q = np.int32(q)
@@ -64,6 +67,8 @@ class IntSeq:
 """
 runs frequency count of (multiple,additive) pairs on contiguous pairs in 
 integer sequence. 
+
+Decomposes integer sequence into format: ((multiple,additive),index list). 
 """
 class AffineFitSearch: 
 
@@ -123,3 +128,21 @@ class AffineFitSearch:
             l = l - new_indices
             sol.append((q[0],new_indices))
         return sol 
+
+"""
+contains a decomposition scheme for integer sequences, based on 
+the modulo operation. 
+"""
+class ModuloDecomp: 
+
+    def __init__(self,l): 
+        assert type(l) == IntSeq 
+        self.l = l 
+
+    def gleqvec_partition(self): 
+        gv = gleqvec(self.l.l,rounding_depth=5)
+        ilist = [] 
+        for i in range(1,len(self.l)): 
+            if self.l.l[i] * -1 == self.l.l[i-1]: 
+                ilist.append(i)
+        return ilist 
