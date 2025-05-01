@@ -51,5 +51,15 @@ class SeqStructMethods(unittest.TestCase):
         sol = [((2, 0), {1, 2, 3, 5, 6}), ((3, 0), {8, 9, 10}), ((3, -33), {7}), ((3, -45), {4})]
         assert q == sol 
 
+    def test__ModuloDecomp__afs_on_partition(self):
+        l = [2,4,8,16,3,6,12,3,9,27,81]
+
+        intsq = IntSeq(l) 
+        md = ModuloDecomp(intsq)
+        assert md.gleqvec_prt == [3,6,10] 
+        maop = md.afs_on_partition()
+        sol = {(0, 4): [((2, 0), {1, 2, 3})], (4, 7): [((2, 0), {1, 2})], (7, 11): [((3, 0), {1, 2, 3})]}
+        assert maop == sol 
+
 if __name__ == '__main__':
     unittest.main()

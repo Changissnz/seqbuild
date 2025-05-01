@@ -138,11 +138,32 @@ class ModuloDecomp:
     def __init__(self,l): 
         assert type(l) == IntSeq 
         self.l = l 
+        self.gleqvec_prt = self.gleqvec_partition()
 
     def gleqvec_partition(self): 
         gv = gleqvec(self.l.l,rounding_depth=5)
         ilist = [] 
-        for i in range(1,len(self.l)): 
-            if self.l.l[i] * -1 == self.l.l[i-1]: 
-                ilist.append(i)
+        for i in range(1,len(gv)): 
+            if gv[i] * -1 == gv[i-1]: 
+                if len(ilist) > 0: 
+                    if ilist[-1] != i -1: 
+                        ilist.append(i)
+                else: ilist.append(i)
+        ilist.append(len(gv)) 
         return ilist 
+
+    """
+    runs AffineFitSearch for each partition 
+    """
+    def afs_on_partition(self,exclude_neg:bool=True): 
+        prev = 0 
+        d = dict() 
+        for x in self.gleqvec_prt: 
+            chunk = self.l.l[prev:x+1] 
+            afs = AffineFitSearch(chunk,exclude_neg,log_revd=True)
+            afs.load_all_candidates()
+            afs.count()
+            q = afs.default_affine_decomp()
+            d[(prev,x+1)] = q 
+            prev = x + 1 
+        return d
