@@ -168,7 +168,9 @@ class ModuloDecomp:
         self.gvec = None 
         self.gleqvec_prt = self.gleqvec_partition()
         self.subvec_fit = dict()
-        self.afs_prt = None 
+        self.afs_prt = [] 
+        self.afs_prt_mod = [] 
+
 
     def gleqvec_partition(self): 
         self.gvec = gleqvec(self.l.l,rounding_depth=5)
@@ -190,10 +192,6 @@ class ModuloDecomp:
     def afs_on_subsequence_(self,i,exclude_neg:bool=True): 
         assert i >= 0 and i < len(self.gleqvec_prt) 
 
-        # case: 0-index, basic AffineFitSearch 
-        if i > 0: 
-            return -1  
-
         prev = 0 if i == 0 else self.gleqvec_prt[i-1]
         now = self.gleqvec_prt[i] + 1
         chunk = self.l.l[prev:now]
@@ -202,7 +200,35 @@ class ModuloDecomp:
         afs.load_all_candidates()
         afs.count()
         q = afs.default_affine_decomp()
-        return ((prev,now),q)
+        a = ((prev,now),q)
+        return a 
+
+    def afs_on_subsequence(self,i,exclude_neg:bool=True):
+        # case: (i > 0)-index 
+        if i > 0: 
+            mod_val = self.subsequence_modulo_connect(i)
+            if type(mod_val) == type(None): 
+                return 
+            self.afs_prt_mod.append(mod_val)
+
+        a_ = self.afs_on_subsequence_(i,exclude_neg)
+        b_ = AffineFitSearch.decomp_to_span_fmt(a_[1])
+        a = (a_[0],b_)
+        self.afs_prt.append(a)
+
+    def subsequence_modulo_connect(self,i): 
+        assert i >= 1 
+        if i >= len(self.gleqvec_prt): 
+            return None  
+
+        r = self.afs_prt[i-1][1]
+        ma = r[-1] 
+        m,a,j = ma[0][0],ma[0][1],ma[1][1] + 1 
+        prev,now = self.l.l[j-1],self.l.l[j]
+
+        value = prev * m + a 
+        mod_val = value - now
+        return mod_val
 
     def continuous_merge(self,i): 
         return -1 
