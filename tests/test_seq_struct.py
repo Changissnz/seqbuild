@@ -103,5 +103,16 @@ class SeqStructMethods(unittest.TestCase):
         assert md.afs_prt_mod == []
         assert md.afs_prt == [((0, 4), [[(-3, 2), [1, 3]]])]
 
+        # case: negative multiple #2 
+        l = [3,-7,23,-67,203,-607,1]
+        intsq = IntSeq(l) 
+        md = ModuloDecomp(intsq)
+        #q = md.continuous_merge(False)
+        md.merge(False)
+        assert md.gleqvec_prt == [5, 6]
+        assert md.afs_prt_mod == [np.int32(1822)]
+        assert md.afs_prt == [((0, 6), [[(-3, 2), [1, 5]]]), ((6, 7), [])]
+
+
 if __name__ == '__main__':
     unittest.main()

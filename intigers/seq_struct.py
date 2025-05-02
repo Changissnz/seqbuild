@@ -205,6 +205,9 @@ class ModuloDecomp:
         prev = 0 if i == 0 else self.gleqvec_prt[i-1] + 1 
         now = self.gleqvec_prt[i] + 1
         chunk = self.l.l[prev:now]
+        if len(chunk) < 2: 
+            return ((prev,now),[])
+
         afs = AffineFitSearch(chunk,exclude_neg,log_revd=True)
         afs.load_all_candidates()
         afs.count()
@@ -221,6 +224,10 @@ class ModuloDecomp:
             self.afs_prt_mod.append(mod_val)
 
         a_ = self.afs_on_subsequence_(i,exclude_neg)
+        if len(a_[1]) == 0: 
+            self.afs_prt.append(a_) 
+            return 
+
         b_ = AffineFitSearch.decomp_to_span_fmt(a_[1])
         for b2 in b_: 
             b2[1][0] += a_[0][0]
@@ -254,6 +261,15 @@ class ModuloDecomp:
             self.afs_on_subsequence(i,exclude_neg)
         return
 
+    def merge(self,exclude_neg):
+        self.continuous_merge(exclude_neg) 
+        i = 1 
+        while i < len(self.gleqvec_prt): 
+            stat = self.premerge_contiguous(i,exclude_neg) 
+            if not stat: 
+                i += 1 
+
+
     def premerge_contiguous(self,i,exclude_neg:bool=True): 
         assert i >= 1 and i < len(self.gleqvec_prt) 
 
@@ -273,13 +289,16 @@ class ModuloDecomp:
         if cost2 < cost:
             self.afs_prt[i] = a 
             self.afs_prt.pop(i-1) 
+            
             if i - 1 < len(self.afs_prt_mod): 
                 mod_val = self.subsequence_modulo_connect(i)
                 if type(mod_val) == type(None): 
                     return 
+                self.afs_prt_mod.pop(i-1)
                 self.afs_prt_mod.insert(i - 1,mod_val)
+             
+            return True 
         else: 
             self.gleqvec_prt = gp 
             self.afs_prt_mod = apm 
-        
-        return
+            return False 
