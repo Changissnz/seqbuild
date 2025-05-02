@@ -129,12 +129,19 @@ class AffineFitSearch:
             sol.append((q[0],new_indices))
         return sol 
 
+    """
+    arguments: 
+    - decomp := list, element is ((multiple,additive),index set) 
+
+    return: 
+    - list, element is {(multiple,additive),contiguous span [start index,end index)}. 
+
+    EX: 
+        input: [((2, 1), {1, 2, 5}), ((3, -25), {4}), ((3, -20), {3})]
+        output: [[(2, 1), [1, 2]], [(3, -20), [3, 3]], [(3, -25), [4, 4]], [(2, 1), [5, 5]]]
+    """
     @staticmethod 
     def decomp_to_span_fmt(decomp): 
-        ## [((2, 1), {1, 2, 5}), ((3, -25), {4}), ((3, -20), {3})]
-        ## [[(2, 1), [0, 2]], [(3, -20), [3, 4]], [(3, -25), [4, 5]]]
-
-
         revd = dict() 
 
         for x in decomp: 
@@ -171,7 +178,9 @@ class ModuloDecomp:
         self.afs_prt = [] 
         self.afs_prt_mod = [] 
 
-
+    """
+    partitions integer sequence based on (greater|lesser|equal)-sign change. 
+    """
     def gleqvec_partition(self): 
         self.gvec = gleqvec(self.l.l,rounding_depth=5)
         ilist = []
@@ -213,9 +222,17 @@ class ModuloDecomp:
 
         a_ = self.afs_on_subsequence_(i,exclude_neg)
         b_ = AffineFitSearch.decomp_to_span_fmt(a_[1])
+        for b2 in b_: 
+            b2[1][0] += a_[0][0]
+            b2[1][1] += a_[0][0]
         a = (a_[0],b_)
         self.afs_prt.append(a)
 
+    """
+    calculates the integer value for modulo operation connecting 
+    the last element of previous subsequence (i-1) to the first 
+    element of subsequence i. 
+    """
     def subsequence_modulo_connect(self,i): 
         assert i >= 1 
         if i >= len(self.gleqvec_prt): 
