@@ -129,6 +129,33 @@ class AffineFitSearch:
             sol.append((q[0],new_indices))
         return sol 
 
+    @staticmethod 
+    def decomp_to_span_fmt(decomp): 
+        ## [((2, 1), {1, 2, 5}), ((3, -25), {4}), ((3, -20), {3})]
+        ## [[(2, 1), [0, 2]], [(3, -20), [3, 4]], [(3, -25), [4, 5]]]
+
+
+        revd = dict() 
+
+        for x in decomp: 
+            for y in x[1]: 
+                revd[y] = x[0]
+        if len(revd) == 0: return None 
+
+        mx = max(revd)
+        spand = []  
+        prev = revd[1] 
+        spand.append([prev,[1,1]]) 
+        for i in range(2,mx+1): 
+            now = revd[i]
+            if now == prev:
+                spand[-1][1][1] += 1 
+            else: 
+                i1,i2 = i,i
+                spand.append([now,[i1,i2]])
+            prev = now 
+        return spand 
+
 """
 contains a decomposition scheme for integer sequences, based on 
 the modulo operation. 
@@ -138,37 +165,44 @@ class ModuloDecomp:
     def __init__(self,l): 
         assert type(l) == IntSeq 
         self.l = l 
+        self.gvec = None 
         self.gleqvec_prt = self.gleqvec_partition()
+        self.subvec_fit = dict()
         self.afs_prt = None 
 
     def gleqvec_partition(self): 
-        gv = gleqvec(self.l.l,rounding_depth=5)
-        ilist = [] 
-        for i in range(1,len(gv)): 
-            if gv[i] * -1 == gv[i-1]: 
+        self.gvec = gleqvec(self.l.l,rounding_depth=5)
+        ilist = []
+        
+        for i in range(1,len(self.gvec)): 
+            if self.gvec[i] * -1 == self.gvec[i-1]: 
                 if len(ilist) > 0: 
                     if ilist[-1] != i -1: 
                         ilist.append(i)
                 else: ilist.append(i)
-        ilist.append(len(gv)) 
+
+        ilist.append(len(self.gvec)) 
         return ilist 
 
     """
-    runs AffineFitSearch for each partition 
+    runs AffineFitSearch for i'th subsequence  
     """
-    def afs_on_partition(self,exclude_neg:bool=True): 
-        prev = 0 
-        d = dict() 
-        for x in self.gleqvec_prt: 
-            chunk = self.l.l[prev:x+1] 
-            afs = AffineFitSearch(chunk,exclude_neg,log_revd=True)
-            afs.load_all_candidates()
-            afs.count()
-            q = afs.default_affine_decomp()
-            d[(prev,x+1)] = q 
-            prev = x + 1 
-        self.afs_prt = d 
-        return d
+    def afs_on_subsequence_(self,i,exclude_neg:bool=True): 
+        assert i >= 0 and i < len(self.gleqvec_prt) 
+
+        # case: 0-index, basic AffineFitSearch 
+        if i > 0: 
+            return -1  
+
+        prev = 0 if i == 0 else self.gleqvec_prt[i-1]
+        now = self.gleqvec_prt[i] + 1
+        chunk = self.l.l[prev:now]
+
+        afs = AffineFitSearch(chunk,exclude_neg,log_revd=True)
+        afs.load_all_candidates()
+        afs.count()
+        q = afs.default_affine_decomp()
+        return ((prev,now),q)
 
     def continuous_merge(self,i): 
         return -1 

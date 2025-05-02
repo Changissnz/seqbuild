@@ -51,15 +51,23 @@ class SeqStructMethods(unittest.TestCase):
         sol = [((2, 0), {1, 2, 3, 5, 6}), ((3, 0), {8, 9, 10}), ((3, -33), {7}), ((3, -45), {4})]
         assert q == sol 
 
-    def test__ModuloDecomp__afs_on_partition(self):
-        l = [2,4,8,16,3,6,12,3,9,27,81]
+    def test__ModuloDecomp__afs_on_subsequence_(self):
 
+        l = [2,5,11,13,14,29]
         intsq = IntSeq(l) 
         md = ModuloDecomp(intsq)
-        assert md.gleqvec_prt == [3,6,10] 
-        maop = md.afs_on_partition()
-        sol = {(0, 4): [((2, 0), {1, 2, 3})], (4, 7): [((2, 0), {1, 2})], (7, 11): [((3, 0), {1, 2, 3})]}
-        assert maop == sol 
+        ##gv = gleqvec(intsq.l)
+
+        aos = md.afs_on_subsequence_(0)
+        sol1 = ((0, 6), [((2, 1), {1, 2, 5}), ((3, -25), {4}), ((3, -20), {3})])
+        assert aos == sol1 
+
+        # test for span format of `aos`
+        q = aos[1]
+        q2 = AffineFitSearch.decomp_to_span_fmt(q)
+        sol2 = [[(2, 1), [1, 2]], [(3, -20), [3, 3]], [(3, -25), [4, 4]], [(2, 1), [5, 5]]]
+        assert sol2 == q2 
+
 
 if __name__ == '__main__':
     unittest.main()
