@@ -256,11 +256,6 @@ class ModuloDecomp:
     """
     main method
     """
-    def continuous_merge(self,exclude_neg:bool=True):
-        for i in range(len(self.gleqvec_prt)): 
-            self.afs_on_subsequence(i,exclude_neg)
-        return
-
     def merge(self,exclude_neg):
         self.continuous_merge(exclude_neg) 
         i = 1 
@@ -269,6 +264,10 @@ class ModuloDecomp:
             if not stat: 
                 i += 1 
 
+    def continuous_merge(self,exclude_neg:bool=True):
+        for i in range(len(self.gleqvec_prt)): 
+            self.afs_on_subsequence(i,exclude_neg)
+        return
 
     def premerge_contiguous(self,i,exclude_neg:bool=True): 
         assert i >= 1 and i < len(self.gleqvec_prt) 

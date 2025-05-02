@@ -44,6 +44,13 @@ def affine_fit_for_pair__multiple(i1,i2):
 """
 Outputs a sequence of (multiple,additive) pairs for every 
 contiguous pair in integer sequence `l`. 
+
+The maximum multiple m to consider for each contiguous pair 
+is: 
+
+MAX abs([ceil(l[i]/l[i-1])]); |l| > i >= 1. 
+
+If `exclude_neg` set to False, considers the span [-m,m]\{0}. 
 """
 class AffineFitCandidates: 
 
