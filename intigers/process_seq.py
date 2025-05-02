@@ -50,7 +50,7 @@ is:
 
 MAX abs([ceil(l[i]/l[i-1])]); |l| > i >= 1. 
 
-If `exclude_neg` set to False, considers the span [-m,m]\{0}. 
+If `exclude_neg` set to False, considers the span [-m,m]\{0}.  
 """
 class AffineFitCandidates: 
 
