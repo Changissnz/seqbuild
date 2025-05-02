@@ -50,7 +50,7 @@ is:
 
 MAX abs([ceil(l[i]/l[i-1])]); |l| > i >= 1. 
 
-If `exclude_neg` set to False, considers the span [-m,m]\{0}.  
+If `exclude_neg` set to False, considers the span [-m,m]\\{0}.  
 """
 class AffineFitCandidates: 
 
@@ -66,22 +66,29 @@ class AffineFitCandidates:
         assert len(self.l.shape) == 1 and len(self.l) > 1 
         return 
 
-    ## 
     def max_multiple(self): 
         q = 0 
         for i in range(1,len(self.l)): 
             m = affine_fit_for_pair__multiple(self.l[i-1],self.l[i]) 
+            if np.isnan(m): 
+                continue 
+
             lm = [q,m]
             j = 0 if abs(q) > abs(m) else 1  
             q = lm[j]
-            #q = max(q,m)
         return abs(q) 
     
     def candidates_at_index(self,i,exclude_neg:bool=True): 
         assert i >= 1 and i < len(self.l) 
         self.exclude_neg = exclude_neg
+
         ds = [] 
         v1,v2 = self.l[i-1],self.l[i]
+
+        if self.m == 0: 
+            ds.append((i,int(v2 - (v1 * self.m)))) 
+            return ds 
+
         if not self.exclude_neg: 
             mx = -self.m 
             for i in range(mx,0): 

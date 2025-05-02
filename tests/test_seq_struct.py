@@ -87,6 +87,54 @@ class SeqStructMethods(unittest.TestCase):
         assert md.afs_prt_mod == [np.int32(19), np.int32(128), np.int32(129)]
         assert md.gleqvec_prt == [2, 5, 7, 9]
 
+    def test__ModuloDecomp__continuous_merge(self): 
+        
+        # case 1 
+        l = [6,0,-6]
+        intsq = IntSeq(l) 
+        md = ModuloDecomp(intsq)
+
+        q = md.continuous_merge(False)
+        assert md.gleqvec_prt == [2]
+        assert md.afs_prt == [((0, 3), [[(1, 0), [1, 1]], [(2, -6), [2, 2]]])]
+        assert md.afs_prt_mod == []
+
+        # case 2 
+        l = [6,0]
+        intsq = IntSeq(l) 
+        md = ModuloDecomp(intsq)
+        q = md.continuous_merge(False)
+        assert md.gleqvec_prt == [1]
+        assert md.afs_prt == [((0, 2), [[(1, 0), [1, 1]]])]
+        assert md.afs_prt_mod == []
+
+        # case 3 
+        l = [0,6]
+        intsq = IntSeq(l) 
+        md = ModuloDecomp(intsq)
+        q = md.continuous_merge(False)
+        assert md.gleqvec_prt == [1]
+        assert md.afs_prt == [((0, 2), [[(1, 6), [1, 1]]])]
+        assert md.afs_prt_mod == [] 
+
+        # case 4 
+        l = [6,0,6]
+        intsq = IntSeq(l) 
+        md = ModuloDecomp(intsq)
+        q = md.continuous_merge(False)
+        assert md.gleqvec_prt == [1, 2]
+        assert md.afs_prt == [((0, 2), [[(1, 0), [1, 1]]]), ((2, 3), [])]
+        assert md.afs_prt_mod == [np.int32(-6)]
+
+        # case 5 
+        l = [-6,0,6]
+        intsq = IntSeq(l) 
+        md = ModuloDecomp(intsq)
+        q = md.continuous_merge(False)
+        assert md.gleqvec_prt == [2]
+        assert md.afs_prt == [((0, 3), [[(1, 0), [1, 1]], [(2, 6), [2, 2]]])]
+        assert md.afs_prt_mod == []
+
     def test__ModuloDecomp__premerge_contiguous(self):
         # case: negative multiple
         l = [3,-7,23,-67]

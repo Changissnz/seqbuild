@@ -89,9 +89,11 @@ class AffineFitSearch:
         
         while True: 
             sx = self.afc.next_candidate_set(self.exclude_neg)
+            #print("SX: ", sx) 
             if type(sx) == type(None): 
                 break 
             self.d[i] = sx 
+            #print("D: ",self.d)
             i = self.afc.i 
         self.load_mmf()
         
