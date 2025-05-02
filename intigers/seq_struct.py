@@ -201,7 +201,7 @@ class ModuloDecomp:
     def afs_on_subsequence_(self,i,exclude_neg:bool=True): 
         assert i >= 0 and i < len(self.gleqvec_prt) 
 
-        prev = 0 if i == 0 else self.gleqvec_prt[i-1]
+        prev = 0 if i == 0 else self.gleqvec_prt[i-1] + 1 
         now = self.gleqvec_prt[i] + 1
         chunk = self.l.l[prev:now]
 
@@ -242,7 +242,6 @@ class ModuloDecomp:
         ma = r[-1] 
         m,a,j = ma[0][0],ma[0][1],ma[1][1] + 1 
         prev,now = self.l.l[j-1],self.l.l[j]
-
         value = prev * m + a 
         mod_val = value - now
         return mod_val
