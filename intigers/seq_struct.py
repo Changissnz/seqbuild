@@ -1,5 +1,6 @@
 from .process_seq import * 
 from mini_dm.minmax_freq import * 
+from copy import deepcopy 
 
 class IntSeq:
 
@@ -112,7 +113,7 @@ class AffineFitSearch:
     main method #2
     """
     def default_affine_decomp(self): 
-        assert self.log_revd 
+        assert self.log_revd         
         assert len(self.mmf.revd) > 0 
 
         l = set([i for i in range(1,len(self.afc.l))])
@@ -204,7 +205,6 @@ class ModuloDecomp:
         prev = 0 if i == 0 else self.gleqvec_prt[i-1] + 1 
         now = self.gleqvec_prt[i] + 1
         chunk = self.l.l[prev:now]
-
         afs = AffineFitSearch(chunk,exclude_neg,log_revd=True)
         afs.load_all_candidates()
         afs.count()
@@ -246,5 +246,40 @@ class ModuloDecomp:
         mod_val = value - now
         return mod_val
 
-    def continuous_merge(self,i): 
-        return -1 
+    """
+    main method
+    """
+    def continuous_merge(self,exclude_neg:bool=True):
+        for i in range(len(self.gleqvec_prt)): 
+            self.afs_on_subsequence(i,exclude_neg)
+        return
+
+    def premerge_contiguous(self,i,exclude_neg:bool=True): 
+        assert i >= 1 and i < len(self.gleqvec_prt) 
+
+        gp = deepcopy(self.gleqvec_prt)
+        apm = deepcopy(self.afs_prt_mod) 
+        
+        cost = 1 + len(self.afs_prt[i-1][1]) + len(self.afs_prt[i][1])# one modulo value 
+        self.gleqvec_prt.pop(i-1)
+        self.afs_prt_mod.pop(i-1)
+        a_ = self.afs_on_subsequence_(i-1,exclude_neg=exclude_neg)  
+        b_ = AffineFitSearch.decomp_to_span_fmt(a_[1])
+        for b2 in b_: 
+            b2[1][0] += a_[0][0]
+            b2[1][1] += a_[0][0]
+        cost2 = len(b_)
+        a = (a_[0],b_)
+        if cost2 < cost:
+            self.afs_prt[i] = a 
+            self.afs_prt.pop(i-1) 
+            if i - 1 < len(self.afs_prt_mod): 
+                mod_val = self.subsequence_modulo_connect(i)
+                if type(mod_val) == type(None): 
+                    return 
+                self.afs_prt_mod.insert(i - 1,mod_val)
+        else: 
+            self.gleqvec_prt = gp 
+            self.afs_prt_mod = apm 
+        
+        return

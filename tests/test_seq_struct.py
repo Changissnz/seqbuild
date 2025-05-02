@@ -68,6 +68,40 @@ class SeqStructMethods(unittest.TestCase):
         sol2 = [[(2, 1), [1, 2]], [(3, -20), [3, 3]], [(3, -25), [4, 4]], [(2, 1), [5, 5]]]
         assert sol2 == q2 
 
+    def test__ModuloDecomp__afs_on_subsequence(self):
+        l = [2,5,11,4,14,44,6,27,3,15]
+        intsq = IntSeq(l) 
+        md = ModuloDecomp(intsq)
+
+        md.afs_on_subsequence(0)
+        md.afs_on_subsequence(1)
+        md.afs_on_subsequence(2)
+        md.afs_on_subsequence(3)
+
+        sol = [((0, 3), [[(2, 1), [1, 2]]]),\
+            ((3, 6), [[(3, 2), [4, 5]]]),\
+            ((6, 8), [[(5, -3), [7, 7]]]),\
+            ((8, 10), [[(5, 0), [9, 9]]])]
+
+        assert md.afs_prt == sol 
+        assert md.afs_prt_mod == [np.int32(19), np.int32(128), np.int32(129)]
+        assert md.gleqvec_prt == [2, 5, 7, 9]
+
+    def test__ModuloDecomp__premerge_contiguous(self):
+        # case: negative multiple
+        l = [3,-7,23,-67]
+        intsq = IntSeq(l) 
+        md = ModuloDecomp(intsq)
+
+        q = md.continuous_merge(False)
+        assert md.gleqvec_prt == [1, 3]
+        assert md.afs_prt_mod == [np.int32(-50)]
+        assert md.afs_prt == [((0, 2), [[(2, -13), [1, 1]]]), ((2, 4), [[(2, -113), [3, 3]]])]
+
+        md.premerge_contiguous(1,False)
+        assert md.gleqvec_prt == [3]
+        assert md.afs_prt_mod == []
+        assert md.afs_prt == [((0, 4), [[(-3, 2), [1, 3]]])]
 
 if __name__ == '__main__':
     unittest.main()
