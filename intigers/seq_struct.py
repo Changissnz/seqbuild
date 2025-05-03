@@ -318,17 +318,6 @@ class ModuloDecompRepr:
         return
 
     def reconstruct_(self,first): 
-        """
-        sol = [((0, 3), [[(2, 1), [1, 2]]]),\
-            ((3, 6), [[(3, 2), [4, 5]]]),\
-            ((6, 8), [[(5, -3), [7, 7]]]),\
-            ((8, 10), [[(5, 0), [9, 9]]])]
-
-        assert md.afs_prt == sol 
-        assert md.afs_prt_mod == [np.int32(19), np.int32(128), np.int32(129)]
-        assert md.gleqvec_prt == [2, 5, 7, 9]
-        """
-
         i = 0 
         l = [first]
         prev_ma = None  
