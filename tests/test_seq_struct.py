@@ -56,7 +56,6 @@ class SeqStructMethods(unittest.TestCase):
         l = [2,5,11,13,14,29]
         intsq = IntSeq(l) 
         md = ModuloDecomp(intsq)
-        ##gv = gleqvec(intsq.l)
 
         aos = md.afs_on_subsequence_(0)
         sol1 = ((0, 6), [((2, 1), {1, 2, 5}), ((3, -25), {4}), ((3, -20), {3})])
@@ -155,12 +154,21 @@ class SeqStructMethods(unittest.TestCase):
         l = [3,-7,23,-67,203,-607,1]
         intsq = IntSeq(l) 
         md = ModuloDecomp(intsq)
-        #q = md.continuous_merge(False)
         md.merge(False)
         assert md.gleqvec_prt == [5, 6]
         assert md.afs_prt_mod == [np.int32(1822)]
         assert md.afs_prt == [((0, 6), [[(-3, 2), [1, 5]]]), ((6, 7), [])]
 
+    def test__ModuloDecompRepr__reconstruct(self):
+        l = [2,5,11,4,14,44,6,27,3,15]
+        intsq = IntSeq(l) 
+        md = ModuloDecomp(intsq)
+        md.merge(False)
+
+        mdr = ModuloDecompRepr(md)
+        r = mdr.reconstruct()
+        assert l == r 
+        return
 
 if __name__ == '__main__':
     unittest.main()

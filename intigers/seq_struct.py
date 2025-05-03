@@ -180,6 +180,7 @@ class ModuloDecomp:
         self.subvec_fit = dict()
         self.afs_prt = [] 
         self.afs_prt_mod = [] 
+        self.fin = False 
 
     """
     partitions integer sequence based on (greater|lesser|equal)-sign change. 
@@ -265,6 +266,7 @@ class ModuloDecomp:
             stat = self.premerge_contiguous(i,exclude_neg) 
             if not stat: 
                 i += 1 
+        self.fin = True 
 
     def continuous_merge(self,exclude_neg:bool=True):
         for i in range(len(self.gleqvec_prt)): 
@@ -300,3 +302,57 @@ class ModuloDecomp:
             self.gleqvec_prt.insert(i-1,q1)
             self.afs_prt_mod.insert(i-1,q2)
             return False 
+
+class ModuloDecompRepr: 
+
+    def __init__(self,md): 
+        assert type(md) == ModuloDecomp
+        self.load(md)
+        return 
+
+    def load(self,md):
+        self.gleqvec_prt = md.gleqvec_prt
+        self.afs_prt = md.afs_prt 
+        self.afs_prt_mod = md.afs_prt_mod 
+        self.first = md.l.l[0] 
+        return
+
+    def reconstruct_(self,first): 
+        """
+        sol = [((0, 3), [[(2, 1), [1, 2]]]),\
+            ((3, 6), [[(3, 2), [4, 5]]]),\
+            ((6, 8), [[(5, -3), [7, 7]]]),\
+            ((8, 10), [[(5, 0), [9, 9]]])]
+
+        assert md.afs_prt == sol 
+        assert md.afs_prt_mod == [np.int32(19), np.int32(128), np.int32(129)]
+        assert md.gleqvec_prt == [2, 5, 7, 9]
+        """
+
+        i = 0 
+        l = [first]
+        prev_ma = None  
+        while i < len(self.gleqvec_prt): 
+            q = self.afs_prt[i]
+
+            if i > 0: 
+                assert type(prev_ma) != type(None) 
+                mod_val = self.afs_prt_mod[i-1] 
+                # 0-case 
+                if l[-1] == 0: 
+                    l.append(-mod_val)
+                else: 
+                    val = (l[-1] * prev_ma[0] + prev_ma[1]) % mod_val 
+                    l.append(val)
+            
+            for x in q[1]:
+                ma = x[0]
+                for j in range(x[1][0],x[1][1] + 1): 
+                    val = l[-1] * ma[0] + ma[1] 
+                    l.append(val) 
+            prev_ma = q[1][-1][0] 
+            i += 1 
+        return l
+
+    def reconstruct(self): 
+        return self.reconstruct_(self.first)
