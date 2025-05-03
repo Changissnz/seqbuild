@@ -95,7 +95,7 @@ class SeqStructMethods(unittest.TestCase):
 
         q = md.continuous_merge(False)
         assert md.gleqvec_prt == [2]
-        assert md.afs_prt == [((0, 3), [[(1, 0), [1, 1]], [(2, -6), [2, 2]]])]
+        assert md.afs_prt == [((0, 3), [[(1, -6), [1, 1]], [(2, -6), [2, 2]]])]
         assert md.afs_prt_mod == []
 
         # case 2 
@@ -104,7 +104,7 @@ class SeqStructMethods(unittest.TestCase):
         md = ModuloDecomp(intsq)
         q = md.continuous_merge(False)
         assert md.gleqvec_prt == [1]
-        assert md.afs_prt == [((0, 2), [[(1, 0), [1, 1]]])]
+        assert md.afs_prt == [((0, 2), [[(1, -6), [1, 1]]])]
         assert md.afs_prt_mod == []
 
         # case 3 
@@ -122,8 +122,8 @@ class SeqStructMethods(unittest.TestCase):
         md = ModuloDecomp(intsq)
         q = md.continuous_merge(False)
         assert md.gleqvec_prt == [1, 2]
-        assert md.afs_prt == [((0, 2), [[(1, 0), [1, 1]]]), ((2, 3), [])]
-        assert md.afs_prt_mod == [np.int32(-6)]
+        assert md.afs_prt == [((0, 2), [[(1, -6), [1, 1]]]), ((2, 3), [])]
+        assert md.afs_prt_mod == [np.int32(-12)]
 
         # case 5 
         l = [-6,0,6]
@@ -131,7 +131,7 @@ class SeqStructMethods(unittest.TestCase):
         md = ModuloDecomp(intsq)
         q = md.continuous_merge(False)
         assert md.gleqvec_prt == [2]
-        assert md.afs_prt == [((0, 3), [[(1, 0), [1, 1]], [(2, 6), [2, 2]]])]
+        assert md.afs_prt == [((0, 3), [[(1, 6), [1, 1]], [(2, 6), [2, 2]]])]
         assert md.afs_prt_mod == []
 
     def test__ModuloDecomp__premerge_contiguous(self):
@@ -160,6 +160,7 @@ class SeqStructMethods(unittest.TestCase):
         assert md.afs_prt == [((0, 6), [[(-3, 2), [1, 5]]]), ((6, 7), [])]
 
     def test__ModuloDecompRepr__reconstruct(self):
+        # case 1 
         l = [2,5,11,4,14,44,6,27,3,15]
         intsq = IntSeq(l) 
         md = ModuloDecomp(intsq)
@@ -167,7 +168,58 @@ class SeqStructMethods(unittest.TestCase):
 
         mdr = ModuloDecompRepr(md)
         r = mdr.reconstruct()
-        assert l == r 
+        assert l == r
+
+        # case 2 
+        l = [6,0]
+        intsq = IntSeq(l) 
+        md = ModuloDecomp(intsq)
+        md.merge(False)
+
+        mdr = ModuloDecompRepr(md)
+        r = mdr.reconstruct()
+        assert l == r
+
+        # case 3 
+        l = [0,6]
+        intsq = IntSeq(l) 
+        md = ModuloDecomp(intsq)
+        md.merge(False)
+
+        mdr = ModuloDecompRepr(md)
+        r = mdr.reconstruct()
+        assert l == r
+
+        # case 4 
+        l = [-6,0,6]
+        intsq = IntSeq(l) 
+        md = ModuloDecomp(intsq)
+        md.merge(False)
+
+        mdr = ModuloDecompRepr(md)
+        r = mdr.reconstruct()
+        assert l == r
+
+        # case 5 
+        l = [6,0,-6]
+        intsq = IntSeq(l) 
+        md = ModuloDecomp(intsq)
+        md.merge(False)
+
+        mdr = ModuloDecompRepr(md)
+        r = mdr.reconstruct()
+        assert l == r
+
+        # case 6 
+        l = [-6,0,-6]
+        intsq = IntSeq(l) 
+        md = ModuloDecomp(intsq)
+        md.merge(False)
+
+        mdr = ModuloDecompRepr(md)
+        r = mdr.reconstruct()
+        assert l == r
+
         return
 
 if __name__ == '__main__':

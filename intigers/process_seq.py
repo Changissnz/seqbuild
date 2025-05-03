@@ -86,7 +86,7 @@ class AffineFitCandidates:
         v1,v2 = self.l[i-1],self.l[i]
 
         if self.m == 0: 
-            ds.append((i,int(v2 - (v1 * self.m)))) 
+            ds.append((i,int(v2 - (v1 * 1)))) 
             return ds 
 
         if not self.exclude_neg: 

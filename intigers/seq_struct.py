@@ -89,11 +89,9 @@ class AffineFitSearch:
         
         while True: 
             sx = self.afc.next_candidate_set(self.exclude_neg)
-            #print("SX: ", sx) 
             if type(sx) == type(None): 
                 break 
             self.d[i] = sx 
-            #print("D: ",self.d)
             i = self.afc.i 
         self.load_mmf()
         
@@ -329,7 +327,7 @@ class ModuloDecompRepr:
                 mod_val = self.afs_prt_mod[i-1] 
                 # 0-case 
                 if l[-1] == 0: 
-                    l.append(-mod_val)
+                    l.append((l[-1] * prev_ma[0] + prev_ma[1]) -mod_val)
                 else: 
                     val = (l[-1] * prev_ma[0] + prev_ma[1]) % mod_val 
                     l.append(val)
@@ -338,9 +336,11 @@ class ModuloDecompRepr:
                 ma = x[0]
                 for j in range(x[1][0],x[1][1] + 1): 
                     val = l[-1] * ma[0] + ma[1] 
-                    l.append(val) 
-            prev_ma = q[1][-1][0] 
+                    l.append(val)
             i += 1 
+            if len(q[1]) > 0: 
+                prev_ma = q[1][-1][0] 
+
         return l
 
     def reconstruct(self): 
