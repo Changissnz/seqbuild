@@ -273,13 +273,10 @@ class ModuloDecomp:
 
     def premerge_contiguous(self,i,exclude_neg:bool=True): 
         assert i >= 1 and i < len(self.gleqvec_prt) 
-
-        gp = deepcopy(self.gleqvec_prt)
-        apm = deepcopy(self.afs_prt_mod) 
         
         cost = 1 + len(self.afs_prt[i-1][1]) + len(self.afs_prt[i][1])# one modulo value 
-        self.gleqvec_prt.pop(i-1)
-        self.afs_prt_mod.pop(i-1)
+        q1 = self.gleqvec_prt.pop(i-1)
+        q2 = self.afs_prt_mod.pop(i-1)
         a_ = self.afs_on_subsequence_(i-1,exclude_neg=exclude_neg)  
         b_ = AffineFitSearch.decomp_to_span_fmt(a_[1])
         for b2 in b_: 
@@ -300,6 +297,6 @@ class ModuloDecomp:
              
             return True 
         else: 
-            self.gleqvec_prt = gp 
-            self.afs_prt_mod = apm 
+            self.gleqvec_prt.insert(i-1,q1)
+            self.afs_prt_mod.insert(i-1,q2)
             return False 
