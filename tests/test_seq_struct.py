@@ -220,6 +220,24 @@ class SeqStructMethods(unittest.TestCase):
         r = mdr.reconstruct()
         assert l == r
 
+        # case 7 
+        l = [2,5,8,1,4,7,0]
+        intsq = IntSeq(l) 
+        md = ModuloDecomp(intsq)
+        md.merge(False)
+        mdr = ModuloDecompRepr(md)
+        r = mdr.reconstruct()
+        assert l == r 
+
+        # case 8 
+        l = [5,5,5,5,7,7,7,3,3,3,3,3]
+        intsq = IntSeq(l) 
+        md = ModuloDecomp(intsq)
+        md.merge(False)
+        mdr = ModuloDecompRepr(md)
+        r = mdr.reconstruct()
+        assert l == r 
+
         return
 
 if __name__ == '__main__':

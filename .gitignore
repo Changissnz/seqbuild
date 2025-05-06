@@ -1,4 +1,5 @@
+.gitignore
 __pycache__
 scratch.py
 scratch2.py
-.gitignore
+scratch3.py

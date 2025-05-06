@@ -284,6 +284,7 @@ class ModuloDecomp:
             b2[1][1] += a_[0][0]
         cost2 = len(b_)
         a = (a_[0],b_)
+
         if cost2 < cost:
             self.afs_prt[i] = a 
             self.afs_prt.pop(i-1) 
