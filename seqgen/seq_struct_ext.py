@@ -1,2 +1,1 @@
-from intigers.seq_struct import * 
-
+# planned to be one of the main files in this folder. 
