@@ -257,8 +257,8 @@ class ModuloDecomp:
         prev,now = self.l.l[j-1],self.l.l[j]
         value = prev * m + a     
         mod_val = value - now
-        
-        if now < 0 and prev != 0: 
+
+        if now < 0: 
             mod_val *= -1 
         return mod_val
 
@@ -334,12 +334,9 @@ class ModuloDecompRepr:
             if i > 0: 
                 assert type(prev_ma) != type(None) 
                 mod_val = self.afs_prt_mod[i-1] 
-                # 0-case 
-                if l[-1] == 0: 
-                    l.append((l[-1] * prev_ma[0] + prev_ma[1]) -mod_val)
-                else: 
-                    val = (l[-1] * prev_ma[0] + prev_ma[1]) % mod_val 
-                    l.append(val)
+                val = (l[-1] * prev_ma[0] + prev_ma[1]) % mod_val 
+                
+                l.append(val)
             
             for x in q[1]:
                 ma = x[0]
