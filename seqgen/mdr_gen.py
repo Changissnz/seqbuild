@@ -3,6 +3,7 @@ from intigers.seq_struct import *
 class MDRGen: 
 
     """
+    mdr := ModuloDecompRepr
     prgen := function, pseudo-random integer generator. Call with `prgen()`.  
     """
     def __init__(self,mdr,prgen):

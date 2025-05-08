@@ -180,6 +180,11 @@ class ModuloDecomp:
         self.afs_prt_mod = [] 
         self.fin = False 
 
+    def __eq__(self,md):
+        assert type(md) == ModuloDecomp
+        return self.afs_prt == md.afs_prt and \
+            self.afs_prt_mod == md.afs_prt_mod 
+
     """
     partitions integer sequence based on (greater|lesser|equal)-sign change. 
     """
@@ -250,8 +255,11 @@ class ModuloDecomp:
         ma = r[-1] 
         m,a,j = ma[0][0],ma[0][1],ma[1][1] + 1 
         prev,now = self.l.l[j-1],self.l.l[j]
-        value = prev * m + a 
+        value = prev * m + a     
         mod_val = value - now
+        
+        if now < 0 and prev != 0: 
+            mod_val *= -1 
         return mod_val
 
     """
