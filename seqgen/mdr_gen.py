@@ -95,13 +95,16 @@ class MDRGen:
                 qx = np.copy(self.seed2seq[q][:,self.gentype2_rc_index])
                 self.seed2seq[q] = np.delete(self.seed2seq[q],\
                     self.gentype2_rc_index,axis=1)
+
+            if len(self.seed2seq[q]) = 0: 
+                del self.seed2seq[q] 
             
             if self.gentype2_seed_in_output:
                 qx =  np.insert(qx,0,q) 
             self.gentype2_cache = qx 
 
         value = self.gentype2_cache[0] 
-        self.gentype2_cache = self.gentype2_cache[1:]
+        self.gentype2_cache = np.delete(self.gentype2_cache,0)
         return value 
 
     def gentype2_selector_delta(self): 
