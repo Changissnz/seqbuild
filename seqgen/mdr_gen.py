@@ -200,7 +200,7 @@ class MDRGen:
             self.mdr2 = new_mdr 
             i = (i + 1) % len(intseed_cycle) 
         
-        self.gentype2_seedcycle = list(np.array(intseed_cycle,dtype=np.int32))
+        self.gentype2_seedcycle = list(np.array(intseed_cycle,dtype=np.int32)) 
         return 
 
     def add_sequence__type_novelgen_(self,intseed): 

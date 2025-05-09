@@ -81,7 +81,7 @@ class MDRGenMethods(unittest.TestCase):
         q = q.flatten() 
         for i in range(20): 
             q2 = next(mdrg)
-            assert xt[i] == q2, "have {}, want {}".format(q2,xt[i])
+            assert xt[i] == q2, "have {}, want {}".format(q2,xt[i]) 
 
 if __name__ == '__main__':
     unittest.main()
