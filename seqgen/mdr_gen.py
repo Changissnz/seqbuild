@@ -24,7 +24,7 @@ class MDRGen:
         return q 
 
     def load_int_seed(self,i): 
-        asser type(i) in {int,np.int32}
+        assert type(i) in {int,np.int32}
         self.mdr.first = np.int32(i) 
         
     """
@@ -49,6 +49,7 @@ class MDRGen:
         while len(terminated_seeds) < len(intseed_cycle) and \
             c < max_sequences: 
             r, stat = self.add_sequence__type_novelgen_(intseed_cycle[i])
+
             if not stat: 
                 terminated_seeds = terminated_seeds | {intseed_cycle[i]}
             else: 
@@ -65,16 +66,25 @@ class MDRGen:
     def add_sequence__type_novelgen_(self,intseed): 
         self.mdr2.reset_first(intseed) 
         r = self.mdr2.reconstruct()
-        q1,q2 = r[0],np.ndarray(r[1:],dtype=np.int32)
+        q1,q2 = r[0],np.array(r[1:],dtype=np.int32)
 
         if q1 not in self.seed2seq:
             x = np.empty((0,len(q2)),dtype=np.int32)
         else: 
             x = self.seed2seq[q1]
-        
-        if q2 in x: 
+
+        stat = np.any(np.all(x == q2, axis=1))
+        if stat: 
             return r, False 
 
         x = np.vstack((x,q2))
         self.seed2seq[q1] = x 
         return r, True 
+
+    def display_s2s(self):
+        for k,v in self.seed2seq.items(): 
+            print("seed: ",k)
+            print("sequences: ")
+            print(v) 
+            print() 
+    
