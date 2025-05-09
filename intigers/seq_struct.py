@@ -351,3 +351,7 @@ class ModuloDecompRepr:
 
     def reconstruct(self): 
         return self.reconstruct_(self.first)
+
+    def reset_first(self,f): 
+        assert type(f) in {int,np.int32}
+        self.first = np.int32(f) 
