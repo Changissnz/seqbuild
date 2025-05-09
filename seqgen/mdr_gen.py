@@ -46,7 +46,7 @@ class MDRGen:
             # seed value is in output 
         self.gentype2_seed_in_output = gt2_seed_in_output
             # seed cycle used to make `seed2seq`
-        self.gentype2_seedcycle = None 
+        self.gentype2_seedcycle = [] 
             # container to draw values for output 
         self.gentype2_cache = [] 
             # indices 
@@ -79,6 +79,9 @@ class MDRGen:
     """
     """
     def next_gentype2(self): 
+        #print("intseed draw: ",self.gentype2_intseed_draw)
+        #print("rc index: ",self.gentype2_rc_index)
+
         if len(self.gentype2_cache) == 0: 
             if len(self.seed2seq) == 0: 
                 return None 
@@ -102,6 +105,7 @@ class MDRGen:
             if self.gentype2_seed_in_output:
                 qx =  np.insert(qx,0,q) 
             self.gentype2_cache = qx 
+            print("new cache: ",self.gentype2_cache) 
 
         value = self.gentype2_cache[0] 
         self.gentype2_cache = np.delete(self.gentype2_cache,0)
@@ -153,7 +157,10 @@ class MDRGen:
 
     def load_int_seed(self,i): 
         assert type(i) in {int,np.int32}
-        self.mdr.reset_first(np.int32(i))
+        if self.gentype == 1: 
+            self.mdr.reset_first(np.int32(i))
+        else: 
+            self.mdr2.reset_first(np.int32(i))
         
     """
     generates sequences until no new sequence for any integer seed is outputted. 
@@ -163,13 +170,14 @@ class MDRGen:
         assert type(intseed_cycle) == list and \
             len(intseed_cycle) > 0
         assert len(set(intseed_cycle)) == len(intseed_cycle)
-        assert self.mdr.first not in intseed_cycle 
+        assert self.mdr.first not in intseed_cycle, "seed {}, have {}".format(self.mdr.first,intseed_cycle)
         assert type(max_sequences) == int or type(max_sequences) == type(None) 
         max_sequences = max_sequences if type(max_sequences) != type(None) else np.inf 
         assert max_sequences > 0 
 
         if clear_prev_info: 
             self.seed2seq.clear() 
+            self.gentype2_seedcycle.clear() 
 
         self.mdr2 = deepcopy(self.mdr) 
         terminated_seeds = set() 
@@ -192,7 +200,7 @@ class MDRGen:
             self.mdr2 = new_mdr 
             i = (i + 1) % len(intseed_cycle) 
         
-        self.gentype2_seedcycle = np.array(intseed_cycle,dtype=np.int32) 
+        self.gentype2_seedcycle = list(np.array(intseed_cycle,dtype=np.int32))
         return 
 
     def add_sequence__type_novelgen_(self,intseed): 
