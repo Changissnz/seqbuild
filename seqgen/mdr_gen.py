@@ -96,7 +96,7 @@ class MDRGen:
                 self.seed2seq[q] = np.delete(self.seed2seq[q],\
                     self.gentype2_rc_index,axis=1)
 
-            if len(self.seed2seq[q]) = 0: 
+            if len(self.seed2seq[q]) == 0: 
                 del self.seed2seq[q] 
             
             if self.gentype2_seed_in_output:
@@ -212,6 +212,12 @@ class MDRGen:
         x = np.vstack((x,q2))
         self.seed2seq[q1] = x 
         return r, True 
+
+    def sequence_size(self): 
+        s = 0 
+        for v in self.seed2seq.values(): 
+            s += v.shape[0]
+        return s 
 
     def display_s2s(self):
         for k,v in self.seed2seq.items(): 
