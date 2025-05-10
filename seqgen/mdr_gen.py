@@ -105,7 +105,6 @@ class MDRGen:
             if self.gentype2_seed_in_output:
                 qx =  np.insert(qx,0,q) 
             self.gentype2_cache = qx 
-            print("new cache: ",self.gentype2_cache) 
 
         value = self.gentype2_cache[0] 
         self.gentype2_cache = np.delete(self.gentype2_cache,0)
