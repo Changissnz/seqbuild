@@ -71,33 +71,42 @@ class OpTriFlipDerivation:
         self.intseed = intseed 
         self.opfunc = opfunc 
         self.axis = axis 
+    
+    def reset_axis(self,axis):
+        assert axis in {0,1} 
+        self.mf = np.flip(self.mf,self.axis)
+        self.axis = axis 
+        self.mf = np.flip(self.mf,self.axis)
 
     def construct_(self,i,intseed):  
         assert i >= 0 and i < self.mf.shape[0]
 
         if self.axis == 0: 
-            subrow = self.mf[0,-(i+1):]
+            subrow = self.mf[i,-(i+1):]
         else: 
-            subrow = self.mf[0,i:] 
+            subrow = self.mf[i,:(self.mf.shape[0] -i)] 
 
         q = [intseed] 
+
         for v in subrow: 
             q.append(self.opfunc(q[-1],v)) 
+        q = q[1:]
 
         if self.axis == 0: 
             i2 = self.mf.shape[0] - 1 - i 
         else:
             q = q[::-1]  
             i2 = i
+
         self.m_[i2,i2:] = np.array(q)             
         return q 
 
     def construct(self): 
         intseed = self.intseed 
-
+        j = 0 if self.axis == 1 else -1 
         for i in range(self.mf.shape[0]): 
             q = self.construct_(i,intseed)
-            intseed = q[-1] 
+            intseed = q[j] 
 
 # TODO: test 
 class OpTriGen:
