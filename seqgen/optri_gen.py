@@ -119,14 +119,24 @@ class OpTriGen:
         self.ots = None 
         self.cache = [] 
 
-    def jagged_split_(self,i): 
-        p45 = [self.m[j,j] for j in range(i+1)] 
-        p90 = list(self.m[i,1:])
+    def jagged_split_(self,row_indices,split_index): 
+        l = []
+        for (i,r) in enumerate(row_indices): 
+            assert r >= i 
+            l.append(self.m[r,i]) 
+        
+        p45,p90 = l[:split_index],l[split_index:]
         return (p45,p90)
 
     def jagged_split_prng(self):
-        i = self.prg() % self.m.shape[0] 
-        return self.jagged_split_(i) 
+
+        row_indices = [] 
+        for i in range(self.m.shape[0]): 
+            j = self.prg() % (i +1) 
+            row_indices.append(j)
+
+        split_index = self.prg() % (len(row_indices) +1)
+        return self.jagged_split_(row_indices,split_index) 
 
     def set_jagged_split(self): 
         js = self.jagged_split_prng()
