@@ -231,6 +231,18 @@ class OpTriGen:
         self.otfd_available_rows = None 
         self.otfd_prev_axis = None 
 
+    def __next__(self): 
+        if len(self.cache) == 0: 
+            self.load_by_gentype() 
+        q = self.cache.pop(0)
+        return q 
+
+    def load_by_gentype(self): 
+        if self.gentype == 1: 
+            self.load_from_jagged45N90() 
+            return 
+        self.load_from_flipderivation() 
+
     #-------------------- generator type #1: Jagged 45-90 Split 
     # TODO: test this section. 
 
@@ -286,12 +298,18 @@ class OpTriGen:
         self.ots = self.ots.reproduce(p45_indices,p90_indices)
         self.ots_available_rows = [i for i in range(1,len(self.ots.split[0]))] 
 
+    def load_from_jagged45N90(self): 
+        if type(self.ots_available_rows) == type(None): 
+            self.set_jagged_split() 
+        self.store_ots_row()
+        return
+
     #------------------------- generator type #2: Flip-Derivation 
     # TODO: test this section. 
 
     def set_otfd(self): 
         axis = self.prg() % 2 
-        self.otfd = OpTriFlipDerivation(m,self.intseed,self.ffunc,axis)
+        self.otfd = OpTriFlipDerivation(self.m,self.intseed,self.ffunc,axis)
         self.otfd.construct() 
         self.otfd_available_rows = [i for i in range(self.otfd.m_.shape[0])] 
         self.otfd_prev_axis = [axis] 
@@ -313,7 +331,7 @@ class OpTriGen:
         self.cache.extend(seq) 
 
     def otherflip_OpTriFlipDerivation(self): 
-        na = self.otfd_prev_axis[-1] + 1) % 2
+        na = (self.otfd_prev_axis[-1] + 1) % 2
         self.otfd_prev_axis.append(na) 
         self.otfd.reset_axis(na)
         self.otfd.construct() 
@@ -327,3 +345,9 @@ class OpTriGen:
         self.otfd.construct() 
         self.otfd_available_rows = [i for i in range(self.otfd.m_.shape[0])] 
         self.otfd_prev_axis = [self.otfd.axis]
+        
+    def load_from_flipderivation(self): 
+        if type(self.ots_available_rows) == type(None): 
+            self.set_otfd() 
+        self.store_otfd_row()
+        return
