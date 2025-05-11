@@ -1,5 +1,49 @@
 from intigers.seq_struct import * 
 
+"""
+The `split` represents a partial derivation of j derivative sequences from 
+an <OpTri>, a triangular matrix that contains m derivative sequences for a 
+vector of length (m+1). The `split` is a 2-tuple of the form
+    (P45: 45-degree part,P90: 90-degree part). 
+In an upper-right hand triangle (see diagram),
+
+    y x x x x 
+    0 y x x x 
+    0 0 y x x 
+    0 0 0 y x 
+    0 0 0 0 y   , 
+
+the 45-degree part is a contiguous subsequence belonging to the diagonal 
+(denoted y) starting at index (0,0) [uppermost leftist]. The 90-degree part 
+is the i'th subrow, i being |P45|-1. 
+
+The number of derivative sequences, otherwise known as the degree, from the 
+`split` is j := |P45|. 
+
+The 1st derivative sequence is of the greatest length: |P45| + |P90|. 
+For a j'th derivative sequence, the length is |P45| + |P90| - (j - 1). 
+
+Derivative sequences are calculated starting from the |P45|'th one. 
+
+                     
+y ? ? ? ? ? ? ? ?  [derivative sequence 1]
+  y ? ? ? ? ? ? ?  [derivative sequence 2]
+    y ? ? ? ? ? ?  [derivative sequence 3]
+      y x x x x x  [derivative sequence 4] 
+
+*   Illustration of a 45-90 split for an <OpTri>; `y` is of P45 and `x` is 
+    of P90. 
+
+The |P45|'th derivative sequence is simply the (|P45| - 1)'th row of the <OpTri>, 
+in other words,
+    <P45[-1],P90[0],P90[1],...,P90[-1]>. 
+
+For all sequences S' of arbitrary derivative order j, the derivative sequence is 
+<x_i : x_i := P45[j-1] if i == 0 else x_i := opfunc(x_(i-1), S[i-1]))>, 
+i is the index of `x_i` in S' and sequence S is of derivative order (j+1). 
+
+The pairwise `opfunc` is typically set to the addition operation. 
+"""
 class OpTri45N90Split: 
 
     def __init__(self,split,opfunc=add):
@@ -55,6 +99,37 @@ class OpTri45N90Split:
         return OpTri45N90Split((p45,p90),self.opfunc)
 
 # TODO: test 
+"""
+Given an <OpTri> upper-right hand triangular matrix `m`, 
+flip `m` by the 0-axis or the 1-axis. 
+
+`m` :=
+    r x x x 
+    0 s x x 
+    0 0 t x 
+    0 0 0 u , 
+
+`m` w/ 0-axis flip := 
+
+    0 0 0 u
+    0 0 t x 
+    0 s x x 
+    r x x x , 
+
+`m` w/ 1-axis flip := 
+
+    x x x r
+    x x s 0
+    x t 0 0 
+    u 0 0 0 . 
+
+    ** Brief ** 
+The flipped <OpTri> is `mf`. And the sequences for the derivative of 
+`mf` is first calculated by iterating through the rows of `mf`, starting 
+with index 0. If index is 0, the starting value for the pairwise opfunc 
+operation is `intseed`. Otherwise, the starting value is the last element 
+of the calculated sequence pertaining to the previous row. 
+"""
 class OpTriFlipDerivation:
 
     def __init__(self,m,intseed,opfunc,axis:int): 
@@ -108,6 +183,12 @@ class OpTriFlipDerivation:
             q = self.construct_(i,intseed)
             intseed = q[j] 
 
+    def source_seq(self): 
+        q = [self.intseed]
+        for r in self.m_[0]: 
+            q.append(self.opfunc(q[-1],r)) 
+        return q 
+     
 # TODO: test 
 class OpTriGen:
 
