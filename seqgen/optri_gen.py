@@ -129,6 +129,11 @@ The flipped <OpTri> is `mf`. And the sequences for the derivative of
 with index 0. If index is 0, the starting value for the pairwise opfunc 
 operation is `intseed`. Otherwise, the starting value is the last element 
 of the calculated sequence pertaining to the previous row. 
+
+The sequences are either reversed w.r.t. themselves (if 1-axis flip) or 
+reversed w.r.t. their index ordering amongst themselves. The result is 
+an upper-right hand triangular matrix `m_`, the flip-derivative of the 
+original matrix `m`. 
 """
 class OpTriFlipDerivation:
 
