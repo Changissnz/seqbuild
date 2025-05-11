@@ -193,6 +193,15 @@ class OpTriFlipDerivation:
         for r in self.m_[0]: 
             q.append(self.opfunc(q[-1],r)) 
         return q 
+
+    def reproduce(self,backward_func):
+        source = self.source_seq() 
+        seq = IntSeq(source) 
+        ot = seq.optri(backward_func,np.int32)
+
+        otfd = OpTriFlipDerivation(ot,self.intseed,\
+            self.opfunc,self.axis)
+        return otfd 
      
 # TODO: test 
 class OpTriGen:
@@ -203,7 +212,7 @@ class OpTriGen:
         assert type(m) == np.ndarray 
         assert m.ndim == 2 
         assert m.shape[0] == m.shape[1]
-        assert gentype in {1,2,3} 
+        assert gentype in {1,2} 
 
         self.intseed = np.int32(intseed) 
         self.m = m 
@@ -211,8 +220,19 @@ class OpTriGen:
         self.gentype = gentype 
         self.ffunc = forward_func
         self.bfunc = backward_func
-        self.ots = None 
         self.cache = [] 
+
+        # variables for gentype #1 
+        self.ots = None 
+        self.ots_available_rows = None 
+
+        # variables for gentype #2 
+        self.otfd = None 
+        self.otfd_available_rows = None 
+        self.otfd_prev_axis = None 
+
+    #-------------------- generator type #1: Jagged 45-90 Split 
+    # TODO: test this section. 
 
     def jagged_split_(self,row_indices,split_index): 
         l = []
@@ -236,6 +256,7 @@ class OpTriGen:
     def set_jagged_split(self): 
         js = self.jagged_split_prng()
         self.ots = OpTri45N90Split(js,self.ffunc)
+        self.ots_available_rows = [i for i in range(1,len(self.ots.split[0]))] 
 
     def store_ots_row_(self,i,store_seq=True): 
         q = self.ots.j_derivative_seq(i,store_seq)
@@ -243,5 +264,66 @@ class OpTriGen:
         return
 
     def store_ots_row(self,store_seq=True): 
-        s = (self.prg() % self.ots.degree()) + 1
+        if len(self.ots_available_rows) == 0: 
+            self.reproduce_OpTri_jagged45N90() 
+
+        i = self.prg() % len(self.ots_available_rows)
+        s = self.ots_available_rows.pop(i)
         self.store_ots_row_(s,store_seq)  
+
+    def reproduce_OpTri_jagged45N90(self): 
+        p45_seqsize = (self.prg() % self.ots.degree()) + 1 
+        p90_seqsize = (self.prg() % self.ots.degree()) + 1 
+
+        p45_indices,p90_indices = [],[] 
+
+        for _ in range(p45_seqsize): 
+            s = (self.prg() % self.ots.degree()) + 1 
+            p45_indices.append(s)
+        for _ in range(p90_seqsize): 
+            s = (self.prg() % self.ots.degree()) + 1 
+            p90_indices.append(s)
+        self.ots = self.ots.reproduce(p45_indices,p90_indices)
+        self.ots_available_rows = [i for i in range(1,len(self.ots.split[0]))] 
+
+    #------------------------- generator type #2: Flip-Derivation 
+    # TODO: test this section. 
+
+    def set_otfd(self): 
+        axis = self.prg() % 2 
+        self.otfd = OpTriFlipDerivation(m,self.intseed,self.ffunc,axis)
+        self.otfd.construct() 
+        self.otfd_available_rows = [i for i in range(self.otfd.m_.shape[0])] 
+        self.otfd_prev_axis = [axis] 
+
+    def store_otfd_row(self): 
+        if len(self.otfd_available_rows) == 0: 
+            # case: flip onto another axis
+            if len(self.otfd_prev_axis) < 2 and \
+                self.prg() % 2 == 1: 
+                self.otherflip_OpTriFlipDerivation()
+
+            # case: reproduce from previous <OpTriFlipDerivation>
+            else: 
+                self.reproduce_OpTriFlipDerivation()
+
+        i = self.prg() % len(self.otfd_available_rows)
+        s = self.otfd_available_rows.pop(i)
+        seq = self.otfd.m_[s,s:]
+        self.cache.extend(seq) 
+
+    def otherflip_OpTriFlipDerivation(self): 
+        na = self.otfd_prev_axis[-1] + 1) % 2
+        self.otfd_prev_axis.append(na) 
+        self.otfd.reset_axis(na)
+        self.otfd.construct() 
+        self.otfd_available_rows = [i for i in range(self.otfd.m_.shape[0])] 
+
+    def reproduce_OpTriFlipDerivation(self): 
+        self.otfd = self.otfd.reproduce(self.bfunc)
+        axis = self.prg() % 2 
+        if self.otfd.axis != axis: 
+            self.otfd.reset_axis(axis)  
+        self.otfd.construct() 
+        self.otfd_available_rows = [i for i in range(self.otfd.m_.shape[0])] 
+        self.otfd_prev_axis = [self.otfd.axis]
