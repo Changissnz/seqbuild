@@ -103,6 +103,62 @@ class OpTriGenMethods(unittest.TestCase):
 
         assert s - 1 == sz * 2 
 
+    '''
+    case 2 is of generator type #1 (jagged 45-90 split)
+    '''
+    def test__OpTriGen__next__case2(self):
+        random.seed(100) # seeds used: 100,99,97 
+        l = [2,6,4,3,8,10]
+        seq = IntSeq(l) 
+        ot = seq.optri(sub,np.int32)
+        prg = prgen(0,101)
+        otg = OpTriGen(2,ot,prg,1,\
+            forward_func=add,backward_func=sub,add_noise=False)
+
+        l = [] 
+        s = 0
+        q = next(otg)
+        s += 1 
+        assert otg.reloaded
+        l.append(q) 
+
+        q = next(otg)
+        s += 1
+        assert not otg.reloaded
+        l.append(q) 
+
+        bs1 = otg.batch_size()
+
+        while not otg.reloaded: 
+            q = next(otg) 
+            s += 1 
+            l.append(q)
+
+        assert s - 1 == bs1 
+
+        bs2 = otg.batch_size()
+        q = next(otg)
+        s += 1
+
+        assert not otg.reloaded
+
+        while not otg.reloaded: 
+            q = next(otg) 
+            s += 1 
+            l.append(q)
+        l = np.array(l,dtype=np.int32)
+
+        assert s - 1 == bs1 + bs2 
+
+        sol = np.array([ 4, -2,  1,  5, -9, -9, \
+            -2,  1,  5, -9,  4,  2,  1,  6, 13, \
+            22, 31, 39, 50, 59, -2, -1,  5,  7, \
+            9,  9,  8, 11,  9,  1,  6,  2,  2, \
+            0, -1,  3, -2,  5, -4,  0, -2, -1, \
+            4, -5,  7], dtype=np.int32)
+
+        assert np.all(sol == l)
+
 
 if __name__ == '__main__':
     unittest.main()
