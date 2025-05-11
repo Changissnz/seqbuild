@@ -5,6 +5,12 @@ file contains methods to aid in calculating analytical values on integer vectors
 import numpy as np
 from operator import add,sub,mul,truediv,floordiv
 from math import ceil 
+import random
+
+def prgen(s1,s2):
+    def prgen_():  
+        return random.randint(s1,s2) 
+    return prgen_
 
 def stdop_vec(l,operation,cast_type=np.int32):
     assert operation in {add,sub,mul,truediv,floordiv}

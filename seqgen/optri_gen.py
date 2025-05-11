@@ -18,7 +18,7 @@ the 45-degree part is a contiguous subsequence belonging to the diagonal
 is the i'th subrow, i being |P45|-1. 
 
 The number of derivative sequences, otherwise known as the degree, from the 
-`split` is j := |P45|. 
+`split` is j := |P45| <= m. 
 
 The 1st derivative sequence is of the greatest length: |P45| + |P90|. 
 For a j'th derivative sequence, the length is |P45| + |P90| - (j - 1). 
@@ -55,6 +55,13 @@ class OpTri45N90Split:
 
     def degree(self): 
         return len(self.split[0])
+
+    def size(self): 
+        r = len(self.split[1]) + 1
+        s = r
+        for i in range(1,len(self.split[0])): 
+            s += r + i 
+        return s 
 
     '''
     main method 
@@ -151,6 +158,10 @@ class OpTriFlipDerivation:
         self.intseed = intseed 
         self.opfunc = opfunc 
         self.axis = axis 
+
+    def size(self): 
+        r = self.m_.shape[0] 
+        return np.sum([_ for _ in range(1,r+1)])
     
     def reset_axis(self,axis):
         assert axis in {0,1} 
@@ -231,11 +242,20 @@ class OpTriGen:
         self.otfd_available_rows = None 
         self.otfd_prev_axis = None 
 
+        self.reloaded = False 
+
     def __next__(self): 
         if len(self.cache) == 0: 
-            self.load_by_gentype() 
+            self.load_by_gentype()
+        else: 
+            self.reloaded = False  
         q = self.cache.pop(0)
         return q 
+
+    def batch_size(self): 
+        if self.gentype == 1: 
+            return self.ots.size() 
+        return self.otfd.size() 
 
     def load_by_gentype(self): 
         if self.gentype == 1: 
@@ -249,7 +269,7 @@ class OpTriGen:
     def jagged_split_(self,row_indices,split_index): 
         l = []
         for (i,r) in enumerate(row_indices): 
-            assert r >= i 
+            assert r <= i 
             l.append(self.m[r,i]) 
         
         p45,p90 = l[:split_index],l[split_index:]
@@ -262,13 +282,13 @@ class OpTriGen:
             j = self.prg() % (i +1) 
             row_indices.append(j)
 
-        split_index = self.prg() % (len(row_indices) +1)
+        split_index = self.prg() % len(row_indices) +1 
         return self.jagged_split_(row_indices,split_index) 
 
     def set_jagged_split(self): 
         js = self.jagged_split_prng()
         self.ots = OpTri45N90Split(js,self.ffunc)
-        self.ots_available_rows = [i for i in range(1,len(self.ots.split[0]))] 
+        self.ots_available_rows = [i for i in range(1,len(self.ots.split[0]) + 1)] 
 
     def store_ots_row_(self,i,store_seq=True): 
         q = self.ots.j_derivative_seq(i,store_seq)
@@ -276,10 +296,15 @@ class OpTriGen:
         return
 
     def store_ots_row(self,store_seq=True): 
+        ##print("available rows: ", self.ots_available_rows)
         if len(self.ots_available_rows) == 0: 
-            self.reproduce_OpTri_jagged45N90() 
+            self.reproduce_OpTri_jagged45N90()
+            self.reloaded = True 
+        else: 
+            self.reloaded = False 
 
         i = self.prg() % len(self.ots_available_rows)
+        ##print("I: ",i)
         s = self.ots_available_rows.pop(i)
         self.store_ots_row_(s,store_seq)  
 
@@ -296,12 +321,17 @@ class OpTriGen:
             s = (self.prg() % self.ots.degree()) + 1 
             p90_indices.append(s)
         self.ots = self.ots.reproduce(p45_indices,p90_indices)
-        self.ots_available_rows = [i for i in range(1,len(self.ots.split[0]))] 
+        self.ots_available_rows = [i for i in range(1,len(self.ots.split[0]) + 1)] 
 
     def load_from_jagged45N90(self): 
+        stat = None 
         if type(self.ots_available_rows) == type(None): 
             self.set_jagged_split() 
+            stat = True 
         self.store_ots_row()
+
+        if stat: 
+            self.reloaded = True 
         return
 
     #------------------------- generator type #2: Flip-Derivation 
@@ -315,18 +345,22 @@ class OpTriGen:
         self.otfd_prev_axis = [axis] 
 
     def store_otfd_row(self): 
+
         if len(self.otfd_available_rows) == 0: 
             # case: flip onto another axis
             if len(self.otfd_prev_axis) < 2 and \
                 self.prg() % 2 == 1: 
                 self.otherflip_OpTriFlipDerivation()
-
             # case: reproduce from previous <OpTriFlipDerivation>
             else: 
                 self.reproduce_OpTriFlipDerivation()
+            self.reloaded = True 
+        else: 
+            self.reloaded = False 
 
         i = self.prg() % len(self.otfd_available_rows)
         s = self.otfd_available_rows.pop(i)
+
         seq = self.otfd.m_[s,s:]
         self.cache.extend(seq) 
 
@@ -347,7 +381,12 @@ class OpTriGen:
         self.otfd_prev_axis = [self.otfd.axis]
         
     def load_from_flipderivation(self): 
-        if type(self.ots_available_rows) == type(None): 
+        stat = None 
+        if type(self.otfd_available_rows) == type(None): 
             self.set_otfd() 
+            stat = True 
+
         self.store_otfd_row()
+        if stat: 
+            self.reloaded = True 
         return

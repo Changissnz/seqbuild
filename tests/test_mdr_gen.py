@@ -1,12 +1,7 @@
 from seqgen.mdr_gen import * 
-import unittest,random
+import unittest
 
 random.seed(100) 
-
-def prgen(s1,s2):
-    def prgen_():  
-        return random.randint(s1,s2) 
-    return prgen_
 
 ### lone file test 
 """
