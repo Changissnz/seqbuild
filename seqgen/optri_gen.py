@@ -1,6 +1,57 @@
 from intigers.seq_struct import * 
 
 """
+collates values from circumference of an upper-right hand 
+triangular matrix. 
+
+00 01 02 03 
+   21    10
+      20 11
+         12
+-- clockwise 
+
+00 21 20 12 
+   01    11
+      02 10
+         03
+-- counter-clockwise 
+
+
+          
+Argument `start_edge` is the starting edge for the circumference 
+values. 
+"""
+def triangular_matrix_circumference(m,start_edge=0,is_clockwise=True): 
+    assert type(m) is np.ndarray 
+    assert m.ndim == 2 
+    assert m.shape[0] == m.shape[1] 
+    assert m.shape[0] > 0 
+    assert start_edge in {0,1,2} 
+
+    if m.shape[0] == 1: return np.array(m[0,0],dtype=np.int32)
+
+    if clockwise: 
+        edge0 = m[0,:] 
+        edge1 = m[:,-1] 
+        edge2 = np.diag(m) 
+    else: 
+        edge0 = np.diag(m) 
+        edge1 = m[:,-1][::-1]
+        edge2 = m[0][::-1] 
+
+    if start_edge == 0: 
+        edges = [edge0,edge1,edge2] 
+    elif start_edge == 1: 
+        edges = [edge1,edge2,edge0] 
+    else:
+        edges = [edge2,edge0,edge1] 
+
+    q = edges[0]
+    q = np.append(q,edges[1][1:]) 
+    q = np.append(q,edges[2][::-1][1:-1]) 
+    return q 
+    
+"""
 The `split` represents a partial derivation of j derivative sequences from 
 an <OpTri>, a triangular matrix that contains m derivative sequences for a 
 vector of length (m+1). The `split` is a 2-tuple of the form
@@ -52,6 +103,7 @@ class OpTri45N90Split:
         self.split = split 
         self.opfunc = add 
         self.derivative_seqs = dict() 
+        self.m_ = None 
 
     def degree(self): 
         return len(self.split[0])
@@ -92,6 +144,17 @@ class OpTri45N90Split:
             k -= 1 
 
         return deepcopy(start_seq)
+
+    # TODO: test 
+    def to_triangular_matrix(self): 
+        d = self.degree() 
+        self.m_ = np.zeros((d,d),dtype=np.int32)
+        for i in range(1,self.degree+1): 
+            if i not in self.derivative_seqs:
+                self.j_derivative_seq(i)
+            self.m_[i-1,i-1:] = np.array(\
+                self.derivative_seqs[i],dtype=np.int32) 
+        return deepcopy(self.m_)
 
     # TODO: test 
     def reproduce(self,p45_indices,p90_indices):
@@ -155,6 +218,7 @@ class OpTriFlipDerivation:
 
         self.mf = np.flip(m,axis=axis)
         self.m_ = np.zeros((self.mf.shape[0],self.mf.shape[0]),dtype=np.int32) 
+        self.m2_ = None 
         self.intseed = intseed 
         self.opfunc = opfunc 
         self.axis = axis 
@@ -192,7 +256,8 @@ class OpTriFlipDerivation:
         self.m_[i2,i2:] = np.array(q)             
         return q 
 
-    def construct(self): 
+    def construct(self):
+        self.m2_ = deepcopy(self.m_) 
         intseed = self.intseed 
         j = 0 if self.axis == 1 else -1 
         for i in range(self.mf.shape[0]): 
@@ -200,10 +265,16 @@ class OpTriFlipDerivation:
             intseed = q[j] 
 
     def source_seq(self): 
-        q = [self.intseed]
+        q = np.array([self.intseed],dtype=np.int32)
         for r in self.m_[0]: 
-            q.append(self.opfunc(q[-1],r)) 
+            q = np.append(q, self.opfunc(q[-1],r)) 
         return q 
+
+    def revert(self): 
+        axis = (self.axis + 1) % 2 
+        self.m_,self.m2_ = self.m2_,None 
+        self.reset_axis(axis)
+
 
     def reproduce(self,backward_func):
         source = self.source_seq() 
@@ -242,7 +313,14 @@ class OpTriGen:
         self.otfd_available_rows = None 
         self.otfd_prev_axis = None 
 
+        # is a new triangular matrix set for drawing values from? 
         self.reloaded = False 
+
+        # variables used for drawing values in cases of `prg` == None. 
+            # variables for gentype #1. 
+        self.base_dim = m.shape[0] 
+            # variables for gentype #2. 
+        self.binary_alternator = 0 
 
     def __next__(self): 
         if len(self.cache) == 0: 
@@ -262,6 +340,19 @@ class OpTriGen:
             self.load_from_jagged45N90() 
             return 
         self.load_from_flipderivation() 
+
+    def load_data_struct(self,datastruct):
+        if type(datastruct) == OpTri45N90Split:
+            self.ots = datastruct 
+            self.ots_available_rows = [i for i in range(1,len(self.ots.split[0]) + 1)] 
+        elif type(datastruct) == OpTriFlipDerivation:
+            self.otfd = datastruct 
+            self.otfd.construct() 
+            self.otfd_available_rows = [i for i in range(self.otfd.m_.shape[0])] 
+            self.otfd_prev_axis = [self.otfd.axis]  
+        else:
+            assert False 
+        
 
     #-------------------- generator type #1: Jagged 45-90 Split 
     # TODO: test this section. 
@@ -287,8 +378,8 @@ class OpTriGen:
 
     def set_jagged_split(self): 
         js = self.jagged_split_prng()
-        self.ots = OpTri45N90Split(js,self.ffunc)
-        self.ots_available_rows = [i for i in range(1,len(self.ots.split[0]) + 1)] 
+        ots = OpTri45N90Split(js,self.ffunc)
+        self.load_data_struct(ots)
 
     def store_ots_row_(self,i,store_seq=True): 
         q = self.ots.j_derivative_seq(i,store_seq)
@@ -320,8 +411,8 @@ class OpTriGen:
         for _ in range(p90_seqsize): 
             s = (self.prg() % self.ots.degree()) + 1 
             p90_indices.append(s)
-        self.ots = self.ots.reproduce(p45_indices,p90_indices)
-        self.ots_available_rows = [i for i in range(1,len(self.ots.split[0]) + 1)] 
+        ots = self.ots.reproduce(p45_indices,p90_indices)
+        self.load_data_struct(ots)
 
     def load_from_jagged45N90(self): 
         stat = None 
@@ -339,10 +430,8 @@ class OpTriGen:
 
     def set_otfd(self): 
         axis = self.prg() % 2 
-        self.otfd = OpTriFlipDerivation(self.m,self.intseed,self.ffunc,axis)
-        self.otfd.construct() 
-        self.otfd_available_rows = [i for i in range(self.otfd.m_.shape[0])] 
-        self.otfd_prev_axis = [axis] 
+        otfd = OpTriFlipDerivation(self.m,self.intseed,self.ffunc,axis)
+        self.load_data_struct(otfd)
 
     def store_otfd_row(self): 
 
@@ -390,3 +479,32 @@ class OpTriGen:
         if stat: 
             self.reloaded = True 
         return
+
+    #------------------------- default methods for PRNG-less mode 
+
+    def new_default_45N90_split(self):
+        new_seq = None 
+        self.ots.to_triangular_matrix()
+        d = self.ots.degree() 
+        if d == self.base_dim: 
+            new_seq = triangular_matrix_circumference(self.ots.m_,\
+                start_edge=0,is_clockwise=True)
+        else: 
+            new_seq = triangular_matrix_circumference(self.ots.m_,\
+                start_edge=0,is_clockwise=False)
+            new_seq = new_seq[:d+1]
+
+        split = (list(new_seq),0) 
+        ots = OpTri45N90Split(split,opfunc=self.ffunc)
+        self.load_data_struct(ots)
+        return 
+
+    def new_default_FlipDerivation(self): 
+        if len(self.otfd_prev_axis) < 2: 
+            self.otherflip_OpTriFlipDerivation()
+            return 
+
+        if self.binary_alternator == 0:
+            self.otfd.revert() 
+
+        self.reproduce_OpTriFlipDerivation()
