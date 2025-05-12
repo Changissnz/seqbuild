@@ -377,7 +377,11 @@ class OpTriGen:
         return self.jagged_split_(row_indices,split_index) 
 
     def set_jagged_split(self): 
-        js = self.jagged_split_prng()
+        # case: PRNG-less 
+        if type(self.prg) == type(None): 
+            js = (np.diag(self.m),[])
+        else: 
+            js = self.jagged_split_prng()
         ots = OpTri45N90Split(js,self.ffunc)
         self.load_data_struct(ots)
 
@@ -389,12 +393,18 @@ class OpTriGen:
     def store_ots_row(self,store_seq=True): 
         ##print("available rows: ", self.ots_available_rows)
         if len(self.ots_available_rows) == 0: 
-            self.reproduce_OpTri_jagged45N90()
-            self.reloaded = True 
+            if type(self.prg) == type(None): 
+                self.new_default_45N90_split()
+            else: 
+                self.reproduce_OpTri_jagged45N90()
+                self.reloaded = True 
         else: 
             self.reloaded = False 
 
-        i = self.prg() % len(self.ots_available_rows)
+        if type(self.prg) == type(None): 
+            i = 0 
+        else: 
+            i = self.prg() % len(self.ots_available_rows)
         ##print("I: ",i)
         s = self.ots_available_rows.pop(i)
         self.store_ots_row_(s,store_seq)  
@@ -429,15 +439,22 @@ class OpTriGen:
     # TODO: test this section. 
 
     def set_otfd(self): 
-        axis = self.prg() % 2 
+        if type(self.prg) == type(None): 
+            axis = 0 
+        else: 
+            axis = self.prg() % 2 
+
         otfd = OpTriFlipDerivation(self.m,self.intseed,self.ffunc,axis)
         self.load_data_struct(otfd)
 
     def store_otfd_row(self): 
 
         if len(self.otfd_available_rows) == 0: 
+            # case: PRNG-less 
+            if type(self.prg) == type(None): 
+                self.new_default_FlipDerivation()
             # case: flip onto another axis
-            if len(self.otfd_prev_axis) < 2 and \
+            elif len(self.otfd_prev_axis) < 2 and \
                 self.prg() % 2 == 1: 
                 self.otherflip_OpTriFlipDerivation()
             # case: reproduce from previous <OpTriFlipDerivation>
@@ -447,9 +464,12 @@ class OpTriGen:
         else: 
             self.reloaded = False 
 
-        i = self.prg() % len(self.otfd_available_rows)
+        if type(self.prg) == type(None): 
+            i = 0 
+        else: 
+            i = self.prg() % len(self.otfd_available_rows)
+        
         s = self.otfd_available_rows.pop(i)
-
         seq = self.otfd.m_[s,s:]
         self.cache.extend(seq) 
 
@@ -462,7 +482,7 @@ class OpTriGen:
 
     def reproduce_OpTriFlipDerivation(self): 
         self.otfd = self.otfd.reproduce(self.bfunc)
-        axis = self.prg() % 2 
+        axis = self.prg() % 2 if type(self.prg) != type(None) else 0 
         if self.otfd.axis != axis: 
             self.otfd.reset_axis(axis)  
         self.otfd.construct() 
@@ -497,14 +517,18 @@ class OpTriGen:
         split = (list(new_seq),0) 
         ots = OpTri45N90Split(split,opfunc=self.ffunc)
         self.load_data_struct(ots)
+        self.reloaded = True 
         return 
 
     def new_default_FlipDerivation(self): 
+        
         if len(self.otfd_prev_axis) < 2: 
             self.otherflip_OpTriFlipDerivation()
+            self.reloaded = True 
             return 
 
         if self.binary_alternator == 0:
             self.otfd.revert() 
-
+        self.binary_alternator = (self.binary_alternator + 1) % 2
         self.reproduce_OpTriFlipDerivation()
+        self.reloaded = True 
