@@ -33,7 +33,7 @@ def triangular_matrix_circumference(m,start_edge=0,is_clockwise=True):
     if is_clockwise: 
         edge0 = m[0,:] 
         edge1 = m[:,-1] 
-        edge2 = np.diag(m) 
+        edge2 = np.diag(m)[::-1]
     else: 
         edge0 = np.diag(m) 
         edge1 = m[:,-1][::-1]
@@ -48,7 +48,7 @@ def triangular_matrix_circumference(m,start_edge=0,is_clockwise=True):
 
     q = edges[0]
     q = np.append(q,edges[1][1:]) 
-    q = np.append(q,edges[2][::-1][1:-1]) 
+    q = np.append(q,edges[2][1:-1]) 
     return q 
     
 """
@@ -120,7 +120,6 @@ class OpTri45N90Split:
     '''
     def j_derivative_seq(self,j,store_seq:bool=True): 
         assert j < self.degree() + 1 
-        ##print("SPLIT: ", self.split)
 
         # case: already stored in memory 
         if j in self.derivative_seqs: 
@@ -260,15 +259,16 @@ class OpTriFlipDerivation:
     def construct(self):
         self.m2_ = deepcopy(self.m_) 
         intseed = self.intseed 
+
         j = 0 if self.axis == 1 else -1 
         for i in range(self.mf.shape[0]): 
             q = self.construct_(i,intseed)
             intseed = q[j] 
 
-    def source_seq(self): 
+    def source_seq(self,func): 
         q = np.array([self.intseed],dtype=np.int32)
         for r in self.m_[0]: 
-            q = np.append(q, self.opfunc(q[-1],r)) 
+            q = np.append(q, func(r,q[-1])) 
         return q 
 
     def revert(self): 
@@ -278,7 +278,7 @@ class OpTriFlipDerivation:
 
 
     def reproduce(self,backward_func):
-        source = self.source_seq() 
+        source = self.source_seq(backward_func) 
         seq = IntSeq(source) 
         ot = seq.optri(backward_func,np.int32)
 
@@ -392,7 +392,6 @@ class OpTriGen:
         return
 
     def store_ots_row(self,store_seq=True): 
-        ##print("available rows: ", self.ots_available_rows)
         if len(self.ots_available_rows) == 0: 
             if type(self.prg) == type(None): 
                 self.new_default_45N90_split()
@@ -406,7 +405,6 @@ class OpTriGen:
             i = 0 
         else: 
             i = self.prg() % len(self.ots_available_rows)
-        ##print("I: ",i)
         s = self.ots_available_rows.pop(i)
         self.store_ots_row_(s,store_seq)  
 
