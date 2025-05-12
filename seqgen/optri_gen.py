@@ -146,12 +146,15 @@ class OpTri45N90Split:
         return deepcopy(start_seq)
 
     # TODO: test 
-    def to_triangular_matrix(self): 
+    def to_matrix(self): 
         d = self.degree() 
-        self.m_ = np.zeros((d,d),dtype=np.int32)
+        c = len(self.split[1]) + 1 
+        self.m_ = np.zeros((d,c),dtype=np.int32)
         for i in range(1,d+1): 
             if i not in self.derivative_seqs:
                 self.j_derivative_seq(i)
+            seq = self.derivative_seqs[i]
+
             self.m_[i-1,i-1:] = np.array(\
                 self.derivative_seqs[i],dtype=np.int32) 
         return deepcopy(self.m_)
@@ -296,13 +299,17 @@ class OpTriGen:
         assert m.ndim == 2 
         assert m.shape[0] == m.shape[1]
         assert gentype in {1,2} 
+        assert type(add_noise) == bool 
 
         self.intseed = np.int32(intseed) 
         self.m = m 
+
         self.prg = prg 
         self.gentype = gentype 
         self.ffunc = forward_func
         self.bfunc = backward_func
+        self.add_noise = add_noise
+
         self.cache = [] 
 
         # variables for gentype #1 
@@ -323,12 +330,22 @@ class OpTriGen:
             # variables for gentype #2. 
         self.binary_alternator = 0 
 
+        # used for switching generator types
+        self.switch_sz = sum([i for i in (1,self.m.shape[0] + 1)])
+        self.cache2 = [] 
+
     def __next__(self): 
         if len(self.cache) == 0: 
             self.load_by_gentype()
         else: 
             self.reloaded = False  
         q = self.cache.pop(0)
+
+        if self.add_noise and \
+            type(self.prg) != type(None): 
+            q = q + self.prg() 
+
+        self.cache2.append(q) 
         return q 
 
     def batch_size(self): 
@@ -353,6 +370,28 @@ class OpTriGen:
             self.otfd_prev_axis = [self.otfd.axis]  
         else:
             assert False 
+    
+    def switch_gentype(self): 
+        if len(self.cache2) < self.switch_sz:
+            print("[!] not enough cache values to declare new matrix")
+            return 
+
+        q = np.zeros((self.m.shape[0],self.m.shape[1]),dtype=np.int32) 
+        for i in range(self.m.shape[0]):
+            seqlen = self.m.shape[0]- i
+            l = self.cache2[:seqlen] 
+            self.cache2 = self.cache2[seqlen:] 
+            q[i,i:] = l
+        self.m = q 
+        self.clear_generator_vars()
+        self.reloaded = False 
+
+    def clear_generator_vars(self): 
+        self.ots = None 
+        self.ots_available_rows = None 
+        self.otfd = None 
+        self.otfd_available_rows = None 
+        self.otfd_prev_axis = None 
         
 
     #-------------------- generator type #1: Jagged 45-90 Split 
