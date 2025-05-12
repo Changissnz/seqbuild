@@ -10,14 +10,14 @@ python3 -m tests.test_optri_gen
 
 class OpTriGenMethods(unittest.TestCase):
 
-    def test__triangular_matrix_circumference(self):
+    def test__triangular_matrix_perimeter(self):
         l = [2,5,1,8,13] 
         seq = IntSeq(l) 
         ot = seq.optri(sub,np.int32)
 
-        c1 = triangular_matrix_circumference(ot,0,True)
-        c2 = triangular_matrix_circumference(ot,1,True)
-        c3 = triangular_matrix_circumference(ot,2,True)
+        c1 = triangular_matrix_perimeter(ot,0,True)
+        c2 = triangular_matrix_perimeter(ot,1,True)
+        c3 = triangular_matrix_perimeter(ot,2,True)
 
         sol1 = np.array([3,  -4,   7,   5,\
             -2, -13, -31,  18,  -7], dtype=np.int32)
@@ -29,9 +29,9 @@ class OpTriGenMethods(unittest.TestCase):
         assert np.all(c2==sol2)
         assert np.all(c3==sol3)
 
-        c4 = triangular_matrix_circumference(ot,0,False)
-        c5 = triangular_matrix_circumference(ot,1,False)
-        c6 = triangular_matrix_circumference(ot,2,False)
+        c4 = triangular_matrix_perimeter(ot,0,False)
+        c5 = triangular_matrix_perimeter(ot,1,False)
+        c6 = triangular_matrix_perimeter(ot,2,False)
 
         sol4 = np.array([  3,  -7,  18, -31,\
             -13,  -2,   5,   7,  -4], dtype=np.int32)
@@ -294,6 +294,42 @@ class OpTriGenMethods(unittest.TestCase):
 
         q = next(otg)
         assert np.all(otg.otfd.m_ == otfd4.m_)
+
+    '''
+    case 4 is of generator type #1 (jagged 45-90 split). 
+    Case tests PRNG-less mode.
+    '''
+    def test__OpTriGen__next__case4(self):
+
+        l = [2,6,4,3,8,10]
+        seq = IntSeq(l) 
+        ot = seq.optri(sub,np.int32)
+
+        random.seed(100)
+        prg = prgen(0,101)
+
+        otg = OpTriGen(2,ot,prg,1,\
+            forward_func=add,backward_func=sub,add_noise=False)
+
+        l = [] 
+        q = next(otg)
+        l.append(q)
+
+        for i in range(16): 
+            q = next(otg)
+
+
+        sol = np.array([\
+            [ 4,  2,  1,  6, 13, 22, 31, 39, 50, 59],\
+            [ 0, -2, -1,  5,  7,  9,  9,  8, 11,  9],\
+            [ 0,  0,  1,  6,  2,  2,  0, -1,  3, -2],\
+            [ 0,  0,  0,  5, -4,  0, -2, -1,  4, -5],\
+            [ 0,  0,  0,  0, -9,  4, -2,  1,  5, -9]], dtype=np.int32)
+
+        assert np.all(otg.ots.to_matrix() == sol)
+
+        if i == 14: assert otg.reloaded 
+        else: assert not otg.reloaded 
 
 
 if __name__ == '__main__':

@@ -21,7 +21,7 @@ triangular matrix.
 Argument `start_edge` is the starting edge for the circumference 
 values. 
 """
-def triangular_matrix_circumference(m,start_edge=0,is_clockwise=True): 
+def triangular_matrix_perimeter(m,start_edge=0,is_clockwise=True): 
     assert type(m) is np.ndarray 
     assert m.ndim == 2 
     assert m.shape[0] == m.shape[1] 
@@ -148,8 +148,8 @@ class OpTri45N90Split:
     # TODO: test 
     def to_matrix(self): 
         d = self.degree() 
-        c = len(self.split[1]) + 1 
-        self.m_ = np.zeros((d,c),dtype=np.int32)
+        c = len(self.split[1]) 
+        self.m_ = np.zeros((d,c + d),dtype=np.int32)
         for i in range(1,d+1): 
             if i not in self.derivative_seqs:
                 self.j_derivative_seq(i)
@@ -546,10 +546,10 @@ class OpTriGen:
         d = self.ots.degree() 
 
         if d == self.base_dim: 
-            new_seq = triangular_matrix_circumference(self.ots.m_,\
+            new_seq = triangular_matrix_perimeter(self.ots.m_,\
                 start_edge=0,is_clockwise=True)            
         else: 
-            new_seq = triangular_matrix_circumference(self.ots.m_,\
+            new_seq = triangular_matrix_perimeter(self.ots.m_,\
                 start_edge=0,is_clockwise=False)
             new_seq = new_seq[:self.base_dim]
 
