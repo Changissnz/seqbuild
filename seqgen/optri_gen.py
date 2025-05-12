@@ -30,7 +30,7 @@ def triangular_matrix_circumference(m,start_edge=0,is_clockwise=True):
 
     if m.shape[0] == 1: return np.array(m[0,0],dtype=np.int32)
 
-    if clockwise: 
+    if is_clockwise: 
         edge0 = m[0,:] 
         edge1 = m[:,-1] 
         edge2 = np.diag(m) 
@@ -120,6 +120,7 @@ class OpTri45N90Split:
     '''
     def j_derivative_seq(self,j,store_seq:bool=True): 
         assert j < self.degree() + 1 
+        ##print("SPLIT: ", self.split)
 
         # case: already stored in memory 
         if j in self.derivative_seqs: 
@@ -149,7 +150,7 @@ class OpTri45N90Split:
     def to_triangular_matrix(self): 
         d = self.degree() 
         self.m_ = np.zeros((d,d),dtype=np.int32)
-        for i in range(1,self.degree+1): 
+        for i in range(1,d+1): 
             if i not in self.derivative_seqs:
                 self.j_derivative_seq(i)
             self.m_[i-1,i-1:] = np.array(\
@@ -506,15 +507,16 @@ class OpTriGen:
         new_seq = None 
         self.ots.to_triangular_matrix()
         d = self.ots.degree() 
+
         if d == self.base_dim: 
             new_seq = triangular_matrix_circumference(self.ots.m_,\
-                start_edge=0,is_clockwise=True)
+                start_edge=0,is_clockwise=True)            
         else: 
             new_seq = triangular_matrix_circumference(self.ots.m_,\
                 start_edge=0,is_clockwise=False)
-            new_seq = new_seq[:d+1]
+            new_seq = new_seq[:self.base_dim]
 
-        split = (list(new_seq),0) 
+        split = (list(new_seq),[]) 
         ots = OpTri45N90Split(split,opfunc=self.ffunc)
         self.load_data_struct(ots)
         self.reloaded = True 
