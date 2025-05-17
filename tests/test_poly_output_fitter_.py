@@ -45,9 +45,5 @@ class PolyOutputFitterMethods(unittest.TestCase):
         pofv.solve()
         assert pofv.apply(x1) == pofv.apply(x2) 
 
-
-
-    
-
 if __name__ == '__main__':
     unittest.main()

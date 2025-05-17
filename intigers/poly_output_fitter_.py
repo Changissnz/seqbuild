@@ -7,8 +7,8 @@ variable except for the n'th power, set to argument
 `coeff`, s.t. P(x1) = P(x2). 
 
 If `prng` is not None, during the search process, algorithm 
-chooses a random candidate coefficient for every power except 
-for 1 and n.
+chooses a pseudo-random candidate coefficient for every power 
+except for 1 and n.
 """
 class PolyOutputFitterVar2:
 
