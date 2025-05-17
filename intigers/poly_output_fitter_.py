@@ -96,10 +96,24 @@ class PolyOutputFitterVar2:
             self.index += 1 
         return "finnamoto" 
 
-    # TODO: 
     def resolve(self,pwr,new_coeff): 
         assert pwr > 1 
-        return -1 
+        j = self.n - pwr 
+        assert j >= 0 
+
+        new_coeffvec = np.zeros((self.n,),dtype=np.int64) 
+        new_coeffvec[:j] = self.poly[:j] 
+        self.poly = new_coeffvec 
+        self.poly[j] = new_coeff
+        self.running_diff = np.zeros((2,),dtype=np.int64)  
+
+        y1 = self.apply(self.x1)
+        y2 = self.apply(self.x2) 
+        q = np.array([y1,y2],dtype=np.int64)
+        self.update_runningdiff(q) 
+        self.index = j + 1 
+        self.solve()
+        return
 
     def is_solvable(self): 
         stat = False 

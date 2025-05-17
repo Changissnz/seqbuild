@@ -45,5 +45,32 @@ class PolyOutputFitterMethods(unittest.TestCase):
         pofv.solve()
         assert pofv.apply(x1) == pofv.apply(x2) 
 
+    def test__PolyOutputFitterVar2__resolve(self):
+
+        n = 8 
+        x1,x2 = 3,7
+        pofv = PolyOutputFitterVar2(n,x1,x2,coeff=3,prng=None)
+        pofv.solve()
+        pofv.resolve(4,21)
+        assert pofv.apply(x1) == pofv.apply(x2)
+        assert pofv.poly[n-4] == 21
+
+        n = 6
+        x1,x2 = -3,5
+        pofv = PolyOutputFitterVar2(n,x1,x2,coeff=2,prng=None)
+        pofv.solve()
+        pofv.resolve(3,30)
+        assert pofv.apply(x1) == pofv.apply(x2)
+        assert pofv.poly[n-3] == 30
+
+        n = 5
+        x1,x2 = -13,8
+        pofv = PolyOutputFitterVar2(n,x1,x2,coeff=4,prng=None)
+        pofv.solve()
+        pofv.resolve(3,30)
+        assert pofv.apply(x1) == pofv.apply(x2)
+        assert pofv.poly[n-3] == 30
+
+
 if __name__ == '__main__':
     unittest.main()
