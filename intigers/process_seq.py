@@ -4,7 +4,7 @@ file contains methods to aid in calculating analytical values on integer vectors
 
 import numpy as np
 from operator import add,sub,mul,truediv,floordiv
-from math import ceil 
+from math import ceil,floor 
 import random
 
 def prgen(s1,s2):
