@@ -33,6 +33,18 @@ class PolyOutputFitterMethods(unittest.TestCase):
         pofv.solve() 
         assert pofv.apply(x1) == pofv.apply(x2) 
 
+        n = 7 
+        x1,x2 = -17,5
+        pofv = PolyOutputFitterVar2(n,x1,x2,coeff=2,prng=None)
+        pofv.solve()
+        assert pofv.apply(x1) == pofv.apply(x2) 
+
+        n = 8 
+        x1,x2 = -22,4
+        pofv = PolyOutputFitterVar2(n,x1,x2,coeff=3,prng=None)
+        pofv.solve()
+        assert pofv.apply(x1) == pofv.apply(x2) 
+
 
 
     

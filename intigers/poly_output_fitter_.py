@@ -1,22 +1,31 @@
 from .process_seq import * 
 from copy import deepcopy
 
+"""
+Finds an n'th degree polynomial P with all coefficients 
+variable except for the n'th power, set to argument 
+`coeff`, s.t. P(x1) = P(x2). 
+
+If `prng` is not None, during the search process, algorithm 
+chooses a random candidate coefficient for every power except 
+for 1 and n.
+"""
 class PolyOutputFitterVar2:
 
     def __init__(self,n,x1,x2,coeff=1,prng=None):
         for q in [n,x1,x2]: 
-            assert type(q) in {int,np.int32} 
+            assert type(q) in {int,np.int64} 
         assert n > 1 
         assert x1 != x2 
         self.n = n 
-        self.x1 = np.int32(x1)
-        self.x2 = np.int32(x2) 
+        self.x1 = np.int64(x1)
+        self.x2 = np.int64(x2) 
         self.ref = None 
         self.set_poly(coeff) 
         self.prng = prng 
 
         self.powerdiff_vec() 
-        q = np.zeros((2,),dtype=np.int32) 
+        q = np.zeros((2,),dtype=np.int64) 
         self.running_diff = deepcopy(q) 
         q[0] = self.apply(self.x1) 
         q[1] = self.apply(self.x2) 
@@ -28,12 +37,12 @@ class PolyOutputFitterVar2:
             self.stat = False 
 
     def set_poly(self,coeff:int=1): 
-        self.poly = np.zeros((self.n,),dtype=np.int32) 
+        self.poly = np.zeros((self.n,),dtype=np.int64) 
         self.poly[0] = coeff
         self.index = 1  
 
     def powerdiff_vec(self): 
-        self.pdvec = np.zeros((self.n,),dtype=np.int32)
+        self.pdvec = np.zeros((self.n,),dtype=np.int64)
 
         self.ref = self.x1 if self.x1 < self.x2 else self.x2 
 
@@ -59,11 +68,11 @@ class PolyOutputFitterVar2:
         x = floor(q) 
 
         if self.n - 1 == i: 
-            return np.int32(x)
+            return np.int64(x)
 
         x2 = 1 if x > 0 else - 1 
         if type(self.prng) == type(None): 
-            return np.int32(x + x2) 
+            return np.int64(x + x2) 
         l = [x + x2]  
         c = 1 
         s2,s3 = l[-1],l[-1]
@@ -74,13 +83,13 @@ class PolyOutputFitterVar2:
             l.extend([s2,s3])
             c += 1
         j = self.prng() % len(target)
-        return np.int32(l[j])
+        return np.int64(l[j])
 
     def solve(self): 
         while self.index < self.n: 
             q = self.next_coeff(self.index)
             j = self.n - self.index # ?  
-            new_diff = np.array([self.x1**j,self.x2 ** j],dtype=np.int32) 
+            new_diff = np.array([self.x1**j,self.x2 ** j],dtype=np.int64) 
             new_diff = q * new_diff 
             self.update_runningdiff(new_diff) 
             self.poly[self.index] = q 
@@ -96,7 +105,7 @@ class PolyOutputFitterVar2:
         stat = False 
         targ = self.pdvec[0] 
 
-        for i in range(1,self.n+1): 
+        for i in range(1,self.n): 
             if targ // self.pdvec[i] == targ / self.pdvec[i]: 
                 return True 
         return False 
