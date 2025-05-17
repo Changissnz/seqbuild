@@ -542,7 +542,7 @@ class OpTriGen:
 
     def new_default_45N90_split(self):
         new_seq = None 
-        self.ots.to_triangular_matrix()
+        self.ots.to_matrix()
         d = self.ots.degree() 
 
         if d == self.base_dim: 
