@@ -1,5 +1,6 @@
 from .process_seq import * 
 from copy import deepcopy
+from morebs2 import aprng_gauge
 
 """
 Finds an n'th degree polynomial P with all coefficients 
