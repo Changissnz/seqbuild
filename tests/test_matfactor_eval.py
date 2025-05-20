@@ -81,7 +81,7 @@ class MatFactorEvalMethods(unittest.TestCase):
         q4 = columnfactor_identity(cfs,2) 
         assert q4 == [{0, 1, 2}]
 
-    def test__MatFactorEval__identity_eval(self):
+    def test__MatFactorEval__identity_eval_case_1(self):
         M = np.array([\
             [1,1,1],\
             [2,2,2]])
@@ -103,10 +103,25 @@ class MatFactorEvalMethods(unittest.TestCase):
         assert q2 == [{0, 1, 2, 3, 4}]
         assert mfe.id_col == [] 
 
+    """
+    0 in column case 
+    """
+    def test__MatFactorEval__identity_eval_case_2(self):
+        M = np.array([\
+            [5,7,0,1,1],\
+            [10,14,0,2,2],\
+            [20,28,0,4,4]])
+
+        mfe = MatFactorEval(M) 
+        m1,m2 = mfe.identity_eval()
+
+        assert m1 == {0: 6.0, 1: 6.0, 3: 6.0, 4: 6.0} 
+        assert m2 == [{0, 1, 3, 4}]
+
 class MatrixConsistencyCheckMethods(unittest.TestCase):
 
     def test__MatrixConsistencyCheck__identity_eval(self):
-
+        # case 1 
         M = np.array([\
                     [1,1,1],\
                     [2,2,2]])
@@ -116,6 +131,8 @@ class MatrixConsistencyCheckMethods(unittest.TestCase):
         mfe = MatrixConsistencyCheck(M,Y)
         mfe.check() 
         assert mfe.inconsistent == [(0, 1)]
+
+        # case 2 
         M = np.array([\
                     [1,1,1],\
                     [2,2,2]])
@@ -126,6 +143,7 @@ class MatrixConsistencyCheckMethods(unittest.TestCase):
         mfe.check() 
         assert mfe.inconsistent == [] 
 
+        # case 3
         M = np.array([\
                     [1,1,1],\
                     [2,2,2],\
@@ -137,7 +155,7 @@ class MatrixConsistencyCheckMethods(unittest.TestCase):
         mfe.check() 
         assert mfe.inconsistent == [(0, 2), (1, 2)]
 
-
+        # case 4 
         M = np.array([\
                     [1,1,1],\
                     [2,2,2],\
@@ -147,7 +165,7 @@ class MatrixConsistencyCheckMethods(unittest.TestCase):
         mfe.check() 
         assert mfe.inconsistent == [(0, 2), (1, 2)]
 
-
+        # case 5
         M = np.array([\
                     [1,0,1],\
                     [2,2,2],\
@@ -159,6 +177,7 @@ class MatrixConsistencyCheckMethods(unittest.TestCase):
         mfe.check() 
         assert mfe.inconsistent == [(1, 2)]
 
+        # case 6
         M = np.array([\
                     [1,0,1],\
                     [2,0,2],\
@@ -170,7 +189,7 @@ class MatrixConsistencyCheckMethods(unittest.TestCase):
         mfe.check() 
         assert mfe.inconsistent == []
 
-
+        # case 7 
         M = np.array([\
                     [1,0,0],\
                     [0,0,0],\
@@ -182,6 +201,7 @@ class MatrixConsistencyCheckMethods(unittest.TestCase):
         mfe.check() 
         assert mfe.inconsistent == []
 
+        # case 8 
         M = np.array([\
                     [1,0,0],\
                     [1,0,0],\
