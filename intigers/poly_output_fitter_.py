@@ -157,6 +157,17 @@ class UDLinSysSolver:
         self.rep_order = None 
         self.cancel_order = None 
 
+    """
+    main method
+    """
+    def solve(self): 
+        self.initial_eval()
+        self.cancel() 
+        self.postcancel_solve()
+
+    """
+    pre-solve evaluation of variables (column-wise values). 
+    """
     def initial_eval(self): 
         mfe = MatFactorEval(self.m)
         q1,q2 = mfe.identity_eval(rank_type=1)
@@ -314,6 +325,8 @@ class UDLinSysSolver:
         for (i,c) in enumerate(cx): 
             Y[i] = Y[i] - c 
         M[:,constant_index] = 0 
+
+    ################### post-solve plug and output 
 
     def value_map(self,fvmap): 
         varvec = indexvalue_map_to_vector(fvmap,self.M.shape[1]) 
