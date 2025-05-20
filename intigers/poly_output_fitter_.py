@@ -136,7 +136,7 @@ Solves under-determined linear system of equations.
 """
 class UDLinSysSolver:
 
-    def __init__(self,m,y,prg=None): 
+    def __init__(self,m,y): 
         assert type(m) == np.ndarray and type(y) == np.ndarray 
         assert m.ndim == 2 and m.shape[0] != m.shape[1] 
         assert m.shape[0] > 1 and m.shape[1] > 1
@@ -146,7 +146,7 @@ class UDLinSysSolver:
         self.M = None 
         self.y = y 
         self.Y = None 
-        self.prg = prg 
+
         self.colstat = np.zeros((self.m.shape[1],),dtype=np.int32) 
 
         # index -> (varvec,constant) 
