@@ -46,12 +46,16 @@ that the column is in.
 seq := list, sequence with elements 
 (column set, factor for column set).
 """
-def columnfactor_rank(seq): 
+def columnfactor_rank(seq,rank_type:int=2): 
+    assert rank_type in {1,2}
     d = defaultdict(float) 
 
     for x0,x1 in seq: 
         for x in x0: 
-            d[x] += x1 
+            if rank_type == 1: 
+                d[x] += 1 
+            else: 
+                d[x] += x1 
     return d 
 
 """
@@ -101,6 +105,17 @@ def columnfactor_identity(seq,num_rows):
             q.append(r1)
     return q 
 
+def indexvalue_map_to_vector(m,sz): 
+    l = np.zeros((sz,))
+    for k,v in m.items(): 
+        l[k] = v 
+    return l 
+
+
+"""
+Evaluates factors between rows of a matrix for 
+column-wise identities. 
+"""
 class MatFactorEval: 
 
     def __init__(self,M): 
@@ -164,10 +179,10 @@ class MatFactorEval:
             d[i] = q 
         self.cfm = d 
 
-    def identity_eval(self): 
+    def identity_eval(self,rank_type=1): 
         self.id_col = self.identity_columns_() 
         self.column_factor_map() 
         seq = columnfactormap_to_sequence(self.cfm)
-        q1 = columnfactor_rank(seq)
+        q1 = columnfactor_rank(seq,rank_type)
         q2 = columnfactor_identity(seq,self.M.shape[0]) 
         return q1,q2 

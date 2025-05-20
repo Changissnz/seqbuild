@@ -1,6 +1,7 @@
 from .process_seq import * 
 from copy import deepcopy
-from morebs2 import aprng_gauge
+from mini_dm.matfactor_eval import * 
+from morebs2 import aprng_gauge 
 
 """
 Finds an n'th degree polynomial P with all coefficients 
@@ -129,3 +130,210 @@ class PolyOutputFitterVar2:
         self.running_diff = self.running_diff + new_diff 
         q = np.min(self.running_diff) 
         self.running_diff = self.running_diff - q 
+
+"""
+Solves under-determined linear system of equations. 
+"""
+class UDLinSysSolver:
+
+    def __init__(self,m,y,prg=None): 
+        assert type(m) == np.ndarray and type(y) == np.ndarray 
+        assert m.ndim == 2 and m.shape[0] != m.shape[1] 
+        assert m.shape[0] > 1 and m.shape[1] > 1
+        assert m.shape[0] < m.shape[1] 
+        assert y.ndim == 1 and y.shape[0] == m.shape[0] 
+        self.m = m 
+        self.M = None 
+        self.y = y 
+        self.Y = None 
+        self.prg = prg 
+        self.colstat = np.zeros((self.m.shape[1],),dtype=np.int32) 
+
+        # index -> (varvec,constant) 
+        self.eqtn = dict() 
+        self.fvars = None 
+        self.varvec = None 
+
+        self.rep_order = None 
+        self.cancel_order = None 
+
+    def initial_eval(self): 
+        mfe = MatFactorEval(self.m)
+        q1,q2 = mfe.identity_eval(rank_type=1)
+
+        self.rep_order = sorted(q1,key=lambda x:q1[x])
+        q = [i for i in range(self.m.shape[1])] 
+        for q_ in q: 
+            if q_ not in self.rep_order: 
+                self.rep_order.insert(0,q_) 
+
+        self.cancel_order = self.rep_order[:self.m.shape[0]]
+        self.idn_colsets = q2 
+        self.colstat = mfe.id_col 
+
+    ################## cancellation methods
+
+    def cancel(self): 
+        # for rows 
+        bis = aprng_gauge.BatchIncrStruct(self.m.shape[0],False,False,\
+            subset_size=self.m.shape[0] - 1)
+        self.M = deepcopy(self.m)
+        self.Y = deepcopy(self.y)
+
+        # iterate through the columns and cancel 
+        for c in self.cancel_order: 
+            q = np.asarray(next(bis),dtype=int) 
+            self.cancel_var_for_rows(self.M,self.Y,c,q)
+
+
+
+    def cancel_var_for_rows(self,M,Y,c,rows):
+        failed = [] 
+        for r in rows:   
+            row,y = self.cancel_one_index(M,Y,r,c)
+            if type(row) == type(None): 
+                failed.append(r) 
+                continue 
+
+            M[r] = row 
+            Y[r] = y 
+        return failed 
+
+
+    def post_cancelvar_adjust(self,M,Y): 
+        for (j,r) in enumerate(M): 
+            y_,i,b = self.solve_constant(r,Y[j]) 
+            if b != False: 
+                self.eqtn[i] = (np.zeros((M.shape[1],)),y_) 
+                self.adjust_matrix_with_constant(M,Y,i) 
+                continue 
+
+    def cancel_one_index(self,M,Y,r,ci): 
+        # iterate through rows and choose a row 
+        # with identical 0-indices and 
+
+        # get 0-indices 
+        i0 = set(np.where(M[r] == 0)[0])
+
+        lowest_excess_cancel = float('inf')
+        r2,y = None,None 
+        for r_ in range(M.shape[0]): 
+            r2_,y_ = None,None 
+            if r_ == r: continue 
+            if M[r_,ci] == 0: continue 
+
+            v = np.lcm(M[r,ci],M[r_,ci])
+            m0,m1 = v / M[r,ci], v / M[r_,ci]
+
+            r0 = m0 * M[r] 
+            r1 = m1 * M[r_] 
+            r2_ = r0 - r1 
+            y_ = m0 * Y[r] - m1 * Y[r_] 
+
+            if np.isnan(y_) or np.any(r2_ == np.nan): 
+                continue 
+
+            excess,excess2 = self.check_cancel(M[r],r2_,ci) 
+
+            excess = excess | excess2  
+
+            if len(excess) < lowest_excess_cancel: 
+                lowest_excess_cancel = len(excess)
+                r2 = r2_
+                y = y_  
+             
+        return r2,y 
+
+    def check_cancel(self,r,r1,ci): 
+        old0 = set(np.where(r == 0)[0])
+        new0 = set(np.where(r1 == 0)[0])
+        excess_delta = new0 - old0 - {ci} 
+        excess_delta2 = old0 - new0 - {ci} 
+        return excess_delta,excess_delta2
+
+    ###################### post-cancellation solve 
+
+    def postcancel_solve(self): 
+        # iterate through all rows and solve for constants 
+        self.apply_constants() 
+        fv = self.freevars() 
+        self.fvars = fv 
+        for ri in range(self.M.shape[0]): 
+            self.solve_row_with_freevar(ri,fv) 
+        return
+
+    def solve_row_with_freevar(self,ri,freevar): 
+        indices = set(np.where(self.M[ri] != 0)[0])
+        indices = indices - freevar 
+        if len(indices) == 0: 
+            return False 
+        if len(indices) > 1: return False 
+
+        q = indices.pop()
+        rw = self.M[ri] 
+        x = rw[q] 
+        rw = -1 * rw 
+        rw[q] = 0 
+        rw = rw / x 
+        self.eqtn[q] = (rw,self.Y[ri] / x) 
+
+    def freevars(self): 
+        q = set() 
+        for rx in self.M: 
+            i0 = set(np.where(rx != 0)[0])
+            if len(i0) == 0: continue 
+
+            if len(q) == 0: 
+                q = i0 
+            else: 
+                q = q & i0 
+        return q 
+
+    def apply_constants(self): 
+        for (i,r) in enumerate(self.M): 
+            y = self.Y[i]
+            y_,c,stat = self.solve_constant(r,y) 
+            if stat: 
+                self.eqtn[c] = (np.zeros((self.M.shape[1],)),y_) 
+                self.adjust_matrix_with_constant(self.M,self.Y,c)  
+
+    def solve_constant(self,r,y): 
+        i0 = np.where(r != 0)[0]
+        if len(i0) != 1: 
+            return None,None,False 
+        i0 = i0[0]
+        y = y / r[i0]
+        return y, i0,True 
+
+    def adjust_matrix_with_constant(self,M,Y,constant_index): 
+        assert constant_index in self.eqtn 
+        assert np.all(self.eqtn[constant_index][0] == 0) 
+        x = self.eqtn[constant_index][1] 
+
+        cx = M[:,constant_index] * x 
+        for (i,c) in enumerate(cx): 
+            Y[i] = Y[i] - c 
+        M[:,constant_index] = 0 
+
+    def value_map(self,fvmap): 
+        varvec = indexvalue_map_to_vector(fvmap,self.M.shape[1]) 
+
+        for k,v in self.eqtn.items(): 
+            # case: constant 
+            if np.all(v[0] == 0): 
+                fvmap[k] = v[1] 
+            else: 
+                s1 = np.sum(varvec * v[0])
+                s1 = s1 + v[1] 
+                fvmap[k] = s1 
+        return fvmap 
+
+    def set_freevar_values(self,fvmap): 
+        assert set(fvmap.keys()) == self.fvars 
+        fvmap = self.value_map(fvmap) 
+
+        self.varvec = indexvalue_map_to_vector(fvmap,self.M.shape[1])
+    
+    def apply(self,vec): 
+        assert type(self.varvec) != type(None) 
+        return round(np.sum(self.varvec*vec),5)

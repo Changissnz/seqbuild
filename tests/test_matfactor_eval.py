@@ -88,7 +88,7 @@ class MatFactorEvalMethods(unittest.TestCase):
             [2,2,2]])
 
         mfe = MatFactorEval(M)
-        q1,q2 = mfe.identity_eval() 
+        q1,q2 = mfe.identity_eval(rank_type=2) 
         assert q1 == {0: np.float64(4.0), 1: np.float64(4.0), 2: np.float64(4.0)}
         assert q2 == [{0, 1, 2}]
         assert mfe.id_col == [] 
@@ -98,7 +98,7 @@ class MatFactorEvalMethods(unittest.TestCase):
             [2,2,2,4,6],\
             [4,4,4,8,12]])
         mfe = MatFactorEval(M)
-        q1,q2 = mfe.identity_eval() 
+        q1,q2 = mfe.identity_eval(rank_type=2) 
         assert q1 == {0: np.float64(16.0), 1: np.float64(16.0), \
             2: np.float64(16.0), 3: np.float64(16.0), 4: np.float64(16.0)}
         assert q2 == [{0, 1, 2, 3, 4}]

@@ -71,6 +71,54 @@ class PolyOutputFitterMethods(unittest.TestCase):
         assert pofv.apply(x1) == pofv.apply(x2)
         assert pofv.poly[n-3] == 30
 
+class UDLinSysSolverMethods(unittest.TestCase):
+
+    def test__UDLinSysSolver__apply_case1(self):
+        # case 1 
+        M = np.array([\
+            [5,7,1,1,1],\
+            [10,14,2,3,2],\
+            [15,20,2,3,2]])
+        Y = np.array([10,20,38])
+
+        ulss = UDLinSysSolver(M,Y)
+        ulss.initial_eval()
+        ulss.cancel() 
+        ulss.postcancel_solve()
+
+        fx = {2:3,4:4} 
+        ulss.set_freevar_values(fx)
+
+        q0 = ulss.apply(ulss.m[0])
+        q1 = ulss.apply(ulss.m[1])
+        q2 = ulss.apply(ulss.m[2])
+
+        assert q0 == ulss.y[0] 
+        assert q1 == ulss.y[1] 
+        assert q2 == ulss.y[2] 
+
+        # case 2 
+        M = np.array([\
+            [3,4,7,5,4],\
+            [2,5,-4,3,-7],\
+            [5,-12,6,-4,10]])
+        Y = np.array([20,12,-36])
+
+        ulss = UDLinSysSolver(M,Y)
+        ulss.initial_eval()
+        ulss.cancel() 
+        ulss.postcancel_solve()
+
+        fx = {0:5,1:30} 
+        ulss.set_freevar_values(fx)
+
+        q0 = ulss.apply(ulss.m[0])
+        q1 = ulss.apply(ulss.m[1])
+        q2 = ulss.apply(ulss.m[2])
+
+        assert q0 == ulss.y[0] 
+        assert q1 == ulss.y[1] 
+        assert q2 == ulss.y[2] 
 
 if __name__ == '__main__':
     unittest.main()
