@@ -166,7 +166,7 @@ class UDLinSysSolver:
     """
     def solve(self): 
         if not self.constat: 
-            print("inconsistent. program terminated.")
+            print("[!] inconsistent. program terminated.")
             return 
 
         self.initial_eval()
@@ -197,7 +197,6 @@ class UDLinSysSolver:
         self.constat = len(self.inconsistent) == 0 
         return
 
-
     ################## cancellation methods
 
     def cancel(self): 
@@ -212,8 +211,6 @@ class UDLinSysSolver:
             q = np.asarray(next(bis),dtype=int) 
             self.cancel_var_for_rows(self.M,self.Y,c,q)
 
-
-
     def cancel_var_for_rows(self,M,Y,c,rows):
         failed = [] 
         for r in rows:   
@@ -225,7 +222,6 @@ class UDLinSysSolver:
             M[r] = row 
             Y[r] = y 
         return failed 
-
 
     def post_cancelvar_adjust(self,M,Y): 
         for (j,r) in enumerate(M): 
@@ -360,7 +356,6 @@ class UDLinSysSolver:
     def set_freevar_values(self,fvmap): 
         assert set(fvmap.keys()) == self.fvars 
         fvmap = self.value_map(fvmap) 
-
         self.varvec = indexvalue_map_to_vector(fvmap,self.M.shape[1])
     
     def apply(self,vec): 
