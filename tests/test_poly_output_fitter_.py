@@ -120,5 +120,32 @@ class UDLinSysSolverMethods(unittest.TestCase):
         assert q1 == ulss.y[1] 
         assert q2 == ulss.y[2] 
 
+    def test__UDLinSysSolver__apply_case2(self):
+
+        M = np.array([\
+            [3,4,7,5,4,14],\
+            [2,5,-4,3,-7,17],\
+            [5,-12,6,-4,10,31],\
+            [31,10,-4,6,-12,5]])
+        Y = np.array([20,12,-36,120])
+
+
+        ulss = UDLinSysSolver(M,Y)
+        ulss.solve()
+
+        fx = {1:5,3:30}
+        ulss.set_freevar_values(fx)
+
+        q0 = ulss.apply(ulss.m[0])
+        q1 = ulss.apply(ulss.m[1])
+        q2 = ulss.apply(ulss.m[2])
+        q3 = ulss.apply(ulss.m[3])
+
+        assert q0 == ulss.y[0] 
+        assert q1 == ulss.y[1] 
+        assert q2 == ulss.y[2] 
+        assert q3 == ulss.y[3] 
+
+
 if __name__ == '__main__':
     unittest.main()

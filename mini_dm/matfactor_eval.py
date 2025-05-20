@@ -96,7 +96,6 @@ w.r.t. the number of rows belonging to the source matrix.
 def columnfactor_identity(seq,num_rows): 
     sts2 = columnfactorpair_to_seq(seq) 
     q = [] 
-
     nr = np.prod([i for i in range(1,num_rows+1)])
     for (r1,r2) in sts2:  
         if len(r2) != nr: continue 
@@ -186,3 +185,43 @@ class MatFactorEval:
         q1 = columnfactor_rank(seq,rank_type)
         q2 = columnfactor_identity(seq,self.M.shape[0]) 
         return q1,q2 
+
+class MatrixConsistencyCheck:
+
+    def __init__(self,M,Y): 
+        assert type(M) == np.ndarray 
+        assert M.ndim == 2 
+        assert M.shape[0] >= 1 and M.shape[1] >= 1 
+        assert type(Y) == np.ndarray 
+        assert Y.ndim == 1 and len(Y) == M.shape[0] 
+        self.M = M 
+        self.Y = Y
+        self.inconsistent = None 
+
+    def check(self): 
+        self.inconsistent = [] 
+        for r in range(self.M.shape[0]-1): 
+            for r2 in range(r + 1, self.M.shape[0]): 
+                stat = self.check_row_pairs(r,r2)
+                if not stat: 
+                    self.inconsistent.append((r,r2))
+        return self.inconsistent
+
+    def check_row_pairs(self,r1,r2): 
+        x = self.M[r1] / self.M[r2] 
+        if np.any(np.isinf(x)): return True
+
+        xu = np.unique(x)
+        if len(xu) > 2: return True 
+
+        if len(xu) == 2: 
+            if not np.any(np.isnan(xu)): return True 
+
+        xu = set(xu)
+        n = xu.pop() 
+        if np.isnan(n): 
+            if len(xu) == 0: return True 
+            n = xu.pop() 
+        q = round(self.Y[r2] * n - self.Y[r1],5) 
+        return q == 0.0 
+        

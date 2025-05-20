@@ -157,10 +157,18 @@ class UDLinSysSolver:
         self.rep_order = None 
         self.cancel_order = None 
 
+        self.constat = True 
+        self.inconsistent = None 
+        self.consistency_check()
+
     """
     main method
     """
     def solve(self): 
+        if not self.constat: 
+            print("inconsistent. program terminated.")
+            return 
+
         self.initial_eval()
         self.cancel() 
         self.postcancel_solve()
@@ -180,7 +188,15 @@ class UDLinSysSolver:
 
         self.cancel_order = self.rep_order[:self.m.shape[0]]
         self.idn_colsets = q2 
-        self.colstat = mfe.id_col 
+        self.colstat = mfe.id_col
+
+    def consistency_check(self):  
+        cfc = MatrixConsistencyCheck(self.m,self.y) 
+        cfc.check() 
+        self.inconsistent = cfc.inconsistent
+        self.constat = len(self.inconsistent) == 0 
+        return
+
 
     ################## cancellation methods
 
@@ -241,7 +257,7 @@ class UDLinSysSolver:
             r2_ = r0 - r1 
             y_ = m0 * Y[r] - m1 * Y[r_] 
 
-            if np.isnan(y_) or np.any(r2_ == np.nan): 
+            if np.isnan(y_) or np.any(np.isnan(r2_)): 
                 continue 
 
             excess,excess2 = self.check_cancel(M[r],r2_,ci) 

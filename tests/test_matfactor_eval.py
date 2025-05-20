@@ -33,7 +33,6 @@ class MatFactorEvalMethods(unittest.TestCase):
             [2,3,2,10,14],\
             [2,3,2,15,20]])
 
-
         mfe = MatFactorEval(M)
 
         mfe.column_factor_map()
@@ -103,5 +102,96 @@ class MatFactorEvalMethods(unittest.TestCase):
             2: np.float64(16.0), 3: np.float64(16.0), 4: np.float64(16.0)}
         assert q2 == [{0, 1, 2, 3, 4}]
         assert mfe.id_col == [] 
+
+class MatrixConsistencyCheckMethods(unittest.TestCase):
+
+    def test__MatrixConsistencyCheck__identity_eval(self):
+
+        M = np.array([\
+                    [1,1,1],\
+                    [2,2,2]])
+
+        Y = np.array([2,6])
+
+        mfe = MatrixConsistencyCheck(M,Y)
+        mfe.check() 
+        assert mfe.inconsistent == [(0, 1)]
+        M = np.array([\
+                    [1,1,1],\
+                    [2,2,2]])
+
+        Y = np.array([2,4])
+
+        mfe = MatrixConsistencyCheck(M,Y)
+        mfe.check() 
+        assert mfe.inconsistent == [] 
+
+        M = np.array([\
+                    [1,1,1],\
+                    [2,2,2],\
+                    [3,3,3]])
+
+        Y = np.array([2,4,5])
+
+        mfe = MatrixConsistencyCheck(M,Y)
+        mfe.check() 
+        assert mfe.inconsistent == [(0, 2), (1, 2)]
+
+
+        M = np.array([\
+                    [1,1,1],\
+                    [2,2,2],\
+                    [3,3,3]])
+
+        mfe = MatrixConsistencyCheck(M,Y)
+        mfe.check() 
+        assert mfe.inconsistent == [(0, 2), (1, 2)]
+
+
+        M = np.array([\
+                    [1,0,1],\
+                    [2,2,2],\
+                    [3,3,3]])
+
+        Y = np.array([2,4,5])
+
+        mfe = MatrixConsistencyCheck(M,Y)
+        mfe.check() 
+        assert mfe.inconsistent == [(1, 2)]
+
+        M = np.array([\
+                    [1,0,1],\
+                    [2,0,2],\
+                    [3,3,3]])
+
+        Y = np.array([2,4,5])
+
+        mfe = MatrixConsistencyCheck(M,Y)
+        mfe.check() 
+        assert mfe.inconsistent == []
+
+
+        M = np.array([\
+                    [1,0,0],\
+                    [0,0,0],\
+                    [0,0,0]])
+
+        Y = np.array([2,4,5])
+
+        mfe = MatrixConsistencyCheck(M,Y)
+        mfe.check() 
+        assert mfe.inconsistent == []
+
+        M = np.array([\
+                    [1,0,0],\
+                    [1,0,0],\
+                    [0,0,0]])
+
+        Y = np.array([2,4,5])
+
+        mfe = MatrixConsistencyCheck(M,Y)
+        mfe.check() 
+        assert mfe.inconsistent == [(0, 1)]
+
 if __name__ == '__main__':
     unittest.main()
