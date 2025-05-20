@@ -152,6 +152,7 @@ class UDLinSysSolver:
         # index -> (varvec,constant) 
         self.eqtn = dict() 
         self.fvars = None 
+        self.fvars_ = None 
         self.varvec = None 
 
         self.rep_order = None 
@@ -160,6 +161,8 @@ class UDLinSysSolver:
         self.constat = True 
         self.inconsistent = None 
         self.consistency_check()
+
+        self.mreps = None 
 
     """
     main method
@@ -172,6 +175,7 @@ class UDLinSysSolver:
         self.initial_eval()
         self.cancel() 
         self.postcancel_solve()
+        self.missing_reps() 
 
     """
     pre-solve evaluation of variables (column-wise values). 
@@ -353,10 +357,67 @@ class UDLinSysSolver:
                 fvmap[k] = s1 
         return fvmap 
 
-    def set_freevar_values(self,fvmap): 
-        assert set(fvmap.keys()) == self.fvars 
-        fvmap = self.value_map(fvmap) 
-        self.varvec = indexvalue_map_to_vector(fvmap,self.M.shape[1])
+    def solve_missing_reps(self,varvec): 
+        self.M = deepcopy(self.m) 
+        self.Y = deepcopy(self.y) 
+
+        eqtn = deepcopy(self.eqtn) 
+        self.eqtn.clear() 
+        for i,v in enumerate(varvec): 
+            if v == 0: continue 
+            self.eqtn[i] = (np.zeros((self.M.shape[1],)),v) 
+            self.adjust_matrix_with_constant(self.M,self.Y,i)
+        self.eqtn = eqtn 
+
+        for r in self.mreps: 
+            r2,y,freevars = self.solve_for_rep(r)
+            if type(r2) != type(None): 
+                self.fvars_ = freevars 
+                self.eqtn[r] = (r2,y)
+                return 
+
+    # TODO: not fully tested. 
+    def solve_for_rep(self,rep):
+        most_reps = 0 
+        r_,y,new_freevars = None,None,None 
+        for (i,r) in enumerate(self.M): 
+            x = r[rep]
+            if x != 0: 
+                xi = set(np.where(r != 0)[0]) 
+                q = xi - {rep}
+                if len(q) < most_reps: 
+                    continue 
+
+                r_ = - r / x
+                r_[rep] = 0 
+                y = self.Y[i] / x 
+                most_reps = len(q)
+                new_freevars = q  
+        return r_,y,new_freevars
+            
+    def set_freevar_values(self,fvmap,map_type=1):
+        if map_type == 1:  
+            assert set(fvmap.keys()) == self.fvars 
+            fvmap = self.value_map(fvmap) 
+            self.varvec = indexvalue_map_to_vector(fvmap,self.M.shape[1])
+        else: 
+            assert set(fvmap.keys()) == self.fvars_
+            for k,v in fvmap.items(): 
+                self.varvec[k] = v 
+            fvmap = vector_to_indexvalue_map(self.varvec)
+            fvmap = self.value_map(fvmap) 
+
+            self.varvec = indexvalue_map_to_vector(fvmap,self.M.shape[1])  
+            for (i,v) in enumerate(self.m): 
+                if self.apply(v) != np.round(self.y[i],5): 
+                    self.constat = False 
+            return 
+
+    def missing_reps(self): 
+        col = set([i for i in range(self.M.shape[1])])  
+        self.mreps = col - self.fvars 
+        return
+
     
     def apply(self,vec): 
         assert type(self.varvec) != type(None) 

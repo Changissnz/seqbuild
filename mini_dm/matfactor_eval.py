@@ -110,6 +110,11 @@ def indexvalue_map_to_vector(m,sz):
         l[k] = v 
     return l 
 
+def vector_to_indexvalue_map(v): 
+    d = {}
+    for (i,v_) in enumerate(v): 
+        d[i] = v_
+    return d 
 
 """
 Evaluates factors between rows of a matrix for 

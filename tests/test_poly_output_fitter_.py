@@ -82,9 +82,7 @@ class UDLinSysSolverMethods(unittest.TestCase):
         Y = np.array([10,20,38])
 
         ulss = UDLinSysSolver(M,Y)
-        ulss.initial_eval()
-        ulss.cancel() 
-        ulss.postcancel_solve()
+        ulss.solve() 
 
         fx = {2:3,4:4} 
         ulss.set_freevar_values(fx)
@@ -105,9 +103,7 @@ class UDLinSysSolverMethods(unittest.TestCase):
         Y = np.array([20,12,-36])
 
         ulss = UDLinSysSolver(M,Y)
-        ulss.initial_eval()
-        ulss.cancel() 
-        ulss.postcancel_solve()
+        ulss.solve()
 
         fx = {0:5,1:30} 
         ulss.set_freevar_values(fx)
@@ -145,6 +141,26 @@ class UDLinSysSolverMethods(unittest.TestCase):
         assert q1 == ulss.y[1] 
         assert q2 == ulss.y[2] 
         assert q3 == ulss.y[3] 
+
+    '''
+    case of stealthy inconsistent system 
+    '''
+    def test__UDLinSysSolver__apply_case3(self):
+        M = np.array([\
+            [1,7,1,7],\
+            [7,1,7,1]])
+
+        Y = np.array([10,20])
+
+        ulss = UDLinSysSolver(M,Y)
+        ulss.solve() 
+
+        d = {1:10,3:-5}
+        ulss.set_freevar_values(d)
+        ulss.solve_missing_reps(ulss.varvec) 
+        d = {2:23}
+        ulss.set_freevar_values(d,2) 
+        assert not ulss.constat
 
 
 if __name__ == '__main__':
