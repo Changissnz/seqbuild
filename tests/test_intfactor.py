@@ -1,4 +1,4 @@
-from intigers.intqual import * 
+from intigers.intfactor import * 
 import unittest
 
 def check_factor_for_one(ms,f): 
@@ -12,10 +12,10 @@ def check_factor_for_one(ms,f):
 
 ### lone file test 
 """
-python -m tests.test_intqual
+python -m tests.test_intfactor
 """
 ###
-class IntQualMethods(unittest.TestCase):
+class IntFactorMethods(unittest.TestCase):
 
     def test__intersection_disjunction__seq_factors__case1(self):
         iseq3 = IntSeq([12,120,1200,12000]) 

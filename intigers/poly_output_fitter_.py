@@ -1,7 +1,8 @@
 from .process_seq import * 
 from copy import deepcopy
 from mini_dm.matfactor_eval import * 
-from morebs2 import aprng_gauge 
+from morebs2 import aprng_gauge
+from morebs2.poly_struct import CEPoly 
 
 """
 Finds an n'th degree polynomial P with all coefficients 
@@ -37,6 +38,16 @@ class PolyOutputFitterVar2:
         if not self.is_solvable(): 
             print("[??] cannot compute...") 
             self.stat = False 
+
+    def to_CEPoly(self): 
+        m = np.zeros((0,2),dtype=np.int32) 
+        l = len(self.poly) 
+
+        for (i,x) in enumerate(self.poly): 
+            if x != 0: 
+                q = np.array([x,l-i],dtype=np.int32) 
+                m = np.vstack((m,q)) 
+        return CEPoly(m) 
 
     def set_poly(self,coeff:int=1): 
         self.poly = np.zeros((self.n,),dtype=np.int64) 

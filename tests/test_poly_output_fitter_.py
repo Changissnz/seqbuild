@@ -14,36 +14,48 @@ class PolyOutputFitterMethods(unittest.TestCase):
         pofv = PolyOutputFitterVar2(n,x1,x2,coeff=1,prng=None)
         pofv.solve() 
         assert pofv.apply(x1) == pofv.apply(x2) 
+        cep = pofv.to_CEPoly()
+        assert str(cep) == ' 1x^5  -9x^4 + 11x^3  -7x^2 + 4x^1'
 
         n = 5
         x1,x2 = 3,7
         pofv = PolyOutputFitterVar2(n,x1,x2,coeff=1,prng=None)
         pofv.solve() 
         assert pofv.apply(x1) == pofv.apply(x2) 
+        cep = pofv.to_CEPoly()
+        assert str(cep) == ' 1x^5  -9x^4 + 14x^3  -4x^2 + 13x^1'
 
         n = 4
         x1,x2 = -6,9
         pofv = PolyOutputFitterVar2(n,x1,x2,coeff=1,prng=None)
         pofv.solve() 
         assert pofv.apply(x1) == pofv.apply(x2) 
+        cep = pofv.to_CEPoly()
+        assert str(cep) == ' 1x^4  -7x^3 + 31x^2  -3x^1'
 
         n = 3
         x1,x2 = 2,5
         pofv = PolyOutputFitterVar2(n,x1,x2,coeff=1,prng=None)
         pofv.solve() 
         assert pofv.apply(x1) == pofv.apply(x2) 
+        cep = pofv.to_CEPoly()
+        assert str(cep) == ' 1x^3  -7x^2 + 10x^1'
 
         n = 7 
         x1,x2 = -17,5
         pofv = PolyOutputFitterVar2(n,x1,x2,coeff=2,prng=None)
         pofv.solve()
         assert pofv.apply(x1) == pofv.apply(x2) 
+        cep = pofv.to_CEPoly()
+        assert str(cep) == ' 2x^7  -36x^6  -1189x^5 + 33x^4 + 1080x^3  -15x^2  -337x^1'
 
         n = 8 
         x1,x2 = -22,4
         pofv = PolyOutputFitterVar2(n,x1,x2,coeff=3,prng=None)
         pofv.solve()
-        assert pofv.apply(x1) == pofv.apply(x2) 
+        assert pofv.apply(x1) == pofv.apply(x2)
+        cep = pofv.to_CEPoly()
+        assert str(cep) == ' 3x^8 + 66x^7  -2x^6  -46x^5 + 39x^4 + 1701x^3  -24x^2  -836x^1'
 
     def test__PolyOutputFitterVar2__resolve(self):
 
