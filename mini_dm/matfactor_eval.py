@@ -1,8 +1,12 @@
 from collections import defaultdict 
 import numpy as np 
 
-
+"""
+In a self-factorable list, every element is a multiple of some 
+other element. 
+"""
 def is_self_factorable_list(l,output_bool:bool=False):
+
     l = np.array(l) 
 
     not_factorable = []
@@ -130,7 +134,7 @@ class MatFactorEval:
         self.id_col = None 
         self.cfm = None 
 
-    ############# preliminary: compares literal matrix values 
+    #----------------- preliminary: compares literal matrix values 
     def identity_columns_(self): 
         col = [] 
         for c in range(self.M.shape[1]): 
@@ -141,8 +145,8 @@ class MatFactorEval:
     def is_identity_column(self,c):  
         return np.all(self.M[0,c] == self.M[:,c])
 
-    ############ factor evaluation: comparisons with application of 
-    ############                    multiples. 
+    #----------------- factor evaluation: comparisons with application of 
+    #                  multiples. 
 
     def identityvar_in_two_rows(self,r1,r2): 
         x = r1 / r2

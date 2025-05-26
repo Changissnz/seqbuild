@@ -201,7 +201,7 @@ class UDLinSysSolver:
         self.constat = len(self.inconsistent) == 0 
         return
 
-    ################## cancellation methods
+    #------------- cancellation methods
 
     def cancel(self): 
         # for rows 
@@ -278,7 +278,7 @@ class UDLinSysSolver:
         excess_delta2 = old0 - new0 - {ci} 
         return excess_delta,excess_delta2
 
-    ###################### post-cancellation solve 
+    #-------------------- post-cancellation solve 
 
     def postcancel_solve(self): 
         # iterate through all rows and solve for constants 
@@ -342,7 +342,7 @@ class UDLinSysSolver:
             Y[i] = Y[i] - c 
         M[:,constant_index] = 0 
 
-    ################### post-solve plug and output 
+    #------------------------- post-solve plug and output 
 
     def value_map(self,fvmap): 
         varvec = indexvalue_map_to_vector(fvmap,self.M.shape[1]) 
