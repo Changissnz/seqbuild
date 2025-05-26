@@ -70,5 +70,8 @@ class ISFactorSetOps:
         if x not in self.iseq.l: 
             return None 
 
-        i = self.iseq.l.index(x) 
-        return len(self.factors[i]) == 2 
+        i = np.where(self.iseq.l == x)[0][0]
+        return len(self.factors[i]) <= 2 
+
+    def primes(self): 
+        return set([x for x in self.iseq.l if self.is_prime(x)])

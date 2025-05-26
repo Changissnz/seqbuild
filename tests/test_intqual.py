@@ -61,6 +61,12 @@ class IntQualMethods(unittest.TestCase):
         assert isfso.cofactor_degree_set(1) == idsm[1] 
         assert isfso.cofactor_degree_set(5) == idsm[0] 
 
+    def test__ISFactorSetOps__primes__case1(self): 
+        L = [5,7,0,1200,1,12000]
+        isfso = ISFactorSetOps(L)
+        isfso.factor_count_() 
+        assert isfso.primes() == {5,7,0,1}
+        assert type(isfso.is_prime(213123123123121)) == type(None) 
 
 if __name__ == '__main__':
     unittest.main()
