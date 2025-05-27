@@ -8,6 +8,15 @@ Uses basic data structures such as <IntSeq> and <LCG> to aid in these requiremen
 from .seq_struct import * 
 from .poly_output_fitter_ import * 
 
+# num of options 
+DEFAULT_NUM_POLYSIBLING_RANGE = [1,10]
+
+def lcm_times(x0,x1,m): 
+
+    def f(): 
+        return np.lcm(x0,x1) * m 
+    return f 
+
 class PolyEqCondition:
 
     def __init__(self,cep,target_value:np.int64): 
@@ -27,9 +36,6 @@ class PolyEqCondition:
     def output(self,x): 
         return self.cep.apply(x) == self.tv 
 
-# num of options 
-DEFAULT_NUM_POLYSIBLING_RANGE = [1,10]
-
 '''
 '''
 class POFV2ConditionAutoGen: 
@@ -41,16 +47,14 @@ class POFV2ConditionAutoGen:
 
     def integerpair_op(self,i1,i2,\
         sibling_range=DEFAULT_NUM_POLYSIBLING_RANGE,coeff_range=DEFAULT_COEFF_RANGE,\
-        power_range=DEFAULT_POWER_RANGE,deepcopy_prng:bool=False):
+        power_range = DEFAULT_POWER_RANGE,deepcopy_prng:bool=False):
         assert i1 in {int,np.int32,np.int64} and \
             i2 in {int,np.int32,np.int64}
 
         q = (self.prg() % r[1]) + r[0]
-
         for i in range(q):
             #
-            maxbase = DEFAULT_MAXBASE4POW(pwr)
-            coeff = (self.prg() % coeff_range[1]) + coeff_range[0]
+            pwr = modulo_in_range(self.prg(),power_range)
             pwr = (self.prg() % power_range[1]) + power_range[0]
             pofv = self.one_new_POFV2(i1 % maxbase,i2 %maxbase,\
                 coeff_range,power_range,deepcopy_prng)
@@ -59,13 +63,14 @@ class POFV2ConditionAutoGen:
     def one_new_POFV2(self,n0,n1,\
         coeff_range=DEFAULT_COEFF_RANGE,\
         power_range=DEFAULT_POWER_RANGE,\
-        deepcopy_prng:bool=True): 
+        deepcopy_prng:bool=True,order_pair:bool=True): 
 
-        coeff = (self.prg() % coeff_range[1]) + coeff_range[0]
-        pwr = (self.prg() % power_range[1]) + power_range[0]
-
+        coeff = modulo_in_range(self.prg(),coeff_range)
+        pwr = modulo_in_range(self.prg(),power_range)
         prg = self.prg if not deepcopy_prng else deepcopy(self.prg)
-        pofv = PolyOutputFitterVar2(pwr,n0,n1,coeff,prng=self.prg)
+        pofv = PolyOutputFitterVar2(pwr,n0,n1,coeff,prng=self.prg,\
+            order_pair=order_pair)
+        pofv.solve() 
         return pofv
 
 class UDLSSAutoGen: 

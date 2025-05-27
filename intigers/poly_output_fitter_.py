@@ -4,6 +4,10 @@ from mini_dm.matfactor_eval import *
 from morebs2 import aprng_gauge
 from morebs2.poly_struct import CEPoly 
 
+def modulo_in_range(i,r): 
+    assert r[0] < r[1] 
+    return i % (r[1] - r[0]) + r[0] 
+
 # function used to help ensure variable does not exceed size expectations
 def BASE_CHECK_FOR_EXP(b,exp): 
     try: 
@@ -31,7 +35,7 @@ def min_base4pow_geq(f,p):
 NPINT32_MAX = max(np.abs([np.iinfo(np.int32).min,np.iinfo(np.int32).max])) 
 DEFAULT_MAXBASE4POW = lambda p: min_base4pow_geq(NPINT32_MAX,p) 
 DEFAULT_COEFF_RANGE = [-996,1001]
-DEFAULT_POWER_RANGE = [3,10]
+DEFAULT_POWER_RANGE = [2,10]
 
 """
 Finds an n'th degree polynomial P with all coefficients 
@@ -53,7 +57,8 @@ class PolyOutputFitterVar2:
 
         if default_sizemod: 
             q = DEFAULT_MAXBASE4POW(n) // 1.5
-            x1,x2 = x1 % q,x2 % q 
+            x1,x2 = x1 % q + 1,x2 % q + 1
+            if x1 == x2: x2 += 6
 
         if order_pair and x1 > x2: x1,x2 = x2,x1 
 
@@ -109,6 +114,7 @@ class PolyOutputFitterVar2:
         return q 
 
     def next_coeff_(self,i): 
+        #if self.pdvec[i] == 0: return 0 
         q = self.running_diff / self.pdvec[i]
         if q[0] == 0.0: return -q[1]
         return q[0]
@@ -123,17 +129,12 @@ class PolyOutputFitterVar2:
         x2 = 1 if x > 0 else - 1 
         if type(self.prng) == type(None): 
             return np.int64(x + x2) 
-        l = [x + x2]  
-        c = 1 
-        s2,s3 = l[-1],l[-1]
-        target = 1 if x > 0 else -1 
 
-        while s2 != target and s3 != target: 
-            s2,s3 = s - c,s + c 
-            l.extend([s2,s3])
-            c += 1
-        j = self.prng() % len(target)
-        return np.int64(l[j])
+        # NOTE: arbitrary range setting 
+        if x == 0: x = 1
+        if self.prng() % 2: 
+            x2 = x2 * -1
+        return np.int64(x + (x2 * self.prng() % x))
 
     def solve(self): 
         while self.index < self.n: 

@@ -1,4 +1,6 @@
 from intigers.poly_output_fitter_ import * 
+from morebs2.numerical_generator import prg__constant
+
 import unittest
 
 ### lone file test 
@@ -88,6 +90,29 @@ class PolyOutputFitterMethods(unittest.TestCase):
         assert pofv.apply(x1) == 4216440480000
         assert pofv.apply(x2) == 100830489600
 
+    """
+    case that uses PRNG 
+    """
+    def test__PolyOutputFitterVar2__solve__case4(self):
+        
+        n=8
+        x1,x2 = 7000,320 
+        coeff = 3
+
+        prng = prg__constant(123)
+        pofv = PolyOutputFitterVar2(n,x1,x2,coeff=coeff,prng=prng,default_sizemod=True,\
+            order_pair=True)
+        pofv.solve() 
+        cep = pofv.to_CEPoly()
+
+        x1,x2 = pofv.x1,pofv.x2 
+        assert pofv.apply(x1) == pofv.apply(x2) 
+
+        pofv.resolve(3,6)
+        x1,x2 = pofv.x1,pofv.x2 
+        assert pofv.apply(x1) == pofv.apply(x2) 
+        
+        return 
 
     def test__PolyOutputFitterVar2__resolve(self):
 
