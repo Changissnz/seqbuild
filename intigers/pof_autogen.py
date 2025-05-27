@@ -27,22 +27,46 @@ class PolyEqCondition:
     def output(self,x): 
         return self.cep.apply(x) == self.tv 
 
+# num of options 
+DEFAULT_NUM_POLYSIBLING_RANGE = [1,10]
+
 '''
 '''
 class POFV2ConditionAutoGen: 
 
-    def __init__(self,intseq,prg):
+    def __init__(self,prg):
         assert type(intseq) == IntSeq
-        self.intseq = intseq 
         self.prg = prg 
         return 
 
-    def integer_pair(self): 
-        return -1
+    def integerpair_op(self,i1,i2,\
+        sibling_range=DEFAULT_NUM_POLYSIBLING_RANGE,coeff_range=DEFAULT_COEFF_RANGE,\
+        power_range=DEFAULT_POWER_RANGE,deepcopy_prng:bool=False):
+        assert i1 in {int,np.int32,np.int64} and \
+            i2 in {int,np.int32,np.int64}
 
-    def one_new_POFV2(self,n0,n1): 
-        # PolyOutputFitterVar2(n,x1,x2,coeff=1,prng=None)
-        return -1 
+        q = (self.prg() % r[1]) + r[0]
+
+        for i in range(q):
+            #
+            maxbase = DEFAULT_MAXBASE4POW(pwr)
+            coeff = (self.prg() % coeff_range[1]) + coeff_range[0]
+            pwr = (self.prg() % power_range[1]) + power_range[0]
+            pofv = self.one_new_POFV2(i1 % maxbase,i2 %maxbase,\
+                coeff_range,power_range,deepcopy_prng)
+            yield pofv
+
+    def one_new_POFV2(self,n0,n1,\
+        coeff_range=DEFAULT_COEFF_RANGE,\
+        power_range=DEFAULT_POWER_RANGE,\
+        deepcopy_prng:bool=True): 
+
+        coeff = (self.prg() % coeff_range[1]) + coeff_range[0]
+        pwr = (self.prg() % power_range[1]) + power_range[0]
+
+        prg = self.prg if not deepcopy_prng else deepcopy(self.prg)
+        pofv = PolyOutputFitterVar2(pwr,n0,n1,coeff,prng=self.prg)
+        return pofv
 
 class UDLSSAutoGen: 
 

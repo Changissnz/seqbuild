@@ -3,7 +3,7 @@ import unittest
 
 ### lone file test 
 """
-python3 -m tests.test_poly_output_fitter_
+python -m tests.test_poly_output_fitter_
 """
 ###
 class PolyOutputFitterMethods(unittest.TestCase):
@@ -56,6 +56,38 @@ class PolyOutputFitterMethods(unittest.TestCase):
         assert pofv.apply(x1) == pofv.apply(x2)
         cep = pofv.to_CEPoly()
         assert str(cep) == ' 3x^8 + 66x^7  -2x^6  -46x^5 + 39x^4 + 1701x^3  -24x^2  -836x^1'
+        
+        
+    def test__PolyOutputFitterVar2__solve__case2(self):
+
+        n=3
+        x1,x2 = 7000,32000 
+        coeff = 3#992
+        pofv = PolyOutputFitterVar2(n,x1,x2,coeff=coeff,prng=None,default_sizemod=False)
+        pofv.solve() 
+        x1,x2 = pofv.x1,pofv.x2 
+        assert pofv.apply(x1) == pofv.apply(x2) 
+
+        n=5
+        x1,x2 = 59,12
+        coeff = 31
+        pofv = PolyOutputFitterVar2(n,x1,x2,coeff=coeff,prng=None,default_sizemod=False)
+        pofv.solve() 
+        x1,x2 = pofv.x1,pofv.x2 
+        assert pofv.apply(x1) == pofv.apply(x2) 
+
+    def test__PolyOutputFitterVar2__solve__case3(self):
+
+        n=3
+        x1,x2 = 7000,320#17,13 
+        coeff = 3#992
+        pofv = PolyOutputFitterVar2(n,x1,x2,coeff=coeff,prng=None,default_sizemod=False,\
+            order_pair=False)
+        pofv.solve() 
+        cep = pofv.to_CEPoly()
+        assert pofv.apply(x1) == 4216440480000
+        assert pofv.apply(x2) == 100830489600
+
 
     def test__PolyOutputFitterVar2__resolve(self):
 

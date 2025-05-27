@@ -4,6 +4,35 @@ from mini_dm.matfactor_eval import *
 from morebs2 import aprng_gauge
 from morebs2.poly_struct import CEPoly 
 
+# function used to help ensure variable does not exceed size expectations
+def BASE_CHECK_FOR_EXP(b,exp): 
+    try: 
+        x = abs(1000 * (b ** exp))
+        return x <= abs(np.iinfo(np.int32).min) and x <= np.iinfo(np.int32).max 
+    except:
+        return False 
+
+
+def min_base4pow_geq(f,p): 
+    assert abs(f) > 0
+    assert p > 0 
+
+    f = abs(f) 
+    i = 2 
+    stat = i ** p < f 
+
+    while stat: 
+        i += 1 
+        j = i ** p 
+        stat = j < f 
+    return i 
+
+
+NPINT32_MAX = max(np.abs([np.iinfo(np.int32).min,np.iinfo(np.int32).max])) 
+DEFAULT_MAXBASE4POW = lambda p: min_base4pow_geq(NPINT32_MAX,p) 
+DEFAULT_COEFF_RANGE = [-996,1001]
+DEFAULT_POWER_RANGE = [3,10]
+
 """
 Finds an n'th degree polynomial P with all coefficients 
 variable except for the n'th power, set to argument 
@@ -15,11 +44,19 @@ except for 1 and n.
 """
 class PolyOutputFitterVar2:
 
-    def __init__(self,n,x1,x2,coeff=1,prng=None):
+    def __init__(self,n,x1,x2,coeff=1,prng=None,default_sizemod:bool=False,\
+        order_pair:bool=True):
         for q in [n,x1,x2]: 
             assert type(q) in {int,np.int64} 
         assert n > 1 
         assert x1 != x2 
+
+        if default_sizemod: 
+            q = DEFAULT_MAXBASE4POW(n) // 1.5
+            x1,x2 = x1 % q,x2 % q 
+
+        if order_pair and x1 > x2: x1,x2 = x2,x1 
+
         self.n = n 
         self.x1 = np.int64(x1)
         self.x2 = np.int64(x2) 
