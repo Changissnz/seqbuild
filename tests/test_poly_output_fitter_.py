@@ -1,5 +1,5 @@
 from intigers.poly_output_fitter_ import * 
-from morebs2.numerical_generator import prg__constant
+from morebs2.numerical_generator import prg__constant,prg__n_ary_alternator
 
 import unittest
 
@@ -9,6 +9,27 @@ python -m tests.test_poly_output_fitter_
 """
 ###
 class PolyOutputFitterMethods(unittest.TestCase):
+
+
+    def test__PolyOutputFitterVar1__solve(self):
+        n = 7 
+        x1 = 100
+        c = 10 ** 7 + 3 * 10 ** 6 + 2 * 10 **5 + \
+            6 * 10 ** 3 + 7 * 10 ** 2 + 4 * 10 ** 1 + 8
+
+        prg = prg__n_ary_alternator(s0=2,s1=59,start=-5)
+
+        pofv1 = PolyOutputFitterVar1(n,x1,c,prg,default_sizemod=True)
+        pofv1.solve()
+        x1,c = pofv1.x1,pofv1.c
+        assert pofv1.apply(x1) == c 
+
+        cep = pofv1.to_CEPoly()
+        scep = str(cep)
+        assert scep == "-5983x^7  -36009x^6  -216165x^5  " +\
+            "-1297162x^4  -7782973x^3  -46697843x^2  " +\
+            "-280187064x^1 + 1681122397x^0" 
+        assert cep.apply(pofv1.x1) == pofv1.apply(pofv1.x1)
 
     def test__PolyOutputFitterVar2__solve(self):
         n = 5 
@@ -89,6 +110,7 @@ class PolyOutputFitterMethods(unittest.TestCase):
         cep = pofv.to_CEPoly()
         assert pofv.apply(x1) == 4216440480000
         assert pofv.apply(x2) == 100830489600
+        assert not pofv.is_solved()
 
     """
     case that uses PRNG 

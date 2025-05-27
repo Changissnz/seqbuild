@@ -37,6 +37,70 @@ DEFAULT_MAXBASE4POW = lambda p: min_base4pow_geq(NPINT32_MAX,p)
 DEFAULT_COEFF_RANGE = [-996,1001]
 DEFAULT_POWER_RANGE = [2,10]
 
+class PolyOutputFitterVar1:
+
+    def __init__(self,n,x1,c,prg,default_sizemod:bool=True):
+        for q in [n,x1,c]: assert type(q) in {int,np.int64,np.int32}
+        assert n >= 1 
+        assert x1 != 0 
+        if default_sizemod: 
+            q = DEFAULT_MAXBASE4POW(n) // 1.5
+            x1,x2 = x1 % q + 1,c % q + 1 
+
+        self.n = n 
+        self.x1 = np.int32(x1) 
+        self.c = np.int32(c)
+        self.prg = prg 
+        self.coeff = np.zeros((self.n + 1,),dtype=np.int32)
+        self.index = 0
+        self.rem = c 
+
+    """
+    main method 
+    """
+    def solve(self): 
+        while self.one_coeff(): 
+            continue 
+
+    def one_coeff(self): 
+        if self.n + 1 <= self.index: return False 
+        pwr = self.n - self.index
+
+        if self.rem == 0: return False 
+
+        if pwr == 0: 
+            self.coeff[-1] = self.rem 
+            self.rem -= self.rem 
+            return True 
+
+        q = ceil(self.rem / (self.x1 ** pwr))
+        coeff_range = [-q,q]
+        md = modulo_in_range(self.prg(),coeff_range)
+        self.coeff[self.index] = md
+        self.rem = self.rem - (md * self.x1 ** pwr)
+        self.index += 1 
+        return True 
+
+    def apply(self,x): 
+        q = 0 
+        for i in range(0,self.n+1): 
+            j = self.n - i 
+            q += self.coeff[j] * x ** i  
+        return q 
+
+    def to_CEPoly(self): 
+        return PolyOutputFitterVar1.to_CEPoly_(self) 
+    
+    @staticmethod
+    def to_CEPoly_(pofv1): 
+
+        m = np.zeros((0,2),dtype=np.int32) 
+        for i in range(0,pofv1.n+1): 
+            j = pofv1.n - i 
+            q = np.array([pofv1.coeff[i],j])
+            m = np.vstack((m,q)) 
+        return CEPoly(m) 
+
 """
 Finds an n'th degree polynomial P with all coefficients 
 variable except for the n'th power, set to argument 
