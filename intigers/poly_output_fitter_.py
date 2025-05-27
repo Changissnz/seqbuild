@@ -65,6 +65,7 @@ class PolyOutputFitterVar2:
         self.n = n 
         self.x1 = np.int64(x1)
         self.x2 = np.int64(x2) 
+        assert self.x1 != 0 and self.x2 != 0 
         self.ref = None 
         self.set_poly(coeff) 
         self.prng = prng 
@@ -112,6 +113,9 @@ class PolyOutputFitterVar2:
             j = self.n - i 
             q += self.poly[j] * x ** i  
         return q 
+
+    def is_solved(self): 
+        return self.apply(self.x1) == self.apply(self.x2) 
 
     def next_coeff_(self,i): 
         #if self.pdvec[i] == 0: return 0 
