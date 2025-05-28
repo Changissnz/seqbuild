@@ -106,22 +106,26 @@ class IntSeq2Tree:
     def split_node(self,node): 
         return -1 
 
+    # TODO: test this 
     def factor_split(self,S,orderng,m=None): 
-        deg = self.factor_csplit_degree(S,orderng,m) 
+        factor = self.csplitting_factor(S,orderng,m) 
 
-        # gather the available factor candidates
-        
+        if type(factor) == type(None): 
+            print("[??] no factor for split")
+            return False 
 
-        return -1 
-
-    def next_factorset_on_path(self): 
-        return -1 
+        # declare the factor condition 
+        f = lambda x: x / factor == x // factor 
+        S2 = set() 
+        for s in S: 
+            if f(s): S2 |= {s} 
+        return f,S2 
 
     """
     chooses a factor by degree based on ordering of 'min','max','median'. 
     Used for conditional splits with integer sets. 
     """
-    def factor_csplit_degree(self,S,orderng = "min",m=None):
+    def csplitting_factor(self,S,orderng = "min",m=None):
         assert orderng in {"min","max","medi"}
         assert len(S) > 0 
 
@@ -131,7 +135,7 @@ class IntSeq2Tree:
         else: 
             median = 0.5 if type(m) == type(None) else m 
             r = self.isfso.median(pkeys=S,r=median)
-        return r 
+        return r
 
     def poly_split(self,S,poly_size:int): 
         return -1 

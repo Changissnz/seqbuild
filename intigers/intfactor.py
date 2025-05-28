@@ -44,15 +44,17 @@ def std_invert_map(m):
             q[v] = {k} 
     return q
 
-def numberdict_subtraction(d1,d2):
+def numberdict_op(d1,d2,f=sub):
     K = set(d1.keys()) | set(d2.keys()) 
     
     d3 = defaultdict(int) 
     for k in K:
         x1 = d1[k] if k in d1 else 0 
         x2 = d2[k] if k in d2 else 0 
-        d3[k] = x1 - x2
+        d3[k] = f(x1,x2) 
     return d3 
+
+
 
 def equal_intdicts(d1,d2): 
     K = set(d1.keys()) | set(d2.keys()) 
@@ -86,17 +88,22 @@ class ISFactorSetOps:
     each degree
     """
     def dsort(self,pkeys=None):
-
+        dx = None 
         if type(pkeys) == type(None): 
-            pkeys = list(self.cfd_map.keys())
+            dx = [[k,v] for (k,v) in self.cfd_map.items()]
+        else: 
+            s = set() 
+            element_indices = self.iseq.element_indices(pkeys) 
+            for ei in element_indices: 
+                s |= self.factors[ei] 
+            dx = defaultdict(int) 
+            for ei in element_indices:
+                q = self.factors[ei]
+                dx2 = dict([[q_,1] for q_ in q]) 
+                dx = numberdict_op(dx,dx2,add)
+        dx = sorted([[k,v] for (k,v) in self.cfd_map.items()],key=lambda x:x[1])
+        return dx 
         
-        d2s = defaultdict(int) 
-        for k in pkeys: 
-            d2s[k] = len(v) 
-
-        qr = sorted([[k,v] for (k,v) in d2s.items()],key=lambda x:x[1])
-        return qr 
-
     def median(self,pkeys=None,r=0.5): 
         qr = self.dsort(pkeys) 
         qr = [x[0] for x in qr]
@@ -116,7 +123,6 @@ class ISFactorSetOps:
             if f in self.factors[i]: 
                 ks |= {k} 
         return ks 
-
 
     """
     main method 
@@ -155,9 +161,16 @@ class ISFactorSetOps:
                 d[x_] += 1
         return d  
 
+    # TODO: 
+    def factorset_for_elements(self,elements):
+        s = set() 
+        ei = self.iseq.element_indices(elements) 
+        for ei_ in ei: s |= self.factors[ei_] 
+        return s 
+
     def update_factor_count(self,factor_count_delta):  
-        self.factor_count = numberdict_subtraction(self.factor_count,\
-            factor_count_delta) 
+        self.factor_count = numberdict_op(self.factor_count,\
+            factor_count_delta,f=sub) 
         ks = set() 
         for k,v in self.factor_count.items(): 
             if v <= 0: ks |= {k} 
@@ -205,6 +218,14 @@ class ISFactorSetOps:
 
         q = self.factors[index1].intersection(self.factors[index2])
         return q == {1} or q == {} 
+
+    # TODO: test 
+    def multiples_of(self,f): 
+        s = set() 
+        for (i,m) in enumerate(self.factor_count): 
+            if f in m: 
+                s |= {self.iseq[i]} 
+        return s 
 
     def __str__(self): 
         s = ""

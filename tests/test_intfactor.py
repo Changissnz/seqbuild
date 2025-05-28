@@ -84,7 +84,7 @@ class IntFactorMethods(unittest.TestCase):
         #print("----")
         #print(str(isfso))
 
-        xr1 = numberdict_subtraction(dxq,dx)
+        xr1 = numberdict_op(dxq,dx,f=sub)
         xr2 = isfso.factor_count
         assert equal_intdicts(xr1,xr2)
         assert not equal_intdicts(dxq,xr2)
