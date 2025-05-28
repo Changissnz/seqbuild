@@ -64,12 +64,11 @@ class IDecTNode:
     def classify(self,v): 
         return self.travf(v) 
 
-        
 """
 converts an <IntSeq> instance to a tree (directed graph) T. 
 T satisfies a leaf requirement `l` XOR  a depth requirement `d`. 
 """
-class IntSeqToTree: 
+class IntSeq2Tree: 
 
     def __init__(self,intseq,l:int,d:int): 
         assert type(intseq) == IntSeq
@@ -80,10 +79,18 @@ class IntSeqToTree:
         self.leaf_first = type(l) != type(None) 
         if self.leaf_first: 
             assert type(self.l) == int and self.l > 0
-            assert self.d <= len(self.intseq) - 1 
+            assert self.l <= len(self.intseq) - 1 
         else: 
             assert type(self.d) == int and self.d >= 0
             assert self.d <= len(self.intseq) - 1 
+
+    def factor_preproc(self):
+        self.isfso = ISFactorSetOps(deepcopy(self.intseq.l),\
+            int_limit=DEFAULT_INT_MAX_THRESHOLD)
+        return 
+
+    #----------------------- root initialization to satisfy depth or
+    #----------------------- leaf requirement 
 
     def init_root(self): 
         return -1 
@@ -99,14 +106,32 @@ class IntSeqToTree:
     def split_node(self,node): 
         return -1 
 
-    def factor_split(self,S,cat_size:int): 
-        assert len(S) > 0
-        assert cat_size >= 1 
-        s = ISFactorSetOps(list(S))
+    def factor_split(self,S,orderng,m=None): 
+        deg = self.factor_csplit_degree(S,orderng,m) 
 
-        cat2size = {}
-        s.factor_count_()
+        # gather the available factor candidates
+        
+
         return -1 
+
+    def next_factorset_on_path(self): 
+        return -1 
+
+    """
+    chooses a factor by degree based on ordering of 'min','max','median'. 
+    Used for conditional splits with integer sets. 
+    """
+    def factor_csplit_degree(self,S,orderng = "min",m=None):
+        assert orderng in {"min","max","medi"}
+        assert len(S) > 0 
+
+        if orderng in {"min","max"}: 
+            index = 0 if orderng == "min" else -1
+            r = self.isfso.dsort(pkeys=S)[index] 
+        else: 
+            median = 0.5 if type(m) == type(None) else m 
+            r = self.isfso.median(pkeys=S,r=median)
+        return r 
 
     def poly_split(self,S,poly_size:int): 
         return -1 

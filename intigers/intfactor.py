@@ -1,6 +1,6 @@
 from morebs2.numerical_extras import * 
 from morebs2.graph_basics import flatten_setseq
-
+from morebs2.poly_factor import median_sort,select_median_in_sequence 
 from .seq_struct import * 
 
 DEFAULT_INT_MAX_THRESHOLD = 10 ** 6 
@@ -48,9 +48,9 @@ def numberdict_subtraction(d1,d2):
     K = set(d1.keys()) | set(d2.keys()) 
     
     d3 = defaultdict(int) 
-    for k in K: 
-        x1 = d1[k]
-        x2 = d2[k]
+    for k in K:
+        x1 = d1[k] if k in d1 else 0 
+        x2 = d2[k] if k in d2 else 0 
         d3[k] = x1 - x2
     return d3 
 
@@ -65,11 +65,51 @@ class ISFactorSetOps:
         assert abs(min(l)) <= DEFAULT_INT_MAX_THRESHOLD and \
             abs(max(l)) <= DEFAULT_INT_MAX_THRESHOLD
         self.iseq = IntSeq(l) 
+        # element in iseq -> factors 
         self.factors = factors_of_seq(self.iseq) 
-        # 
+        # factor -> degree 
         self.factor_count = None 
+        # degree -> factor set  
         self.cfd_map = None 
         self.max_cofactor_degree = None 
+
+    # TODO: test 
+    """
+    sort from minimum to maximum factor size for 
+    each degree
+    """
+    def dsort(self,pkeys=None):
+
+        if type(pkeys) == type(None): 
+            pkeys = list(self.cfd_map.keys())
+        
+        d2s = defaultdict(int) 
+        for k in pkeys: 
+            d2s[k] = len(v) 
+
+        qr = sorted([[k,v] for (k,v) in d2s.items()],key=lambda x:x[1])
+        return qr 
+
+    def median(self,pkeys=None,r=0.5): 
+        qr = self.dsort(pkeys) 
+        qr = [x[0] for x in qr]
+        return select_median_in_sequence(qr,m=r)
+
+    def median_sort(self,pkeys=None,r=0.5): 
+
+        # get the degree to size map 
+        qr = self.dsort(pkeys) 
+        qr = [x[0] for x in qr]
+        x = median_sort(qr,m=r)
+        return x 
+
+    def factor_to_keys(self,f): 
+        ks = set()
+        for (i,k) in enumerate(self.iseq.l): 
+            if f in self.factors[i]: 
+                ks |= {k} 
+        return ks 
+
 
     """
     main method 
