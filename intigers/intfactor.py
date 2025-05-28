@@ -127,7 +127,6 @@ class ISFactorSetOps:
                 s |= {k} 
         return s 
 
-
     def is_prime(self,x): 
         if x not in self.iseq.l: 
             return None 
@@ -137,6 +136,23 @@ class ISFactorSetOps:
 
     def primes(self): 
         return set([x for x in self.iseq.l if self.is_prime(x)])
+
+    # TODO: test 
+    def coprimes_of(self,i1):
+        coprimes = set()
+        for l_ in self.iseq.l: 
+            if l_ == i1: continue 
+            stat = self.are_coprimes(i1,l_)
+            if stat: coprimes |= {l_}
+        return coprimes 
+
+    def are_coprimes(self,i1,i2):
+        assert i1 in self.iseq.l and i2 in self.iseq.l 
+        index1 = np.where(self.iseq.l == i1)[0][0] 
+        index2 = np.where(self.iseq.l == i2)[0][0]
+
+        q = self.factors[index1].intersection(self.factors[index2])
+        return q == {1} or q == {} 
 
 # TODO: test 
 class FactorClassifier: 
