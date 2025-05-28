@@ -54,13 +54,19 @@ def numberdict_subtraction(d1,d2):
         d3[k] = x1 - x2
     return d3 
 
+def equal_intdicts(d1,d2): 
+    K = set(d1.keys()) | set(d2.keys()) 
+
+    for k in K: 
+        if d1[k] != d2[k]: return False 
+    return True 
 
 """
 set operations of multiples for an integer sequence
 """
 class ISFactorSetOps: 
 
-    def __init__(self,l,int_limit=DEFAULT_INT_MAX_THRESHOLD):  
+    def __init__(self,l,int_limit=DEFAULT_INT_MAX_THRESHOLD,str_mode_full:bool=True):  
         assert len(l) >= 2
         assert abs(min(l)) <= DEFAULT_INT_MAX_THRESHOLD and \
             abs(max(l)) <= DEFAULT_INT_MAX_THRESHOLD
@@ -72,6 +78,7 @@ class ISFactorSetOps:
         # degree -> factor set  
         self.cfd_map = None 
         self.max_cofactor_degree = None 
+        self.str_mode_full=str_mode_full
 
     # TODO: test 
     """
@@ -133,18 +140,31 @@ class ISFactorSetOps:
         element_indices = self.iseq.element_indices(elements) 
         self.iseq.remove_element_indices(element_indices)
 
+        """
         affected_factors = set() 
         factor_count_delta = defaultdict(int) # negative 
         for x in element_indices:
             for x_ in self.factors[x]: 
                 factor_count_delta[x_] += 1
         self.update_factor_count(factor_count_delta)
+        """ 
+        dx = self.factorcount_for_elementindices(element_indices) 
+        self.update_factor_count(dx) 
 
         # NOTE: ineff 
         self.cfd_map_() 
 
         self.factors = [f for (i,f) in enumerate(self.factors) if \
             i not in element_indices] 
+
+    def factorcount_for_elementindices(self,element_indices): 
+        d = defaultdict(int)
+        for ei in element_indices:
+            for x_ in self.factors[ei]: 
+                d[x_] += 1
+        return d  
+
+
 
     def update_factor_count(self,factor_count_delta):  
         self.factor_count = numberdict_subtraction(self.factor_count,\
@@ -193,6 +213,21 @@ class ISFactorSetOps:
 
         q = self.factors[index1].intersection(self.factors[index2])
         return q == {1} or q == {} 
+
+    def __str__(self): 
+        s = ""
+        for (i,f) in enumerate(self.factors): 
+            s += "element {}\n".format(self.iseq[i])
+            s += "factors\n"
+            s += str(f) + "\n\n"
+
+        if self.str_mode_full: 
+            s += "\t\tdegree-to-factor map" + "\n"
+            for (k,v) in self.cfd_map.items():
+                s += "degree: {}\n".format(k)
+                s += "factors\n"
+                s += str(v) + "\n\n"
+        return s 
 
 # TODO: test 
 class FactorClassifier: 

@@ -21,7 +21,7 @@ class IntSeq:
         elements = set(elements) 
         i = set()
         for x in elements: 
-            i1 = set(np.where(l == x)[0])
+            i1 = set(np.where(self.l == x)[0])
             i |= i1 
         return i 
 
@@ -36,6 +36,11 @@ class IntSeq:
 
     def __len__(self): 
         return len(self.l)
+
+    def __getitem__(self,i):
+        assert i < len(self) 
+        return self.l[i]  
+
 
     def append(self,q): 
         if type(q) in [int,np.int32]: 

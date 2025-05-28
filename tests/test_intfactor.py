@@ -68,5 +68,30 @@ class IntFactorMethods(unittest.TestCase):
         assert isfso.primes() == {5,7,0,1}
         assert type(isfso.is_prime(213123123123121)) == type(None) 
 
+    def test__ISFactorSetOps__remove_seq_elements(self): 
+        L = [3002,4370,10006,912,431]
+        isfso = ISFactorSetOps(L,int_limit=DEFAULT_INT_MAX_THRESHOLD)
+        isfso.factor_count_() 
+
+        ei = isfso.iseq.element_indices([3002,431])
+        dxq = deepcopy(isfso.factor_count)
+        dx = isfso.factorcount_for_elementindices(ei)
+
+        #print(str(isfso))
+        x = [isfso.factors[ei_] for ei_ in ei]
+        x = flatten_setseq(x) 
+        isfso.remove_seq_elements(set([3002,431])) 
+        #print("----")
+        #print(str(isfso))
+
+        xr1 = numberdict_subtraction(dxq,dx)
+        xr2 = isfso.factor_count
+        assert equal_intdicts(xr1,xr2)
+        assert set(isfso.iseq.l) == {4370,10006,912}
+        assert len(isfso.iseq) == 3 
+        assert len(isfso.factors) == 3 
+
+
+
 if __name__ == '__main__':
     unittest.main()
