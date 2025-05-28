@@ -32,6 +32,29 @@ def intersection_disjunction__seq_factors(ms):
             all_mult -= x 
     return q,all_mult
 
+# TODO: relocate 
+def std_invert_map(m):
+    assert type(m) in {dict,defaultdict}
+
+    q = {}
+    for k,v in m.items():
+        if v in q:
+            q[v] |= {k}
+        else:
+            q[v] = {k} 
+    return q
+
+def numberdict_subtraction(d1,d2):
+    K = set(d1.keys()) | set(d2.keys()) 
+    
+    d3 = defaultdict(int) 
+    for k in K: 
+        x1 = d1[k]
+        x2 = d2[k]
+        d3[k] = x1 - x2
+    return d3 
+
+
 """
 set operations of multiples for an integer sequence
 """
@@ -43,9 +66,14 @@ class ISFactorSetOps:
             abs(max(l)) <= DEFAULT_INT_MAX_THRESHOLD
         self.iseq = IntSeq(l) 
         self.factors = factors_of_seq(self.iseq) 
+        # 
         self.factor_count = None 
+        self.cfd_map = None 
         self.max_cofactor_degree = None 
 
+    """
+    main method 
+    """
     def factor_count_(self): 
         self.factor_count = defaultdict(int) 
         self.max_cofactor_degree = 0 
@@ -55,6 +83,39 @@ class ISFactorSetOps:
                 self.max_cofactor_degree = self.max_cofactor_degree if \
                     self.factor_count[q] < self.max_cofactor_degree else \
                     self.factor_count[q] 
+        self.cfd_map_() 
+
+    #--------------------------- updated methods related to removing elements 
+    #--------------------------- from sequence  
+
+    # TODO: test 
+    def remove_seq_elements(self,elements): 
+        element_indices = self.iseq.element_indices(elements) 
+        self.iseq.remove_element_indices(element_indices)
+
+        affected_factors = set() 
+        factor_count_delta = defaultdict(int) # negative 
+        for x in element_indices:
+            for x_ in self.factors[x]: 
+                factor_count_delta[x_] += 1
+        self.update_factor_count(factor_count_delta)
+
+        # NOTE: ineff 
+        self.cfd_map_() 
+
+        self.factors = [f for (i,f) in enumerate(self.factors) if \
+            i not in element_indices] 
+
+    def update_factor_count(self,factor_count_delta):  
+        self.factor_count = numberdict_subtraction(self.factor_count,\
+            factor_count_delta) 
+        return
+
+    #--------------------------- methods related to cofactor degree 
+
+    def cfd_map_(self):
+        assert type(self.factor_count) != type(None) 
+        self.cfd_map = std_invert_map(self.factor_count)
 
     def cofactor_degree_set(self,d):
         assert d >= 1
@@ -65,6 +126,7 @@ class ISFactorSetOps:
             if v == d: 
                 s |= {k} 
         return s 
+
 
     def is_prime(self,x): 
         if x not in self.iseq.l: 

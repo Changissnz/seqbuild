@@ -16,6 +16,24 @@ class IntSeq:
             assert len(self.l.shape) == 1 
         return 
 
+    # TODO: test 
+    def element_indices(self,elements):
+        elements = set(elements) 
+        i = set()
+        for x in elements: 
+            i1 = set(np.where(l == x)[0])
+            i |= i1 
+        return i 
+
+    def remove_elements(self,elements):
+        indices = self.element_indices(element)
+        self.remove_element_indices(indices)
+        return 
+
+    def remove_element_indices(self,indices): 
+        l2 = [l_ for (i,l_) in enumerate(self.l) if i not in indices] 
+        self.l = np.array(l2,dtype=np.int32)
+
     def __len__(self): 
         return len(self.l)
 

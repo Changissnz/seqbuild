@@ -94,5 +94,19 @@ class IntSeqToTree:
     def init_df(self):
         return -1 
 
+    #---------------------- splitter functions 
+
     def split_node(self,node): 
+        return -1 
+
+    def factor_split(self,S,cat_size:int): 
+        assert len(S) > 0
+        assert cat_size >= 1 
+        s = ISFactorSetOps(list(S))
+
+        cat2size = {}
+        s.factor_count_()
+        return -1 
+
+    def poly_split(self,S,poly_size:int): 
         return -1 
