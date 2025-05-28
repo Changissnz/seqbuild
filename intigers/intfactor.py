@@ -82,15 +82,18 @@ class ISFactorSetOps:
         self.max_cofactor_degree = None 
         self.str_mode_full=str_mode_full
 
-    # TODO: test 
     """
-    sort from minimum to maximum factor size for 
-    each degree
+    For the keys (elements of `iseq`) provided or all elements 
+    of `iseq` if `pkeys` is None, sorts the keys by their co-factor 
+    degree with respect to `pkeys`. 
+
+    Outputs a sequence of pairs 
+    (factor, co-factor degree)
     """
     def dsort(self,pkeys=None):
         dx = None 
         if type(pkeys) == type(None): 
-            dx = [[k,v] for (k,v) in self.cfd_map.items()]
+            dx = self.factor_count
         else: 
             s = set() 
             element_indices = self.iseq.element_indices(pkeys) 
@@ -101,7 +104,7 @@ class ISFactorSetOps:
                 q = self.factors[ei]
                 dx2 = dict([[q_,1] for q_ in q]) 
                 dx = numberdict_op(dx,dx2,add)
-        dx = sorted([[k,v] for (k,v) in self.cfd_map.items()],key=lambda x:x[1])
+        dx = sorted([[k,v] for (k,v) in dx.items()],key=lambda x:x[1])
         return dx 
         
     def median(self,pkeys=None,r=0.5): 
