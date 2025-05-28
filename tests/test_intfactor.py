@@ -87,10 +87,56 @@ class IntFactorMethods(unittest.TestCase):
         xr1 = numberdict_subtraction(dxq,dx)
         xr2 = isfso.factor_count
         assert equal_intdicts(xr1,xr2)
+        assert not equal_intdicts(dxq,xr2)
+
         assert set(isfso.iseq.l) == {4370,10006,912}
         assert len(isfso.iseq) == 3 
         assert len(isfso.factors) == 3 
 
+    def test__ISFactorSetOps__coprimes_of_case1(self):
+
+        L = [3002,4370,10006,912,431]
+        isfso = ISFactorSetOps(L,int_limit=DEFAULT_INT_MAX_THRESHOLD)
+        isfso.factor_count_() 
+
+        ei = isfso.iseq.element_indices([3002,431])
+        dxq = deepcopy(isfso.factor_count)
+        dx = isfso.factorcount_for_elementindices(ei)
+
+        ans = {3002: {np.int32(431)},\
+            4370: {np.int32(431)},\
+            10006: {np.int32(431)},\
+            912: {np.int32(431)},\
+            431: {np.int32(912), np.int32(3002), \
+                np.int32(4370), np.int32(10006)}}
+
+        for l in L: 
+            assert ans[l] == isfso.coprimes_of(l)
+
+    def test__ISFactorSetOps__coprimes_of_case2(self):
+
+        L = [480,320,6400,1280,804,7,19,11]
+        isfso = ISFactorSetOps(L,int_limit=DEFAULT_INT_MAX_THRESHOLD)
+        isfso.factor_count_() 
+
+        ei = isfso.iseq.element_indices([3002,431])
+        dxq = deepcopy(isfso.factor_count)
+        dx = isfso.factorcount_for_elementindices(ei)
+
+        ans = {480: {np.int32(11), np.int32(19), np.int32(7)},\
+            320: {np.int32(11), np.int32(19), np.int32(7)},\
+            6400: {np.int32(11), np.int32(19), np.int32(7)},\
+            1280: {np.int32(11), np.int32(19), np.int32(7)},\
+            804: {np.int32(11), np.int32(19), np.int32(7)},\
+            7: {np.int32(480), np.int32(6400), np.int32(320), \
+                np.int32(1280), np.int32(804), np.int32(19), np.int32(11)},\
+            19: {np.int32(480), np.int32(6400), np.int32(320), \
+                np.int32(1280), np.int32(804), np.int32(7), np.int32(11)},\
+            11: {np.int32(480), np.int32(6400), np.int32(320), \
+                np.int32(1280), np.int32(804), np.int32(19), np.int32(7)}}
+
+        for l in L: 
+            assert ans[l] == isfso.coprimes_of(l)
 
 
 if __name__ == '__main__':

@@ -135,19 +135,10 @@ class ISFactorSetOps:
     #--------------------------- updated methods related to removing elements 
     #--------------------------- from sequence  
 
-    # TODO: test 
     def remove_seq_elements(self,elements): 
         element_indices = self.iseq.element_indices(elements) 
         self.iseq.remove_element_indices(element_indices)
 
-        """
-        affected_factors = set() 
-        factor_count_delta = defaultdict(int) # negative 
-        for x in element_indices:
-            for x_ in self.factors[x]: 
-                factor_count_delta[x_] += 1
-        self.update_factor_count(factor_count_delta)
-        """ 
         dx = self.factorcount_for_elementindices(element_indices) 
         self.update_factor_count(dx) 
 
@@ -164,11 +155,13 @@ class ISFactorSetOps:
                 d[x_] += 1
         return d  
 
-
-
     def update_factor_count(self,factor_count_delta):  
         self.factor_count = numberdict_subtraction(self.factor_count,\
             factor_count_delta) 
+        ks = set() 
+        for k,v in self.factor_count.items(): 
+            if v <= 0: ks |= {k} 
+        for k in ks: del self.factor_count[k] 
         return
 
     #--------------------------- methods related to cofactor degree 
@@ -197,7 +190,6 @@ class ISFactorSetOps:
     def primes(self): 
         return set([x for x in self.iseq.l if self.is_prime(x)])
 
-    # TODO: test 
     def coprimes_of(self,i1):
         coprimes = set()
         for l_ in self.iseq.l: 
