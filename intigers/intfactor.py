@@ -112,11 +112,12 @@ class ISFactorSetOps:
         qr = [x[0] for x in qr]
         return select_median_in_sequence(qr,m=r)
 
-    def median_sort(self,pkeys=None,r=0.5): 
+    def median_sort(self,pkeys=None,r=0.5,fullpair_sequence:bool=True): 
 
         # get the degree to size map 
         qr = self.dsort(pkeys) 
-        qr = [x[0] for x in qr]
+        if not fullpair_sequence: 
+            qr = [x[0] for x in qr]
         x = median_sort(qr,m=r)
         return x 
 
@@ -164,7 +165,7 @@ class ISFactorSetOps:
                 d[x_] += 1
         return d  
 
-    # TODO: 
+    # TODO: test 
     def factorset_for_elements(self,elements):
         s = set() 
         ei = self.iseq.element_indices(elements) 
@@ -244,29 +245,3 @@ class ISFactorSetOps:
                 s += "factors\n"
                 s += str(v) + "\n\n"
         return s 
-
-# TODO: test 
-class FactorClassifier: 
-
-    def __init__(self,factor2class=dict()):
-        assert type(factor2class) == dict 
-        self.class_ctr = 0 
-        if len(factor2class) > 0: 
-            V = set(factor2class.values()) 
-            assert min(V) == 0 and max(V) == len(V) - 1
-            self.class_ctr = len(V) 
-        self.f2c = factor2class
-        self.f2c_inverted = dict([(v,k) for (k,v) in self.f2c.items()])
-
-    def add_class(self,k): 
-        assert k not in self.f2c
-        self.f2c[k] = self.class_ctr 
-        self.f2c_inverted[self.class_ctr] = k 
-        self.class_ctr = self.class_ctr + 1 
-
-    def classify(self,q):
-        for i in range(self.class_ctr): 
-            q2 = self.f2c_inverted[i]
-            stat = q / q2 == q // q2 
-            if stat: return i 
-        return -1 

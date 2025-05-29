@@ -2,8 +2,8 @@ from collections import defaultdict
 import numpy as np 
 
 """
-In a self-factorable list, every element is a multiple of some 
-other element. 
+In a self-factorable list, every element is a multiple of all 
+elements less than it. 
 """
 def is_self_factorable_list(l,output_bool:bool=False):
 
