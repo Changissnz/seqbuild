@@ -82,9 +82,6 @@ class PolyOutputFitterVar1:
 
         q = ceil(self.rem / (self.x1 ** pwr))
         coeff_range = [-abs(q),abs(q)]
-        print("POW ",pwr)
-        print("X1 : ",self.x1, "  ",self.x1 ** pwr)
-        print("COEFF: ",coeff_range, " REM ",self.rem)
         md = modulo_in_range(self.prg(),coeff_range)
         self.coeff[self.index] = md
         self.rem = self.rem - (md * self.x1 ** pwr)

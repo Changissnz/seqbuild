@@ -47,6 +47,7 @@ class POFV2ConditionAutoGen:
         coeff_range=DEFAULT_COEFF_RANGE,\
         power_range=DEFAULT_POWER_RANGE,\
         deepcopy_prng:bool=True,order_pair:bool=True): 
+        
         coeff = modulo_in_range(self.prg(),coeff_range)
         pwr = modulo_in_range(self.prg(),power_range)
         prg = self.prg if not deepcopy_prng else deepcopy(self.prg)
@@ -55,15 +56,24 @@ class POFV2ConditionAutoGen:
         pofv.solve() 
         return pofv
 
-    def POFV2_to_POFV1_siblings(self,pofv2,sibling_integers,power_range=\
-        DEFAULT_POWER_RANGE): 
+    # NOTE: caution required for large integers. The exponential
+    #       values are not suited for program. 
+    def POFV2_to_POFV1_siblings(self,pofv2,sibling_integers): 
 
         for s in sibling_integers: assert type(s) in {int,np.int32,np.int64} 
 
         q = [] 
         c = pofv2.apply(pofv2.x1)
         for s in sibling_integers:
-            n = modulo_in_range(self.prg(),DEFAULT_POWER_RANGE)
+            # search for the largest power that base s can use 
+            mp = DEFAULT_MAXPOW4BASE(s)
+            pwrange = [2,None]
+            if mp < 2: 
+                print("[!!] large value. be warned.")
+            pwrange[1] = min(mp,DEFAULT_POWER_RANGE[1])
+            if pwrange[0] == pwrange[1]: pwrange[1] += 1 
+            n = modulo_in_range(self.prg(),pwrange)
+
             pofv1 = PolyOutputFitterVar1(n,s,c,self.prg,default_sizemod=False)
             pofv1.solve() 
             q.append(pofv1) 
