@@ -1,6 +1,6 @@
 from .pof_autogen import * 
 from .intfactor import * 
-from morebs2.numerical_generator import prg_seqsort_ties
+from morebs2.numerical_generator import prg_seqsort_ties,prg_partition_for_sz
 
 """
 Node structure used as unit for a decision tree constructed 
@@ -446,7 +446,7 @@ class IntSeq2Tree:
 
         pofv2 = pofgen.integerpair_op(x1,x2,\
             sibling_range=[1,2],coeff_range=DEFAULT_COEFF_RANGE,\
-            power_range = DEFAULT_POWER_RANGE,deepcopy_prng:bool=False)
+            power_range = DEFAULT_POWER_RANGE,deepcopy_prng=False)
         pofv2 = next(pofv2) 
 
         siblings = [] 

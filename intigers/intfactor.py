@@ -1,6 +1,7 @@
 from morebs2.numerical_extras import * 
 from morebs2.graph_basics import flatten_setseq
 from morebs2.poly_factor import median_sort,select_median_in_sequence 
+from morebs2.globalls import std_invert_map,numberdict_op,equal_intdicts
 from .seq_struct import * 
 
 DEFAULT_INT_MAX_THRESHOLD = 10 ** 6 
@@ -32,36 +33,7 @@ def intersection_disjunction__seq_factors(ms):
             all_mult -= x 
     return q,all_mult
 
-# TODO: relocate 
-def std_invert_map(m):
-    assert type(m) in {dict,defaultdict}
-
-    q = {}
-    for k,v in m.items():
-        if v in q:
-            q[v] |= {k}
-        else:
-            q[v] = {k} 
-    return q
-
-def numberdict_op(d1,d2,f=sub):
-    K = set(d1.keys()) | set(d2.keys()) 
-    
-    d3 = defaultdict(int) 
-    for k in K:
-        x1 = d1[k] if k in d1 else 0 
-        x2 = d2[k] if k in d2 else 0 
-        d3[k] = f(x1,x2) 
-    return d3 
-
-
-
-def equal_intdicts(d1,d2): 
-    K = set(d1.keys()) | set(d2.keys()) 
-
-    for k in K: 
-        if d1[k] != d2[k]: return False 
-    return True 
+###
 
 """
 set operations of multiples for an integer sequence

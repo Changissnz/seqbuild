@@ -84,7 +84,7 @@ class POFV2ConditionAutoGen:
         c = pofv2.apply(pofv2.x1)
         for s in sibling_integers:
             n = modulo_in_range(self.prg(),DEFAULT_POWER_RANGE)
-            pofv1 = PolyOutputFitterVar1(n,s,c,self.prg,default_sizemod:bool=True)
+            pofv1 = PolyOutputFitterVar1(n,s,c,self.prg,default_sizemod=True)
             pofv1.solve() 
             q.append(pofv1) 
         return q 

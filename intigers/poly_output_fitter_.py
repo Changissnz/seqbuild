@@ -3,10 +3,7 @@ from copy import deepcopy
 from mini_dm.matfactor_eval import * 
 from morebs2 import aprng_gauge
 from morebs2.poly_struct import CEPoly 
-
-def modulo_in_range(i,r): 
-    assert r[0] < r[1] 
-    return i % (r[1] - r[0]) + r[0] 
+from morebs2.numerical_generator import modulo_in_range
 
 # function used to help ensure variable does not exceed size expectations
 def BASE_CHECK_FOR_EXP(b,exp): 
