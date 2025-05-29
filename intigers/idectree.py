@@ -63,7 +63,7 @@ class IDecNode:
         return self.entryf(v) 
 
     def classify(self,v): 
-        return self.travf(v) 
+        return self.travf.apply(v) 
 
 """
 represents a factor-based or polynomial based boolean classifier 
@@ -104,6 +104,25 @@ class IDecTrFunc:
             return self.cl[i].apply(x) == self.cl[i].c 
         return self.cl[i].apply(x) == self.cl[i].apply(self.cl[i].x1) 
 
+class IDecNodeTravFunc:
+
+    def __init__(self):
+        self.bclassif = [] 
+        self.bclassif_nextnode = [] 
+        return
+
+    def add_bclassif_nextnode_pair(self,bc,nn): 
+        assert type(bc) == IDecTrFunc
+        assert nn not in self.bclassif_nextnode
+        self.bclassif.append(bc)
+        self.bclassif_nextnode.append(nn)
+
+    def apply(self,x): 
+        for (i,c) in self.bclassif.items(): 
+            if c.bclassify(x): 
+                return self.bclassif_nextnode[i] 
+        return None 
+
 """
 converts an <IntSeq> instance to a tree (directed graph) T. 
 T satisfies a leaf requirement `l` XOR  a depth requirement `d`. 
@@ -126,6 +145,7 @@ class IntSeq2Tree:
             assert self.d <= len(self.intseq) - 1 
 
         self.factor_preproc()
+        self.node_ctr = 0 
 
     def factor_preproc(self):
         self.isfso = ISFactorSetOps(deepcopy(self.intseq.l),\
@@ -149,6 +169,22 @@ class IntSeq2Tree:
         return -1
 
     #---------------------- factor-splitter functions 
+
+    def factor_split_travf(self,S,partition):
+        fspart = self.factor_split__partitioned(S,partition)
+        idntf = IDecNodeTravFunc()
+
+        for fx in fspart: 
+            classif = self.partition_subset_to_factor_classifier(fx)
+            next_node = self.node_ctr 
+            self.node_ctr += 1
+            idntf.add_bclassif_nextnode_pair(classif,next_node)
+
+        return idntf 
+
+    def partition_subset_to_factor_classifier(self,ps): 
+        conditional_list = [ps_[0] for ps_ in ps] 
+        return IDecTrFunc(conditional_list,"factor")
 
     """
     splits a sequence S of elements according to the `partition` (list) given. 
