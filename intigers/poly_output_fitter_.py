@@ -34,6 +34,16 @@ DEFAULT_MAXBASE4POW = lambda p: min_base4pow_geq(NPINT32_MAX,p)
 DEFAULT_COEFF_RANGE = [-996,1001]
 DEFAULT_POWER_RANGE = [2,10]
 
+# TODO: test 
+def DEFAULT_MAXPOW4BASE(b): 
+    i = 2
+    while True: 
+        if b >= DEFAULT_MAXBASE4POW(i): 
+            i -= 1 
+            break
+        i += 1
+    return i 
+
 class PolyOutputFitterVar1:
 
     def __init__(self,n,x1,c,prg,default_sizemod:bool=True):
@@ -71,7 +81,10 @@ class PolyOutputFitterVar1:
             return True 
 
         q = ceil(self.rem / (self.x1 ** pwr))
-        coeff_range = [-q,q]
+        coeff_range = [-abs(q),abs(q)]
+        print("POW ",pwr)
+        print("X1 : ",self.x1, "  ",self.x1 ** pwr)
+        print("COEFF: ",coeff_range, " REM ",self.rem)
         md = modulo_in_range(self.prg(),coeff_range)
         self.coeff[self.index] = md
         self.rem = self.rem - (md * self.x1 ** pwr)
@@ -112,7 +125,7 @@ class PolyOutputFitterVar2:
     def __init__(self,n,x1,x2,coeff=1,prng=None,default_sizemod:bool=False,\
         order_pair:bool=True):
         for q in [n,x1,x2]: 
-            assert type(q) in {int,np.int64} 
+            assert type(q) in {int,np.int32,np.int64} 
         assert n > 1 
         assert x1 != x2 
 

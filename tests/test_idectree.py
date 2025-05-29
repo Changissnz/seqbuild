@@ -60,7 +60,8 @@ class IDecTreeMethods(unittest.TestCase):
 
         is2t.init_root() 
         tn = is2t.node_cache.pop(0) 
-        xr = is2t.factor_split__depthreq(tn)
+        #xr = is2t.factor_split__depthreq(tn)
+        xr = is2t.split__depthreq(tn,"factor")
 
         assert len(tn.acc_queue) == 13 - 4
         for x in tn.acc_queue: 
@@ -91,6 +92,34 @@ class IDecTreeMethods(unittest.TestCase):
         assert type(tn5.travf) == type(None)
         return 
 
+    def test__IntSeq2Tree__poly_split__depthreq__case1(self): 
+            
+        prng = prg__constant(0)
+        l = None 
+        d = 4 
+        L = [3,4,10,20,32,12,17,15,16,2,1,5,13]
+
+        is2t = IntSeq2Tree(IntSeq(L),l,d,prng)
+        is2t.init_root() 
+        tn = is2t.node_cache.pop(0) 
+        #q = is2t.factor_split__depthreq(tn)
+        q = is2t.split__depthreq(tn,"poly")
+        tn = is2t.node_cache[0] 
+
+        D = defaultdict(int)
+        for l in L: 
+            q = tn.travf.apply(l)
+            D[q] += 1 
+        assert D == {None:9,1:4}
+
+        c = 0 
+        while True: 
+            if len(tn.children) == 0: 
+                break     
+            tn = tn.children[0]
+            c += 1 
+        assert c == 4
+
     def test__IntSeq2Tree__poly_subset_classifier(self): 
         prng = prg__constant(0)
         l = None 
@@ -99,7 +128,7 @@ class IDecTreeMethods(unittest.TestCase):
 
         is2t = IntSeq2Tree(IntSeq(L),l,d,prng)
 
-        q = is2t.poly_subset_classifier(deepcopy(L),4)
+        q,_ = is2t.poly_subset_classifier(deepcopy(L),4)
 
         r = 0 
         for l in L: 

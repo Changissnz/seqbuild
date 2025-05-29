@@ -18,25 +18,6 @@ def lcm_times(x0,x1,m):
         return np.lcm(x0,x1) * m 
     return f 
 
-class PolyEqCondition:
-
-    def __init__(self,cep,target_value:np.int64): 
-        assert type(cep) == CEPoly 
-        self.cep = cep 
-        self.tv = target_value 
-
-    @staticmethod
-    def from_POFV2(pofv,x=None):
-        x = pofv.x1 if type(x) == type(None) else x 
-        assert type(x) in {int,np.int32,np.int64}
-
-        cep = pofv.to_CEPoly() 
-        tv = pofv.apply(x)
-        return PolyEqCondition(cep,tv) 
-
-    def output(self,x): 
-        return self.cep.apply(x) == self.tv 
-
 '''
 '''
 class POFV2ConditionAutoGen: 

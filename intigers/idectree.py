@@ -243,7 +243,7 @@ class IntSeq2Tree:
     def split_node(self,node): 
         return -1
 
-    #---------------------- factor-splitter functions 
+    #---------------------- splitter for depth 
 
     """
     satisfies the depth requirement `d`, if not None, by 
@@ -252,43 +252,57 @@ class IntSeq2Tree:
     a 1-to-1 mapping of the `d` elements to the `d` nodes 
     (every element satisfies exactly one node). 
     """
-    def factor_split__depthreq(self,tn):   
-        assert tn.rd == 0
+    def split__depthreq(self,tn,split_type): 
+        assert split_type in {"poly","factor"}
 
-        # allocate d elements from tn to its next 
-        SX = tn.acc_queue 
-        prt0 = [self.d,len(SX) - self.d] 
-        travf = self.factor_split_travf(SX,prt0,last_subset_isneg=True)
-        tn.set_travf(travf)
+        S = deepcopy(tn.acc_queue) 
 
-        # set the first child for the d elements 
+        # declare the first split
+        if split_type == "poly": 
+            classif,siblings = self.poly_subset_classifier(S,self.d)
+            idntf = IDecNodeTravFunc()
+            idntf.add_bclassif_nextnode_pair(classif,self.node_ctr,siblings)
+            self.node_ctr += 1 
+            tn.set_travf(idntf) 
+            tn.update_acc_queue(siblings)
+        else: 
+            prt0 = [self.d,len(S) - self.d] 
+            travf = self.factor_split_travf(S,prt0,last_subset_isneg=True)
+            tn.set_travf(travf)
+            tn.update_acc_queue(travf.cat_samples[0])
+
         cx = IDecNode(tn.travf.bclassif_nextnode[0],None,None,tn.rd+1) 
         cx.add_to_acc_queue(tn.travf.cat_samples[0])
-        tn.update_acc_queue(tn.travf.cat_samples[0])
         tn.add_children_nodes([cx]) 
 
-        # continually partition the remaining elements 
-        stat = len(cx.acc_queue) > 0
-
+        S = cx.acc_queue
+        stat = len(cx.acc_queue) > 1
         while stat: 
-            SX = cx.acc_queue
-            prt0 = [1,len(SX) - 1]  
-            travf = self.factor_split_travf(SX,prt0,last_subset_isneg=True)
+            S = cx.acc_queue
+            if split_type == "poly":
+                travf = self.poly_one_classify(S) 
+                aqueue = travf.cat_samples[0]
+            else: 
+                prt0 = [1,len(S) - 1]  
+                travf = self.factor_split_travf(S,prt0,last_subset_isneg=True)
 
-            # all elements except for the fitted one can pass 
-            travf.bclassif[0].switch_conditional(0) 
+                # all elements except for the fitted one can pass 
+                travf.bclassif[0].switch_conditional(0) 
+                aqueue = list(set(S) - travf.cat_samples[0])
 
-            cx2 = IDecNode(travf.bclassif_nextnode[0],None,None,tn.rd+1)
-            cx2.add_to_acc_queue(list(set(SX) - travf.cat_samples[0])) 
+            cx2 = IDecNode(travf.bclassif_nextnode[0],None,None,cx.rd+1)
+            cx2.add_to_acc_queue(aqueue)
             cx.add_children_nodes([cx2]) 
             cx.set_travf(travf) 
+
             cx = cx2
             stat = len(cx2.acc_queue) >= 2 
 
         if len(tn.acc_queue) > 0: 
             self.node_cache.append(tn) 
-        return
 
+    #---------------------- factor-splitter functions 
+    
     def factor_split_travf(self,S,partition,last_subset_isneg:bool=False,\
         set_default_class:bool=False): 
         fspart = self.factor_split__partitioned(S,partition,\
@@ -430,8 +444,8 @@ class IntSeq2Tree:
         rx = self.sort_factors_by_keys(S,orderng,m) 
         return rx[0][0] 
 
-    #-------------------------------------------------------------------
-
+    #---------------------- poly-splitter functions 
+    
     # TODO: test 
     def poly_subset_classifier(self,S,class_size:int):
         assert len(S) >= class_size
@@ -462,9 +476,33 @@ class IntSeq2Tree:
             j = self.prg() % len(S) 
             sx = S.pop(j) 
             S2 |= {sx}
-             
+
         S2 -= {x1,x2}
         pofv1_siblings = pofgen.POFV2_to_POFV1_siblings(pofv2,S2) 
 
         conditional_list = [pofv2] + pofv1_siblings
-        return IDecTrFunc(conditional_list,"poly")
+        return IDecTrFunc(conditional_list,"poly"), S2 | {x1,x2} 
+
+    def poly_one_classify(self,S):
+
+        # choose a value from S 
+        j = self.prg() % len(S)
+        x = S.pop(j)
+
+        # choose a value in the range of [1,10**6]
+        q = modulo_in_range(self.prg(),DEFAULT_COEFF_RANGE) 
+        q = 1 if q == 0 else q 
+
+        # choose an exponent
+        n = modulo_in_range(self.prg(),DEFAULT_POWER_RANGE)
+
+        pofv1 = PolyOutputFitterVar1(n,x,q,self.prg,default_sizemod=False)
+        pofv1.solve()
+
+        conditional_list = [pofv1] 
+        idtf = IDecTrFunc(conditional_list,"poly")
+        idtf.one_switch(1)
+
+        idntf = IDecNodeTravFunc()
+        idntf.add_bclassif_nextnode_pair(idtf,self.node_ctr,set(S)) 
+        return idntf 
