@@ -38,13 +38,25 @@ class IDecNode:
     def clear_conkey(self): 
         self.con_key.clear()  
 
-    #----------------------- children-access functions 
+    def add_to_acc_queue(self,q): 
+        self.acc_queue.extend(q)  
+    
+    def update_acc_queue(self,s): 
+        self.acc_queue = list(set(self.acc_queue) - set(s))
 
+    #----------------------- children-access functions 
+    """
     def add_children(self,idn_seq,entryf_seq): 
         assert len(idn_seq) == len(entryf_seq)
         for (i,x) in enumerate(idn_seq): 
             q = IDecNode(x,entryf_seq[i],None,self.rd+1)
             self.children.append(q)
+    """
+
+    def add_children_nodes(self,tnx): 
+        for tn in tnx: 
+            assert type(tn) == IDecNode
+            self.children.append(tn)
 
     def index_of(self,idn): 
         q = self.children
@@ -119,6 +131,9 @@ class IDecTrFunc:
             return not stat 
         return stat 
 
+    def switch_conditional(self,ci): 
+        self.si[ci] = (self.si[ci] + 1) % 2 
+
 """
 every <IDecNode>'s `travf` variable is an instance of this, used 
 for directing input values towards next nodes. 
@@ -127,20 +142,40 @@ class IDecNodeTravFunc:
 
     def __init__(self):
         self.bclassif = [] 
-        self.bclassif_nextnode = [] 
+        self.bclassif_nextnode = []
+        self.cat_samples = []  
+        self.default_class = None
+        self.default_class_samples = None  
         return
 
-    def add_bclassif_nextnode_pair(self,bc,nn): 
+    def __str__(self): 
+        s = "pos-labels: " + str(len(self.bclassif)) + "\n"
+        for (i,cs) in enumerate(self.cat_samples): 
+            if type(cs) == type(None): 
+                l = 0 
+            else: 
+                l = len(cs) 
+            s += "label: {} \tsize: {}".format(self.bclassif_nextnode[i],l) + "\n"
+        return s 
+
+    def set_default_class(self,dc,samples):
+        assert type(dc) in {int,np.int32,np.int64}
+        self.default_class = dc 
+        self.default_class_samples = samples 
+
+    def add_bclassif_nextnode_pair(self,bc,nn,cat_sample=None): 
         assert type(bc) == IDecTrFunc
         assert nn not in self.bclassif_nextnode
+        assert type(cat_sample) in {list,set,type(None)}
         self.bclassif.append(bc)
         self.bclassif_nextnode.append(nn)
+        self.cat_samples.append(cat_sample)
 
     def apply(self,x): 
-        for (i,c) in self.bclassif.items(): 
+        for (i,c) in enumerate(self.bclassif): 
             if c.bclassify(x): 
                 return self.bclassif_nextnode[i] 
-        return None 
+        return self.default_class
 
 """
 converts an <IntSeq> instance to a tree (directed graph) T. 
@@ -165,6 +200,8 @@ class IntSeq2Tree:
 
         self.factor_preproc()
         self.node_ctr = 0 
+        self.node_cache = [] 
+        self.root = None 
 
     def factor_preproc(self):
         self.isfso = ISFactorSetOps(deepcopy(self.intseq.l),\
@@ -176,7 +213,12 @@ class IntSeq2Tree:
     #----------------------- leaf requirement 
 
     def init_root(self): 
-        return -1 
+        tn = IDecNode(self.node_ctr,None,None,0) 
+        tn.add_to_acc_queue(deepcopy(self.intseq.l))
+        self.root = tn 
+        self.node_cache.append(tn) 
+        self.node_ctr += 1 
+        return
 
     def init_lf(self): 
         return -1 
@@ -189,15 +231,66 @@ class IntSeq2Tree:
 
     #---------------------- factor-splitter functions 
 
-    def factor_split_travf(self,S,partition):
-        fspart = self.factor_split__partitioned(S,partition)
+    """
+    satisfies the depth requirement `d`, if not None, by 
+    declaring nodes that form a path of length `d` starting 
+    from `tn` (typically the root node). The path constitutes 
+    a 1-to-1 mapping of the `d` elements to the `d` nodes 
+    (every element satisfies exactly one node). 
+    """
+    def factor_split__depthreq(self,tn):   
+        assert tn.rd == 0
+
+        # allocate d elements from tn to its next 
+        SX = tn.acc_queue 
+        prt0 = [self.d,len(SX) - self.d] 
+        travf = self.factor_split_travf(SX,prt0,last_subset_isneg=True)
+        tn.set_travf(travf)
+
+        # set the first child for the d elements 
+        cx = IDecNode(tn.travf.bclassif_nextnode[0],None,None,tn.rd+1) 
+        cx.add_to_acc_queue(tn.travf.cat_samples[0])
+        tn.update_acc_queue(tn.travf.cat_samples[0])
+        tn.add_children_nodes([cx]) 
+
+        # continually partition the remaining elements 
+        stat = len(cx.acc_queue) > 0
+
+        while stat: 
+            SX = cx.acc_queue
+            prt0 = [1,len(SX) - 1]  
+            travf = self.factor_split_travf(SX,prt0,last_subset_isneg=True)
+
+            # all elements except for the fitted one can pass 
+            travf.bclassif[0].switch_conditional(0) 
+
+            cx2 = IDecNode(travf.bclassif_nextnode[0],None,None,tn.rd+1)
+            cx2.add_to_acc_queue(list(set(SX) - travf.cat_samples[0])) 
+            cx.add_children_nodes([cx2]) 
+            cx.set_travf(travf) 
+            cx = cx2
+            stat = len(cx2.acc_queue) >= 2 
+        return
+
+    def factor_split_travf(self,S,partition,last_subset_isneg:bool=False,\
+        set_default_class:bool=False): 
+        fspart = self.factor_split__partitioned(S,partition,\
+            last_subset_isneg)
         idntf = IDecNodeTravFunc()
 
-        for fx in fspart: 
+        S_ = set(S) 
+        for (k,fx) in fspart.items(): 
             classif = self.partition_subset_to_factor_classifier(fx)
+            samples = set() 
+            for fx_ in fx: samples |= fx_[1] 
             next_node = self.node_ctr 
             self.node_ctr += 1
-            idntf.add_bclassif_nextnode_pair(classif,next_node)
+            idntf.add_bclassif_nextnode_pair(classif,next_node,samples)
+            S_ -= samples 
+
+        if set_default_class: 
+            idntf.set_default_class(self.node_ctr,list(S_))
+            self.node_ctr += 1 
 
         return idntf 
 
@@ -227,7 +320,7 @@ class IntSeq2Tree:
         px = partition if not last_subset_isneg else partition[:-1] 
         FS = dict() 
         for (i,p) in enumerate(px): 
-            fx = self.factors_for_subset(S,p) 
+            fx,S = self.factors_for_subset(S,p) 
             FS[i] = fx 
         return FS 
 
@@ -245,13 +338,14 @@ class IntSeq2Tree:
                 break 
             factor = self.fs.pop(q) 
             keys = self.isfso.factor_to_keys(factor[0]) 
+
             keys = keys.intersection(S) 
-            S -= keys 
+            S = S - keys 
             self.update_sorted_factors(keys)
             #self.isfso.remove_seq_elements(keys) 
             f.append((factor[0],keys))  
-            sz -= len(keys)  
-        return f 
+            sz -= len(keys) 
+        return f,S
 
     # TODO: ineff 
     def factor_for_size(self,sz,fs):
