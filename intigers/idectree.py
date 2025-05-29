@@ -122,11 +122,20 @@ class IDecTrFunc:
 
     def poly_classify(self,x,i): 
         assert self.ct == "poly" 
+        stat = False 
         if type(self.cl[i]) == PolyOutputFitterVar1:
-            stat = self.cl[i].apply(x) == self.cl[i].c 
+            try: 
+                x1,x2 = self.cl[i].apply(x), self.cl[i].c  
+                stat = x1 == x2 
+            except: 
+                stat = False 
         else: 
-            stat = self.cl[i].apply(x) == self.cl[i].apply(self.cl[i].x1) 
-        
+            try: 
+                x1,x2 = self.cl[i].apply(x), self.cl[i].apply(self.cl[i].x1)  
+                stat = x1 == x2 
+            except:
+                stat = False 
+
         if self.si[i]: 
             return not stat 
         return stat 
@@ -427,7 +436,7 @@ class IntSeq2Tree:
     def poly_subset_classifier(self,S,class_size:int):
         assert len(S) >= class_size
         assert class_size >= 2
-        assert np.unique(S) >= 2 
+        assert len(np.unique(S)) >= 2 
 
         # choose two elements from S to pair up
         j = self.prg() % len(S) 
@@ -449,12 +458,13 @@ class IntSeq2Tree:
             power_range = DEFAULT_POWER_RANGE,deepcopy_prng=False)
         pofv2 = next(pofv2) 
 
-        siblings = [] 
         while len(S2) < class_size:
             j = self.prg() % len(S) 
             sx = S.pop(j) 
-            siblings.append(sx) 
+            S2 |= {sx}
+             
+        S2 -= {x1,x2}
+        pofv1_siblings = pofgen.POFV2_to_POFV1_siblings(pofv2,S2) 
 
-        pofv1_siblings = pofgen.POFV2_to_POFV1_siblings(pofv2,siblings) 
         conditional_list = [pofv2] + pofv1_siblings
         return IDecTrFunc(conditional_list,"poly")

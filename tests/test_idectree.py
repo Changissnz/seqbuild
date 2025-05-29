@@ -91,5 +91,20 @@ class IDecTreeMethods(unittest.TestCase):
         assert type(tn5.travf) == type(None)
         return 
 
+    def test__IntSeq2Tree__poly_subset_classifier(self): 
+        prng = prg__constant(0)
+        l = None 
+        d = 4 
+        L = [480,320,6400,1280,804,7,19,11,50000,735,230,170,556]
+
+        is2t = IntSeq2Tree(IntSeq(L),l,d,prng)
+
+        q = is2t.poly_subset_classifier(deepcopy(L),4)
+
+        r = 0 
+        for l in L: 
+            if q.bclassify(l): r += 1 
+        assert r == 4 
+
 if __name__ == '__main__':
     unittest.main()

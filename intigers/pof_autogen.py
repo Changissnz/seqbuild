@@ -58,7 +58,7 @@ class POFV2ConditionAutoGen:
         q = modulo_in_range(self.prg(),sibling_range)
         for i in range(q):
             #
-            pofv = self.one_new_POFV2(i1,i2,\
+            pofv = self.one_new_POFV2(deepcopy(i1),deepcopy(i2),\
                 coeff_range,power_range,deepcopy_prng)
             yield pofv
 
@@ -66,12 +66,11 @@ class POFV2ConditionAutoGen:
         coeff_range=DEFAULT_COEFF_RANGE,\
         power_range=DEFAULT_POWER_RANGE,\
         deepcopy_prng:bool=True,order_pair:bool=True): 
-
         coeff = modulo_in_range(self.prg(),coeff_range)
         pwr = modulo_in_range(self.prg(),power_range)
         prg = self.prg if not deepcopy_prng else deepcopy(self.prg)
         pofv = PolyOutputFitterVar2(pwr,n0,n1,coeff,prng=self.prg,\
-            default_sizemod=True,order_pair=order_pair)
+            default_sizemod=False,order_pair=order_pair)
         pofv.solve() 
         return pofv
 
@@ -84,7 +83,7 @@ class POFV2ConditionAutoGen:
         c = pofv2.apply(pofv2.x1)
         for s in sibling_integers:
             n = modulo_in_range(self.prg(),DEFAULT_POWER_RANGE)
-            pofv1 = PolyOutputFitterVar1(n,s,c,self.prg,default_sizemod=True)
+            pofv1 = PolyOutputFitterVar1(n,s,c,self.prg,default_sizemod=False)
             pofv1.solve() 
             q.append(pofv1) 
         return q 
