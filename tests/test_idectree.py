@@ -31,5 +31,23 @@ class IDecTreeMethods(unittest.TestCase):
         assert q2 == {0: [(5, {480,6400,320,1280})], \
             1: [(134, {804}), (19, {19})], 2: [(1, {11,7})]}
 
+    def test__IntSeq2Tree__factor_split__partitioned__case2(self):
+
+        prng = prg__constant(0)
+
+        l = None 
+        d = 4 
+        L = [480,320,6400,1280,804,7,19,11,50000,735,230,170,556]
+
+        is2t = IntSeq2Tree(IntSeq(L),l,d,prng)
+        SX = deepcopy(L) 
+        partition = [4,2,2,len(L) - 8] 
+
+        q2 = is2t.factor_split__partitioned(L,partition,last_subset_isneg=False) 
+
+        assert q2 == {0: [(32, {480,6400,320,1280})], 1: [(7, {7,735})], \
+            2: [(11, {11}), (268, {804})], 3: [(1, {230,170,556,50000,19})]}
+
+
 if __name__ == '__main__':
     unittest.main()
