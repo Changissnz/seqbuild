@@ -134,9 +134,14 @@ class IDecTrFunc:
     def switch_conditional(self,ci): 
         self.si[ci] = (self.si[ci] + 1) % 2 
 
+    def one_switch(self,x): 
+        assert x in {0,1} 
+        self.si = [x] * len(self.si)
+
 """
 every <IDecNode>'s `travf` variable is an instance of this, used 
-for directing input values towards next nodes. 
+for directing input values towards next nodes. A multi-classifier 
+built from an ordered sequence of <IDecTrFunc> instances. 
 """
 class IDecNodeTravFunc:
 
@@ -270,6 +275,9 @@ class IntSeq2Tree:
             cx.set_travf(travf) 
             cx = cx2
             stat = len(cx2.acc_queue) >= 2 
+
+        if len(tn.acc_queue) > 0: 
+            self.node_cache.append(tn) 
         return
 
     def factor_split_travf(self,S,partition,last_subset_isneg:bool=False,\
@@ -415,5 +423,38 @@ class IntSeq2Tree:
 
     #-------------------------------------------------------------------
 
-    def poly_split(self,S,poly_size:int): 
-        return -1 
+    # TODO: test 
+    def poly_subset_classifier(self,S,class_size:int):
+        assert len(S) >= class_size
+        assert class_size >= 2
+        assert np.unique(S) >= 2 
+
+        # choose two elements from S to pair up
+        j = self.prg() % len(S) 
+        x1 = S.pop(j)
+        x2 = None 
+        while True: 
+            j = self.prg() % len(S) 
+            if S[j] != x1: 
+                x2 = S.pop(j)
+                break 
+
+        S2 = set([x1,x2]) 
+
+        # solve the polynomial 
+        pofgen = POFV2ConditionAutoGen(self.prg) 
+
+        pofv2 = pofgen.integerpair_op(x1,x2,\
+            sibling_range=[1,2],coeff_range=DEFAULT_COEFF_RANGE,\
+            power_range = DEFAULT_POWER_RANGE,deepcopy_prng:bool=False)
+        pofv2 = next(pofv2) 
+
+        siblings = [] 
+        while len(S2) < class_size:
+            j = self.prg() % len(S) 
+            sx = S.pop(j) 
+            siblings.append(sx) 
+
+        pofv1_siblings = pofgen.POFV2_to_POFV1_siblings(pofv2,siblings) 
+        conditional_list = [pofv2] + pofv1_siblings
+        return IDecTrFunc(conditional_list,"poly")

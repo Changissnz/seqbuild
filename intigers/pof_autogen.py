@@ -45,6 +45,10 @@ class POFV2ConditionAutoGen:
         self.prg = prg 
         return 
 
+    """
+    for 2 integers i1,i2, generates q <PolyOutputFitterVar2> instances 
+    according to the method parameters. 
+    """
     def integerpair_op(self,i1,i2,\
         sibling_range=DEFAULT_NUM_POLYSIBLING_RANGE,coeff_range=DEFAULT_COEFF_RANGE,\
         power_range = DEFAULT_POWER_RANGE,deepcopy_prng:bool=False):
@@ -70,6 +74,20 @@ class POFV2ConditionAutoGen:
             default_sizemod=True,order_pair=order_pair)
         pofv.solve() 
         return pofv
+
+    def POFV2_to_POFV1_siblings(self,pofv2,sibling_integers,power_range=\
+        DEFAULT_POWER_RANGE): 
+
+        for s in sibling_integers: assert type(s) in {int,np.int32,np.int64} 
+
+        q = [] 
+        c = pofv2.apply(pofv2.x1)
+        for s in sibling_integers:
+            n = modulo_in_range(self.prg(),DEFAULT_POWER_RANGE)
+            pofv1 = PolyOutputFitterVar1(n,s,c,self.prg,default_sizemod:bool=True)
+            pofv1.solve() 
+            q.append(pofv1) 
+        return q 
 
 class UDLSSAutoGen: 
 
