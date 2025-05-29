@@ -66,11 +66,11 @@ class IDecNode:
         return self.travf.apply(v) 
 
 """
-represents a factor-based or polynomial based boolean classifier 
+represents a factor-based or polynomial-based boolean classifier 
 """
 class IDecTrFunc: 
 
-    def __init__(self,conditional_list,conditional_type):  
+    def __init__(self,conditional_list,conditional_type,switched_indices=None):  
         assert conditional_type in {"poly","factor"}
         if conditional_type == "poly": 
             for x in conditional_list: 
@@ -79,8 +79,15 @@ class IDecTrFunc:
             for x in conditional_list: 
                 assert type(x) in {int,np.int32,np.int64} 
 
+
+        if type(switched_indices) == type(None): 
+            switched_indices = [0] * len(conditional_list) 
+        assert set(switched_indices).issubset({0,1})
+        assert len(switched_indices) == len(conditional_list)
+
         self.cl = conditional_list
         self.ct = conditional_type
+        self.si = switched_indices
         return
 
     """
@@ -96,14 +103,26 @@ class IDecTrFunc:
 
     def factor_classify(self,x,i): 
         assert self.ct == "factor" 
-        return x / self.cl[i] == x // self.cl[i]
+        stat = x / self.cl[i] == x // self.cl[i]
+        if self.si[i]: 
+            return not stat 
+        return stat 
 
     def poly_classify(self,x,i): 
         assert self.ct == "poly" 
         if type(self.cl[i]) == PolyOutputFitterVar1:
-            return self.cl[i].apply(x) == self.cl[i].c 
-        return self.cl[i].apply(x) == self.cl[i].apply(self.cl[i].x1) 
+            stat = self.cl[i].apply(x) == self.cl[i].c 
+        else: 
+            stat = self.cl[i].apply(x) == self.cl[i].apply(self.cl[i].x1) 
+        
+        if self.si[i]: 
+            return not stat 
+        return stat 
 
+"""
+every <IDecNode>'s `travf` variable is an instance of this, used 
+for directing input values towards next nodes. 
+"""
 class IDecNodeTravFunc:
 
     def __init__(self):
@@ -229,7 +248,7 @@ class IntSeq2Tree:
             keys = keys.intersection(S) 
             S -= keys 
             self.update_sorted_factors(keys)
-            self.isfso.remove_seq_elements(keys) 
+            #self.isfso.remove_seq_elements(keys) 
             f.append((factor[0],keys))  
             sz -= len(keys)  
         return f 
