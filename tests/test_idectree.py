@@ -120,7 +120,7 @@ class IDecTreeMethods(unittest.TestCase):
             c += 1 
         assert c == 4
 
-    def test__IntSeq2Tree__poly_subset_classifier(self): 
+    def test__IntSeq2Tree__poly_subset_bclassifier(self): 
         prng = prg__constant(0)
         l = None 
         d = 4 
@@ -128,7 +128,7 @@ class IDecTreeMethods(unittest.TestCase):
 
         is2t = IntSeq2Tree(IntSeq(L),l,d,prng)
 
-        q,_ = is2t.poly_subset_classifier(deepcopy(L),4)
+        q,_ = is2t.poly_subset_bclassifier(deepcopy(L),4)
 
         r = 0 
         for l in L: 

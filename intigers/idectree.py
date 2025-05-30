@@ -191,6 +191,7 @@ class IDecNodeTravFunc:
                 return self.bclassif_nextnode[i] 
         return self.default_class
 
+# NOTE: some code in this class may need to be refactored. 
 """
 converts an <IntSeq> instance to a tree (directed graph) T. 
 T satisfies a leaf requirement `l` XOR  a depth requirement `d`. 
@@ -226,6 +227,19 @@ class IntSeq2Tree:
             print("finished factor count.")
         return 
 
+    def convert(self): 
+        self.init_root()
+        if self.leaf_first: 
+            self.init_lf()
+        else: 
+            self.init_df()
+
+        while len(self.node_cache) > 0: 
+            tn = self.node_cache.pop(0)
+            self.split_node(tn,partition=None)
+        
+
+
     #----------------------- root initialization to satisfy depth or
     #----------------------- leaf requirement 
 
@@ -240,13 +254,96 @@ class IntSeq2Tree:
         return
 
     def init_lf(self): 
-        return -1 
+        tn = self.node_cache.pop(0) 
+
+        num_sets = self.l 
+        partition = self.partition_for_node(tn,num_sets=num_sets)
+        self.split_node(tn,partition=partition) 
+        return
 
     def init_df(self):
-        return -1 
+        tn = self.node_cache.pop(0) 
+        f = "factor" if self.prg() % 2 else \
+            "poly"
 
-    def split_node(self,node): 
-        return -1
+        self.split__depthreq(tn,f)
+        return
+
+    #---------------------- main splitting function
+
+    # TODO: test. 
+    def split_node(self,node,partition=None):
+
+        if len(node.acc_queue) < 2:
+            return 
+
+        # get the split type 
+        is_factor = False 
+        if self.prg() % 2: 
+            is_factor = True 
+        
+        # get the partition 
+        if type(partition) == type(None): 
+            partition = self.partition_for_node(node) 
+        else: 
+            assert sum(partition) == len(node.acc_queue)
+
+        if is_factor: 
+            travf = self.factor_split_travf(deepcopy(node.acc_queue),\
+                partition,last_subset_isneg=False,set_default_class=False)
+        else: 
+            travf = self.poly_split__travf(deepcopy(S),partition,\
+                last_subset_isneg=False,set_default_class=False)
+
+        self.set_travf_for_node(node,travf) 
+
+    """
+    sets the output function `travf` and the corresponding children 
+    nodes for `node`. 
+    """
+    def set_travf_for_node(self,node,travf): 
+        node.set_travf(travf) 
+
+        # declare the children 
+        tns = [] 
+        for cls in travf.bclassif_nextnode: 
+            tn = IDecNode(cls,None,None,node.rd+1) 
+            tns.append(tn)
+        
+        # check for default class
+        if type(travf.default_class) != type(None): 
+            tn = IDecNode(travf.default_class,None,None,node.rd+1) 
+            tns.append(tn) 
+        node.add_children_nodes(tns) 
+
+        # classify all samples
+        D = defaultdict(list)
+        while len(node.acc_queue) > 0: 
+            x = node.acc_queue.pop(0) 
+            ci = travf.apply(x)
+            if type(ci) == type(None): 
+                continue 
+            D[ci].append(x) 
+
+        # add samples to children pertaining to 
+        # their category 
+        for k,v in D.items(): 
+            c = node.fetch_conn(k) 
+            c.add_to_acc_queue(v) 
+            if len(c.acc_queue) > 1: 
+                self.node_cache.append(c)
+
+    def partition_for_node(self,node,num_sets=None): 
+        # choose the number of sets + variance for a partition
+        if type(num_sets) != type(None): 
+            assert num_sets <= len(node.acc_queue)
+        else: 
+            num_sets = modulo_in_range(self.prg(),[1,len(node.acc_queue) // 2])
+
+        variance = modulo_in_range(self.prg(),[0,1001]) / 1000.0 
+        partition = prg_partition_for_sz(len(node.acc_queue),num_sets,\
+            self.prg,variance)
+        return partition
 
     #---------------------- splitter for depth 
 
@@ -267,7 +364,7 @@ class IntSeq2Tree:
 
         # declare the first split
         if split_type == "poly": 
-            classif,siblings = self.poly_subset_classifier(S,self.d)
+            classif,siblings = self.poly_subset_bclassifier(S,self.d)
             idntf = IDecNodeTravFunc()
             idntf.add_bclassif_nextnode_pair(classif,self.node_ctr,siblings)
             self.node_ctr += 1 
@@ -456,9 +553,28 @@ class IntSeq2Tree:
         return rx[0][0] 
 
     #---------------------- poly-splitter functions 
+
+    def poly_split__travf(self,S,partition,last_subset_isneg:bool=False,\
+        set_default_class:bool=False):
+
+        l = len(partition) if not last_subset_isneg \
+            else len(partition) - 1
+
+        travf = IDecNodeTravFunc() 
+        for i in range(l): 
+            p = partition[i] 
+            bfunc = self.poly_subset_bclassifier(S,p)
+            travf.add_bclassif_nextnode_pair(bfunc,self.node_ctr)
+            self.node_ctr += 1
+
+        if set_default_class: 
+            travf.set_default_class(self.node_ctr,None) 
+            self.node_ctr += 1 
+
+        return travf 
     
     # TODO: test 
-    def poly_subset_classifier(self,S,class_size:int):
+    def poly_subset_bclassifier(self,S,class_size:int):
         assert len(S) >= class_size
         assert class_size >= 2
         assert len(np.unique(S)) >= 2 
@@ -493,10 +609,13 @@ class IntSeq2Tree:
 
         S2 -= {x1,x2}
 
+        # make siblings for the polynomial 
         pofv1_siblings,solvestat = pofgen.POFV2_to_POFV1_siblings(pofv2,S2) 
+
         # ensure all siblings solved constant c 
         assert set(solvestat) == {True} 
 
+        # make the `travf` function 
         conditional_list = [pofv2] + pofv1_siblings
         return IDecTrFunc(conditional_list,"poly"), S2 | {x1,x2} 
 

@@ -24,8 +24,10 @@ def safe_power_range_for_base(b,power_range=DEFAULT_POWER_RANGE):
 
     mp = DEFAULT_MAXPOW4BASE(b,power_range[1])
     pwrange = [power_range[0],None]
-    if mp < 2: 
+    if mp < power_range[0]: 
         print("[!!] large value. be warned.")
+        return None 
+
     pwrange[1] = min(mp,DEFAULT_POWER_RANGE[1])
     return [pwrange[0],max(pwrange[1],pwrange[0]+1)]
 
