@@ -18,6 +18,17 @@ def lcm_times(x0,x1,m):
         return np.lcm(x0,x1) * m 
     return f 
 
+def safe_power_range_for_base(b,power_range=DEFAULT_POWER_RANGE):
+    assert power_range[0] > 0 
+    assert power_range[1] > power_range[0] 
+
+    mp = DEFAULT_MAXPOW4BASE(b,power_range[1])
+    pwrange = [power_range[0],None]
+    if mp < 2: 
+        print("[!!] large value. be warned.")
+    pwrange[1] = min(mp,DEFAULT_POWER_RANGE[1])
+    return [pwrange[0],max(pwrange[1],pwrange[0]+1)]
+
 '''
 '''
 class POFV2ConditionAutoGen: 
@@ -48,36 +59,36 @@ class POFV2ConditionAutoGen:
         power_range=DEFAULT_POWER_RANGE,\
         deepcopy_prng:bool=True,order_pair:bool=True): 
         
+        nx = max([n0,n1])
+        pwrange = safe_power_range_for_base(nx,power_range)
+
         coeff = modulo_in_range(self.prg(),coeff_range)
-        pwr = modulo_in_range(self.prg(),power_range)
+        pwr = modulo_in_range(self.prg(),pwrange)
         prg = self.prg if not deepcopy_prng else deepcopy(self.prg)
         pofv = PolyOutputFitterVar2(pwr,n0,n1,coeff,prng=self.prg,\
             default_sizemod=False,order_pair=order_pair)
         pofv.solve() 
         return pofv
 
-    # NOTE: caution required for large integers. The exponential
+    # NOTE: caution required for large integers. Their exponential
     #       values are not suited for program. 
     def POFV2_to_POFV1_siblings(self,pofv2,sibling_integers): 
 
         for s in sibling_integers: assert type(s) in {int,np.int32,np.int64} 
 
         q = [] 
+        solvestat = [] 
         c = pofv2.apply(pofv2.x1)
         for s in sibling_integers:
             # search for the largest power that base s can use 
-            mp = DEFAULT_MAXPOW4BASE(s)
-            pwrange = [2,None]
-            if mp < 2: 
-                print("[!!] large value. be warned.")
-            pwrange[1] = min(mp,DEFAULT_POWER_RANGE[1])
-            if pwrange[0] == pwrange[1]: pwrange[1] += 1 
-            n = modulo_in_range(self.prg(),pwrange)
+            pwrange = safe_power_range_for_base(s)
 
+            n = modulo_in_range(self.prg(),pwrange)
             pofv1 = PolyOutputFitterVar1(n,s,c,self.prg,default_sizemod=False)
             pofv1.solve() 
-            q.append(pofv1) 
-        return q 
+            q.append(pofv1)
+            solvestat.append(pofv1.is_solved()) 
+        return q,solvestat 
 
 class UDLSSAutoGen: 
 

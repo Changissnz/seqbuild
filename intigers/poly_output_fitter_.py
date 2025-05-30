@@ -35,13 +35,18 @@ DEFAULT_COEFF_RANGE = [-996,1001]
 DEFAULT_POWER_RANGE = [2,10]
 
 # TODO: test 
-def DEFAULT_MAXPOW4BASE(b): 
+def DEFAULT_MAXPOW4BASE(b,max_pow=DEFAULT_POWER_RANGE[1]): 
+    assert max_pow > 0 
+    if b == 1: return max_pow
+
     i = 2
     while True: 
         if b >= DEFAULT_MAXBASE4POW(i): 
             i -= 1 
             break
         i += 1
+        if i > max_pow: 
+            return max_pow 
     return i 
 
 class PolyOutputFitterVar1:
@@ -69,10 +74,15 @@ class PolyOutputFitterVar1:
         while self.one_coeff(): 
             continue 
 
+    def is_solved(self): 
+        try: 
+            return self.apply(self.x1) == self.c
+        except: return False 
+
+
     def one_coeff(self): 
         if self.n + 1 <= self.index: return False 
         pwr = self.n - self.index
-
         if self.rem == 0: return False 
 
         if pwr == 0: 
@@ -80,8 +90,8 @@ class PolyOutputFitterVar1:
             self.rem -= self.rem 
             return True 
 
-        q = ceil(self.rem / (self.x1 ** pwr))
-        coeff_range = [-abs(q),abs(q)]
+        q = ceil(abs(self.rem / (self.x1 ** pwr)))
+        coeff_range = [-q,q]
         md = modulo_in_range(self.prg(),coeff_range)
         self.coeff[self.index] = md
         self.rem = self.rem - (md * self.x1 ** pwr)

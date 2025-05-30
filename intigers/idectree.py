@@ -197,12 +197,13 @@ T satisfies a leaf requirement `l` XOR  a depth requirement `d`.
 """
 class IntSeq2Tree: 
 
-    def __init__(self,intseq,l:int,d:int,prg): 
+    def __init__(self,intseq,l:int,d:int,prg,verbose:bool=False): 
         assert type(intseq) == IntSeq
         assert type(l) == type(None) or type(d) == type(None)
         self.intseq = intseq 
         self.l = l 
         self.d = d
+        self.verbose=verbose
         self.prg = prg 
         self.leaf_first = type(l) != type(None) 
         if self.leaf_first: 
@@ -221,6 +222,8 @@ class IntSeq2Tree:
         self.isfso = ISFactorSetOps(deepcopy(self.intseq.l),\
             int_limit=DEFAULT_INT_MAX_THRESHOLD)
         self.isfso.factor_count_()
+        if self.verbose:
+            print("finished factor count.")
         return 
 
     #----------------------- root initialization to satisfy depth or
@@ -232,6 +235,8 @@ class IntSeq2Tree:
         self.root = tn 
         self.node_cache.append(tn) 
         self.node_ctr += 1 
+        if self.verbose:
+            print("- init root.")
         return
 
     def init_lf(self): 
@@ -257,6 +262,9 @@ class IntSeq2Tree:
 
         S = deepcopy(tn.acc_queue) 
 
+        if self.verbose:
+            print("start split for depth-req")
+
         # declare the first split
         if split_type == "poly": 
             classif,siblings = self.poly_subset_classifier(S,self.d)
@@ -275,10 +283,13 @@ class IntSeq2Tree:
         cx.add_to_acc_queue(tn.travf.cat_samples[0])
         tn.add_children_nodes([cx]) 
 
+        if self.verbose: print("\t- first split done.")
+    
         S = cx.acc_queue
         stat = len(cx.acc_queue) > 1
-        while stat: 
+        while stat:             
             S = cx.acc_queue
+            if self.verbose: print("\t* remaining: ",len(S))
             if split_type == "poly":
                 travf = self.poly_one_classify(S) 
                 aqueue = travf.cat_samples[0]
@@ -452,6 +463,9 @@ class IntSeq2Tree:
         assert class_size >= 2
         assert len(np.unique(S)) >= 2 
 
+        if self.verbose: 
+            print("\t\tpoly classifiers for {}".format(S))
+
         # choose two elements from S to pair up
         j = self.prg() % len(S) 
         x1 = S.pop(j)
@@ -478,7 +492,10 @@ class IntSeq2Tree:
             S2 |= {sx}
 
         S2 -= {x1,x2}
-        pofv1_siblings = pofgen.POFV2_to_POFV1_siblings(pofv2,S2) 
+
+        pofv1_siblings,solvestat = pofgen.POFV2_to_POFV1_siblings(pofv2,S2) 
+        # ensure all siblings solved constant c 
+        assert set(solvestat) == {True} 
 
         conditional_list = [pofv2] + pofv1_siblings
         return IDecTrFunc(conditional_list,"poly"), S2 | {x1,x2} 

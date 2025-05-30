@@ -79,8 +79,6 @@ class MDRGen:
     """
     """
     def next_gentype2(self): 
-        #print("intseed draw: ",self.gentype2_intseed_draw)
-        #print("rc index: ",self.gentype2_rc_index)
 
         if len(self.gentype2_cache) == 0: 
             if len(self.seed2seq) == 0: 

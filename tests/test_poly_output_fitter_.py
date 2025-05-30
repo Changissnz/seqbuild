@@ -10,6 +10,22 @@ python -m tests.test_poly_output_fitter_
 ###
 class PolyOutputFitterMethods(unittest.TestCase):
 
+    def test__DEFAULT_MAXPOW4BASE(self):
+        x = 0
+        assert DEFAULT_MAXPOW4BASE(x) == DEFAULT_POWER_RANGE[1] 
+
+        x = 1
+        assert DEFAULT_MAXPOW4BASE(x) == DEFAULT_POWER_RANGE[1] 
+
+        x = 481
+        assert DEFAULT_MAXPOW4BASE(x) == 3
+
+        x = 1290
+        assert DEFAULT_MAXPOW4BASE(x) == 3
+
+        x = 200
+        assert DEFAULT_MAXPOW4BASE(x) == 4 
+
 
     def test__PolyOutputFitterVar1__solve(self):
         n = 7 
@@ -30,6 +46,27 @@ class PolyOutputFitterMethods(unittest.TestCase):
             "-1297162x^4  -7782973x^3  -46697843x^2  " +\
             "-280187064x^1 + 1681122397x^0" 
         assert cep.apply(pofv1.x1) == pofv1.apply(pofv1.x1)
+
+    """
+    demonstrates size limitations for np.int32 fitting 
+    """
+    def test__PolyOutputFitterVar1__solve__case2(self):
+        l = 24 
+        x = 43215678
+        prng = prg__constant(0)
+
+        pofv1 = PolyOutputFitterVar1(7,l//2,x,prng,default_sizemod=True)
+        pofv1.solve()
+        assert pofv1.apply(l//2) != pofv1.c
+        assert pofv1.apply(pofv1.x1) == pofv1.c
+
+        pofv2 = PolyOutputFitterVar1(7,l,x,prng,default_sizemod=False)
+        pofv2.solve()
+        try: 
+            pofv2.apply(l) 
+            assert False
+        except: 
+            assert True 
 
     def test__PolyOutputFitterVar2__solve(self):
         n = 5 
