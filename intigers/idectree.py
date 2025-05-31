@@ -390,9 +390,9 @@ class IntSeq2Tree:
         if self.verbose: 
             print("partitioning {} elements".format(\
                 len(node.acc_queue)))
-            i = 1
+            i = 0
             while True:
-                aq0 = node.acc_queue[(i-1) * 5: i * 5]
+                aq0 = node.acc_queue[i * 5: (i+1) * 5]
                 print("\t {}".format(aq0))
                 i += 1 
                 if i * 5 > len(node.acc_queue): break 
@@ -402,7 +402,7 @@ class IntSeq2Tree:
         if type(num_sets) != type(None): 
             assert num_sets <= len(node.acc_queue)
         else: 
-            max_sets = ceil(len(node.acc_queue) / 2) + 1 
+            max_sets = ceil(len(node.acc_queue) / 2)# + 1 
             max_sets = max([max_sets,3])
             num_sets = modulo_in_range(self.prg(),[2,max_sets])
 

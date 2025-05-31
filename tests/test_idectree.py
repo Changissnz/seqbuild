@@ -230,5 +230,22 @@ class IDecTreeMethods(unittest.TestCase):
         dr,depth = TNode.dfs(q,display=False,collect=True,reset_index=True)
         assert depth == 4 
 
+    """
+    test for correct leaf size
+    """
+    def test__IntSeq2Tree__convert__case3(self): 
+        prng = prg__n_ary_alternator(-8,8,-7)
+        #prng = prg__constant(1)
+
+        L = [48,32,640,128,804,7,19,482,330,350,600,1220,1032,450] 
+        l = 5
+        d = None 
+
+        is2t = IntSeq2Tree(IntSeq(L),l,d,prng,verbose=False)
+        is2t.convert()
+        q = is2t.root
+
+        assert len(q.children) == 5 
+
 if __name__ == '__main__':
     unittest.main()
