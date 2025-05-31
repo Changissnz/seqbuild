@@ -7,6 +7,10 @@ from morebs2.g2tdecomp import TNode
 `p` is a partition that does not contain 0. Fixes any 
 element of `p` that is less than 2 by transferring 1 
 over from an element of value greater than 2. 
+
+:return: p' if p has any elements below 2 o.w. p, success status 
+        of fix. 
+:rtype: list|np.ndarray,bool. 
 """
 # NOTE: method used for partitions valid to the requirements 
 #       of polynomial-splitting. 
@@ -56,6 +60,11 @@ class IDecNode(TNode):
         return
 
     #----------------------- var-setter functions 
+
+    def clear(self): 
+        self.acc_queue.clear() 
+        if type(self.travf) != type(None): 
+            self.travf.clear() 
 
     def set_travf(self,travf):
         self.travf = travf 
@@ -226,10 +235,67 @@ class IDecNodeTravFunc:
                 return self.bclassif_nextnode[i] 
         return self.default_class
 
+    def clear(self):
+        self.cat_samples.clear()  
+
+
 # NOTE: some code in this class may need to be refactored. 
 """
 converts an <IntSeq> instance to a tree (directed graph) T. 
+Specifically, the tree is single root with single-parented 
+children.  
+
 T satisfies a leaf requirement `l` XOR  a depth requirement `d`. 
+
+T starts as a single node that takes as input the the integer 
+sequence `intseq`. A process calculates a classifier to split 
+the sequence according to an arbitrary value valid in accordance 
+with the size of the integer sequence. The splitting of a sequence 
+at a node results in disjoint subsets of the sequence getting routed 
+to different destinations, namely at the node (value is no longer 
+considered in splitting process) or to a child node of the node. 
+The classifier is an instance of <IDecNodeTravFunc>, which is comprised 
+of an ordered sequence of boolean classifier instances <IDecTrFunc>. 
+Each of these boolean classifiers C checks an input value v to see if 
+it satisfies any of its conditionals c_i: 
+        C(v) = 1 if there exists a c_i in C such that c_i(v).  
+For a boolean classifier C, all conditionals are of one type `factor` 
+or `poly`. The type `factor` splits sequences according to the sequence 
+elements that are multiples of the corresponding factor. For the `poly` 
+type, at least two integers are required for the initial fitting via 
+a <PolyOutputFitterVar2> instance. Once these two integers are fitted 
+for the first conditional, any remaining number of integers can be added 
+to the <IDecTrFunc> by fitting them with a <PolyOutputFitterVar1> to the 
+output value from the <PolyOutputFitterVar2>. To split, the `factor` type 
+requires at least two values, and the `poly` type requires at least four 
+values. A boolean classifier corresponds to a node identifier, one child 
+of the node the classifier belongs to. 
+
+An <IDecNodeTravFunc> iterates through its sequence of boolean classifiers 
+in order to classify an input value v. If a boolean classifier C outputs 1, 
+then v is of the category C corresponds to. If all boolean classifiers output 
+0, exactly one of two things happens:
+- the value v ceases travel and its final destination is the node it is at, 
+- the value v travels to the node of identifier `default_class`, the class 
+  variable of <IDecNodeTravFunc>, if `default_class` is not None. 
+
+The conversion process starts with satisfying either the leaf or depth 
+requirement. A pseudo-random number (integer) generator `prg` is used for making 
+certain decisions in this first part. For the remaining elements of the sequence, 
+the `prg` outputs values that decide attributes on splitting, such as: 
+- partition for the elements
+- type of boolean classifier
+
+For all nodes except for the root, their <IDecNodeTravFunc> function will 
+always have instances of <IDecTrFunc> that are all of exactly `factor` or 
+`poly`, due to the programming. The root `travf` may have <IDecTrunc> functions 
+of differing types. 
+
+NOTE: some deficiencies of this splitting algorithm, due to the use of factors 
+      and polynomial-based equations, are that 
+- duplicate integers can never be split against each other. 
+- the value 0 cannot be used for splitting. 
+- (infrastructure-dependent) numbers larger than ?3200? will break the program. 
 """
 class IntSeq2Tree: 
 
@@ -262,6 +328,9 @@ class IntSeq2Tree:
             print("finished factor count.")
         return 
 
+    """
+    main method 
+    """
     def convert(self): 
         self.init_root()
         if self.leaf_first: 
@@ -385,6 +454,7 @@ class IntSeq2Tree:
             travf = node.travf + travf 
 
         node.set_travf(travf) 
+        node.clear() 
 
     def partition_for_node(self,node,num_sets=None,is_min2=False): 
         # choose the number of sets + variance for a partition
