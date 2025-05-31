@@ -4,6 +4,36 @@ from morebs2.numerical_generator import prg_seqsort_ties,prg_partition_for_sz
 from morebs2.g2tdecomp import TNode 
 
 """
+`p` is a partition that does not contain 0. Fixes any 
+element of `p` that is less than 2 by transferring 1 
+over from an element of value greater than 2. 
+"""
+# NOTE: method used for partitions valid to the requirements 
+#       of polynomial-splitting. 
+def partition_fix__subset_is_minsize_2(p,prg): 
+    p_ = np.array(p) 
+    indices = np.where(p_ < 2)[0][0]
+    if len(indices) == 0: return p_ 
+
+    other_indices = np.where(p_ > 2)[0][0]
+    stat = True 
+    for i in indices: 
+        if len(other_indices) == 0: 
+            stat = False 
+            break 
+
+        diff = 2 - p_[i]
+        j2 = prg() % len(other_indices) 
+        j = other_indices[j2] 
+        p_[j] -= 1 
+        p_[i] += 1 
+
+        if p_[j] == 2:
+            other_indices = np.delete(other_indices,j2)
+        
+    return p_,stat 
+
+"""
 Node structure used as unit for a decision tree constructed 
 from an <IntSeq>. Structure is associated with functions, 
 an input (operation) function `entryf` for an incoming value 
@@ -291,7 +321,8 @@ class IntSeq2Tree:
         
         # get the partition 
         if type(partition) == type(None): 
-            partition = self.partition_for_node(node) 
+            is_min2 = True if not is_factor else False 
+            partition = self.partition_for_node(node,is_min2=is_min2) 
         else: 
             assert sum(partition) == len(node.acc_queue)
         if self.verbose: print("\t- partition: ",partition) 
@@ -345,7 +376,7 @@ class IntSeq2Tree:
 
         node.set_travf(travf) 
 
-    def partition_for_node(self,node,num_sets=None): 
+    def partition_for_node(self,node,num_sets=None,is_min2=False): 
         # choose the number of sets + variance for a partition
         if self.verbose: print("partitioning {} elements".format(\
             len(node.acc_queue)))
@@ -361,7 +392,11 @@ class IntSeq2Tree:
         variance = modulo_in_range(self.prg(),[0,1001]) / 1000.0 
         partition = prg_partition_for_sz(len(node.acc_queue),num_sets,\
             self.prg,variance)
-        #partition = [p + 1 for p in partition]
+
+        # NOTE: caution. 
+        if is_min2: 
+            partition = partition__subset_is_minsize_2(partition,self.prg) 
+        
         return partition
 
     #---------------------- splitter for depth 
