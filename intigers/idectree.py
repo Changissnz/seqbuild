@@ -168,6 +168,21 @@ class IDecNodeTravFunc:
         self.default_class_samples = None  
         return
 
+    def __add__(self,x):
+        assert type(x) == IDecNodeTravFunc
+
+        assert set(self.bclassif_nextnode).intersection(set(\
+            x.bclassif_nextnode)) == set() 
+        q = deepcopy(self)
+        q.bclassif.extend(x.bclassif)
+        q.bclassif_nextnode.extend(x.bclassif_nextnode)
+        q.cat_samples.extend(x.cat_samples)
+        if type(x.default_class) != type(None): 
+            q.default_class = x.default_class
+            q.default_class_samples = x.default_class_samples
+        return q  
+
+
     def __str__(self): 
         s = "pos-labels: " + str(len(self.bclassif)) + "\n"
         for (i,cs) in enumerate(self.cat_samples): 
@@ -311,6 +326,9 @@ class IntSeq2Tree:
     nodes for `node`. 
     """
     def set_travf_for_node(self,node,travf): 
+        if type(node.travf) != type(None): 
+            travf = node.travf + travf 
+
         node.set_travf(travf) 
 
         # declare the children 

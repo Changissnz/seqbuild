@@ -1,4 +1,4 @@
-from intigers.idectree import * 
+from intigers.idt_proc import * 
 from morebs2.numerical_generator import prg__constant,prg__n_ary_alternator,LCG 
 
 import unittest
@@ -60,7 +60,6 @@ class IDecTreeMethods(unittest.TestCase):
 
         is2t.init_root() 
         tn = is2t.node_cache.pop(0) 
-        #xr = is2t.factor_split__depthreq(tn)
         xr = is2t.split__depthreq(tn,"factor")
 
         assert len(tn.acc_queue) == 13 - 4
@@ -102,7 +101,6 @@ class IDecTreeMethods(unittest.TestCase):
         is2t = IntSeq2Tree(IntSeq(L),l,d,prng)
         is2t.init_root() 
         tn = is2t.node_cache.pop(0) 
-        #q = is2t.factor_split__depthreq(tn)
         q = is2t.split__depthreq(tn,"poly")
         tn = is2t.node_cache[0] 
 
@@ -134,6 +132,44 @@ class IDecTreeMethods(unittest.TestCase):
         for l in L: 
             if q.bclassify(l): r += 1 
         assert r == 4 
+
+    """
+    simple case of integer sequence, relatively small numbers, 
+    no duplicates, no zeros. 
+    """
+    def test__IntSeq2Tree__convert__case1(self): 
+        prng = prg__constant(0)#3)
+        l = None 
+        d = 4 
+        L = [123, 321, 43, 15, 17, 18, 19]
+
+        is2t = IntSeq2Tree(IntSeq(L),l,d,prng,verbose=False)
+        is2t.convert()
+        q = is2t.root
+        dr,depth = TNode.dfs(q,display=False,collect=True,reset_index=True)
+
+        D = {}
+        for x in L: 
+            y = q.travf.apply(x)
+            D[x] = y 
+
+        assert depth == 4
+        assert D == {123: 1, 321: 1, \
+            43: 1, 15: 1, 17: 5, 18: 5, 19: 6}
+
+        itp = IDTProc(q)
+        D2 = dict() 
+        D2[123] = [0, 1]
+        D2[321] = [0, 1, 2]
+        D2[43] = [0, 1, 2, 3]
+        D2[15] = [0, 1, 2, 3, 4]
+        D2[17] = [0, 5, 8]
+        D2[18] = [0, 5, 7]
+        D2[19] = [0, 6]
+
+        for l in L[:7]: 
+            p = itp.process_value(l)
+            assert D2[l] == p 
 
 if __name__ == '__main__':
     unittest.main()
