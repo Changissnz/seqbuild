@@ -1,5 +1,6 @@
 from intigers.idt_proc import * 
-from morebs2.numerical_generator import prg__constant,prg__n_ary_alternator,LCG 
+from morebs2.numerical_generator import prg__constant,\
+    prg__n_ary_alternator,LCG,prg__LCG
 from morebs2.globalls import std_invert_map 
 
 import unittest
@@ -192,7 +193,7 @@ class IDecTreeMethods(unittest.TestCase):
             assert D2[l] == p 
 
     """
-    Simple test case to case 1. Uses larger values than case 1 and 
+    Similar test case to case 1. Uses larger values than case 1 and 
     demonstrates with two constant generators.
     """
     def test__IntSeq2Tree__convert__case2(self): 
@@ -235,7 +236,6 @@ class IDecTreeMethods(unittest.TestCase):
     """
     def test__IntSeq2Tree__convert__case3(self): 
         prng = prg__n_ary_alternator(-8,8,-7)
-        #prng = prg__constant(1)
 
         L = [48,32,640,128,804,7,19,482,330,350,600,1220,1032,450] 
         l = 5
@@ -245,6 +245,12 @@ class IDecTreeMethods(unittest.TestCase):
         is2t.convert()
         q = is2t.root
 
+        assert len(q.children) == 5 
+
+        prng = prg__LCG(-4,5,2,29)
+        is2t = IntSeq2Tree(IntSeq(L),l,d,prng,verbose=False)
+        is2t.convert()
+        q = is2t.root
         assert len(q.children) == 5 
 
 if __name__ == '__main__':

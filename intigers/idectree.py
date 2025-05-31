@@ -32,6 +32,7 @@ def partition_fix__subset_is_minsize_2(p,prg):
             other_indices = np.delete(other_indices,j2)
     return p_,stat 
 
+#------------------------------------------------------------------
 """
 Node structure used as unit for a decision tree constructed 
 from an <IntSeq>. Structure is associated with functions, 
