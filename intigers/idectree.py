@@ -276,7 +276,7 @@ class IntSeq2Tree:
             self.split_node(tn,partition=None)
             if self.verbose: 
                 print('---/---/---/---/')
-                
+
     #----------------------- root initialization to satisfy depth or
     #----------------------- leaf requirement 
 
@@ -322,11 +322,15 @@ class IntSeq2Tree:
             is_factor = True 
         
         # get the partition 
+        is_min2 = True if not is_factor else False 
         if type(partition) == type(None): 
-            is_min2 = True if not is_factor else False 
             partition = self.partition_for_node(node,is_min2=is_min2) 
         else: 
             assert sum(partition) == len(node.acc_queue)
+            if is_min2: 
+                partition,stat = partition_fix__subset_is_minsize_2(partition,self.prg)
+                assert stat 
+
         if self.verbose: 
             stype = "factor" if is_factor else "poly"
             print("\t- split type {}, partition: {}".format(\

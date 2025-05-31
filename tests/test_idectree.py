@@ -1,5 +1,6 @@
 from intigers.idt_proc import * 
 from morebs2.numerical_generator import prg__constant,prg__n_ary_alternator,LCG 
+from morebs2.globalls import std_invert_map 
 
 import unittest
 
@@ -153,9 +154,11 @@ class IDecTreeMethods(unittest.TestCase):
     """
     simple case of integer sequence, relatively small numbers, 
     no duplicates, no zeros. 
+
+    Tests for depth requirement, correct labelling by `travf`. 
     """
     def test__IntSeq2Tree__convert__case1(self): 
-        prng = prg__constant(0)#3)
+        prng = prg__constant(0)
         l = None 
         d = 4 
         L = [123, 321, 43, 15, 17, 18, 19]
@@ -184,9 +187,48 @@ class IDecTreeMethods(unittest.TestCase):
         D2[18] = [0, 5, 7]
         D2[19] = [0, 6]
 
-        for l in L[:7]: 
+        for l in L: 
             p = itp.process_value(l)
             assert D2[l] == p 
+
+    """
+    Simple test case to case 1. Uses larger values than case 1 and 
+    demonstrates with two constant generators.
+    """
+    def test__IntSeq2Tree__convert__case2(self): 
+        l = None 
+        d = 4 
+
+        # prng #1 
+        prng = prg__constant(0)#3)
+
+        L = [480,320,6400,1280,804,7,19,482,330,350,6000,1220,1032,450] 
+        is2t = IntSeq2Tree(IntSeq(L),l,d,prng,verbose=False)
+        is2t.convert()
+
+        q = is2t.root
+        dr,depth = TNode.dfs(q,display=False,collect=True,reset_index=True)
+        assert depth == 4 
+
+        D = {480: 1, 320: 1, 6400: 1, 1280: 1, 804: 5, \
+            7: 5, 19: 6, 482: 5, 330: 6, 350: 6, 6000: 6, \
+            1220: 5, 1032: 6, 450: 5}
+
+        for x in L:
+            y = q.travf.apply(x)
+            assert D[x] == y 
+
+        D2 = std_invert_map(D) 
+        assert len(D2[1]) == 4   
+
+        # prng #2 
+        prng = prg__constant(5)#3)
+        is2t = IntSeq2Tree(IntSeq(L),l,d,prng,verbose=False)
+        is2t.convert()
+
+        q = is2t.root
+        dr,depth = TNode.dfs(q,display=False,collect=True,reset_index=True)
+        assert depth == 4 
 
 if __name__ == '__main__':
     unittest.main()
