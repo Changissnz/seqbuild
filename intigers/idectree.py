@@ -173,7 +173,8 @@ class IDecNodeTravFunc:
                 l = 0 
             else: 
                 l = len(cs) 
-            s += "label: {} \tsize: {}".format(self.bclassif_nextnode[i],l) + "\n"
+            s += "stype: {} \tlabel: {} \tsize: {}".format(\
+                self.bclassif[i].ct,self.bclassif_nextnode[i],l) + "\n"
         return s 
 
     def set_default_class(self,dc,samples):
@@ -309,10 +310,6 @@ class IntSeq2Tree:
     nodes for `node`. 
     """
     def set_travf_for_node(self,node,travf): 
-        if type(node.travf) != type(None): 
-            travf = node.travf + travf 
-
-        node.set_travf(travf) 
 
         # declare the children 
         tns = [] 
@@ -342,6 +339,11 @@ class IntSeq2Tree:
             c.add_to_acc_queue(v) 
             if len(c.acc_queue) > 1: 
                 self.node_cache.append(c)
+
+        if type(node.travf) != type(None): 
+            travf = node.travf + travf 
+
+        node.set_travf(travf) 
 
     def partition_for_node(self,node,num_sets=None): 
         # choose the number of sets + variance for a partition

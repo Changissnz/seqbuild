@@ -14,7 +14,6 @@ class IDTProc:
         while True: 
             if type(tn.travf) == type(None): 
                 break 
-                
             q = tn.travf.apply(v)
             if type(q) == type(None): break
             tn2 = tn.fetch_conn(q)
