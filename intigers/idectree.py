@@ -17,11 +17,9 @@ class IDecNode(TNode):
         is_root = True if root_distance == 0 else False
         super().__init__(idn,False,is_root,root_distance)
 
-        #self.idn = idn 
         self.entryf = entryf
         self.travf = travf 
         self.children = [] 
-        #self.rd = root_distance 
         self.reachability_key = None 
         self.con_key = set() 
         self.acc_queue = []
@@ -49,26 +47,11 @@ class IDecNode(TNode):
         self.acc_queue = list(set(self.acc_queue) - set(s))
 
     #----------------------- children-access functions 
-    """
-    def add_children(self,idn_seq,entryf_seq): 
-        assert len(idn_seq) == len(entryf_seq)
-        for (i,x) in enumerate(idn_seq): 
-            q = IDecNode(x,entryf_seq[i],None,self.rd+1)
-            self.children.append(q)
-    """
 
     def add_children(self,tnx): 
         for tn in tnx: 
             assert type(tn) == IDecNode
             self.children.append(tn)
-
-    """
-    def index_of(self,idn): 
-        q = self.children
-        for (i,q_) in enumerate(q): 
-            if q_.idn == idn: return i 
-        return -1
-    """
 
     def fetch_conn(self,idn): 
         i = self.index_of_child(idn) 
