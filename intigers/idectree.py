@@ -267,12 +267,16 @@ class IntSeq2Tree:
             self.init_lf()
         else: 
             self.init_df()
-        if self.verbose: print("splitting the rest.")
+        if self.verbose: 
+            print("splitting the rest.")
+            print("---/---/---/---/")
 
         while len(self.node_cache) > 0: 
             tn = self.node_cache.pop(0)
             self.split_node(tn,partition=None)
-        
+            if self.verbose: 
+                print('---/---/---/---/')
+                
     #----------------------- root initialization to satisfy depth or
     #----------------------- leaf requirement 
 
@@ -379,8 +383,16 @@ class IntSeq2Tree:
 
     def partition_for_node(self,node,num_sets=None,is_min2=False): 
         # choose the number of sets + variance for a partition
-        if self.verbose: print("partitioning {} elements".format(\
-            len(node.acc_queue)))
+        if self.verbose: 
+            print("partitioning {} elements".format(\
+                len(node.acc_queue)))
+            i = 1
+            while True:
+                aq0 = node.acc_queue[(i-1) * 5: i * 5]
+                print("\t {}".format(aq0))
+                i += 1 
+                if i * 5 > len(node.acc_queue): break 
+            
         assert len(node.acc_queue) > 1 
 
         if type(num_sets) != type(None): 
