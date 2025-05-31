@@ -10,6 +10,23 @@ python -m tests.test_idectree
 ###
 class IDecTreeMethods(unittest.TestCase):
 
+    def test__partition_fix__subset_is_minsize_2__case1(self):
+        g = [1,4,1] 
+        q = prg__n_ary_alternator(-10,15,5)
+        g2 = partition_fix__subset_is_minsize_2(g,q)
+        assert np.all(g2[0] == [2,2,2])
+        assert g2[1] == True
+
+        g = [1,3,1] 
+        g2 = partition_fix__subset_is_minsize_2(g,q)
+        assert g2[1] == False
+
+        g = [30,1,1,1,1,1,1,27,1,1,1,1,1] 
+        g2 = partition_fix__subset_is_minsize_2(g,q)
+        assert np.all(g2[0] == [24,  2,  2,  2,  2,  \
+            2,  2, 22,  2,  2,  2,  2,  2])
+        assert g2[1] == True
+
     def test__IntSeq2Tree__factor_split__partitioned__case1(self):
         prng = prg__constant(0)
 

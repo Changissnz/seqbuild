@@ -12,10 +12,10 @@ over from an element of value greater than 2.
 #       of polynomial-splitting. 
 def partition_fix__subset_is_minsize_2(p,prg): 
     p_ = np.array(p) 
-    indices = np.where(p_ < 2)[0][0]
-    if len(indices) == 0: return p_ 
+    indices = np.where(p_ < 2)[0]
+    if len(indices) == 0: return p_,True 
 
-    other_indices = np.where(p_ > 2)[0][0]
+    other_indices = np.where(p_ > 2)[0]
     stat = True 
     for i in indices: 
         if len(other_indices) == 0: 
@@ -30,7 +30,6 @@ def partition_fix__subset_is_minsize_2(p,prg):
 
         if p_[j] == 2:
             other_indices = np.delete(other_indices,j2)
-        
     return p_,stat 
 
 """
@@ -307,7 +306,6 @@ class IntSeq2Tree:
 
     # TODO: test. 
     def split_node(self,node,partition=None):
-
         if len(node.acc_queue) < 2:
             return 
 
@@ -325,7 +323,10 @@ class IntSeq2Tree:
             partition = self.partition_for_node(node,is_min2=is_min2) 
         else: 
             assert sum(partition) == len(node.acc_queue)
-        if self.verbose: print("\t- partition: ",partition) 
+        if self.verbose: 
+            stype = "factor" if is_factor else "poly"
+            print("\t- split type {}, partition: {}".format(\
+                stype,partition))
 
         if is_factor: 
             travf = self.factor_split_travf(deepcopy(node.acc_queue),\
@@ -395,8 +396,9 @@ class IntSeq2Tree:
 
         # NOTE: caution. 
         if is_min2: 
-            partition = partition__subset_is_minsize_2(partition,self.prg) 
-        
+            partition,stat = partition_fix__subset_is_minsize_2(partition,self.prg) 
+            if not stat: raise ValueError("something wrong.")
+
         return partition
 
     #---------------------- splitter for depth 
@@ -434,7 +436,7 @@ class IntSeq2Tree:
         cx.add_to_acc_queue(tn.travf.cat_samples[0])
         tn.add_children([cx]) 
 
-        if self.verbose: print("\t- first split done.")
+        if self.verbose: print("\t- first split of ({}) done.".format(split_type))
     
         S = cx.acc_queue
         stat = len(cx.acc_queue) > 1
@@ -619,7 +621,6 @@ class IntSeq2Tree:
             p = partition[i] 
             bfunc,q = self.poly_subset_bclassifier(S,p)
             S = list(set(S) - q)
-            #print("LEN S: ",len(S))
             travf.add_bclassif_nextnode_pair(bfunc,self.node_ctr)
             self.node_ctr += 1
 
