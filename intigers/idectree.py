@@ -292,7 +292,7 @@ always have instances of <IDecTrFunc> that are all of exactly `factor` or
 of differing types. 
 
 NOTE: some deficiencies of this splitting algorithm, due to the use of factors 
-      and polynomial-based equations, are that 
+      and polynomial-based equations, are 
 - duplicate integers can never be split against each other. 
 - the value 0 cannot be used for splitting. 
 - (infrastructure-dependent) numbers larger than ?3200? will break the program. 
