@@ -552,7 +552,20 @@ class UDLinSysSolver:
         self.mreps = col - self.fvars 
         return
 
-    
     def apply(self,vec): 
         assert type(self.varvec) != type(None) 
         return round(np.sum(self.varvec*vec),5)
+
+class LinCombo: 
+
+    def __init__(self,x): 
+        assert type(x) == np.ndarray
+        self.x = x 
+
+    def degree(self): 
+        return len(self.x) - 1 
+
+    def apply(self,X):
+        assert type(X) == np.ndarray 
+        assert len(X) == len(self.x) - 1
+        return np.dot(X,self.x[:-1]) + self.x[-1]
