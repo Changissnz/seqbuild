@@ -2,69 +2,16 @@
 file contains code to extend the <RChainHead> class from the 
 library <morebs2>
 """
-from seqbuild.poly_output_fitter_ import * 
-from morebs2.matrix_methods import is_vector
+from intigers.poly_output_fitter_ import * 
+from intigers.extraneous import * 
 from morebs2.relevance_functions import RCInst,RChainHead
-from morebs2.measures import zero_div 
+from morebs2.numerical_generator import prg_choose_n
+
 
 MRIF_VARMAP = {CEPoly:"v",\
     LinCombo:"x"}
 
 DM_FUNC_LIST = [np.dot,mul,safe_div,add,sub]
-
-zero_div0 = lambda num,denum: zero_div(num,denum,0)
-
-def safe_div(V1,V2):
-    stat1 = is_vector(V1)
-    stat2 = is_vector(V2) 
-
-    if not stat1 and not stat2: 
-        return zero_div0(V1,V2)
-
-    if stat1 and stat2:
-        assert len(V1) == len(V2)
-        q = []
-        for x,x2 in zip(V1,V2):
-            q2 = zero_div0(x,x2)
-            q.append(q2)
-        return np.array(q)
-
-    i = 0
-    VX = None
-    f = None 
-
-    if stat1:
-        VX = V1
-        f = lambda x: zero_div0(x,V2)
-    else: 
-        VX = V2
-        f = lambda x: zero_div0(V1,x) 
-
-    q = [] 
-    for x in VX:
-        q.append(f(x))
-    return q 
-    
-def safe_npint32_value(v):
-    r = (np.iinfo(np.int32).min,np.iinfo(np.int32).max)
-    v_ = modulo_in_range(v,r) 
-    return np.int32(v_)
-
-def safe_npint32_vec(V):
-    return np.array([safe_npint32_value(v_) for \
-        v_ in V],dtype=np.int32) 
-
-def safe_npint32__prg_vec(prg,sz):
-    v = np.zeros((sz,),dtype=np.int32) 
-    for i in range(sz):
-        v[i] = safe_npint32_value(prg()) 
-    return v 
-
-def partitioned_vecmul(v1,v2): 
-    return -1
-
-def partitioned_vecdot(v1,v2):
-    return -1
 
 class MutableRInstFunction:
 
@@ -86,27 +33,30 @@ class MutableRInstFunction:
         return
 
     def apply(self,x): 
-        return self.base_func.apply(x) 
+        y = self.base_func.apply(x)
+
+        if type(y) == np.ndarray: 
+            y = y.flatten()
+            return safe_npint32_vec(y)
+        return safe_npint32_value(y)
+
 
 class RCHAccuGen: 
 
-    def __init__(self,rch,perm_prg,acc_queue=[],\
+    def __init__(self,rch,prg,acc_queue=[],\
         queue_capacity:int=1000):
-            assert type(acc_queue) == list 
-            assert type(queue_capacity) == int and queue_capacity > 1
-            self.rch = rch 
-            self.perm_prg = perm_prg 
-            self.acc_queue = acc_queue 
-            self.qcap = queue_capacity
 
-            self.mutgen = [{} for _ in range(len(self.rch.s))] 
-            self.update_log = defaultdict(defaultdict)
-            self.ctr = 0
-            return 
+        assert type(acc_queue) == list 
+        assert type(queue_capacity) == int and queue_capacity > 1
+        self.rch = rch 
+        self.prg = prg 
+        self.acc_queue = acc_queue 
+        self.qcap = queue_capacity
 
-    @staticmethod
-    def one_new_instance(prg,mutrate=0.5): 
-        return -1 
+        self.mutgen = [set() for _ in range(len(self.rch.s))] 
+        self.update_log = defaultdict(defaultdict)
+        self.ctr = 0
+        return 
 
     """
     main method
@@ -120,25 +70,103 @@ class RCHAccuGen:
 
         for v in self.rch.vpath: 
             if type(v) != np.ndarray: 
+                v = safe_npint32_value(v) 
                 self.acc_queue.append(v)
             else: 
+                v = v.flatten() 
+                v = safe_npint32_vec(v) 
                 self.acc_queue.extend(v) 
-
         self.ctr += 1 
         self.update()
-        return 
+        return self.rch.vpath[-1]
+
+    @staticmethod
+    def one_new_RCHAccuGen__v1(num_nodes,dim_range,prg,\
+        ufreq_range,mutrate=0.5,queue_capacity=1000): 
+
+        # declare the RChainHead 
+        rch,FX = RCHAccuGen.one_new_RChainHead__v1(\
+            num_nodes,dim_range,prg)
+
+        # declare the generator 
+        rg = RCHAccuGen(rch,prg,acc_queue=[],\
+            queue_capacity=queue_capacity)
+
+        # choose the candidates to mute
+        Q = []
+        for i in range(num_nodes):
+            Q.append((i,'cf'))
+            Q.append((i,'rf')) 
+
+        n = int(ceil(mutrate * len(Q)))
+        Q_ = prg_choose_n(Q,n,prg,is_unique_picker=True)
+
+        for q in Q_: 
+            uf = modulo_in_range(prg(),ufreq_range)
+            if q[1] == 'rf': 
+                rg.add_mutable(q[0],(q[1],uf))
+            else: 
+                fx = FX[q[0]]
+                mf = MutableRInstFunction(fx,uf)
+                rg.add_mutable(q[0],mf)
+        return rg 
+
+    @staticmethod
+    def one_new_RChainHead__v1(num_nodes,dim_range,prg):
+        # declare the RChainHead 
+        rch = RChainHead()
+        FX = [] 
+        for _ in range(num_nodes): 
+            rcia,fx = RCHAccuGen.one_new_RCInst_args__v1(dim_range,prg)
+            rch.add_node_at(rcia)
+            FX.append(fx)
+        return rch,FX
+
+    @staticmethod
+    def one_new_RCInst_args__v1(dim_range,prg):
+
+        zero = 'r' if prg() % 2 else 'nr' 
+        kwargz = [zero]
+        FX = None 
+
+        dim = modulo_in_range(prg(),dim_range) 
+        # case: referential, uses <LinCombo> 
+        if zero == 'r':
+            V = safe_npint32__prg_vec(prg,dim)
+            kwargz.append(V) 
+
+            fi = prg() % len(DM_FUNC_LIST)
+            fx = DM_FUNC_LIST[fi] 
+            kwargz.append(fx)
+
+            V2 = safe_npint32__prg_vec(prg,dim + 1)
+            lc = LinCombo(V2)
+
+            FX = lc
+            kwargz.append(lc.apply)
+        # case: non-referential, uses <CEPoly>
+        else: 
+            V = safe_npint32__prg_vec(prg,dim + 1)
+            V2 = [(v,i) for i,v in enumerate(V[::-1])]
+            cep = CEPoly(np.array(V2,dtype=np.int32))
+
+            FX = cep
+            kwargz.append(cep.apply) 
+        return kwargz,FX 
 
     #-------------------------------------
 
     def auto_add_mutable(self):
         return -1 
 
-    def add_mutable(self,mg,rci_index,var_idn): 
-        assert type(mg) == MutableRInstFunction
-        assert var_idn in {'cf','rf'} 
+    def add_mutable(self,rci_index,var): 
         assert rci_index < len(self.mutgen) and \
             rci_index >= 0
-        self.mutgen[rci_index][var_idn] = mg
+        assert type(var) == tuple or type(var) == MutableRInstFunction
+        if type(var) == tuple: 
+            assert len(var) == 2 
+            assert var[0] == 'rf' and type(var[1]) == int
+        self.mutgen[rci_index] |= {var}
 
     #--------------------- methods for updating 
 
@@ -163,10 +191,13 @@ class RCHAccuGen:
 
         # case: update function 
         else: 
-            self.mut_gen[rci_index][var_idn].update(q)
-            fx = self.mut_gen[rci_index][var_idn].apply
+            mg = self.fetch_mutgen(rci_index)
+            assert type(mg) != type(None)
+            mg.update(q) 
+            fx = mg.apply
             self.rch[rci_index].update_var(var_idn,fx)
 
+        # edit the update log 
         if rci_index not in self.update_log: 
             self.update_log[rci_index] = defaultdict(int) 
         self.update_log[rci_index][var_idn] += 1 
@@ -184,26 +215,31 @@ class RCHAccuGen:
 
         vl = self.mutgen[rci_index][var_idn]
         d = vl.dim()
-        return self.choose_n(d) 
-
-    def choose_n(self,n):
-        l = len(self.acc_queue)
-        assert l > 0 
-        q = []
-        while n > 0:  
-            i = self.prg() % l
-            q.append(self.acc_queue[i])
-            n -= 1
-        return q 
+        return prg_choose_n(d) 
 
     def mutable2update_list(self): 
         q = [] 
         for (i,x) in enumerate(self.mutgen): 
-            for k,v in x.items():
-                y = self.ctr % v.update_freq
-                if y == 0:
-                    q.append((i,k))
+
+            for x_ in x: 
+                print("X: ",x_)
+                if type(x_) == tuple:
+                    y = self.ctr % x_[1] 
+                    if y == 0: 
+                        q.append((i,x_[0]))
+                else: 
+                    y = self.ctr % x_.update_freq
+                    if y == 0:
+                        q.append((i,'cf'))
         return q 
+
+    def fetch_mutgen(self,index):
+        q = self.mutgen[index]
+
+        for q_ in q: 
+            if type(q_) == MutableRInstFunction:
+                return q_ 
+        return None 
 
     def __next__(self):
         return -1
