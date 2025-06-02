@@ -53,13 +53,9 @@ class RCHAccuGen:
             self.ctr = 0
             return 
 
-    def add_mutable(self,mg,rci_index,var_idn): 
-        assert type(mg) == MutableRInstFunction
-        assert var_idn in {'cf','dm','r'} 
-        assert rci_index < len(self.mutgen) and \
-            rci_index >= 0
-        self.mutgen[rci_index][var_idn] = mg
-
+    """
+    main method
+    """
     def apply(self,x): 
         assert is_vector(x) or type(x) in \
             {int,np.int32,np.int64}
@@ -73,17 +69,54 @@ class RCHAccuGen:
             else: 
                 self.acc_queue.extend(v) 
 
+        self.ctr += 1 
         self.update()
         return 
 
+    #-------------------------------------
+
+    def auto_add_mutable(self):
+        return -1 
+
+    def add_mutable(self,mg,rci_index,var_idn): 
+        assert type(mg) == MutableRInstFunction
+        assert var_idn in {'cf','dm','r'} 
+        assert rci_index < len(self.mutgen) and \
+            rci_index >= 0
+        self.mutgen[rci_index][var_idn] = mg
+
     #--------------------- methods for updating 
 
+    def update(self): 
+
+        ml = self.mutable2update_list()
+
+        for ml_ in ml: 
+            self.update_idn(ml_[0],ml_[1])
+        return 
+
     def update_idn(self,rci_index,var_idn):
+        assert var_idn in {'r','cf','dm'}
+
+        q = self.fetch_varlist_for_idn(rci_index,var_idn)
+
         # case: update reference value
+        if var_idn == 'r': 
+            self.rch.load_update_vars(q)
+            self.tmpset_rch_updatepath(rci_index,len(q))
+            self.rch[rci_index].inst_update_var() 
 
         # case: update function 
+        else: 
+            self.mut_gen[rci_index][var_idn].update(q)
+            fx = self.mut_gen[rci_index][var_idn].apply
+            self.rch[rci_index].update_var(var_idn,fx)
+        return 
 
-        return -1  
+    def tmpset_rch_updatepath(self,rci_index,n): 
+        x = [i for i in range(n)]
+        self.rch.updatePath = {rci_index: x}
+        return
 
     def fetch_varlist_for_idn(self,rci_index,var_idn):
         if len(self.acc_queue) == 0: 
@@ -112,12 +145,6 @@ class RCHAccuGen:
                 if y == 0:
                     q.append((i,k))
         return q 
-
-    def update(self): 
-        return -1
-
-    def set_update_paths(self): 
-        return -1 
 
     def __next__(self):
         return -1
