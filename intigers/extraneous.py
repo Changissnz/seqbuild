@@ -38,6 +38,7 @@ def safe_div(V1,V2):
     
 def safe_npint32_value(v):
     r = (np.iinfo(np.int32).min,np.iinfo(np.int32).max)
+    if v >= r[0] and v <= r[1]: return np.int32(v) 
     v_ = modulo_in_range(v,r) 
     return np.int32(v_)
 

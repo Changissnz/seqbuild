@@ -13,6 +13,8 @@ MRIF_VARMAP = {CEPoly:"v",\
 
 DM_FUNC_LIST = [np.dot,mul,safe_div,add,sub]
 
+DEFAULT_RCH_ACCUGEN_RANGE = [-0000,10000]
+
 class MutableRInstFunction:
 
     def __init__(self,base_func,update_freq:int): 
@@ -29,6 +31,11 @@ class MutableRInstFunction:
     def update(self,new_var): 
         assert type(new_var) == np.ndarray
         assert len(new_var) == self.dim()
+
+        q = getattr(self.base_func,MRIF_VARMAP[type(self.base_func)])
+        if q.ndim == 2: 
+            q[:,0] = new_var
+            new_var = q 
         setattr(self.base_func,MRIF_VARMAP[type(self.base_func)],new_var)
         return
 
@@ -71,14 +78,17 @@ class RCHAccuGen:
         for v in self.rch.vpath: 
             if type(v) != np.ndarray: 
                 v = safe_npint32_value(v) 
+                v = modulo_in_range(v,DEFAULT_RCH_ACCUGEN_RANGE) 
                 self.acc_queue.append(v)
             else: 
                 v = v.flatten() 
                 v = safe_npint32_vec(v) 
+                v = [modulo_in_range(v_,DEFAULT_RCH_ACCUGEN_RANGE) \
+                    for v_ in v] 
                 self.acc_queue.extend(v) 
         self.ctr += 1 
         self.update()
-        return self.rch.vpath[-1]
+        return self.acc_queue[-1] 
 
     @staticmethod
     def one_new_RCHAccuGen__v1(num_nodes,dim_range,prg,\
@@ -187,7 +197,7 @@ class RCHAccuGen:
         if var_idn == 'rf': 
             self.rch.load_update_vars(q)
             self.tmpset_rch_updatepath(rci_index,len(q))
-            self.rch[rci_index].inst_update_var() 
+            self.rch.s[rci_index].inst_update_var() 
 
         # case: update function 
         else: 
@@ -195,7 +205,7 @@ class RCHAccuGen:
             assert type(mg) != type(None)
             mg.update(q) 
             fx = mg.apply
-            self.rch[rci_index].update_var(var_idn,fx)
+            self.rch.s[rci_index].update_var(var_idn,fx)
 
         # edit the update log 
         if rci_index not in self.update_log: 
@@ -212,17 +222,16 @@ class RCHAccuGen:
         if len(self.acc_queue) == 0: 
             print("[!] none in queue for op.")
             return 
-
-        vl = self.mutgen[rci_index][var_idn]
-        d = vl.dim()
-        return prg_choose_n(d) 
+        q = self.fetch_mutgen(rci_index)
+        #vl = self.mutgen[rci_index][var_idn]
+        d = q.dim()
+        return np.array(prg_choose_n(self.acc_queue,d,self.prg))
 
     def mutable2update_list(self): 
         q = [] 
         for (i,x) in enumerate(self.mutgen): 
 
             for x_ in x: 
-                print("X: ",x_)
                 if type(x_) == tuple:
                     y = self.ctr % x_[1] 
                     if y == 0: 
