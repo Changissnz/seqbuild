@@ -3,9 +3,17 @@ file contains code to extend the <RChainHead> class from the
 library <morebs2>
 """
 from seqbuild.poly_output_fitter_ import * 
+from morebs2.matrix_methods import is_vector
+from morebs2.relevance_functions import RCInst,RChainHead
 
 MRIF_VARMAP = {CEPoly:"v",\
     LinCombo:"x"}
+
+def partitioned_vecmul(v1,v2): 
+    return -1
+
+def partitioned_vecdot(v1,v2):
+    return -1
 
 class MutableRInstFunction:
 
@@ -37,22 +45,82 @@ class RCHAccuGen:
             assert type(queue_capacity) == int and queue_capacity > 1
             self.rch = rch 
             self.perm_prg = perm_prg 
-            self.acc_queue = [] 
+            self.acc_queue = acc_queue 
+            self.qcap = queue_capacity
+
+            self.mutgen = [{} for _ in range(len(self.rch.s))] 
             self.update_log = {}
+            self.ctr = 0
             return 
 
-        def fetch_varlist(self):
-            return -1 
+    def add_mutable(self,mg,rci_index,var_idn): 
+        assert type(mg) == MutableRInstFunction
+        assert var_idn in {'cf','dm','r'} 
+        assert rci_index < len(self.mutgen) and \
+            rci_index >= 0
+        self.mutgen[rci_index][var_idn] = mg
 
-        def apply(self,x): 
-            self.rch.apply(x)
-            vx = deepcopy(self.rch.vpath)
-            self.acc_queue.extend(vx)
-            self.update()
+    def apply(self,x): 
+        assert is_vector(x) or type(x) in \
+            {int,np.int32,np.int64}
+
+        self.rch.apply(x)
+        vx = deepcopy(self.rch.vpath)
+
+        for v in self.rch.vpath: 
+            if type(v) != np.ndarray: 
+                self.acc_queue.append(v)
+            else: 
+                self.acc_queue.extend(v) 
+
+        self.update()
+        return 
+
+    #--------------------- methods for updating 
+
+    def update_idn(self,rci_index,var_idn):
+        # case: update reference value
+
+        # case: update function 
+
+        return -1  
+
+    def fetch_varlist_for_idn(self,rci_index,var_idn):
+        if len(self.acc_queue) == 0: 
+            print("[!] none in queue for op.")
             return 
 
-        def update(self): 
-            return -1
+        vl = self.mutgen[rci_index][var_idn]
+        d = vl.dim()
+        return self.choose_n(d) 
 
-        def __next__(self):
-            return -1
+    def choose_n(self,n):
+        l = len(self.acc_queue)
+        assert l > 0 
+        q = []
+        while n > 0:  
+            i = self.prg() % l
+            q.append(self.acc_queue[i])
+            n -= 1
+        return q 
+
+    def mutable2update_list(self): 
+        q = [] 
+        for (i,x) in enumerate(self.mutgen): 
+            for k,v in x.items():
+                y = self.ctr % v.update_freq
+                if y == 0:
+                    q.append((i,k))
+        return q 
+
+    def update(self): 
+        return -1
+
+    def set_update_paths(self): 
+        return -1 
+
+    def __next__(self):
+        return -1
+
+    def change_dim(self): 
+        return -1 
