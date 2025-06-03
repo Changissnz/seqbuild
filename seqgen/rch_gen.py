@@ -59,7 +59,8 @@ to these specifications:
 - for every `apply` call, the `rch` processes one integer. 
 - the `rch` is comprised of a variable number of nodes (type<RCInst>), 
   each with either the <LinCombo.apply> or <CEPoly.apply> function as 
-  the variable <RCInst.cf>. 
+  the variable <RCInst.cf>. The nodes are connected via one uni-directional 
+  path. 
 - for each <RCInst>, the variables `cf` (outer function) and `rf` (value, 
   such as integer, vector) are mutable. 
 - the `rf` value (reference value) is used only in the case of <LinCombo>. 
@@ -74,6 +75,8 @@ to these specifications:
   the last element from `rch.vpath` at that point in time. 
 - to update either `rf` or `cf`, values are drawn from `acc_queue` by use of 
   the `prg` as an index generator. 
+- all values stored in `acc_queue` as well as the output value from `apply` 
+  are in the bounds of DEFAULT_RCH_ACCUGEN_RANGE. 
 """
 class RCHAccuGen: 
 
