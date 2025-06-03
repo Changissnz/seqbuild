@@ -8,6 +8,17 @@ class IntSeq:
         self.l = l 
         self.load()
 
+    def __iter__(self):
+        self.index = 0
+        return self
+
+    def __next__(self):
+        if self.index < len(self.l):
+            x = self.l[self.index]
+            self.index += 1
+            return x
+        raise StopIteration
+
     def load(self):
         if type(self.l) == type(None): 
             self.l = np.array([],"int32")

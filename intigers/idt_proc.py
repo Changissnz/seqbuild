@@ -20,3 +20,6 @@ class IDTProc:
             path.append(tn2.idn)
             tn = tn2 
         return path 
+
+    def isomorphism(self,S1,S2):
+        return -1 
