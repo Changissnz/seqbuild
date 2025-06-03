@@ -15,6 +15,12 @@ DM_FUNC_LIST = [np.dot,mul,safe_div,add,sub]
 
 DEFAULT_RCH_ACCUGEN_RANGE = [-0000,1000]
 
+"""
+carries instructions for updating functions <CEPoly>,<LinCombo>, 
+set by `base_func`. The `update_freq` is a positive integer that 
+specifies how often the class instance accepts a new variable (vector)
+to update itself with. 
+"""
 class MutableRInstFunction:
 
     def __init__(self,base_func,update_freq:int): 
@@ -47,7 +53,28 @@ class MutableRInstFunction:
             return safe_npint32_vec(y)
         return safe_npint32_value(y)
 
+"""
+uses an <RChainHead> `rch` to generate integer values according 
+to these specifications: 
+- for every `apply` call, the `rch` processes one integer. 
+- the `rch` is comprised of a variable number of nodes (type<RCInst>), 
+  each with either the <LinCombo.apply> or <CEPoly.apply> function as 
+  the variable <RCInst.cf>. 
+- for each <RCInst>, the variables `cf` (outer function) and `rf` (value, 
+  such as integer, vector) are mutable. 
+- the `rf` value (reference value) is used only in the case of <LinCombo>. 
+  So for an integer i, the function of the corresponding <RCInst> is
+        `cf(dm(i,rf))`; `cf` a <LinCombo.apply> function. 
 
+  The `dm` function is a pairwise function, first argument an integer and the 
+  second a vector. See variable `DM_FUNC_LIST`.
+- in the processing of integer i, the <RCHAccuGen> accumulates values 
+  from `rch.vpath` into its `acc_queue, the vector of values calculated by 
+  each node <RCInst> in the chain. The output from `i` is another integer `j`, 
+  the last element from `rch.vpath` at that point in time. 
+- to update either `rf` or `cf`, values are drawn from `acc_queue` by use of 
+  the `prg` as an index generator. 
+"""
 class RCHAccuGen: 
 
     def __init__(self,rch,prg,acc_queue=[],\
