@@ -20,6 +20,8 @@ class RCHGenMethods(unittest.TestCase):
 
         rg = RCHAccuGen.one_new_RCHAccuGen__v1(num_nodes,dim_range,prg,\
                 ufreq_range,mutrate,queue_capacity)
+
+        # size check with |<RChainHead>|
         rg.apply(16) 
         assert len(rg.acc_queue) == 3 
 
@@ -27,8 +29,14 @@ class RCHGenMethods(unittest.TestCase):
         rg.apply(233) 
         rg.apply(52) 
 
+        # counter check for update 
         D = {0: {'cf': 2, 'rf': 2}, 1: {'rf': 2, 'cf': 2}}
         assert rg.update_log == D 
+
+        # size check for queue
+        for _ in range(1200): 
+            rg.apply(prg())
+        assert len(rg.acc_queue) == 1000 
 
 if __name__ == '__main__':
     unittest.main()

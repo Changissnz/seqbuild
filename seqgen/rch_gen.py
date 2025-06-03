@@ -13,7 +13,7 @@ MRIF_VARMAP = {CEPoly:"v",\
 
 DM_FUNC_LIST = [np.dot,mul,safe_div,add,sub]
 
-DEFAULT_RCH_ACCUGEN_RANGE = [-0000,10000]
+DEFAULT_RCH_ACCUGEN_RANGE = [-0000,1000]
 
 class MutableRInstFunction:
 
@@ -90,6 +90,7 @@ class RCHAccuGen:
         self.update()
         return self.acc_queue[-1] 
 
+
     @staticmethod
     def one_new_RCHAccuGen__v1(num_nodes,dim_range,prg,\
         ufreq_range,mutrate=0.5,queue_capacity=1000): 
@@ -164,10 +165,7 @@ class RCHAccuGen:
             kwargz.append(cep.apply) 
         return kwargz,FX 
 
-    #-------------------------------------
-
-    def auto_add_mutable(self):
-        return -1 
+    #------------------- setters/getters for mutable <RChainHead> value 
 
     def add_mutable(self,rci_index,var): 
         assert rci_index < len(self.mutgen) and \
@@ -178,14 +176,58 @@ class RCHAccuGen:
             assert var[0] == 'rf' and type(var[1]) == int
         self.mutgen[rci_index] |= {var}
 
+
+    def tmpset_rch_updatepath(self,rci_index,n): 
+        x = [i for i in range(n)]
+        self.rch.updatePath = {rci_index: x}
+        return
+
+    def fetch_varlist_for_idn(self,rci_index,var_idn):
+        if len(self.acc_queue) == 0: 
+            print("[!] none in queue for op.")
+            return 
+        q = self.fetch_mutgen(rci_index)
+        d = q.dim()
+        return np.array(prg_choose_n(self.acc_queue,d,self.prg))
+
+    def mutable2update_list(self): 
+        q = [] 
+        for (i,x) in enumerate(self.mutgen): 
+
+            for x_ in x: 
+                if type(x_) == tuple:
+                    y = self.ctr % x_[1] 
+                    if y == 0: 
+                        q.append((i,x_[0]))
+                else: 
+                    y = self.ctr % x_.update_freq
+                    if y == 0:
+                        q.append((i,'cf'))
+        return q 
+
+    def fetch_mutgen(self,index):
+        q = self.mutgen[index]
+
+        for q_ in q: 
+            if type(q_) == MutableRInstFunction:
+                return q_ 
+        return None 
+
     #--------------------- methods for updating 
 
     def update(self): 
 
+        # update <RCInst> variables of <RChainHead> 
         ml = self.mutable2update_list()
-
         for ml_ in ml: 
             self.update_idn(ml_[0],ml_[1])
+
+        # size check for `acc_queue` 
+        diff = len(self.acc_queue) - self.qcap
+        while diff > 0: 
+            self.acc_queue.pop(0) 
+            diff -= 1 
+
         return 
 
     def update_idn(self,rci_index,var_idn):
@@ -212,43 +254,6 @@ class RCHAccuGen:
             self.update_log[rci_index] = defaultdict(int) 
         self.update_log[rci_index][var_idn] += 1 
         return 
-
-    def tmpset_rch_updatepath(self,rci_index,n): 
-        x = [i for i in range(n)]
-        self.rch.updatePath = {rci_index: x}
-        return
-
-    def fetch_varlist_for_idn(self,rci_index,var_idn):
-        if len(self.acc_queue) == 0: 
-            print("[!] none in queue for op.")
-            return 
-        q = self.fetch_mutgen(rci_index)
-        #vl = self.mutgen[rci_index][var_idn]
-        d = q.dim()
-        return np.array(prg_choose_n(self.acc_queue,d,self.prg))
-
-    def mutable2update_list(self): 
-        q = [] 
-        for (i,x) in enumerate(self.mutgen): 
-
-            for x_ in x: 
-                if type(x_) == tuple:
-                    y = self.ctr % x_[1] 
-                    if y == 0: 
-                        q.append((i,x_[0]))
-                else: 
-                    y = self.ctr % x_.update_freq
-                    if y == 0:
-                        q.append((i,'cf'))
-        return q 
-
-    def fetch_mutgen(self,index):
-        q = self.mutgen[index]
-
-        for q_ in q: 
-            if type(q_) == MutableRInstFunction:
-                return q_ 
-        return None 
 
     def __next__(self):
         return -1
