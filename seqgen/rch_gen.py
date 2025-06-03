@@ -177,9 +177,10 @@ class RCHAccuGen:
         self.mutgen[rci_index] |= {var}
 
 
-    def tmpset_rch_updatepath(self,rci_index,n): 
-        x = [i for i in range(n)]
-        self.rch.updatePath = {rci_index: x}
+    def tmpset_rch_updatepath(self,rci_index,q,rf_func=lambda x:x): 
+        self.rch.s[rci_index].updateInfo = [q]
+        self.rch.s[rci_index].updateFunc['rf'] = rf_func
+        self.rch.s[rci_index].updatePath = {'rf': [0]}
         return
 
     def fetch_varlist_for_idn(self,rci_index,var_idn):
@@ -188,6 +189,8 @@ class RCHAccuGen:
             return 
         q = self.fetch_mutgen(rci_index)
         d = q.dim()
+        if var_idn == 'rf':
+            d = d - 1
         return np.array(prg_choose_n(self.acc_queue,d,self.prg))
 
     def mutable2update_list(self): 
@@ -237,8 +240,8 @@ class RCHAccuGen:
 
         # case: update reference value
         if var_idn == 'rf': 
-            self.rch.load_update_vars(q)
-            self.tmpset_rch_updatepath(rci_index,len(q))
+            #self.rch.load_update_vars(q)
+            self.tmpset_rch_updatepath(rci_index,q)
             self.rch.s[rci_index].inst_update_var() 
 
         # case: update function 

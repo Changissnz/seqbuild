@@ -10,7 +10,7 @@ python -m tests.test_rch_gen
 ###
 class RCHGenMethods(unittest.TestCase):
 
-    def test__RCHAccuGen__one_new_RCHAccuGen__v1(self):
+    def test__RCHAccuGen__one_new_RCHAccuGen__v1__case1(self):
         num_nodes = 2
         dim_range = [3,6]
         prg = prg__LCG(3,4,5,33)
@@ -37,6 +37,35 @@ class RCHGenMethods(unittest.TestCase):
         for _ in range(1200): 
             rg.apply(prg())
         assert len(rg.acc_queue) == 1000 
+
+    def test__RCHAccuGen__one_new_RCHAccuGen__v1__case2(self):
+
+        num_nodes = 1
+        dim_range = [3,6]
+        prg = prg__LCG(3,4,5,33)
+        ufreq_range = [2,3]
+        mutrate = 1.0 
+        queue_capacity = 1000 
+
+        rg = RCHAccuGen.one_new_RCHAccuGen__v1(num_nodes,dim_range,prg,\
+                ufreq_range,mutrate,queue_capacity)
+        rch1 = deepcopy(rg.rch)
+
+        x1 = rg.apply(16) 
+        assert len(rg.acc_queue) == 2 
+
+        # test for correct change of function 
+        q1 = rg.rch.s[0].f(34)
+
+        x2 = rg.apply(16) # change function here 
+
+        q2 = rg.rch.s[0].f(34)
+
+        x3 = rg.apply(16)
+
+        assert q1 != q2
+        assert x1 == x2
+        assert x2 != x3 
 
 if __name__ == '__main__':
     unittest.main()

@@ -562,10 +562,23 @@ class LinCombo:
         assert type(x) == np.ndarray
         self.x = x 
 
+    def __str__(self):
+        s = ""
+        L = len(self.x) 
+
+        for i in range(L[:-1]): 
+            j = L - i
+            x = str(self.x[i]) + "X_" + str(j) + " + "
+            s += x
+
+        s += str(self.x[-1])
+        return s 
+
+
     def degree(self): 
         return len(self.x) - 1 
 
     def apply(self,X):
         assert type(X) == np.ndarray 
-        assert len(X) == len(self.x) - 1
+        assert len(X) == len(self.x) - 1, "GOT {} {}".format(len(X),len(self.x))
         return np.dot(X,self.x[:-1]) + self.x[-1]
