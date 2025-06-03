@@ -54,13 +54,15 @@ class MutableRInstFunction:
         return safe_npint32_value(y)
 
 """
+<RCHAccuGen> is shorthand for <RChainHead> accumulating generator. 
 uses an <RChainHead> `rch` to generate integer values according 
 to these specifications: 
 - for every `apply` call, the `rch` processes one integer. 
 - the `rch` is comprised of a variable number of nodes (type<RCInst>), 
   each with either the <LinCombo.apply> or <CEPoly.apply> function as 
   the variable <RCInst.cf>. The nodes are connected via one uni-directional 
-  path. 
+  path. For an `rch` of m nodes, an input value produces (m + 1) values, 
+  one at each of the m nodes and the input value itself. 
 - for each <RCInst>, the variables `cf` (outer function) and `rf` (value, 
   such as integer, vector) are mutable. 
 - the `rf` value (reference value) is used only in the case of <LinCombo>. 
@@ -70,7 +72,7 @@ to these specifications:
   The `dm` function is a pairwise function, first argument an integer and the 
   second a vector. See variable `DM_FUNC_LIST`.
 - in the processing of integer i, the <RCHAccuGen> accumulates values 
-  from `rch.vpath` into its `acc_queue, the vector of values calculated by 
+  from `rch.vpath` into its `acc_queue`, the vector of values calculated by 
   each node <RCInst> in the chain. The output from `i` is another integer `j`, 
   the last element from `rch.vpath` at that point in time. 
 - to update either `rf` or `cf`, values are drawn from `acc_queue` by use of 

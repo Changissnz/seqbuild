@@ -612,7 +612,7 @@ class IntSeq2Tree:
     """
     def factors_for_subset(self,S,sz): 
         f = [] 
-        S = set(S) 
+        S = set(S)         
         while sz > 0: 
             q = self.factor_for_size(sz,self.fs)
             if type(q) == type(None):

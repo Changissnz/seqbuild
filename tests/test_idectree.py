@@ -253,5 +253,32 @@ class IDecTreeMethods(unittest.TestCase):
         q = is2t.root
         assert len(q.children) == 5 
 
+    """
+    capacity test for input magnitude 
+    """
+    def test__IntSeq2Tree__convert__case4(self):     
+        prg = prg__LCG(3,7,9,33)
+        prg2 = prg__n_ary_alternator(-20,30,-19) 
+
+        q = [] 
+        for i in range(50): 
+            q_ = prg()
+            q2_ = prg2() 
+            q.append((q_ * q2_) % 422)
+        q = list(set(q) - {0})
+        
+        ns = IntSeq(q) 
+        l = None#4 
+        d = 6 
+        is2t = IntSeq2Tree(ns,l,d,prg,verbose=True) 
+        is2t.convert()
+
+        ns = IntSeq(q) 
+        l = 4 
+        d = None  
+        is2t = IntSeq2Tree(ns,l,d,prg,verbose=True) 
+        is2t.convert()
+
+
 if __name__ == '__main__':
     unittest.main()
