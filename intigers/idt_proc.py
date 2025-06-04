@@ -32,7 +32,6 @@ class IDTProc:
     def travel_path(self,v,vpath):
 
         xr = self.tn 
-
         def add_entry(v_): 
             # print out first value 
             vx = xr.entryf(v_)

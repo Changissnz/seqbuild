@@ -579,6 +579,7 @@ class LinCombo:
         return len(self.x) - 1 
 
     def apply(self,X):
-        assert type(X) == np.ndarray 
+        #print("XX: ",X)
+        #assert type(X) == np.ndarray 
         assert len(X) == len(self.x) - 1, "GOT {} {}".format(len(X),len(self.x))
         return np.dot(X,self.x[:-1]) + self.x[-1]

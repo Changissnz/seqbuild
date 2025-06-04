@@ -23,9 +23,10 @@ to update itself with.
 """
 class MutableRInstFunction:
 
-    def __init__(self,base_func,update_freq:int): 
+    def __init__(self,base_func,update_freq:int,idn): 
         assert type(base_func) in MRIF_VARMAP
         assert type(update_freq) == int and update_freq >= 0 
+        self.idn = idn 
         self.base_func = base_func 
         self.update_freq = update_freq 
         return
@@ -36,12 +37,10 @@ class MutableRInstFunction:
 
     def update(self,new_var): 
         assert type(new_var) == np.ndarray
-        assert len(new_var) == self.dim()
+        if type(self.base_func) == CEPoly: 
+            new_var = [(c,i) for (c,i) in enumerate(new_var[::-1])][::-1]
+            new_var = np.array(new_var)
 
-        q = getattr(self.base_func,MRIF_VARMAP[type(self.base_func)])
-        if q.ndim == 2: 
-            q[:,0] = new_var
-            new_var = q 
         setattr(self.base_func,MRIF_VARMAP[type(self.base_func)],new_var)
         return
 
@@ -83,7 +82,7 @@ to these specifications:
 class RCHAccuGen: 
 
     def __init__(self,rch,prg,acc_queue=[],\
-        queue_capacity:int=1000):
+        queue_capacity:int=1000,dim_range=(3,8)):
 
         assert type(acc_queue) == list 
         assert type(queue_capacity) == int and queue_capacity > 1
@@ -91,6 +90,7 @@ class RCHAccuGen:
         self.prg = prg 
         self.acc_queue = acc_queue 
         self.qcap = queue_capacity
+        self.dim_range = dim_range
 
         self.mutgen = [set() for _ in range(len(self.rch.s))] 
         self.update_log = defaultdict(defaultdict)
@@ -103,7 +103,6 @@ class RCHAccuGen:
     def apply(self,x): 
         assert is_vector(x) or type(x) in \
             {int,np.int32,np.int64}
-
         self.rch.apply(x)
         vx = deepcopy(self.rch.vpath)
 
@@ -122,6 +121,21 @@ class RCHAccuGen:
         self.update()
         return self.acc_queue[-1] 
 
+    # TODO: test 
+    @staticmethod
+    def generate_n_instances(n,prg,num_nodes_range=[1,12],\
+        dim_range=[3,6],ufreq_range=[2,9],qcap_range=[100,1001]): 
+        
+        rgs = [] 
+        for i in range(n): 
+            num_nodes = modulo_in_range(prg(),num_nodes_range)
+            mutrate = modulo_in_range(prg(),[0,1001])
+            mutrate = mutrate / 1000.0 
+            qcap = modulo_in_range(prg(),qcap_range)
+            rg = RCHAccuGen.one_new_RCHAccuGen__v1(num_nodes,deepcopy(dim_range),\
+                prg,deepcopy(ufreq_range),mutrate,qcap)
+            rgs.append(rg) 
+        return rgs 
 
     @staticmethod
     def one_new_RCHAccuGen__v1(num_nodes,dim_range,prg,\
@@ -133,25 +147,19 @@ class RCHAccuGen:
 
         # declare the generator 
         rg = RCHAccuGen(rch,prg,acc_queue=[],\
-            queue_capacity=queue_capacity)
+            queue_capacity=queue_capacity,dim_range=dim_range)
 
         # choose the candidates to mute
-        Q = []
-        for i in range(num_nodes):
-            Q.append((i,'cf'))
-            Q.append((i,'rf')) 
-
+        Q = [i for i in range(num_nodes)]
         n = int(ceil(mutrate * len(Q)))
         Q_ = prg_choose_n(Q,n,prg,is_unique_picker=True)
 
         for q in Q_: 
             uf = modulo_in_range(prg(),ufreq_range)
-            if q[1] == 'rf': 
-                rg.add_mutable(q[0],(q[1],uf))
-            else: 
-                fx = FX[q[0]]
-                mf = MutableRInstFunction(fx,uf)
-                rg.add_mutable(q[0],mf)
+            fx = FX[q] 
+            mf = MutableRInstFunction(fx,uf,idn=0)
+            rg.add_mutable(q,mf)
+
         return rg 
 
     @staticmethod
@@ -202,49 +210,58 @@ class RCHAccuGen:
     def add_mutable(self,rci_index,var): 
         assert rci_index < len(self.mutgen) and \
             rci_index >= 0
-        assert type(var) == tuple or type(var) == MutableRInstFunction
-        if type(var) == tuple: 
-            assert len(var) == 2 
-            assert var[0] == 'rf' and type(var[1]) == int
+        assert type(var) == MutableRInstFunction
         self.mutgen[rci_index] |= {var}
 
 
     def tmpset_rch_updatepath(self,rci_index,q,rf_func=lambda x:x): 
-        self.rch.s[rci_index].updateInfo = [q]
+        self.rch.s[rci_index].updateInfo = [np.array(q)]
         self.rch.s[rci_index].updateFunc['rf'] = rf_func
         self.rch.s[rci_index].updatePath = {'rf': [0]}
         return
 
-    def fetch_varlist_for_idn(self,rci_index,var_idn):
+    def delta_on_mutgen(self,rci_index,mg,same_dim:bool=False):
         if len(self.acc_queue) == 0: 
             print("[!] none in queue for op.")
             return 
-        q = self.fetch_mutgen(rci_index)
-        d = q.dim()
-        if var_idn == 'rf':
-            d = d - 1
-        return np.array(prg_choose_n(self.acc_queue,d,self.prg))
+
+        assert type(mg) == MutableRInstFunction
+
+        if same_dim:
+            d = mg.dim() 
+        else:
+            d = modulo_in_range(self.prg(),self.dim_range)
+
+        q1 = np.array(prg_choose_n(self.acc_queue,d,self.prg))
+
+        # case: LinCombo, change both 'rf' and 'cf' 
+        if type(mg.base_func) == LinCombo: 
+            d2 = d - 1
+            q2 = np.array(prg_choose_n(self.acc_queue,d2,self.prg))
+            self.tmpset_rch_updatepath(rci_index,q2)
+            self.rch.s[rci_index].inst_update_var() 
+
+        mg.update(q1) 
+        fx = mg.apply
+        self.rch.s[rci_index].update_var('cf',fx)
+        return
 
     def mutable2update_list(self): 
         q = [] 
         for (i,x) in enumerate(self.mutgen): 
 
             for x_ in x: 
-                if type(x_) == tuple:
-                    y = self.ctr % x_[1] 
-                    if y == 0: 
-                        q.append((i,x_[0]))
-                else: 
-                    y = self.ctr % x_.update_freq
-                    if y == 0:
-                        q.append((i,'cf'))
+                y = self.ctr % x_.update_freq
+                if y == 0:
+                    q.append((i,x_.idn))
+
         return q 
 
-    def fetch_mutgen(self,index):
+    def fetch_mutgen(self,index,idn):
         q = self.mutgen[index]
 
         for q_ in q: 
-            if type(q_) == MutableRInstFunction:
+            if q_.idn == idn: 
                 return q_ 
         return None 
 
@@ -265,24 +282,13 @@ class RCHAccuGen:
 
         return 
 
+    """
+    updates values corresponding to a <MutableRInstFunction>
+    """ 
     def update_idn(self,rci_index,var_idn):
-        assert var_idn in {'rf','cf'}
-
-        q = self.fetch_varlist_for_idn(rci_index,var_idn)
-
-        # case: update reference value
-        if var_idn == 'rf': 
-            #self.rch.load_update_vars(q)
-            self.tmpset_rch_updatepath(rci_index,q)
-            self.rch.s[rci_index].inst_update_var() 
-
-        # case: update function 
-        else: 
-            mg = self.fetch_mutgen(rci_index)
-            assert type(mg) != type(None)
-            mg.update(q) 
-            fx = mg.apply
-            self.rch.s[rci_index].update_var(var_idn,fx)
+        # change appropriate functions/values
+        mg = self.fetch_mutgen(rci_index,var_idn)
+        self.delta_on_mutgen(rci_index,mg,same_dim=False)
 
         # edit the update log 
         if rci_index not in self.update_log: 
