@@ -27,7 +27,6 @@ class IDTProc:
     """
     sequence of output values from the `entryf` functions applied 
     on `v` if `v` were to travel the sequence of nodes `vpath`. 
-
     """
     def travel_path(self,v,vpath):
 
