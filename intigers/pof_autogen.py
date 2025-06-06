@@ -12,12 +12,6 @@ from morebs2.numerical_generator import prg__n_ary_alternator
 # num of options 
 DEFAULT_NUM_POLYSIBLING_RANGE = [1,10]
 
-def lcm_times(x0,x1,m): 
-
-    def f(): 
-        return np.lcm(x0,x1) * m 
-    return f 
-
 def safe_power_range_for_base(b,power_range=DEFAULT_POWER_RANGE):
     assert power_range[0] > 0 
     assert power_range[1] > power_range[0] 
