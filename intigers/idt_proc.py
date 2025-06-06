@@ -8,6 +8,68 @@ class IDTProc:
         assert proc_mode in {"T","O+T"}
         self.tn = tn
         self.proc_mode = proc_mode
+        self.flow_queue = set() 
+
+    #----------------------- input-flow processing functions 
+
+    def __next__(self):
+        nfq = set() 
+        vx = [] 
+        dxo = defaultdict(set) 
+        opu = lambda x,x2: x | x2 
+
+        while len(self.flow_queue) > 0:
+            tn = self.flow_queue.pop()
+            vs,dx = self.process_node_queue(tn)
+
+            vx.extend(vs) 
+            dxo = numberdict_op(dxo,dx,opu)
+
+            for k in dx.keys():
+                tn2 = tn.fetch_conn(k)
+                nfq = nfq | {tn2}
+
+        self.flow_queue = nfq
+        self.update_node_queue(dxo)
+        return
+
+    def process_node_queue(self,tn):
+        assert type(tn) == IDecNode
+
+        vs = []
+        dx = defaultdict(set) 
+        for x in tn.acc_queue:
+            q = tn.entryf(x) 
+            vs.append(q)
+
+            q2 = tn.travf.apply(x) 
+            if type(q2) != type(None):
+                dx[q2] |= {x}
+
+        tn.clear() 
+        return vs,dx
+
+    def update_node_queue(self,dx):
+
+        for k,v in dx.items():
+            tn = None
+            for x in self.flow_queue:
+                if x.idn == k:
+                    tn = x
+                    break
+            assert type(tn) != type(None) 
+            tn.add_to_acc_queue(list(v))
+        return
+
+    def inflow_set(self,iset):
+        assert type(iset) == iset
+        self.tn.add_to_acc_queue(list(iset))
+
+        if self.tn not in self.flow_queue:
+            self.flow_queue |= {self.tn}
+        return
+
+    #----------------------- standalone value-processing functions
 
     """
     produce a path that v undergoes starting at `tn`. 

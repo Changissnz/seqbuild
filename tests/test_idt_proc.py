@@ -46,7 +46,7 @@ class IDTProcMethods(unittest.TestCase):
             return rg.apply
 
         is2t = IntSeq2Tree__caseX()
-        qx1,qx2 = TNode.dfs(is2t.root,False,True,True,set_attr=('entryf',set_v))
+        qx1,qx2,_ = TNode.dfs(is2t.root,False,True,True,set_attr=('entryf',set_v))
 
         qx = IDTProc(is2t.root)
         
@@ -78,7 +78,7 @@ class IDTProcMethods(unittest.TestCase):
 
         ###
         is2t = IntSeq2Tree__caseX()
-        qx1,qx2 = TNode.dfs(is2t.root,False,True,True,set_attr=('entryf',set_v))
+        qx1,qx2,_ = TNode.dfs(is2t.root,False,True,True,set_attr=('entryf',set_v))
 
         qx = IDTProc(is2t.root)
 
