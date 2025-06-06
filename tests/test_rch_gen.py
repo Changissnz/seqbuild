@@ -1,14 +1,26 @@
+from intigers.mod_prng import * 
 from seqgen.rch_gen import * 
 from morebs2.numerical_generator import prg__LCG,prg__n_ary_alternator
 
 import unittest
+
+def RCHAccuGen_argseq__caseX():
+    n = 10
+    prg3 = prg__LCG(11,31,17,1500) 
+    num_nodes_range = [2,13] 
+    dim_range = [3,12]
+    ufreq_range = [2,11]
+    qcap_range = [100,1001]
+
+    return n,prg3,num_nodes_range,\
+        dim_range,ufreq_range,qcap_range
 
 ### lone file test 
 """
 python -m tests.test_rch_gen
 """
 ###
-class RCHGenMethods(unittest.TestCase):
+class RCHAccuGenMethods(unittest.TestCase):
 
     def test__RCHAccuGen__one_new_RCHAccuGen__v1__case1(self):
         num_nodes = 2
@@ -100,15 +112,9 @@ class RCHGenMethods(unittest.TestCase):
     def test__RCHAccuGen__generate_n_instances__case1(self):
 
         # set each as RCHAccuGen 
-        n = 10
-        prg3 = prg__LCG(11,31,17,1500) 
-        num_nodes_range = [2,13] 
-        dim_range = [3,12]
-        ufreq_range = [2,11]
-        qcap_range = [100,1001]
-
-        rgs = RCHAccuGen.generate_n_instances(n,prg3,num_nodes_range,\
-        dim_range,ufreq_range,qcap_range)
+        argx = RCHAccuGen_argseq__caseX()
+        rgs = RCHAccuGen.generate_n_instances(argx[0],argx[1],argx[2],\
+            argx[3],argx[4],argx[5])
 
         prg2 = prg__n_ary_alternator(1,15,3)
 
@@ -119,7 +125,25 @@ class RCHGenMethods(unittest.TestCase):
                 y = r.apply(x*2)
                 print("\t ",y)
             print() 
-  
+
+    """
+    uses a <ModPRNGOutputter> to test out output from 10 
+    <RCHAccuGen.apply> instances. 
+    """
+    def test__RCHAccuGen__generate_n_instances__case2(self):
+        argx = RCHAccuGen_argseq__caseX()
+        rgs = RCHAccuGen.generate_n_instances(argx[0],argx[1],argx[2],\
+            argx[3],argx[4],argx[5])
+        rgsf = [rgs_.apply for rgs_ in rgs]
+
+        prg = prg__n_ary_alternator(0,len(rgs),0)
+        mpo = ModPRNGOutputter(rgsf)
+
+        prg2 = prg__LCG(4,-3,11,59)
+        for i in range(10):
+            q = next(mpo)
+            rx = q(prg2()) 
+            assert type(rx) in {int,np.int32} 
 
 if __name__ == '__main__':
     unittest.main()
