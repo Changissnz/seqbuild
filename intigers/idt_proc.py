@@ -1,4 +1,5 @@
 from .idectree import * 
+from types import MethodType 
 
 class IDTProc:
 
@@ -51,14 +52,15 @@ class IDTProc:
     """
     travels `v2` on the path `p` that `v1` 
     takes from `process_value`. Outputs the
-    corresponding `entryf` values. 
+    corresponding `entryf` values, path-isomorphic 
+    to the output of `v1`. 
     """
     def iso_output(self,v1,v2):
         p = self.process_value(v1)
         return self.travel_path(v2,p[1:])
 
     """
-    outputs the map `node idn` -> `number of input elements that traveled it. 
+    outputs the map `node idn` -> `number of input elements that traveled the node`
     """
     def traffic_map(self,S):
         D = defaultdict(int)

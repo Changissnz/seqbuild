@@ -36,7 +36,7 @@ class IDTProcMethods(unittest.TestCase):
         dim_range = [3,10]
         prg = prg__LCG(3,4,5,33)
         ufreq_range = [2,10]
-        mutrate = 0.3#1.0 #0.3 
+        mutrate = 0.3
         queue_capacity = 1000 
 
         rg = RCHAccuGen.one_new_RCHAccuGen__v1(num_nodes,dim_range,prg,\
@@ -66,7 +66,7 @@ class IDTProcMethods(unittest.TestCase):
         dim_range = [3,10]
         prg = prg__LCG(3,4,5,33)
         ufreq_range = [20,30]
-        mutrate = 1.0#1.0 #0.3 
+        mutrate = 1.0 
         queue_capacity = 1000 
 
         rg = RCHAccuGen.one_new_RCHAccuGen__v1(num_nodes,dim_range,prg,\

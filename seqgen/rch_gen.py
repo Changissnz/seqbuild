@@ -82,7 +82,8 @@ to these specifications:
 class RCHAccuGen: 
 
     def __init__(self,rch,prg,acc_queue=[],\
-        queue_capacity:int=1000,dim_range=(3,8)):
+        queue_capacity:int=1000,dim_range=(3,8),\
+        output_range=DEFAULT_RCH_ACCUGEN_RANGE):
 
         assert type(acc_queue) == list 
         assert type(queue_capacity) == int and queue_capacity > 1
@@ -91,6 +92,7 @@ class RCHAccuGen:
         self.acc_queue = acc_queue 
         self.qcap = queue_capacity
         self.dim_range = dim_range
+        self.output_range = DEFAULT_RCH_ACCUGEN_RANGE
 
         self.mutgen = [set() for _ in range(len(self.rch.s))] 
         self.update_log = defaultdict(defaultdict)
@@ -109,12 +111,12 @@ class RCHAccuGen:
         for v in self.rch.vpath: 
             if type(v) != np.ndarray: 
                 v = safe_npint32_value(v) 
-                v = modulo_in_range(v,DEFAULT_RCH_ACCUGEN_RANGE) 
+                v = modulo_in_range(v,self.output_range) 
                 self.acc_queue.append(v)
             else: 
                 v = v.flatten() 
                 v = safe_npint32_vec(v) 
-                v = [modulo_in_range(v_,DEFAULT_RCH_ACCUGEN_RANGE) \
+                v = [modulo_in_range(v_,self.output_range) \
                     for v_ in v] 
                 self.acc_queue.extend(v) 
         self.ctr += 1 
