@@ -1,5 +1,5 @@
 from seqgen.rch_gen import * 
-from morebs2.numerical_generator import prg__LCG 
+from morebs2.numerical_generator import prg__LCG,prg__n_ary_alternator
 
 import unittest
 
@@ -93,6 +93,33 @@ class RCHGenMethods(unittest.TestCase):
         # check for correct number of <MutableRInstFunction>
         c = len([m for m in rg.mutgen if m != set()])
         assert c == 3
+
+    """
+    inconclusive test, mainly for demonstrating output values. 
+    """
+    def test__RCHAccuGen__generate_n_instances__case1(self):
+
+        # set each as RCHAccuGen 
+        n = 10
+        prg3 = prg__LCG(11,3,7,150) 
+        num_nodes_range = [2,13] 
+        dim_range = [3,12]
+        ufreq_range = [2,11]
+        qcap_range = [100,1001]
+
+        rgs = RCHAccuGen.generate_n_instances(n,prg3,num_nodes_range,\
+        dim_range,ufreq_range,qcap_range)
+
+        prg2 = prg__n_ary_alternator(1,15,3)
+
+        for _ in range(10):
+            x = prg2()
+            print("input: ",x*2) 
+            for (i,r) in enumerate(rgs):
+                y = r.apply(x*2)
+                print("\t ",y)
+            print() 
+  
 
 if __name__ == '__main__':
     unittest.main()
