@@ -101,7 +101,7 @@ class RCHGenMethods(unittest.TestCase):
 
         # set each as RCHAccuGen 
         n = 10
-        prg3 = prg__LCG(11,3,7,150) 
+        prg3 = prg__LCG(11,31,17,1500) 
         num_nodes_range = [2,13] 
         dim_range = [3,12]
         ufreq_range = [2,11]
