@@ -1,5 +1,9 @@
 from types import MethodType,FunctionType
 
+"""
+outputs a function for every `next` call, according to 
+the counter `i` modulated by |prngs|. 
+"""
 class ModPRNGOutputter:
 
     def __init__(self,prngs):

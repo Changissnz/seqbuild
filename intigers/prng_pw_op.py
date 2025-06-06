@@ -1,5 +1,9 @@
 from types import MethodType,FunctionType
 
+"""
+for every pair of input integers (x1,x2), chooses 
+an operator O using `prg` and outputs O(x1,x2). 
+"""
 class PRNGPairwiseOp:
 
     def __init__(self,operators,prg):
