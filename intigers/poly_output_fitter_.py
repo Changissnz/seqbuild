@@ -34,7 +34,6 @@ DEFAULT_MAXBASE4POW = lambda p: min_base4pow_geq(NPINT32_MAX,p)
 DEFAULT_COEFF_RANGE = [-996,1001]
 DEFAULT_POWER_RANGE = [2,10]
 
-# TODO: test 
 def DEFAULT_MAXPOW4BASE(b,max_pow=DEFAULT_POWER_RANGE[1]): 
     assert max_pow > 0 
     if b == 1: return max_pow

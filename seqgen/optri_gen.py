@@ -145,7 +145,6 @@ class OpTri45N90Split:
 
         return deepcopy(start_seq)
 
-    # TODO: test 
     def to_matrix(self): 
         d = self.degree() 
         c = len(self.split[1]) 
@@ -171,7 +170,6 @@ class OpTri45N90Split:
             p90.extend(self.derivative_seqs[i])
         return OpTri45N90Split((p45,p90),self.opfunc)
 
-# TODO: test 
 """
 Given an <OpTri> upper-right hand triangular matrix `m`, 
 flip `m` by the 0-axis or the 1-axis. 
@@ -289,7 +287,6 @@ class OpTriFlipDerivation:
             self.opfunc,self.axis)
         return otfd 
      
-# TODO: test 
 class OpTriGen:
 
     def __init__(self,intseed,m,prg,gentype:int,\
@@ -395,7 +392,6 @@ class OpTriGen:
         
 
     #-------------------- generator type #1: Jagged 45-90 Split 
-    # TODO: test this section. 
 
     def jagged_split_(self,row_indices,split_index): 
         l = []
@@ -474,7 +470,6 @@ class OpTriGen:
         return
 
     #------------------------- generator type #2: Flip-Derivation 
-    # TODO: test this section. 
 
     def set_otfd(self): 
         if type(self.prg) == type(None): 

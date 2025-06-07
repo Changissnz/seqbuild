@@ -75,7 +75,6 @@ class MDRGen:
 
     #--------------- methods for generator type 2 -----------------# 
     
-    # TODO: test 
     """
     """
     def next_gentype2(self): 

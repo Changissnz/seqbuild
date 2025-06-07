@@ -388,7 +388,6 @@ class IntSeq2Tree:
 
     #---------------------- main splitting function
 
-    # TODO: test. 
     def split_node(self,node,partition=None):
         if len(node.acc_queue) < 2:
             return 
@@ -726,7 +725,6 @@ class IntSeq2Tree:
 
         return travf 
     
-    # TODO: test 
     def poly_subset_bclassifier(self,S,class_size:int):
         assert len(S) >= class_size
         assert class_size >= 2

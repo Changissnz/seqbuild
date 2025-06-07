@@ -76,6 +76,31 @@ class IDTProc:
 
     #----------------------- standalone value-processing functions
 
+    # TODO: test 
+    """
+    D is a map of 
+        node idn -> list of input values. 
+
+    return: 
+    - list, element is (input,output)
+    """
+    def splat_process(self,D):
+        ks = sorted(D.keys())
+        _,_,nodes = TNode.dfs(self.tn,False,False,True,None,set(ks))
+        dnodes = {}
+        for n in nodes: dnodes[n.idn] = n 
+
+        L = []
+        for k in ks:
+            v = D[k]
+            assert type(v) == list 
+
+            n = dnodes[k]
+            for v_ in v:
+                q = n.travf.apply(v_)
+                L.append((k,q))
+        return L  
+
     """
     produce a path that v undergoes starting at `tn`. 
     """
