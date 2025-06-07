@@ -6,6 +6,7 @@ class IDTProc:
     def __init__(self,tn,proc_mode="T"): 
         assert type(tn) == IDecNode
         assert proc_mode in {"T","O+T"}
+        tn.full_clear() 
         self.tn = tn
         self.proc_mode = proc_mode
         self.flow_queue = set() 
@@ -14,15 +15,21 @@ class IDTProc:
 
     def __next__(self):
         nfq = set() 
-        vx = [] 
+        vx = defaultdict(list)
         dxo = defaultdict(set) 
-        opu = lambda x,x2: x | x2 
+
+        def opu(x,x2):
+            if x == 0:
+                return x2
+            elif x2 == 0: 
+                return x
+            return x | x2
 
         while len(self.flow_queue) > 0:
             tn = self.flow_queue.pop()
             vs,dx = self.process_node_queue(tn)
 
-            vx.extend(vs) 
+            vx[tn.idn] = vs
             dxo = numberdict_op(dxo,dx,opu)
 
             for k in dx.keys():
@@ -31,7 +38,7 @@ class IDTProc:
 
         self.flow_queue = nfq
         self.update_node_queue(dxo)
-        return
+        return vx 
 
     def process_node_queue(self,tn):
         assert type(tn) == IDecNode
@@ -57,16 +64,14 @@ class IDTProc:
                 if x.idn == k:
                     tn = x
                     break
-            assert type(tn) != type(None) 
+            assert type(tn) != type(None)
             tn.add_to_acc_queue(list(v))
         return
 
     def inflow_set(self,iset):
-        assert type(iset) == iset
+        assert type(iset) == set
         self.tn.add_to_acc_queue(list(iset))
-
-        if self.tn not in self.flow_queue:
-            self.flow_queue |= {self.tn}
+        self.flow_queue |= {self.tn}
         return
 
     #----------------------- standalone value-processing functions

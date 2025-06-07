@@ -61,6 +61,16 @@ class IDecNode(TNode):
 
     #----------------------- var-setter functions 
 
+    def full_clear(self):
+        qx = [self]
+
+        while len(qx) > 0:
+            qx2 = []
+            for x in qx:
+                x.clear()
+                qx2.extend(x.children)
+            qx = qx2
+
     def clear(self): 
         self.acc_queue.clear() 
         if type(self.travf) != type(None): 
@@ -545,7 +555,6 @@ class IntSeq2Tree:
             cx2.add_to_acc_queue(aqueue)
             cx.add_children([cx2]) 
             cx.set_travf(travf) 
-
             cx = cx2
             stat = len(cx2.acc_queue) >= 2 
 

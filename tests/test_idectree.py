@@ -91,7 +91,7 @@ class IDecTreeMethods(unittest.TestCase):
         dx = defaultdict(int)
         for e in elem:
             dx[tn2.travf.apply(e)] += 1 
-        assert dx == {None:1,2:3} 
+        assert dx == {None:1,2:3}, "got {}".format(dx) 
 
         tn3 = tn2.children[0]
         dx = defaultdict(int)
@@ -167,7 +167,7 @@ class IDecTreeMethods(unittest.TestCase):
         is2t = IntSeq2Tree(IntSeq(L),l,d,prng,verbose=False)
         is2t.convert()
         q = is2t.root
-        dr,depth = TNode.dfs(q,display=False,collect=True,reset_index=True)
+        dr,depth,_ = TNode.dfs(q,display=False,collect=True,reset_index=True)
 
         D = {}
         for x in L: 
@@ -208,7 +208,7 @@ class IDecTreeMethods(unittest.TestCase):
         is2t.convert()
 
         q = is2t.root
-        dr,depth = TNode.dfs(q,display=False,collect=True,reset_index=True)
+        dr,depth,_ = TNode.dfs(q,display=False,collect=True,reset_index=True)
         assert depth == 4 
 
         D = {480: 1, 320: 1, 6400: 1, 1280: 1, 804: 5, \
@@ -228,7 +228,7 @@ class IDecTreeMethods(unittest.TestCase):
         is2t.convert()
 
         q = is2t.root
-        dr,depth = TNode.dfs(q,display=False,collect=True,reset_index=True)
+        dr,depth,_ = TNode.dfs(q,display=False,collect=True,reset_index=True)
         assert depth == 4 
 
     """
