@@ -22,6 +22,9 @@ class IntSeq:
             return x
         raise StopIteration
 
+    def __str__(self):
+        return str(self.l)
+
     def load(self):
         if type(self.l) == type(None): 
             self.l = np.array([],"int32")

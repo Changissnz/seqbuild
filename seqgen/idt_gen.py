@@ -1,5 +1,6 @@
 from intigers.mod_prng import *
 from intigers.idt_proc import * 
+from intigers.extraneous import * 
 
 DEFAULT_FOREST_NEWSEQ_NUMCENTERS = [2,15]
 DEFAULT_FOREST_NEWSEQ_MULTRANGE = [-20,20]
@@ -72,7 +73,7 @@ class IDecForest:
         # fetch the centers, each a factor
         isfso = ISFactorSetOps(S.l,int_limit=NPINT32_MAX)
         isfso.factor_count_()
-        q = isfso.dsort(keys=None)
+        q = isfso.dsort(pkeys=None)
 
         cx = []
         while c_ > 0:
@@ -87,9 +88,10 @@ class IDecForest:
         rx = modulo_in_range(prg(),[0,1001])
         rx = rx / 1000.0 
 
-        iseq = prg__integer_seq__mult(n,cx,rx,None,\
+        iseq,_ = prg__integer_seq__mult(n,cx,rx,None,\
             DEFAULT_FOREST_NEWSEQ_MULTRANGE,prg,\
             num_attempts_per_nc=150)
+
         iseq = intlist_no_dups_no_zero(iseq)
         return IntSeq(iseq)
 

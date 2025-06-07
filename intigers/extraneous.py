@@ -149,6 +149,9 @@ def prg__integer_sets__mult(n,c,r,crange,mrange,prg,\
             maxie = max(maxie,c_) 
     else: 
         qx = [[c_] for c_ in c]
+        centers = c 
+        minnie = min(centers)
+        maxie = max(centers)
         
     # get ratio of remaining elements that will not be a multiple of
     # any center 
@@ -166,6 +169,8 @@ def prg__integer_sets__mult(n,c,r,crange,mrange,prg,\
 
         minnie = min(minnie,q)
         maxie = max(maxie,q) 
+
+    maxie = maxie + 1 if maxie == minnie else maxie 
 
     # assign values that are not divisible by any centers
     # except for 1 and 2
