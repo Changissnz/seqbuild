@@ -2,6 +2,9 @@ from .process_seq import *
 from mini_dm.minmax_freq import * 
 from copy import deepcopy 
 
+def intlist_no_dups_no_zero(il):
+    return sorted(list(set(il) - {0}))
+
 class IntSeq:
 
     def __init__(self,l):

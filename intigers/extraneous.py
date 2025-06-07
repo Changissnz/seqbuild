@@ -104,13 +104,18 @@ NOTE: there is a non-null probability the algorithm does not produce the
 """
 def prg__integer_sets__mult(n,c,r,crange,mrange,prg,\
     num_attempts_per_nc):
+    assert type(n) == int and type(r) == float 
+    assert type(c) in {int,list} 
 
-    assert type(n) == int and type(c) == int and type(r) == float 
-    assert n >= c and c > 0
+    lc = c if type(c) == int else len(c) 
+    assert n >= lc and lc > 0
     assert r >= 0.0 and r <= 1.0 
 
-    assert len(crange) == 2
-    assert crange[0] < crange[1] and mrange[0] < mrange[1]
+    if type(c) == int:
+        assert len(crange) == 2
+        assert crange[0] < crange[1] 
+        
+    assert mrange[0] < mrange[1]
 
     def not_divisible_by_centers(ix,C):
 
@@ -135,19 +140,22 @@ def prg__integer_sets__mult(n,c,r,crange,mrange,prg,\
     maxie = -float('inf')
 
     # declare the centers
-    for _ in range(c):
-        c_ = modulo_in_range(prg(),crange)
-        qx.append([c_])
-        centers.append(c_)
-        minnie = min(minnie,c_)
-        maxie = max(maxie,c_) 
+    if type(c) == int: 
+        for _ in range(c):
+            c_ = modulo_in_range(prg(),crange)
+            qx.append([c_])
+            centers.append(c_)
+            minnie = min(minnie,c_)
+            maxie = max(maxie,c_) 
+    else: 
+        qx = [[c_] for c_ in c]
         
     # get ratio of remaining elements that will not be a multiple of
     # any center 
-    l = int(ceil((n - c) * r))
+    l = int(ceil((n - lc) * r))
 
     # assign values from `prg` to the centers
-    rl = n - c - l
+    rl = n - lc - l
     for _ in range(rl):
         ci = prg() % len(centers)
         ctr = centers[ci]
