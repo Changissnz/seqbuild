@@ -25,6 +25,17 @@ class IntSeq:
     def __str__(self):
         return str(self.l)
 
+    def __min__(self):
+        return min(self.l)
+    
+    def __max__(self):
+        return max(self.l)
+
+    def __add__(self,x):
+        assert type(x) in {np.ndarray,np.int32,int}
+        L2 = self.l + x 
+        return IntSeq(L2)
+
     def load(self):
         if type(self.l) == type(None): 
             self.l = np.array([],"int32")
