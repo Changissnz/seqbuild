@@ -1,16 +1,24 @@
 from intigers.mod_prng import *
 from intigers.idt_proc import * 
 from intigers.extraneous import * 
+from morebs2.numerical_generator import prg_seqsort
 
 DEFAULT_FOREST_NEWSEQ_NUMCENTERS = [2,15]
 DEFAULT_FOREST_NEWSEQ_MULTRANGE = [-20,20]
 
 class IDecForest: 
 
-    def __init__(self,s,prng_outputter,cache_size,prg,prg2=None):
+    def __init__(self,s,prng_outputter,cache_size,reprod_rate_range,\
+        tree_cap:int,prg,prg2=None):
         assert type(s) == IntSeq
         assert len(s) >= 5 
         assert type(prng_outputter) == ModPRNGOutputter
+        assert reprod_rate_range[0] < reprod_rate_range[1] 
+        assert reprod_rate_range[0] > 0 
+        assert type(reprod_rate_range[0]) == type(reprod_rate_range[1])
+        assert type(reprod_rate_range[0]) == int 
+        assert tree_cap > 0 and type(tree_cap) == int 
+
         self.ST = []
         self.S = s
         
@@ -21,9 +29,28 @@ class IDecForest:
             IDecForest.default_IDecForest_integer_range(min(self.S),max(self.S))
         self.T = None 
         self.mpo = prng_outputter
+        # ? 
+        self.queue = []
         self.cache_size = cache_size
+        self.reprod_rate_range = reprod_rate_range
+        self.tree_cap = tree_cap 
         self.prg = prg 
         self.prg2 = prg2
+        self.next_reprod = None 
+
+    def __next__(self): 
+        if len(self.queue) == 0: 
+            # case: initialize
+            if len(self.ST) == 0: 
+                self.one_tree() 
+
+            # choose a tree
+            q = self.prg() % len(self.ST)
+            t = self.ST[q][1] 
+
+            # choose a sequence to process
+            return -1 
+        return -1 
 
     """
     outputs n values
@@ -95,9 +122,10 @@ class IDecForest:
                 l = len(q)
                 v = [modulo_in_range(px(),self.default_integer_range) \
                     for _ in range(len(q))]
+                v = np.array(v,dtype=np.int32)
                 q = q + v
                 v2 = [modulo_in_range(v_,self.default_integer_range) \
-                    for _ in range(len(q))]
+                    for v_ in q]
                 q = IntSeq(v2) 
         return q 
 
@@ -145,7 +173,7 @@ class IDecForest:
 
         qs = []
         for s in S: 
-            _,vs = itp.process_value(s)
+            _,vs = itp.process_value(s,True)
             qs.extend(vs)
         return qs 
 
@@ -157,7 +185,7 @@ class IDecForest:
         qs = []
         for (i,s2) in enumerate(S2): 
             s1 = S[i % len(S)]
-            qs_ = itp.iso_output(v1,s2)
+            qs_ = itp.iso_output(s1,s2)
             qs.extend(qs_)
         return qs 
 
@@ -170,12 +198,12 @@ class IDecForest:
 
         # shuffle the sequence
         i2 = list(S.l)
-        i2 = prg_seqsort(i2,px) 
+        i2 = prg_seqsort(i2,self.prg)  
 
         # get the max frequency for calling `inflow_set` 
         _,depth,_ = TNode.dfs(T,display=False,\
             collect=True,reset_index=True,set_attr=None,\
-            fetch_set=set())
+            fetch_set=set())        
         depth_range = [1,depth+1]
         if depth_range[0] == depth_range[1]: 
             depth_range[1] += 1 
@@ -188,7 +216,8 @@ class IDecForest:
         for p in prt:
             st = i2[s:s+p]
             dt = modulo_in_range(self.prg(),depth_range)
-            qr,stat = self.process_one_partition_set__inflow(itp,st,num_rounds=dt)
+            qr,stat = self.process_one_partition_set__inflow(itp,\
+                set(st),num_rounds=dt)
             qrs.extend(qr) 
             s = s + p
 
@@ -207,11 +236,11 @@ class IDecForest:
         qr = [] 
         stat = False
         while c < num_rounds:
-            qr = next(itp)
-            if len(qr) == 0: 
+            qrx = next(itp)
+            if len(qrx) == 0: 
                 stat = True
                 break
-            qr_ = IDecForest.default_IDecForest_shuffle_dictoutput(qr,self.prg)
+            qr_ = IDecForest.default_IDecForest_shuffle_dictoutput(qrx,self.prg)
             qr.extend(qr_)
             c += 1 
 

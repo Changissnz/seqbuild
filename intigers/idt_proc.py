@@ -53,6 +53,9 @@ class IDTProc:
             q = tn.entryf(x) 
             vs.append(q)
 
+            if type(tn.travf) == type(None):
+                continue 
+
             q2 = tn.travf.apply(x) 
             if type(q2) != type(None):
                 dx[q2] |= {x}

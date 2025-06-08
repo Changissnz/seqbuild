@@ -4,17 +4,6 @@ from morebs2.numerical_generator import prg__LCG,prg__n_ary_alternator
 
 import unittest
 
-def RCHAccuGen_argseq__caseX():
-    n = 10
-    prg3 = prg__LCG(11,31,17,1500) 
-    num_nodes_range = [2,13] 
-    dim_range = [3,12]
-    ufreq_range = [2,11]
-    qcap_range = [100,1001]
-
-    return n,prg3,num_nodes_range,\
-        dim_range,ufreq_range,qcap_range
-
 ### lone file test 
 """
 python -m tests.test_rch_gen

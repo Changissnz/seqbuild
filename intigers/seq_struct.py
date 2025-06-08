@@ -42,6 +42,9 @@ class IntSeq:
         return len(self.l)
 
     def __getitem__(self,i):
+
+        if isinstance(i, slice): 
+            return self.l.__getitem__(i)    
         assert i < len(self) 
         return self.l[i]  
 
