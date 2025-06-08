@@ -621,9 +621,15 @@ class IntSeq2Tree:
     def factors_for_subset(self,S,sz): 
         f = [] 
         S = set(S)         
-        while sz > 0: 
+        while sz > 0 and len(S) > 0: 
             q = self.factor_for_size(sz,self.fs)
             if type(q) == type(None):
+                print("ERROR? ")
+                print(S)
+                print()
+                print(sz)
+                print()
+                print(self.fs) 
                 raise ValueError("something wrong: num factors {} sz req {}".format(len(self.fs),sz))
                 break 
             factor = self.fs.pop(q) 
@@ -710,7 +716,7 @@ class IntSeq2Tree:
         l = len(partition) if not last_subset_isneg \
             else len(partition) - 1
 
-        travf = IDecNodeTravFunc() 
+        travf = IDecNodeTravFunc()
         for i in range(l): 
             p = partition[i] 
             bfunc,q = self.poly_subset_bclassifier(S,p)

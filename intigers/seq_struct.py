@@ -9,7 +9,7 @@ def intlist_no_dups_no_zero(il):
 prg is used to decide between neg. and pos. 
 in the case of 
 """
-def intlist_no_dups_no_zero_abs(il,prg): 
+def intlist_no_dups_no_zero_abs(il,prg,exclude_one:bool=True): 
     il2 = intlist_no_dups_no_zero(il)
     negs = set(il2) - set(np.abs(il2))
 
@@ -23,6 +23,9 @@ def intlist_no_dups_no_zero_abs(il,prg):
             il2 -= {n}
         else: 
             il2 -= {-n}
+
+    if exclude_one: 
+        il2 -= {1,-1} 
     return sorted(list(il2))
 
 class IntSeq:

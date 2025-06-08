@@ -279,6 +279,18 @@ class IDecTreeMethods(unittest.TestCase):
         is2t = IntSeq2Tree(ns,l,d,prg,verbose=True) 
         is2t.convert()
 
+    """
+    capacity test #2 for input magnitude 
+    """
+    def test__IntSeq2Tree__convert__case5(self):
+        from random import randrange 
+
+        qx = np.unique([randrange(2,20000) for _ in range(100)])
+        iq = IntSeq(qx)
+        prg1 = prg__LCG(13,87,2011,500)
+        is2t = IntSeq2Tree(iq,2,None,prg1,verbose=True) 
+        is2t.convert()
+
 
 if __name__ == '__main__':
     unittest.main()
