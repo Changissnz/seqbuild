@@ -46,9 +46,9 @@ class IDecForestMethods(unittest.TestCase):
 
         _,q = IDecForest_sampleZ()
 
-        assert len(q[0]) == 22
-        assert len(q[1]) == 52 
-        assert len(q[2]) == 20 
+        assert len(q[0]) == 60, "Q0: {}".format(len(q[0])) 
+        assert len(q[1]) == 18, "Q1: {}".format(len(q[1]))  
+        assert len(q[2]) == 20, "Q2: {}".format(len(q[2])) 
         return 
 
 
@@ -68,10 +68,39 @@ class IDecForestMethods(unittest.TestCase):
         qx2 = idf.process_seq_at_tree__iso_sequential(x2,x1_,x3)
         qx3 = idf.process_seq_at_tree__inflow(x2,x1)
 
-        #assert len(qx) == 182 
-        #assert len(qx2) == 109
-        #assert len(qx3) == 205 
+        assert len(qx) == 90, "got {}".format(len(qx))
+        assert len(qx2) == 207, "got {}".format(len(qx2))
+        assert len(qx3) == 127, "got {}".format(len(qx3))
+
+        prg3 = prg__LCG(31,83,311,1500)
+        ql = list(x1.l)
+        ql = prg_seqsort(ql,prg3)
+        x1_ = IntSeq(ql)
+        qx4 = idf.process_seq_at_tree__iso_sequential(x2,x1_,x1)
+        assert len(qx4) == len(qx3)
         return 
+
+    def test__IDecForest__process_seq_at_tree__case2(self): 
+        idf,q = IDecForest_sampleZ()
+        idf.one_tree() 
+        x1,x2 = idf.ST[0] 
+        qx1 = idf.process_seq_at_tree__splat(x2,x1)
+        qx2 = idf.process_seq_at_tree__splat(x2,x1)
+        qx3 = idf.process_seq_at_tree__splat(x2,x1)
+
+        assert len(qx1) == 19 
+        assert len(qx1) == len(qx2) 
+        assert len(qx2) == len(qx3)
+        return
+
+    def test__IDecForest__next__case1(self): 
+
+        idf,q = IDecForest_sampleZ()
+
+        print("DISPLAY TEST")
+        for _ in range(1000): 
+            x = next(idf)
+    
 
 if __name__ == '__main__':
     unittest.main()

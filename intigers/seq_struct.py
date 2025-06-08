@@ -5,6 +5,26 @@ from copy import deepcopy
 def intlist_no_dups_no_zero(il):
     return sorted(list(set(il) - {0}))
 
+"""
+prg is used to decide between neg. and pos. 
+in the case of 
+"""
+def intlist_no_dups_no_zero_abs(il,prg): 
+    il2 = intlist_no_dups_no_zero(il)
+    negs = set(il2) - set(np.abs(il2))
+
+    if len(negs) == 0: return il2
+
+    il2 = set(il2)
+    for n in negs:
+        q = prg() % 2
+
+        if q: 
+            il2 -= {n}
+        else: 
+            il2 -= {-n}
+    return sorted(list(il2))
+
 class IntSeq:
 
     def __init__(self,l):

@@ -68,7 +68,7 @@ class POFV2ConditionAutoGen:
 
     # NOTE: caution required for large integers. Their exponential
     #       values are not suited for program. 
-    def POFV2_to_POFV1_siblings(self,pofv2,sibling_integers): 
+    def POFV2_to_POFV1_siblings(self,pofv2,sibling_integers,adjust_excess=False): 
 
         for s in sibling_integers: assert type(s) in {int,np.int32,np.int64} 
 
@@ -80,7 +80,8 @@ class POFV2ConditionAutoGen:
             pwrange = safe_power_range_for_base(s)
 
             n = modulo_in_range(self.prg(),pwrange)
-            pofv1 = PolyOutputFitterVar1(n,s,c,self.prg,default_sizemod=False)
+            pofv1 = PolyOutputFitterVar1(n,s,c,self.prg,default_sizemod=False,\
+                adjust_excess=adjust_excess)
             pofv1.solve() 
             q.append(pofv1)
             solvestat.append(pofv1.is_solved()) 

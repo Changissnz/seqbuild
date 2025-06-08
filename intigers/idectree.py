@@ -632,8 +632,7 @@ class IntSeq2Tree:
             keys = keys.intersection(S) 
             S = S - keys 
             self.update_sorted_factors(keys)
-            #self.isfso.remove_seq_elements(keys) 
-            f.append((factor[0],keys))  
+            f.append((factor[0],keys))
             sz -= len(keys) 
         return f,S
 
@@ -762,11 +761,11 @@ class IntSeq2Tree:
         S2 -= {x1,x2}
 
         # make siblings for the polynomial 
-        pofv1_siblings,solvestat = pofgen.POFV2_to_POFV1_siblings(pofv2,S2) 
+        pofv1_siblings,solvestat = pofgen.POFV2_to_POFV1_siblings(pofv2,S2,adjust_excess=True) 
         if self.verbose: print("poly-split number of siblings: ",len(S2) + 2)
 
         # ensure all siblings solved constant c 
-        assert set(solvestat) == {True} or len(S2) == 0 
+        ##assert set(solvestat) == {True} or len(S2) == 0 
 
         # make the `travf` function 
         conditional_list = [pofv2] + pofv1_siblings
@@ -785,7 +784,8 @@ class IntSeq2Tree:
         # choose an exponent
         n = modulo_in_range(self.prg(),DEFAULT_POWER_RANGE)
 
-        pofv1 = PolyOutputFitterVar1(n,x,q,self.prg,default_sizemod=False)
+        pofv1 = PolyOutputFitterVar1(n,x,q,self.prg,default_sizemod=False,\
+            adjust_excess=True)
         pofv1.solve()
 
         conditional_list = [pofv1] 

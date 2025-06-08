@@ -6,11 +6,16 @@ from .seq_struct import *
 
 DEFAULT_INT_MAX_THRESHOLD = 10 ** 6 
 
+# NOTE: outputs only positive factors 
 def factors_of_seq(seq): 
     assert type(seq) == IntSeq
     S = [] 
-    for n in seq.l:      
-        S.append(all_multiples(n)) 
+    for n in seq.l:
+        m = all_multiples(n) 
+        m = np.array(list(m))
+        m = np.abs(m) 
+        m = set(m) 
+        S.append(m) 
     return S 
 
 def intersection_disjunction__seq_factors(ms): 

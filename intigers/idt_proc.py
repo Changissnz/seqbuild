@@ -89,9 +89,10 @@ class IDTProc:
         node idn -> list of input values. 
 
     return: 
-    - list, element is (input,output)
+    - list, element is (input,output) if output_type == 1 else output
     """
-    def splat_process(self,D):
+    def splat_process(self,D,output_type=0):
+        assert output_type in {0,1}
         ks = sorted(D.keys())
         _,_,nodes = TNode.dfs(self.tn,False,False,True,None,set(ks))
         dnodes = {}
@@ -104,8 +105,11 @@ class IDTProc:
 
             n = dnodes[k]
             for v_ in v:
-                q = n.travf.apply(v_)
-                L.append((k,q))
+                q = n.entryf(v_)
+                if output_type == 0: 
+                    L.append(q)
+                else: 
+                    L.append((k,q))
         return L  
 
     """

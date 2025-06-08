@@ -1,7 +1,7 @@
 from intigers.mod_prng import *
 from intigers.idt_proc import * 
 from intigers.extraneous import * 
-from morebs2.numerical_generator import prg_seqsort
+from morebs2.numerical_generator import prg_seqsort,prg_choose_n
 
 DEFAULT_FOREST_NEWSEQ_NUMCENTERS = [2,15]
 DEFAULT_FOREST_NEWSEQ_MULTRANGE = [-20,20]
@@ -9,7 +9,7 @@ DEFAULT_FOREST_NEWSEQ_MULTRANGE = [-20,20]
 class IDecForest: 
 
     def __init__(self,s,prng_outputter,cache_size,reprod_rate_range,\
-        tree_cap:int,prg,prg2=None):
+        tree_cap:int,prg,prg2=None,verbose:bool = True):
         assert type(s) == IntSeq
         assert len(s) >= 5 
         assert type(prng_outputter) == ModPRNGOutputter
@@ -36,13 +36,16 @@ class IDecForest:
         self.tree_cap = tree_cap 
         self.prg = prg 
         self.prg2 = prg2
+        self.verbose = verbose 
         self.next_reprod = None 
         self.reprod_ctr = None
+        self.reset_reprod_ctr()
 
     """
     main method: test 
     """
     def __next__(self): 
+
         if len(self.queue) == 0: 
             # case: initialize
             if len(self.ST) == 0: 
@@ -51,10 +54,13 @@ class IDecForest:
             # choose a tree
             q = self.prg() % len(self.ST)
             T = self.ST[q][1] 
+            if self.verbose: print("choose tree")
 
             # choose a sequence to process
             seqtype = self.prg() % 3
             S = self.one_new_IntSeq(seqtype)
+            
+            if self.verbose: print("new seq: ",S) 
 
             # choose a process type
             proctype = self.prg() % 4
@@ -70,6 +76,9 @@ class IDecForest:
         if self.reprod_ctr >= self.next_reprod:
             seqtype = self.prg() % 3
             self.S = self.one_new_IntSeq(seqtype)
+            if self.verbose: 
+                print("reproducing @: ",self.reprod_ctr)
+                print("seq: ",self.S)
             self.one_tree()
             self.reset_reprod_ctr()
 
@@ -105,7 +114,8 @@ class IDecForest:
             d = q     
 
         prgx = self.prg2 if type(self.prg2) != type(None) else self.prg 
-        cnvrt = IntSeq2Tree(I,l,q,prgx)
+        
+        cnvrt = IntSeq2Tree(I,l,d,prgx,verbose=False)
         cnvrt.convert()
 
         # set the `entryf` functions for the new tree 
@@ -134,7 +144,7 @@ class IDecForest:
             for _ in range(l2):
                 n2 = modulo_in_range(px(),self.default_integer_range)
                 q.append(n2) 
-            q = intlist_no_dups_no_zero(q)
+            q = intlist_no_dups_no_zero_abs(q,px)
             q = IntSeq(q) 
         else: 
             # choose a sequence 
@@ -152,6 +162,7 @@ class IDecForest:
                 q = q + v
                 v2 = [modulo_in_range(v_,self.default_integer_range) \
                     for v_ in q]
+                v2 = intlist_no_dups_no_zero_abs(v2,px)
                 q = IntSeq(v2) 
         return q 
 
@@ -187,7 +198,7 @@ class IDecForest:
             DEFAULT_FOREST_NEWSEQ_MULTRANGE,prg,\
             num_attempts_per_nc=150)
 
-        iseq = intlist_no_dups_no_zero(iseq)
+        iseq = intlist_no_dups_no_zero_abs(iseq,prg)
         return IntSeq(iseq)
 
     #------------------------ output generation
@@ -195,6 +206,7 @@ class IDecForest:
     def process_seq_at_tree(self,T,S,proc_type):
         assert proc_type in {0,1,2,3}
 
+        if self.verbose: print("proc type: ",proc_type)
         if proc_type == 1:
             # make new sequence 
             seqtype = self.prg() % 4
@@ -303,7 +315,7 @@ class IDecForest:
 
         nodelist = sorted(list(D.keys()))
         intlist = prg_choose_n(list(S.l),n,self.prg,is_unique_picker=True)
-        SD = default_IDecForest_splatdict(nodelist,intlist,self.prg)
+        SD = IDecForest.default_IDecForest_splatdict(nodelist,intlist,self.prg)
 
         # splat now 
         itp = IDTProc(T) 

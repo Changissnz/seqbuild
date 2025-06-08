@@ -4,6 +4,7 @@ from mini_dm.matfactor_eval import *
 from morebs2 import aprng_gauge
 from morebs2.poly_struct import CEPoly 
 from morebs2.numerical_generator import modulo_in_range
+from .extraneous import safe_npint32_value
 
 # function used to help ensure variable does not exceed size expectations
 def BASE_CHECK_FOR_EXP(b,exp): 
@@ -50,7 +51,7 @@ def DEFAULT_MAXPOW4BASE(b,max_pow=DEFAULT_POWER_RANGE[1]):
 
 class PolyOutputFitterVar1:
 
-    def __init__(self,n,x1,c,prg,default_sizemod:bool=True):
+    def __init__(self,n,x1,c,prg,default_sizemod:bool=True,adjust_excess:bool=False):
         for q in [n,x1,c]: assert type(q) in {int,np.int64,np.int32}
         assert n >= 1 
         assert x1 != 0 
@@ -62,6 +63,7 @@ class PolyOutputFitterVar1:
         self.x1 = np.int32(x1) 
         self.c = np.int32(c)
         self.prg = prg 
+        self.adjust_excess = adjust_excess
         self.coeff = np.zeros((self.n + 1,),dtype=np.int32)
         self.index = 0
         self.rem = c 
@@ -84,13 +86,20 @@ class PolyOutputFitterVar1:
         pwr = self.n - self.index
         if self.rem == 0: return False 
 
-        if pwr == 0: 
-            self.coeff[-1] = self.rem 
+        if pwr == 0:
+            if abs(self.rem) >= NPINT32_MAX:
+                self.coeff[-1] = safe_npint32_value(self.rem)
+                if self.adjust_excess:
+                    self.c = self.apply(self.x1) 
+            else: 
+                self.coeff[-1] = self.rem 
             self.rem -= self.rem 
             return True 
 
         q = ceil(abs(self.rem / (self.x1 ** pwr)))
-        coeff_range = [-q,q]
+         
+        coeff_range = [-NPINT32_MAX//2,NPINT32_MAX//2] if \
+            q >= NPINT32_MAX else [-q,q]
         md = modulo_in_range(self.prg(),coeff_range)
         self.coeff[self.index] = md
         self.rem = self.rem - (md * self.x1 ** pwr)
@@ -578,7 +587,6 @@ class LinCombo:
         return len(self.x) - 1 
 
     def apply(self,X):
-        #print("XX: ",X)
-        #assert type(X) == np.ndarray 
+        assert type(X) in {np.ndarray,list} 
         assert len(X) == len(self.x) - 1, "GOT {} {}".format(len(X),len(self.x))
         return np.dot(X,self.x[:-1]) + self.x[-1]
