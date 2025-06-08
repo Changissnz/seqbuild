@@ -217,11 +217,24 @@ class IDecForest:
 
         return qr,stat 
 
+    # TODO: test 
     def process_seq_at_tree__splat(self,T,S):
-        return -1 
+        D,_,_ = TNode.dfs(T,False,True,True,set_attr=None)
+
+        # choose between 25 and 75 percent of the samples from S
+        q = modulo_in_range(self.prg(),[0,1001]) / 1000.0 
+        n = int(ceil(len(S) / 2.0))  
+
+        nodelist = sorted(list(D.keys()))
+        intlist = prg_choose_n(list(S.l),n,self.prg,is_unique_picker=True)
+        SD = default_IDecForest_splatdict(nodelist,intlist,self.prg)
+
+        # splat now 
+        itp = IDTProc(T) 
+        return itp.splat_process(SD)
 
     #------------------------- default methods for specifying ranges 
-    #------------------------- for sequence lengths and integer values, 
+    #------------------------- of sequence lengths and integer values, 
     #------------------------- amongst other tasks. 
 
     """
@@ -267,3 +280,13 @@ class IDecForest:
         for k in ks:
             vs.extend(D[k])
         return prg_seqsort(vs,prg)
+
+    @staticmethod
+    def default_IDecForest_splatdict(nodelist,intlist,prg):
+        D = defaultdict(list)
+
+        for i in intlist: 
+            q = prg() % len(nodelist) 
+            n = nodelist[q] 
+            D[n].append(i)
+        return D 
