@@ -37,7 +37,11 @@ class IDecForest:
         self.prg = prg 
         self.prg2 = prg2
         self.next_reprod = None 
+        self.reprod_ctr = None
 
+    """
+    main method: test 
+    """
     def __next__(self): 
         if len(self.queue) == 0: 
             # case: initialize
@@ -46,17 +50,39 @@ class IDecForest:
 
             # choose a tree
             q = self.prg() % len(self.ST)
-            t = self.ST[q][1] 
+            T = self.ST[q][1] 
 
             # choose a sequence to process
-            return -1 
-        return -1 
+            seqtype = self.prg() % 3
+            S = self.one_new_IntSeq(seqtype)
 
-    """
-    outputs n values
-    """
-    def output_n(self,n):  
-        return -1
+            # choose a process type
+            proctype = self.prg() % 4
+
+            # add output sequence to queue
+            q = self.process_seq_at_tree(T,S,proctype)
+            self.queue.extend(q) 
+
+        x = self.queue.pop(0)
+        self.reprod_ctr += 1
+
+        # case: reproduce new tree
+        if self.reprod_ctr >= self.next_reprod:
+            seqtype = self.prg() % 3
+            self.S = self.one_new_IntSeq(seqtype)
+            self.one_tree()
+            self.reset_reprod_ctr()
+
+        return x
+
+    def reset_reprod_ctr(self): 
+        self.reprod_ctr = 0
+        # reset `next_reprod`
+        if len(self.ST) >= self.tree_cap:
+            self.next_reprod = float('inf') 
+        else: 
+            self.next_reprod = modulo_in_range(\
+                self.prg(),self.reprod_rate_range)
 
     #---------------------- tree and integer sequence creation
 
@@ -165,6 +191,27 @@ class IDecForest:
         return IntSeq(iseq)
 
     #------------------------ output generation
+
+    def process_seq_at_tree(self,T,S,proc_type):
+        assert proc_type in {0,1,2,3}
+
+        if proc_type == 1:
+            # make new sequence 
+            seqtype = self.prg() % 4
+            intseq = self.one_new_IntSeq(seqtype)
+
+            if len(intseq) > len(S):
+                S1,S2 = S,intseq
+            else: 
+                S1,S2 = intseq,S 
+            return self.process_seq_at_tree__iso_sequential(T,S1,S2)
+
+        elif proc_type == 0: 
+            return self.process_seq_at_tree__sequential(T,S)
+        elif proc_type == 2: 
+            return self.process_seq_at_tree__inflow(T,S)
+        else:
+            return self.process_seq_at_tree__splat(T,S)
 
     # choose seq for tree 
     def process_seq_at_tree__sequential(self,T,S):
