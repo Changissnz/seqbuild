@@ -13,6 +13,10 @@ class IDTProc:
 
     #----------------------- input-flow processing functions 
 
+    """
+    Outputs a dictionary of 
+        node idn. -> list of values from `entryf` function 
+    """
     def __next__(self):
         nfq = set() 
         vx = defaultdict(list)
@@ -104,18 +108,25 @@ class IDTProc:
     """
     produce a path that v undergoes starting at `tn`. 
     """
-    def process_value(self,v):
+    def process_value(self,v,calculate_vpath:bool=False):
         tn = self.tn 
         path = [tn.idn] 
+        vpath = []
         while True: 
             if type(tn.travf) == type(None): 
                 break 
+            
+            if calculate_vpath:
+                q_ = tn.entryf(v)
+                vpath.append(q_)
+
             q = tn.travf.apply(v)
             if type(q) == type(None): break
             tn2 = tn.fetch_conn(q)
             path.append(tn2.idn)
             tn = tn2 
-        return path
+
+        return path,vpath 
 
     """
     sequence of output values from the `entryf` functions applied 
@@ -148,7 +159,7 @@ class IDTProc:
     to the output of `v1`. 
     """
     def iso_output(self,v1,v2):
-        p = self.process_value(v1)
+        p,_ = self.process_value(v1)
         return self.travel_path(v2,p[1:])
 
     """
@@ -157,7 +168,7 @@ class IDTProc:
     def traffic_map(self,S):
         D = defaultdict(int)
         for s in S:
-            pth = self.process_value(v)
+            pth,_ = self.process_value(v)
             pth = dict({(p,1) for p in pth})
             D = numberdict_op(D,pth,add)
         return D  

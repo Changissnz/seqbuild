@@ -11,6 +11,8 @@ class IntSeq:
         self.l = l 
         self.load()
 
+    #------------------- dunder methods 
+
     def __iter__(self):
         self.index = 0
         return self
@@ -35,6 +37,16 @@ class IntSeq:
         assert type(x) in {np.ndarray,np.int32,int}
         L2 = self.l + x 
         return IntSeq(L2)
+
+    def __len__(self): 
+        return len(self.l)
+
+    def __getitem__(self,i):
+        assert i < len(self) 
+        return self.l[i]  
+
+    #---------------------------------- 
+
 
     def load(self):
         if type(self.l) == type(None): 
@@ -61,14 +73,6 @@ class IntSeq:
     def remove_element_indices(self,indices): 
         l2 = [l_ for (i,l_) in enumerate(self.l) if i not in indices] 
         self.l = np.array(l2,dtype=np.int32)
-
-    def __len__(self): 
-        return len(self.l)
-
-    def __getitem__(self,i):
-        assert i < len(self) 
-        return self.l[i]  
-
 
     def append(self,q): 
         if type(q) in [int,np.int32]: 

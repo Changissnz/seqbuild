@@ -65,7 +65,7 @@ class IDTProcMethods(unittest.TestCase):
         qx = IDTProc(is2t.root)
         
         # iso-output test 
-        p = qx.process_value(300)
+        p,_ = qx.process_value(300)
         p2 = qx.travel_path(300,p[1:])
         p3 = qx.travel_path(240,p[1:])
         p4 = qx.travel_path(240,p[1:])
@@ -96,7 +96,7 @@ class IDTProcMethods(unittest.TestCase):
 
         qx = IDTProc(is2t.root)
 
-        p = qx.process_value(300)
+        p,_ = qx.process_value(300)
         p2 = qx.travel_path(300,p[1:])
         p3 = qx.travel_path(240,p[1:])
         p4 = qx.travel_path(240,p[1:])

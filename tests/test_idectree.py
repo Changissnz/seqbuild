@@ -189,7 +189,7 @@ class IDecTreeMethods(unittest.TestCase):
         D2[19] = [0, 6]
 
         for l in L: 
-            p = itp.process_value(l)
+            p,_ = itp.process_value(l)
             assert D2[l] == p 
 
     """
