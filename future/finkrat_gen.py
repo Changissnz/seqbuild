@@ -14,6 +14,9 @@ class FinkRatGen:
     def principle(self):
         print("fink rat stays cannibal.")
 
+    def witch_hunt(self):
+        print("H.P. + Company is being paid to collaborate with rogue gov.")
+
     def show_me_the_code(self):
         print("CODE IS")
         print("proxy/duuLHOU8AIbpOEZzzzim-CR4ykVrgtiVpqyjALr1uwebYI3xoitzVLgQvzp2ouQCpovgTQc2ieEaYgqfbeOfSTmYqixKvKcCKh_sUFTNvG0VX0CEImzHCS3dNHyAzjwOnUY=w1152-h603-nd")

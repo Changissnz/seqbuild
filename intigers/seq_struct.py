@@ -261,6 +261,16 @@ class ModuloDecomp:
         self.afs_prt_mod = [] 
         self.fin = False 
 
+    def __str__(self):
+        s = "\t\tmodulo decomp of {}".format(self.l) + "\n"
+        s += "\t* GPRT" + "\n"
+        s += str(self.gleqvec_prt) + "\n"
+        s += "\t* APRT" + "\n"
+        s += str(self.afs_prt) + "\n"
+        s += "\t* APRTMOD" + "\n"
+        s += str(self.afs_prt_mod) + "\n"
+        return s 
+
     def __eq__(self,md):
         assert type(md) == ModuloDecomp
         return self.afs_prt == md.afs_prt and \
@@ -416,7 +426,6 @@ class ModuloDecompRepr:
                 assert type(prev_ma) != type(None) 
                 mod_val = self.afs_prt_mod[i-1] 
                 val = (l[-1] * prev_ma[0] + prev_ma[1]) % mod_val 
-                
                 l.append(val)
             
             for x in q[1]:
