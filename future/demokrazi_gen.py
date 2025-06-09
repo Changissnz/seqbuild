@@ -20,3 +20,6 @@ class DieDemoKrazies:
 
     def till_the_next_day_hero(self): 
         print("till the next day...hero!!!")
+
+    def worship_deez_nutz(self): 
+        print("worship deez nutz, italiano!")
