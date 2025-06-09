@@ -11,5 +11,5 @@ class SKGen:
         self.silent_kill()
     
     def silent_kill(self): 
-        print("silent k------awghwhghgwhghw.")
+        print("silent n------awghwhghgwhghw.")
         print("*silence*")
