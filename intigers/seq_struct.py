@@ -1,5 +1,6 @@
 from .process_seq import * 
 from mini_dm.minmax_freq import * 
+from morebs2.numerical_generator import prg_seqsort
 from copy import deepcopy 
 
 def intlist_no_dups_no_zero(il):
@@ -13,7 +14,13 @@ def intlist_no_dups_no_zero_abs(il,prg,exclude_one:bool=True):
     il2 = intlist_no_dups_no_zero(il)
     negs = set(il2) - set(np.abs(il2))
 
-    if len(negs) == 0: return il2
+    def ex_one(I):
+        if exclude_one: 
+            I = set(I) - {1,-1}
+        return prg_seqsort(list(I),prg)
+
+    if len(negs) == 0: 
+        return ex_one(il2)
 
     il2 = set(il2)
     for n in negs:
@@ -24,9 +31,7 @@ def intlist_no_dups_no_zero_abs(il,prg,exclude_one:bool=True):
         else: 
             il2 -= {-n}
 
-    if exclude_one: 
-        il2 -= {1,-1} 
-    return sorted(list(il2))
+    return ex_one(il2)
 
 class IntSeq:
 

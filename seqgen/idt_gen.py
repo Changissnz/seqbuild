@@ -152,7 +152,8 @@ class IDecForest:
             i = self.prg() % len(self.ST)
             S = self.ST[i][0] 
             q = IDecForest.derive_new_IntSeq__type_fm(S,px,self.default_length_range)
-
+            q = IntSeq(intlist_no_dups_no_zero_abs(q.l,px))
+            
             # case: add noise
             if gentype == 2:
                 l = len(q)

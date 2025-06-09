@@ -47,8 +47,8 @@ class IDecForestMethods(unittest.TestCase):
         _,q = IDecForest_sampleZ()
 
         assert len(q[0]) == 60, "Q0: {}".format(len(q[0])) 
-        assert len(q[1]) == 18, "Q1: {}".format(len(q[1]))  
-        assert len(q[2]) == 20, "Q2: {}".format(len(q[2])) 
+        assert len(q[1]) == 23, "Q1: {}".format(len(q[1]))  
+        assert len(q[2]) == 11, "Q2: {}".format(len(q[2])) 
         return 
 
 
