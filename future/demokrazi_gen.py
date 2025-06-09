@@ -7,6 +7,7 @@ Demokrazi is a word that comes from `Demonstracciones de la Krahzi`.
 class DieDemoKrazies:
 
     def __init__(self): 
+        print("remember the pandemic,sucker.")
         return -1 
 
     def democratized_and_broke(self):
