@@ -16,6 +16,7 @@ class FinkRatGen:
 
     def witch_hunt(self):
         print("H.P. + Company is being paid to collaborate with rogue gov.")
+        print("find out who!")
 
     def show_me_the_code(self):
         print("CODE IS")
