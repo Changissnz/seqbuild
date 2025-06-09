@@ -10,3 +10,6 @@ class FinkRatGen:
     
     def sorry_excuse_for_justice(self): 
         print("ECHO: what a sorry excuse for justice.")
+
+    def principle(self):
+        print("fink rat stays cannibal.")
