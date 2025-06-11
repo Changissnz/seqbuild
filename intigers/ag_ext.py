@@ -21,7 +21,7 @@ class APRNGGaugeV2(APRNGGauge):
 
     def measure_match(self,match_map):
         # measure the tie-size
-        q = sum([len(v) for v in match_map.values()])
+        q = sum([len(v) - 1 for v in match_map.values()])
 
         # measure the most frequent intersection
         mmf = MinMaxFreq(match_map,False)
