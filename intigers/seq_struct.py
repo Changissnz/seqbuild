@@ -66,13 +66,25 @@ class IntSeq:
         L2 = self.l + x 
         return IntSeq(L2)
 
+    def __sub__(self,x):
+        return self.__add__(-x)
+
+    def __abs__(self): 
+        return IntSeq(np.abs(self.l)) 
+
     def __len__(self): 
         return len(self.l)
 
     def __getitem__(self,i):
-
         if isinstance(i, slice): 
             return self.l.__getitem__(i)    
+
+        if type(i) in {list,np.ndarray}:
+            qx = []
+            for i_ in i:
+                qx.append(self.__getitem__(i_))
+            return qx 
+
         assert i < len(self) 
         return self.l[i]  
 
@@ -150,6 +162,27 @@ class IntSeq:
     '''
     def divtri(self,div_type=truediv,cast_type=np.float32): 
         return self.optri(div_type,cast_type)
+
+    # TODO: test 
+    def match_map(self,is2,match_func): 
+        assert type(is2) == IntSeq 
+
+        D = dict() 
+        for l in self.l:
+            D[l] = match_func(l,is2.l)
+        return D 
+
+    def diffcat_vec(self,seg_length:float,start_value = None):
+        mx0 = self.__min__() if type(start_value) \
+            == type(None) else start_value
+
+        lx = []
+        for x in is1:
+            q = abs(x - mx0)
+            l = int(ceil(q / seg_length))
+            lx.append(l) 
+        return lx 
+
 
 """
 runs frequency count of (multiple,additive) pairs on contiguous pairs in 
