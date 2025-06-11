@@ -27,13 +27,8 @@ class APRNGGaugeV2(APRNGGauge):
         mmf = MinMaxFreq(match_map,False)
         mmf.count_one() 
         mmf.finalize_count()
+        fx = mmf.nth_most_frequent(0)
         
-        q = mmf.sorted_counts[-1][1]
-        fx = []
-
-        for x in mmf.sorted_counts[::-1]:
-            if x[1] != q: break 
-            fx.append(x[0]) 
         return q,fx 
 
     def match_two_intseq(self,i1,i2,match_func): 

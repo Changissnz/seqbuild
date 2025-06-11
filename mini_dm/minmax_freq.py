@@ -82,3 +82,26 @@ class MinMaxFreq:
         self.sorted_counts = sorted(self.c.items(),key=lambda x:x[1])
         self.fin = True 
         return
+
+    # TODO: test 
+    def nth_most_frequent(self,n):
+        if type(self.sorted_counts) == type(None):
+            return []
+        if len(self.sorted_counts) == 0: 
+            return [] 
+
+        r = self.sorted_counts[-1][1]
+        c = 0
+
+        fx = []
+
+        for x in self.sorted_counts[::-1]:
+            if x[1] != r:
+                c += 1
+                r = x[1]
+            if c > n: break
+
+            if c == n:
+                fx.append(x[0])  
+
+        return fx 
