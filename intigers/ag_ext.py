@@ -86,7 +86,7 @@ class APRNGGaugeV2(APRNGGauge):
 
         if seg_length == 0.0: return 0.0 
 
-        catvec = is1.categorize_intseq(seg_length,start_value)
+        catvec = is1.diffcat_vec(seg_length,start_value)
         if len(np.unique(catvec)) < 2: return 0.0 
 
         c = 0
