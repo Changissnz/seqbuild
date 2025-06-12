@@ -6,7 +6,10 @@ calculates the frequency of each element in the value.
 """
 class MinMaxFreq: 
 
-    def __init__(self,d:dict,log_revd:bool): 
+    def __init__(self,d,log_revd:bool): 
+        assert type(d) in {dict,defaultdict}
+        if type(d) == dict: 
+            d = defaultdict(list,d)
         self.d = d  
         self.c = defaultdict(int)
         self.revd = defaultdict(list)

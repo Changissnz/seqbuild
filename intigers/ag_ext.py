@@ -48,8 +48,10 @@ class APRNGGaugeV2(APRNGGauge):
 
         # measure the most frequent intersection
         mmf = MinMaxFreq(match_map,False)
-        mmf.count_one() 
+        while not mmf.fin: 
+            mmf.count_one() 
         mmf.finalize_count()
+        
         fx = mmf.nth_most_frequent(0)
         return q,fx 
 

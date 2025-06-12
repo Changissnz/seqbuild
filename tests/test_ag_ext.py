@@ -112,6 +112,9 @@ class APRNGGaugeV2Methods(unittest.TestCase):
         assert match[4] == [3] 
         assert match[6] == [6] 
         assert match[10] == [6] 
+        q1 = APRNGGaugeV2.measure_match(match)
+        assert q1[0] == 0 
+        assert q1[1] == [6,3]
 
         i3 = IntSeq([1,3,4,8,9,11])
         mf = absdiff_match_func
@@ -121,5 +124,9 @@ class APRNGGaugeV2Methods(unittest.TestCase):
         assert match[6] == [4,8] 
         assert match[10] == [9,11] 
 
+        q2 = APRNGGaugeV2.measure_match(match)
+        assert q2[0] == 3 
+        assert q2[1] == [4]
+        
 if __name__ == '__main__':
     unittest.main()
