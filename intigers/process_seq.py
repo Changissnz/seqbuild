@@ -13,7 +13,7 @@ def prgen(s1,s2):
     return prgen_
 
 def stdop_vec(l,operation,cast_type=np.int32):
-    assert operation in {add,sub,mul,truediv,floordiv}
+    ##assert operation in {add,sub,mul,truediv,floordiv}
     assert cast_type in {np.int32,np.float32} 
     assert type(l) == np.ndarray and len(l.shape) == 1
     d = []

@@ -177,7 +177,7 @@ class IntSeq:
             == type(None) else start_value
 
         lx = []
-        for x in is1:
+        for x in self:
             q = abs(x - mx0)
             l = int(ceil(q / seg_length))
             lx.append(l) 

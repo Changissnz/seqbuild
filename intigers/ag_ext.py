@@ -1,5 +1,7 @@
 from morebs2.aprng_gauge import *
+from types import MethodType,FunctionType
 from .seq_struct import * 
+from .extraneous import * 
 
 def absdiff_match_func(i,i2):
     mm = dict() 
@@ -12,7 +14,26 @@ def absdiff_match_func(i,i2):
 class APRNGGaugeV2(APRNGGauge):
 
     def __init__(self,aprng,frange,pradius:float):
-        super().__init__(aprng,frang,pradius)
+        super().__init__(aprng,frange,pradius)
+        self.catvec = None 
+
+    def reload_var(self,varname,varvalue):
+        assert varname in {"aprng","frange","pradius"}
+
+        if varname == "aprng":
+            assert type(varvalue) in {MethodType,FunctionType}
+        elif varname == "frange":
+            assert type(varvalue) in {tuple,list}
+            assert len(varvalue) == 2 
+            assert varvalue[0] <= varvalue[1]
+        else: 
+            assert type(varvalue) == float 
+            assert varvalue >= 0.0 and varvalue <= 1.0 
+        
+        setattr(self,varname,varvalue)
+
+    def clear_cycle(self):
+        self.cycle = None 
 
     def measure_cycle(self,max_size,\
         term_func=lambda l,l2: type(l) == type(None)): 
@@ -28,7 +49,6 @@ class APRNGGaugeV2(APRNGGauge):
         mmf.count_one() 
         mmf.finalize_count()
         fx = mmf.nth_most_frequent(0)
-        
         return q,fx 
 
     def match_two_intseq(self,i1,i2,match_func): 
@@ -62,7 +82,7 @@ class APRNGGaugeV2(APRNGGauge):
 
     """
     standard categorical entropy measures the number of 
-    contiguous pairwise difference in category. Categories 
+    contiguous pairwise differences in category. Categories 
     are assigned by using the `start_value` (the minumum 
     value of `is1` if `None`) as the 0 category. An element 
     x is labeled the category `(x - start_value) / seg_length`. 
@@ -81,15 +101,18 @@ class APRNGGaugeV2(APRNGGauge):
 
         if seg_length == 0.0: return 0.0 
 
-        catvec = is1.diffcat_vec(seg_length,start_value)
-        if len(np.unique(catvec)) < 2: return 0.0 
+        self.catvec = is1.diffcat_vec(seg_length,start_value)
+        if len(np.unique(self.catvec)) < 2: return 0.0 
 
         c = 0
-        for i in range(len(catvec) - 1):
-            q = abs(catvec[i] - catvec[i+1])
+        for i in range(len(self.catvec) - 1):
+            q = abs(self.catvec[i] - self.catvec[i+1])
             if q == 0.0: continue 
 
             c += 1 if count_type == "equals" else q 
         
-        qc = max(catvec) if count_type == "absdiff" else 1 
-        return c / (qc * (len(catvec) - 1)) 
+        qc = max(self.catvec) if count_type == "absdiff" else 1 
+        return c / (qc * (len(self.catvec) - 1)) 
+
+    def cycle_multvec(self):
+        return stdop_vec(self.cycle,zero_div0,cast_type=np.float32)
