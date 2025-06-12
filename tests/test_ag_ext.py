@@ -85,7 +85,7 @@ class APRNGGaugeV2Methods(unittest.TestCase):
         prg4 = f
         idf,_ = IDecForest_sampleZ(L,False,prg4)
         idf.verbose = False 
-        
+
         def g(): 
             return next(idf) 
 
@@ -101,6 +101,25 @@ class APRNGGaugeV2Methods(unittest.TestCase):
         qx = ag.std_cat_entropy(is1,seg_length=None,start_value=None,\
                 count_type="absdiff")
         assert max(ag.catvec) == 3 
+
+    def test__APRNGGaugeV2__match_two_intseq(self):
+        i1 = IntSeq([2,4,6,10])
+        i2 = IntSeq([3,6,20])
+        mf = absdiff_match_func
+        match = APRNGGaugeV2.match_two_intseq(i1,i2,match_func=mf)
+
+        assert match[2] == [3] 
+        assert match[4] == [3] 
+        assert match[6] == [6] 
+        assert match[10] == [6] 
+
+        i3 = IntSeq([1,3,4,8,9,11])
+        mf = absdiff_match_func
+        match = APRNGGaugeV2.match_two_intseq(i1,i3,match_func=mf)
+        assert match[2] == [1,3] 
+        assert match[4] == [4] 
+        assert match[6] == [4,8] 
+        assert match[10] == [9,11] 
 
 if __name__ == '__main__':
     unittest.main()

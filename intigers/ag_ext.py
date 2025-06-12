@@ -7,8 +7,8 @@ def absdiff_match_func(i,i2):
     mm = dict() 
     x = abs(i2 - i)
     q = min(x)
-    indices = np.where(x.l == q)[0]
-    return i2[indices]
+    indices = np.where(x == q)[0]
+    return list(i2[indices])
 
 # TODO: test 
 class APRNGGaugeV2(APRNGGauge):
@@ -41,7 +41,8 @@ class APRNGGaugeV2(APRNGGauge):
         q = super().measure_cycle(max_size,term_func,auto_frange) 
         return q
 
-    def measure_match(self,match_map):
+    @staticmethod 
+    def measure_match(match_map):
         # measure the tie-size
         q = sum([len(v) - 1 for v in match_map.values()])
 
@@ -52,7 +53,8 @@ class APRNGGaugeV2(APRNGGauge):
         fx = mmf.nth_most_frequent(0)
         return q,fx 
 
-    def match_two_intseq(self,i1,i2,match_func): 
+    @staticmethod
+    def match_two_intseq(i1,i2,match_func): 
         assert type(i1) == type(i2)
         assert type(i1) == IntSeq
         return i1.match_map(i2,match_func) 
