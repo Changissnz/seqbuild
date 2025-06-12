@@ -36,8 +36,9 @@ class APRNGGaugeV2(APRNGGauge):
         self.cycle = None 
 
     def measure_cycle(self,max_size,\
-        term_func=lambda l,l2: type(l) == type(None)): 
-        q = super().measure_cycle(max_size,term_func)
+        term_func=lambda l,l2: type(l) == type(None),\
+        auto_frange:bool=False): 
+        q = super().measure_cycle(max_size,term_func,auto_frange) 
         return q
 
     def measure_match(self,match_map):
@@ -63,22 +64,10 @@ class APRNGGaugeV2(APRNGGauge):
     @staticmethod
     def pairwise_diffs(is1):
         assert type(is1) == IntSeq
-
         if len(is1) < 2:
             return None,None,None 
-
-        c = 0
-        dx = 0 
-        minnie,maxie = float('inf'),-float('inf')
-        for i in range(len(is1)-1):
-            q = is1[i]
-            for j in range(i+1,len(is1)):
-                x = abs(q - is1[j])
-                c += x
-                if x < minnie: minnie = x
-                if x > maxie: maxie = x
-                dx += 1
-        return minnie,maxie, c / dx
+        q = uwpd(np.array(is1.l),pairwise_op=lambda x1,x2: np.abs(x2 - x1),accum_op=None)
+        return min(q),max(q), sum(q) / len(q) 
 
     """
     standard categorical entropy measures the number of 
@@ -97,10 +86,9 @@ class APRNGGaugeV2(APRNGGauge):
             return 0.0 
 
         if type(seg_length) == type(None):
-            seg_length,_,_ = APRNGGaugeV2.pairwise_diffs(is1)
+            _,_,seg_length = APRNGGaugeV2.pairwise_diffs(is1)
 
         if seg_length == 0.0: return 0.0 
-
         self.catvec = is1.diffcat_vec(seg_length,start_value)
         if len(np.unique(self.catvec)) < 2: return 0.0 
 
