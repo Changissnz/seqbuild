@@ -38,6 +38,32 @@ class LCGV2Methods(unittest.TestCase):
         cl = l2.cycle_length()
         assert cl == 5 
 
+    def test__LCGV2__io_map_summary__case1(self):
+
+        l2 = LCGV2(0,2,1,0,10,0) 
+        l2.io_map()
+        l2.io_map_partition()
+        l2.io_map_summary()
+
+        assert len(l2.cycle_descriptors) == 5
+        
+        assert l2.cycle_descriptors[0].is_closed() and \
+        l2.cycle_descriptors[2].is_closed()
+        
+        assert not l2.cycle_descriptors[1].is_closed() and \
+            not l2.cycle_descriptors[3].is_closed() and \
+            not l2.cycle_descriptors[4].is_closed() 
+
+        dheads = {} 
+        dheads[0] = {0, 1, 3, 5, 7}
+        dheads[1] = {5}
+        dheads[2] = {9}
+        dheads[3] = {3}
+        dheads[4] = {7}
+
+        for (i,ld) in enumerate(l2.cycle_descriptors):
+            assert ld.d["sub-cycle"] == dheads[i]
+        
 
 if __name__ == '__main__':
     unittest.main()

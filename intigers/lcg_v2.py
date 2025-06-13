@@ -1,3 +1,4 @@
+from morebs2.graph_basics import * 
 from .ag_ext import * 
 
 # no sub-cycle is continuous
@@ -35,6 +36,12 @@ class CycleDescriptor:
 
     def __init__(self):
         self.d = defaultdict(None)
+
+    def __str__(self):
+        s = "closed: " + str(self.d["closed"]) + "\n" 
+        s += "sub-cycle heads: " + \
+            str(self.d["sub-cycle"]) + "\n"
+        return s 
 
     def update(self,k,v): 
         assert k in CYCLE_CATEGORIES
@@ -159,7 +166,7 @@ class LCGV2:
 
     def io_map_partition(self): 
         qx = defaultdict(set)
-        for k,v in self.map121.items():
+        for k,v in self.map_io.items():
             qx[k] = set([v]) 
 
         self.gd = GraphComponentDecomposition(qx) 
@@ -178,17 +185,17 @@ class LCGV2:
         is_closed = True
         sub_cycle = set()
         for q_ in q:
-            p = travel_io_map_till_repeat(self.map121,q_)
+            p = travel_io_map_till_repeat(self.map_io,q_)
             px = set(p)
 
-            if px.issubset(q): 
+            if not px.issubset(q): 
                 is_closed = False
 
             if px != q: 
-                subcycle |= {q_} 
+                sub_cycle |= {q_} 
 
-        if len(subcycle) == 0: 
-            subcycle = None
+        if len(sub_cycle) == 0: 
+            sub_cycle = None
 
         cd = CycleDescriptor()
         cd.update("closed",is_closed) 
