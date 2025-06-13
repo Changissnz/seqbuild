@@ -10,7 +10,6 @@ class TFunc__NoRepeats:
         self.l |= {i} 
         return stat 
 
-# TODO: test
 class LCGV2:
 
     def __init__(self,start,m,a,n0,n1,log_sc:int):
@@ -55,3 +54,52 @@ class LCGV2:
             self.cycle.clear()
         self.cycle.append(s_)
         return self.s 
+
+    #-------------- functions to discover LCG attributes 
+
+    def gen_dir(self): 
+        if self.m >= 0 and self.a >= 0: 
+            return 1
+        elif self.m <= 0 and self.a <= 0:
+            return -1
+        return 0 
+
+    def init_dir(self):
+        q = self.r[0]
+        qx = q * self.m + self.a 
+
+        if qx > q:
+            return 1
+        elif qx < q: 
+            return -1 
+        return 0
+
+    def coverage(self): 
+        q = self.s 
+        d,c = self.dir,self.cycled 
+        self.reset_vars()
+
+        fx = self.__next__ 
+        tf = TFunc__NoRepeats() 
+        ag = APRNGGauge(fx,self.r,0.5)
+        cov,_ = ag.measure_cycle(max_size=self.r[1]-self.r[0],\
+            term_func=tf.output) 
+        self.s,self.dir,self.cycled = q,d,c
+        return cov 
+
+    def reset_vars(self):
+        self.s = self.r[0] 
+        self.dir,self.cycled = None,False 
+        self.fired = False 
+
+    def cycle_length(self): 
+        q = self.s
+        d,c = self.dir,self.cycled 
+        self.reset_vars()
+        ct = 0 
+        while not self.cycled: 
+            self.__next__()
+            ct += 1
+        self.s,self.dir,self.cycled = q,d,c
+        return ct 
+        
