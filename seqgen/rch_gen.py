@@ -6,7 +6,6 @@ from intigers.poly_output_fitter_ import *
 from intigers.extraneous import * 
 from morebs2.relevance_functions import RCInst,RChainHead
 from morebs2.numerical_generator import prg_choose_n
-from morebs2.numerical_generator import prg__LCG 
 
 
 MRIF_VARMAP = {CEPoly:"v",\

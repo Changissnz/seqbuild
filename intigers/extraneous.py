@@ -1,7 +1,7 @@
 import numpy as np 
 from morebs2.matrix_methods import is_vector
 from morebs2.measures import zero_div 
-from morebs2.numerical_generator import modulo_in_range
+from morebs2.numerical_generator import modulo_in_range,prg__LCG
 from math import ceil
 
 zero_div0 = lambda num,denum: zero_div(num,denum,0)
