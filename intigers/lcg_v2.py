@@ -1,5 +1,25 @@
 from .ag_ext import * 
 
+# no sub-cycle is continuous
+CYCLE_CATEGORIES = {"closed","sub-cycle"}
+
+def io_map__signchange_count(m):
+    p,n = 0,0
+    for k,v in m.items(): 
+        if v > k: p += 1
+        elif v < k: n += 1
+        else: pass 
+    return p,n 
+
+def travel_io_map_till_repeat(m,k):
+    q = [k]
+    stat = True 
+    while stat: 
+        v = m[k]
+        if v in q: break 
+        q.append(v) 
+    return q 
+
 class TFunc__NoRepeats: 
 
     def __init__(self,s:set):
@@ -10,6 +30,27 @@ class TFunc__NoRepeats:
         stat = not (i in self.l) 
         self.l |= {i} 
         return stat 
+
+class CycleDescriptor:
+
+    def __init__(self):
+        self.d = defaultdict(None)
+
+    def update(self,k,v): 
+        assert k in CYCLE_CATEGORIES
+        if k == "closed":
+            assert type(v) == bool 
+        else:
+            assert type(v) in {type(None),set}
+
+        self.d[k] = v 
+        return
+
+    def is_closed(self):
+        return self.d["closed"] 
+
+    def is_continuous(self):
+        return type(self.d["sub-cycle"]) == type(None)
 
 class LCGV2:
 
@@ -31,6 +72,9 @@ class LCGV2:
         self.fired = False
         self.cycled = False
         self.dir = None
+        self.map_io = dict()
+        self.gd = None 
+        self.cycle_descriptors = [] 
 
     def __next__(self):
         if not self.fired:
@@ -104,4 +148,51 @@ class LCGV2:
             ct += 1
         self.s,self.dir,self.cycled = q,d,c
         return ct 
+
+    # TODO: test
+    def io_map(self):
+        self.map_io.clear()
+        for x in range(self.r[0],self.r[1]): 
+            y = modulo_in_range(x * self.m + \
+                self.a,self.r) 
+            self.map_io[x] = y 
+
+    def io_map_partition(self): 
+        qx = defaultdict(set)
+        for k,v in self.map121.items():
+            qx[k] = set([v]) 
+
+        self.gd = GraphComponentDecomposition(qx) 
+        self.gd.decompose()
+
+    def io_map_summary(self):
+        for i in range(len(self.gd.components)):
+            cd = self.component_index_summary(i)
+            self.cycle_descriptors.append(cd) 
+
+    def component_index_summary(self,i):
+        q = self.gd.components[i] 
+        q = flatten_setseq(q) 
+        dci = self.gd.dcomponent_cyclic_indices(i)
+
+        is_closed = True
+        sub_cycle = set()
+        for q_ in q:
+            p = travel_io_map_till_repeat(self.map121,q_)
+            px = set(p)
+
+            if px.issubset(q): 
+                is_closed = False
+
+            if px != q: 
+                subcycle |= {q_} 
+
+        if len(subcycle) == 0: 
+            subcycle = None
+
+        cd = CycleDescriptor()
+        cd.update("closed",is_closed) 
+        cd.update("sub-cycle",sub_cycle)
+        return cd 
+
         

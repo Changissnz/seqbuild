@@ -10,7 +10,6 @@ def absdiff_match_func(i,i2):
     indices = np.where(x == q)[0]
     return list(i2[indices])
 
-# TODO: test 
 class APRNGGaugeV2(APRNGGauge):
 
     def __init__(self,aprng,frange,pradius:float):
