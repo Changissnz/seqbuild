@@ -19,6 +19,7 @@ def travel_io_map_till_repeat(m,k):
         v = m[k]
         if v in q: break 
         q.append(v) 
+        k = v 
     return q 
 
 class TFunc__NoRepeats: 

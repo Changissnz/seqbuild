@@ -55,11 +55,11 @@ class LCGV2Methods(unittest.TestCase):
             not l2.cycle_descriptors[4].is_closed() 
 
         dheads = {} 
-        dheads[0] = {0, 1, 3, 5, 7}
-        dheads[1] = {5}
+        dheads[0] = {1, 3, 5, 7}
+        dheads[1] = {2, 5}
         dheads[2] = {9}
-        dheads[3] = {3}
-        dheads[4] = {7}
+        dheads[3] = {3, 6}
+        dheads[4] = {8, 7}
 
         for (i,ld) in enumerate(l2.cycle_descriptors):
             assert ld.d["sub-cycle"] == dheads[i]
@@ -73,9 +73,9 @@ class LCGV2Methods(unittest.TestCase):
         assert l2.gd.components == \
         [[{0}, {2}, {4}, {6}, {8}], [{1}, {3}, {5}, {7}, {9}]]
         assert l2.cycle_descriptors[0].is_closed() 
-        assert l2.cycle_descriptors[0].d["sub-cycle"] == {0, 2, 4, 6, 8}
+        assert type(l2.cycle_descriptors[0].d["sub-cycle"]) == type(None)
         assert l2.cycle_descriptors[1].is_closed() 
-        assert l2.cycle_descriptors[1].d["sub-cycle"] == {1, 3, 5, 7, 9}        
+        assert type(l2.cycle_descriptors[1].d["sub-cycle"]) == type(None)
 
 if __name__ == '__main__':
     unittest.main()
