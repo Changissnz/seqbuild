@@ -63,7 +63,19 @@ class LCGV2Methods(unittest.TestCase):
 
         for (i,ld) in enumerate(l2.cycle_descriptors):
             assert ld.d["sub-cycle"] == dheads[i]
-        
+
+    def test__LCGV2__io_map_summary__case2(self):
+        l2 = LCGV2(0,1,2,0,10,0) 
+        l2.io_map()
+        l2.io_map_partition()
+        l2.io_map_summary()
+
+        assert l2.gd.components == \
+        [[{0}, {2}, {4}, {6}, {8}], [{1}, {3}, {5}, {7}, {9}]]
+        assert l2.cycle_descriptors[0].is_closed() 
+        assert l2.cycle_descriptors[0].d["sub-cycle"] == {0, 2, 4, 6, 8}
+        assert l2.cycle_descriptors[1].is_closed() 
+        assert l2.cycle_descriptors[1].d["sub-cycle"] == {1, 3, 5, 7, 9}        
 
 if __name__ == '__main__':
     unittest.main()
