@@ -2,8 +2,9 @@ from .ag_ext import *
 
 class TFunc__NoRepeats: 
 
-    def __init__(self):
-        self.l = set() 
+    def __init__(self,s:set):
+        assert type(s) == set 
+        self.l = s
 
     def output(self,i,i2):
         stat = not (i in self.l) 
@@ -18,7 +19,8 @@ class LCGV2:
         assert type(log_sc) == int 
         assert log_sc >= 0 
 
-        self.s = start 
+        self.s = start
+        self.s_ = start  
         self.m = m 
         self.a = a 
         self.r = [n0,n1]
@@ -49,7 +51,6 @@ class LCGV2:
             self.dir = d
         
         self.s = s_ 
-
         if self.cycled:
             self.cycle.clear()
         self.cycle.append(s_)
@@ -65,7 +66,7 @@ class LCGV2:
         return 0 
 
     def init_dir(self):
-        q = self.r[0]
+        q = self.s_
         qx = q * self.m + self.a 
 
         if qx > q:
@@ -76,19 +77,20 @@ class LCGV2:
 
     def coverage(self): 
         q = self.s 
-        d,c = self.dir,self.cycled 
+        d,c,f = self.dir,self.cycled,self.fired 
         self.reset_vars()
 
         fx = self.__next__ 
-        tf = TFunc__NoRepeats() 
+        tf = TFunc__NoRepeats({self.s}) 
         ag = APRNGGauge(fx,self.r,0.5)
         cov,_ = ag.measure_cycle(max_size=self.r[1]-self.r[0],\
-            term_func=tf.output) 
-        self.s,self.dir,self.cycled = q,d,c
+            term_func=tf.output)            
+        self.s,self.dir,self.cycled,self.fired \
+            = q,d,c,f 
         return cov 
 
     def reset_vars(self):
-        self.s = self.r[0] 
+        self.s = self.s_  
         self.dir,self.cycled = None,False 
         self.fired = False 
 
