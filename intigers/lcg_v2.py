@@ -1,5 +1,6 @@
 from morebs2.graph_basics import * 
 from .ag_ext import * 
+from .tvec import * 
 
 # no sub-cycle is continuous
 CYCLE_CATEGORIES = {"closed","sub-cycle"}
@@ -62,17 +63,19 @@ class CycleDescriptor:
 
 class LCGV2:
 
-    def __init__(self,start,m,a,n0,n1,log_sc:int):
+    def __init__(self,start,m,a,n0,n1,sc_size:int):
         assert n0 < n1
         assert not (m == 0 and a == 0)
-        assert type(log_sc) == int 
-        assert log_sc >= 0 
+        assert type(sc_size) == int 
+        assert sc_size >= 0 
 
         self.s = start
         self.s_ = start  
         self.m = m 
         self.a = a 
         self.r = [n0,n1]
+
+        self.sc_size = sc_size 
         self.log_sc = [] 
 
         self.cycle = []
@@ -157,7 +160,6 @@ class LCGV2:
         self.s,self.dir,self.cycled = q,d,c
         return ct 
 
-    # TODO: test
     def io_map(self):
         self.map_io.clear()
         for x in range(self.r[0],self.r[1]): 
