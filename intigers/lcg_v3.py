@@ -6,6 +6,10 @@ class LCGV3(LCGV2):
     def __init__(self,start,m,a,n0,n1,sc_size:int,preproc_gd:bool=False):
         super().__init__(start,m,a,n0,n1,sc_size,preproc_gd)
         self.tv = None
+        self.
+
+    def __next__(self):
+        return -1
 
     def set_tv(self,tv):
         assert type(tv) == TrinaryVec

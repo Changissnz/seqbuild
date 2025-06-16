@@ -1,4 +1,11 @@
 from collections import defaultdict 
+from morebs2.matrix_methods import is_vector
+
+def vec_to_frequency_map(V):
+    assert is_vector(V)
+    dx = defaultdict(int)
+    for v_ in V: dx[v_] += 1
+    return dx 
 
 """
 given a dictionary with string-like key and value as list, <MinMaxFreq> 

@@ -16,7 +16,7 @@ class TrinaryVec(IntSeq):
         vec = np.zeros((length,),dtype=np.int32) \
             + base_value 
 
-        num_changes = int(ceil(change_ratio * length))
+        n = int(ceil(change_ratio * length))
         Q = [i for i in range(length)]
         ix = prg_choose_n(Q,n,prg,is_unique_picker=True)
 

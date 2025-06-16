@@ -19,3 +19,20 @@ class ModPRNGOutputter:
         q = self.prngs[self.i]
         self.i += 1
         return q 
+
+class BasicIterableContainer:
+
+    def __init__(self,L):
+        assert type(L) == list
+        assert len(L) > 0 
+        self.l = L
+        self.i = 0 
+
+    def __next__(self):
+        q = self.l[self.i] 
+        self.i = (self.i + 1)  % len(self.l)
+        return q 
+
+def prg__iterable(L):
+    bic = BasicIterableContainer(L)
+    return bic.__next__ 
