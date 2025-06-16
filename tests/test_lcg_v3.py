@@ -45,6 +45,91 @@ class LCGV3Methods(unittest.TestCase):
         assert modulo_in_range(111321,qx11) == -1500 
         return  
 
+    def test__unimodular_number__modulo_range_adjustment__case1(self):
+        # case 1 
+        wv = 38 
+        av = 29 
+        cv = 32 
+        modrange = [3,38]
+        mrx4 = unimodular_number__modulo_range_adjustment(wv,av,cv,modrange)
+        assert modulo_in_range(29,mrx4) == wv 
+
+        # case 2 
+        wv = 5 
+        mrx5 = unimodular_number__modulo_range_adjustment(wv,av,cv,modrange)
+        assert modulo_in_range(29,mrx5) == wv 
+        return
+
+    def test__multimodular_number__modulo_range_adjustment__case1(self):
+        
+        # case 1
+        modrange = [3,38]
+        pv = 7 
+        av = 5000 # 33 
+        sign = -1 
+        mrx6 = multimodular_number__modulo_range_adjustment(pv,av,sign,modrange)
+        assert to_trinary_relation(modulo_in_range(av,mrx6),pv) == sign 
+
+        # case 2 
+        pv = 37
+        sign = 1
+        mrx7 = multimodular_number__modulo_range_adjustment(pv,av,sign,modrange)
+        assert to_trinary_relation(modulo_in_range(av,mrx7),pv) == sign
+
+        # case 3 
+        pv = 15 
+        av = 5010 
+        sign = 1 
+        mrx8 = multimodular_number__modulo_range_adjustment(pv,av,sign,modrange)
+        assert to_trinary_relation(modulo_in_range(av,mrx8),pv) == sign 
+ 
+    def test__LCGV3__adjust_modulo_range__case1(self): 
+        lcg1 = prg__LCG(13,-20,14,1000)
+        lg = LCGV3(7,10,5,3,38,10)
+
+        # case 1 
+        rv = 8 
+        nv = 36 
+        sign = -1 
+        mr23 = lg.adjust_modulo_range(rv,nv,sign,lcg1)
+        avx = lg.m * rv + lg.a
+        assert to_trinary_relation(modulo_in_range(avx,mr23),rv) == sign 
+
+        # case 2 
+        rv = 16 
+        sign = -1 
+        mr23 = lg.adjust_modulo_range(rv,42,sign,lcg1)
+        avx = lg.m * rv + lg.a
+        assert to_trinary_relation(modulo_in_range(avx,mr23),rv) == sign 
+
+        # case 3 
+        lg2 = LCGV3(7,-2,6,3,38,10)
+        sign = -1 
+        mr24 = lg2.adjust_modulo_range(4,36,sign,lcg1)
+        avx = lg2.m * rv + lg2.a
+        assert to_trinary_relation(modulo_in_range(avx,mr24),rv) == sign 
+
+        # case 4 
+        lg3 = LCGV3(7,-1,10,3,38,10)
+        rv = 6 
+        sign = 1 
+        mr25 = lg3.adjust_modulo_range(rv,4,sign,lcg1)
+        avx = lg3.m * rv + lg3.a
+        assert to_trinary_relation(modulo_in_range(avx,mr25),rv) == sign 
+
+        # case 6 
+        sign = 0 
+        mr26 = lg3.adjust_modulo_range(rv,4,sign,lcg1)
+        avx = lg3.m * rv + lg3.a
+        assert to_trinary_relation(modulo_in_range(avx,mr26),rv) == sign 
+
+        # case 7 
+        sign = 0 
+        rv = 36
+        avx = lg3.m * rv + lg3.a
+        mr27 = lg3.adjust_modulo_range(rv,12,sign,lcg1)
+        assert to_trinary_relation(modulo_in_range(avx,mr27),rv) == sign 
+
 
 if __name__ == '__main__':
     unittest.main()

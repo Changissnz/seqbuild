@@ -3,7 +3,7 @@ from morebs2.numerical_generator import prg_choose_n
 
 def to_trinary_relation(v1,v2):
     if v1 == v2: return 0 
-    if v1 < v2: return 1 
+    if v1 > v2: return 1 
     return -1 
 
 class TrinaryVec(IntSeq):

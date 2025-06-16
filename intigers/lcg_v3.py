@@ -2,6 +2,8 @@ from .lcg_v2 import *
 from .tvec import * 
 from morebs2.numerical_generator import modulo_in_range
 
+"""
+"""
 def is_value_below_modulo_range_length(v,mr):
     assert is_valid_range(mr,True,False)  
     return abs(v) <= mr[1] - mr[0]
@@ -14,21 +16,77 @@ def iterative_adjustment_for_direction__modrange(pv,av,sign,modrange,\
     x1 = modulo_in_range(av,modrange)
     
     # case: do nothing
-    if to_trinary_relation(pv,x1) == sign: 
+    if to_trinary_relation(x1,pv) == sign: 
         return modrange
 
     newrange = [modrange[0],modrange[1]]
-    ##q = -1 if modindex == 0 else 1
-    #moddir = None 
-    #if modindex == 0 and av > 
 
     stat = True
     while stat:
         newrange[modindex] += moddir 
         x1 = modulo_in_range(av,newrange)
-        stat = to_trinary_relation(pv,x1) != sign
+        stat = to_trinary_relation(x1,pv) != sign
     return newrange 
 
+"""
+NOTE: Method is specifically for `av` that does not satisfy the 
+`is_value_below_modulo_range_length(av,modrange)` relation. 
+
+Adjusts a modulo range `modrange` to M_r so that the output from 
+`modulo_in_range(av,M_r)` satisfies the `sign`, -1 for `pv > av` or 
+1 for `pv < av`. 
+
+pv := "parent" value, also a "reference" for the trinary relation with 
+      `av`.
+av := actual value, v = m * pv + a. 
+sign := wanted binary relation between `av` and `pv`. 
+modrange := base modulo range to adjust. 
+"""
+def multimodular_number__modulo_range_adjustment(pv,av,sign,modrange):
+    assert sign in {-1,1}
+
+    if sign == 1: 
+        md,mi = 1,1
+    else: 
+        md,mi = -1,0
+    return iterative_adjustment_for_direction__modrange(pv,av,sign,\
+        modrange,mi,md) 
+
+"""
+NOTE: Method is specifically for `av` that satisfies the 
+`is_value_below_modulo_range_length(av,modrange)` relation. 
+
+wv := wanted value
+av := actual value
+cv := current value, the output from `modulo_in_range(av,modrange)`
+modrange := base modulo range to adjust. 
+"""
+def unimodular_number__modulo_range_adjustment(wv,av,cv,modrange):
+
+    sign = to_trinary_relation(wv,cv) 
+    assert sign != 0 
+
+    # adjust modrange if necessary
+    cv_ = cv 
+    mr = [modrange[0],modrange[1]] 
+    if sign == 1: 
+        if mr[1] <= wv:
+            mr[1] = wv + 1
+            cv_ = modulo_in_range(av,mr)
+        d = wv - av 
+        mr[0] = d 
+    else: 
+        if mr[0] > wv: 
+            mr[0] = wv
+            cv_ = modulo_in_range(av,mr)
+        d = cv_ - wv
+        mr[0] -= d 
+    return mr 
+
+"""
+Calculates a new modrange M_r such that for the actual 
+value `av`, `modulo_in_range(av,M_r) == pv`. 
+"""
 def modrange_for_congruence(pv,av,modrange):
     assert type(pv) in {int,np.int32,np.int64}
     assert type(av) in {int,np.int32,np.int64}
@@ -41,10 +99,7 @@ def modrange_for_congruence(pv,av,modrange):
             m = 1 if av < 0 else -1 
             mr2[1] += m * pv 
         else:            
-            if av > 0: 
-                av_ = -av 
-            else: 
-                av_ = av 
+            av_ = -av if av > 0 else av 
 
             pvs = pv >= 0 
             avs = av >= 0 
@@ -63,6 +118,8 @@ def modrange_for_congruence(pv,av,modrange):
         mr2[1] -= difference 
     return mr2 
 
+#--------------------------------------------------------------------- 
+
 class LCGV3(LCGV2): 
 
     def __init__(self,start,m,a,n0,n1,sc_size:int,preproc_gd:bool=False):
@@ -71,7 +128,31 @@ class LCGV3(LCGV2):
         self.r_ = [self.r[0],self.r[1]]
 
     def __next__(self):
-        return -1
+        return super().__next__()
+
+    def adjust_modulo_range(self,reference,new_value,sign_change,prg2):
+        # case: sign already satisfied
+        if to_trinary_relation(new_value,reference) == sign_change: 
+            return None 
+
+        actual_value = self.m * reference + self.a 
+
+        # case: congruence 
+        if sign_change == 0: 
+            r_ = modrange_for_congruence(reference,actual_value,self.r)
+            return r_ 
+
+        stat = is_value_below_modulo_range_length(actual_value,self.r) 
+
+        if stat: 
+            wv = reference 
+            d = modulo_in_range(prg2(),[0,self.r[1] - self.r[0]])
+            wv += (d * sign_change)
+            return unimodular_number__modulo_range_adjustment(wv,actual_value,\
+                new_value,self.r)
+
+        return multimodular_number__modulo_range_adjustment(reference,\
+            actual_value,sign_change,self.r)
 
     def set_tv(self,tv):
         assert type(tv) == TrinaryVec
