@@ -1,8 +1,7 @@
 from morebs2.graph_basics import * 
 from .ag_ext import * 
-from .tvec import * 
 
-# no sub-cycle is continuous
+# no sub-cycle -> continuous
 CYCLE_CATEGORIES = {"closed","sub-cycle"}
 
 def io_map__signchange_count(m):
@@ -63,7 +62,7 @@ class CycleDescriptor:
 
 class LCGV2:
 
-    def __init__(self,start,m,a,n0,n1,sc_size:int):
+    def __init__(self,start,m,a,n0,n1,sc_size:int,preproc_gd:bool=False):
         assert n0 < n1
         assert not (m == 0 and a == 0)
         assert type(sc_size) == int 
@@ -87,6 +86,9 @@ class LCGV2:
         self.gd = None 
         self.cycle_descriptors = [] 
 
+        if preproc_gd: 
+            self.gd_preproc() 
+
     def __next__(self):
         if not self.fired:
             self.fired = not self.fired
@@ -104,6 +106,15 @@ class LCGV2:
                 self.cycled = False
         else: 
             self.dir = d
+
+        if self.sc_size > 0:
+            if self.s == s_: 
+                d = 0
+            self.log_sc.append(d) 
+            rx = len(self.log_sc) - self.sc_size 
+            while rx > 0:
+                self.log_sc.pop(0) 
+                rx -= 1
         
         self.s = s_ 
         if self.cycled:
@@ -159,6 +170,11 @@ class LCGV2:
             ct += 1
         self.s,self.dir,self.cycled = q,d,c
         return ct 
+
+    def gd_preproc(self):
+        self.io_map()
+        self.io_map_partition()
+        self.io_map_summary()
 
     def io_map(self):
         self.map_io.clear()
