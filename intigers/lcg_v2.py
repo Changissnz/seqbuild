@@ -183,7 +183,6 @@ class LCGV2:
     def component_index_summary(self,i):
         q = self.gd.components[i] 
         q = flatten_setseq(q) 
-        dci = self.gd.dcomponent_cyclic_indices(i)
 
         is_closed = True
         sub_cycle = set()
@@ -191,11 +190,13 @@ class LCGV2:
             p = travel_io_map_till_repeat(self.map_io,q_)
             px = set(p)
 
-            if not px.issubset(q): 
-                is_closed = False
-
             if px != q: 
                 sub_cycle |= {q_} 
+
+            if not is_closed: continue 
+
+            if not px.issubset(q): 
+                is_closed = False
 
         if len(sub_cycle) == 0: 
             sub_cycle = None

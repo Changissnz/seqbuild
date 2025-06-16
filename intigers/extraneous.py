@@ -1,7 +1,8 @@
 import numpy as np 
-from morebs2.matrix_methods import is_vector
+from morebs2.matrix_methods import is_vector,is_valid_range 
 from morebs2.measures import zero_div 
-from morebs2.numerical_generator import modulo_in_range,prg__LCG
+from morebs2.numerical_generator import modulo_in_range,\
+    prg__LCG,euclidean_point_distance
 from math import ceil
 
 zero_div0 = lambda num,denum: zero_div(num,denum,0)
@@ -201,3 +202,47 @@ def prg__integer_seq__mult(n,c,r,crange,mrange,prg,\
     for qx_ in qx: qx2.extend(qx_)
 
     return qx2,len(qx2) == n
+
+#------------------------------- operations related to euclid's distance
+
+"""
+d := int, positive, dimension of points
+r := iterable, length 2, ordered range for values of interest
+inclusive := bool, 
+"""
+def euclid_pd_over_range__int(d,r,inclusive=False,\
+    output_type=0):
+    assert type(d) == int and d > 0 
+    assert r[0] < r[1] 
+    assert type(r[0]) == type(r[1])
+    assert type(r[0]) == int 
+    assert len(r) == 2 
+    assert output_type in {0,1} 
+
+    rx0,rx1 = r[0],r[1] 
+
+    if inclusive: 
+        rx1 += 1
+    
+    p = np.zeros((d,),dtype=np.float32)
+    dx = []
+    for r0 in range(rx0,rx1):
+        p2 = np.ones((d,),dtype=np.float32)
+        p2 = p2 * r0
+        pd = euclidean_point_distance(p,p2)
+
+        x = pd if output_type == 0 else (r0,pd)
+        dx.append(x)
+
+    return dx 
+
+def multiple_sqrt_seq(x,mrange,output_type=0):
+    assert is_valid_range(mrange,True,False) 
+    assert output_type in {0,1}
+
+    qx = []
+    for i in range(mrange[0],mrange[1]): 
+        dx = np.sqrt(x * i)
+        y = (i,dx) if output_type else dx 
+        qx.append(y) 
+    return qx 
