@@ -122,13 +122,35 @@ def modrange_for_congruence(pv,av,modrange):
 
 class LCGV3(LCGV2): 
 
-    def __init__(self,start,m,a,n0,n1,sc_size:int,preproc_gd:bool=False):
+    def __init__(self,start,m,a,n0,n1,sc_size:int,preproc_gd:bool=False,\
+        prg=None):
         super().__init__(start,m,a,n0,n1,sc_size,preproc_gd)
         self.tv = None
+        self.tvi = None 
         self.r_ = [self.r[0],self.r[1]]
+        self.prg = prg
 
     def __next__(self):
-        return super().__next__()
+        did_fire = self.fired
+        s_ = self.s 
+        q = super().__next__()
+
+        # case: first element, no trinary vec comparison 
+        if not did_fire:
+            return q
+
+        if type(self.tv) == TrinaryVec: 
+            assert type(self.prg) != type(None)
+
+            sc = self.tv[self.tvi]
+            mr = self.adjust_modulo_range(s_,q,sc,self.prg)
+
+            if type(mr) != type(None): 
+                self.r = mr
+                q = s_ * self.m + self.a
+                q = modulo_in_range(q,self.r) 
+            self.tvi = (self.tvi + 1) % len(self.tv) 
+        return q 
 
     def adjust_modulo_range(self,reference,new_value,sign_change,prg2):
         # case: sign already satisfied
@@ -157,6 +179,7 @@ class LCGV3(LCGV2):
     def set_tv(self,tv):
         assert type(tv) == TrinaryVec
         self.tv = tv 
+        self.tvi = 0 
         return
 
     def autoset_tv(self,gen_type,l,ext_prg=None):
