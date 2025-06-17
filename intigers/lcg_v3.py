@@ -70,17 +70,24 @@ def unimodular_number__modulo_range_adjustment(wv,av,cv,modrange):
     cv_ = cv 
     mr = [modrange[0],modrange[1]] 
     if sign == 1: 
-        if mr[1] <= wv:
-            mr[1] = wv + 1
+        if mr[1] < wv:
+            mr[1] = wv
             cv_ = modulo_in_range(av,mr)
-        d = wv - av 
-        mr[0] = d 
-    else: 
+            mr[1] += wv - cv_ 
+        else: 
+            if mr[1] == wv: 
+                mr[1] = wv + 1 
+            d = wv - av 
+            mr[0] = d 
+    else:
         if mr[0] > wv: 
             mr[0] = wv
             cv_ = modulo_in_range(av,mr)
-        d = cv_ - wv
-        mr[0] -= d 
+            mr[1] = mr[1] - cv + wv 
+        elif mr[0] == wv: 
+            mr[1] = mr[1] - (cv_ - mr[0])
+        else: 
+            mr[0] -= (cv_ - wv) 
     return mr 
 
 """
@@ -139,17 +146,19 @@ class LCGV3(LCGV2):
         if not did_fire:
             return q
 
+        ## print("S_: ",s_, " Q: ",q, " TVI: ",self.tvi, " SG: ",self.tv[self.tvi])
+
         if type(self.tv) == TrinaryVec: 
             assert type(self.prg) != type(None)
 
             sc = self.tv[self.tvi]
             mr = self.adjust_modulo_range(s_,q,sc,self.prg)
-
             if type(mr) != type(None): 
-                self.r = mr
+                self.r = [int(mr[0]),int(mr[1])]
                 q = s_ * self.m + self.a
                 q = modulo_in_range(q,self.r) 
             self.tvi = (self.tvi + 1) % len(self.tv) 
+            self.s = q 
         return q 
 
     def adjust_modulo_range(self,reference,new_value,sign_change,prg2):
@@ -165,7 +174,6 @@ class LCGV3(LCGV2):
             return r_ 
 
         stat = is_value_below_modulo_range_length(actual_value,self.r) 
-
         if stat: 
             wv = reference 
             d = modulo_in_range(prg2(),[0,self.r[1] - self.r[0]])
@@ -203,4 +211,8 @@ class LCGV3(LCGV2):
                 zero_div0(k1,s),zero_div0(k2,s)
             fm = {-1:k0,0:k1,1:k2}
             tv = TrinaryVec.one_instance__v2(l,fm,qx)
-        self.tv = tv 
+        self.set_tv(tv)
+
+    def set_prg(self,prg):
+        assert type(prg) in {FunctionType,MethodType}
+        self.prg = prg 

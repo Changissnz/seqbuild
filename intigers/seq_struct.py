@@ -88,6 +88,11 @@ class IntSeq:
         assert i < len(self) 
         return self.l[i]  
 
+    def __eq__(self,l): 
+        assert type(l) == np.ndarray
+        if len(l) != len(self): return False
+        return np.all(l == self.l) 
+
     #---------------------------------- 
 
 

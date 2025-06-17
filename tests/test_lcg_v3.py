@@ -56,8 +56,33 @@ class LCGV3Methods(unittest.TestCase):
 
         # case 2 
         wv = 5 
+        av = 29 
+        cv = 32 
+        modrange = [3,38]
         mrx5 = unimodular_number__modulo_range_adjustment(wv,av,cv,modrange)
         assert modulo_in_range(29,mrx5) == wv 
+
+        # case 3 
+        wv = 13 
+        cv = -12 
+        av = 85 
+        mrx2_ = unimodular_number__modulo_range_adjustment(wv,cv,av,[50,97])
+        assert modulo_in_range(cv,mrx2_) == 13 
+
+        # case 4 
+        wv = 100 
+        cv = -20 
+        av = 77 
+        mrx3_ = unimodular_number__modulo_range_adjustment(wv,cv,av,[50,97])
+        assert modulo_in_range(-20,mrx3_) == 100 
+
+        # case 5 
+        wv = 50 
+        cv = -20 
+        av = 77 
+        mrx4_ = unimodular_number__modulo_range_adjustment(wv,cv,av,[50,97])
+        assert modulo_in_range(-20,mrx4_) == 50 
+
         return
 
     def test__multimodular_number__modulo_range_adjustment__case1(self):
@@ -130,6 +155,20 @@ class LCGV3Methods(unittest.TestCase):
         mr27 = lg3.adjust_modulo_range(rv,12,sign,lcg1)
         assert to_trinary_relation(modulo_in_range(avx,mr27),rv) == sign 
 
+    def test__LCGV3__next__case1(self): 
+        lcg1 = prg__LCG(13,-20,14,1000)
+        lg2 = LCGV3(7,-2,6,3,38,10)
+        lg2.set_prg(lcg1)
+        lg2.autoset_tv(1,6,ext_prg=lcg1) 
+
+        lx = [] 
+        for _ in range(7): 
+            lx_ = next(lg2) 
+            lx.append(lx_)
+
+        lx = np.array(lx) 
+        sv = stdop_vec(lx,to_trinary_relation,cast_type=np.int32)
+        assert lg2.tv == sv 
 
 if __name__ == '__main__':
     unittest.main()
