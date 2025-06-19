@@ -1,6 +1,25 @@
 from morebs2.graph_basics import * 
 from .ag_ext import * 
 
+def prg__range_output_by_LCG(lcg):
+    def f(): 
+        q1 = lcg() 
+        q2 = lcg() 
+        if q1 < q2:
+            return (q1,q2)
+        q2 = (q1 + 1) + q1 - q2 
+        return (q1,q2) 
+    return f 
+
+def output_LCG_matrix(lcg,shape,range_outputter):
+    assert type(shape) == tuple and len(shape) == 2
+    x = np.zeros((shape[0],shape[1]))
+
+    for i in range(shape[0]):
+        for j in range(shape[1]):
+            x[i,j] = modulo_in_range(lcg(),range_outputter())
+    return x 
+
 # no sub-cycle -> continuous
 CYCLE_CATEGORIES = {"closed","sub-cycle"}
 
