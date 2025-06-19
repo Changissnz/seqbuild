@@ -127,6 +127,66 @@ class APRNGGaugeV2Methods(unittest.TestCase):
         q2 = APRNGGaugeV2.measure_match(match)
         assert q2[0] == 3 
         assert q2[1] == [4]
+
+    def test__APRNGGaugeV2__matrix_cat_entropy__case1(self): 
+
+        mx2 = np.array([[160., 376., 120., 366.],\
+            [ 80., 356.,  40., 346.],\
+            [150., 336., 110., 326.],\
+            [ 70., 316.,  30., 382.],\
+            [140., 372., 100., 362.],\
+            [ 60., 352.,  20., 342.],\
+            [130., 332.,  90., 322.],\
+            [ 50., 386., 160., 376.],\
+            [120., 366.,  80., 356.],\
+            [ 40., 346., 150., 336.],\
+            [110., 326.,  70., 316.],\
+            [ 30., 382., 140., 372.],\
+            [100., 362.,  60., 352.],\
+            [ 20., 342., 130., 332.]])
+
+        franges = (0.,400.)
+        is_rowwise = True 
+        is_local_frange = True 
+        sl_info = 5 
+        count_type = "absdiff" 
+        round_depth = 4 
+
+        evec = APRNGGaugeV2__matrix_cat_entropy(mx2,franges,is_rowwise,is_local_frange,\
+            sl_info,count_type,round_depth)
+        assert np.all(evec == [0.6,0.8,0.6,0.6667,0.6,0.8,0.6,0.6667,\
+            0.7333,0.6667,0.6667,0.6667,0.7333,0.6667])
+        
+        is_rowwise = False 
+        evec2 = APRNGGaugeV2__matrix_cat_entropy(mx2,franges,is_rowwise,is_local_frange,\
+            sl_info,count_type,round_depth)
+        assert np.all(evec2 == np.array([0.5,0.0308, 0.4615, 0.0308]))
+
+        franges = None 
+        evec3 = APRNGGaugeV2__matrix_cat_entropy(mx2,franges,is_rowwise,is_local_frange,\
+            sl_info,count_type,round_depth)
+        assert np.all(evec3 == np.array([0.5077, 0.3846, 0.5231, 0.4308]))
+
+        franges = (500.,1000.)
+        evec4 = APRNGGaugeV2__matrix_cat_entropy(mx2,franges,is_rowwise,is_local_frange,\
+            sl_info,count_type,round_depth)
+        assert np.all(evec4 == np.array([0.2   , 0.    , 0.1846, 0.    ])) 
+
+        franges = np.array([[0.,200.],[350.,400.],[0.,200.],[350.,400.]])
+        evec5 = APRNGGaugeV2__matrix_cat_entropy(mx2,franges,is_rowwise,is_local_frange,\
+            sl_info,count_type,round_depth)
+        assert np.all(evec5 == np.array([0.4808, 0.3846, 0.4808, 0.3462])) 
+
+        sl_info = np.array([1,3,6,6],dtype=np.int32)
+        evec6 = APRNGGaugeV2__matrix_cat_entropy(mx2,franges,is_rowwise,is_local_frange,\
+            sl_info,count_type,round_depth)
+        assert np.all(evec6 == np.array([0.,0.2821, 0.4308, 0.3538]))
+
+        franges = np.array([[0.,200.],[0.,400.],[0.,200.],[0.,400.]])
+        evec7 = APRNGGaugeV2__matrix_cat_entropy(mx2,franges,is_rowwise,is_local_frange,\
+            sl_info,count_type,round_depth)
+        assert np.all(evec7 == np.array([0.    , 0.    , 0.4308, 0.0897]))
+
         
 if __name__ == '__main__':
     unittest.main()

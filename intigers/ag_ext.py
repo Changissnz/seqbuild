@@ -1,5 +1,5 @@
 from morebs2.aprng_gauge import *
-from morebs2.matrix_methods import is_proper_bounds_vector,is_2d_matrix  
+from morebs2.matrix_methods import is_bounds_vector,is_proper_bounds_vector,is_2dmatrix  
 from types import MethodType,FunctionType
 from .seq_struct import * 
 from .extraneous import * 
@@ -117,7 +117,7 @@ vector<int> (denumerator for each row or column), float (literal), and vector<fl
 """
 def APRNGGaugeV2__matrix_cat_entropy(m,franges,is_rowwise:bool=True,is_local_frange:bool=True,\
     sl_info = None,count_type="absdiff",round_depth:int=5):
-    assert is_2d_matrix(m)
+    assert is_2dmatrix(m)
     m_ = m.T if not is_rowwise else m 
     f = None 
     i = None  
@@ -131,7 +131,9 @@ def APRNGGaugeV2__matrix_cat_entropy(m,franges,is_rowwise:bool=True,is_local_fra
         else: 
             franges = (np.min(m_),np.max(m_))
 
-    if is_proper_bounds_vector(franges): 
+    if is_bounds_vector(franges): 
+        assert is_proper_bounds_vector(franges)
+        assert franges.shape[0] == len(m_)
         f,i = franges[0],0 
     else: 
         assert type(franges) == tuple
@@ -145,6 +147,10 @@ def APRNGGaugeV2__matrix_cat_entropy(m,franges,is_rowwise:bool=True,is_local_fra
     lx = [] 
     for x in m_: 
         iseq = IntSeq(x) 
+
+        if type(i) != type(None): 
+            f = franges[i] 
+            ag.reload_var("frange",tuple(f) )
 
         if type(j) != type(None):
             sl = sl_info[j] 
@@ -160,8 +166,6 @@ def APRNGGaugeV2__matrix_cat_entropy(m,franges,is_rowwise:bool=True,is_local_fra
 
         if type(i) != type(None): 
             i += 1 
-            f = franges[i] 
-            ag.reload_var("frange",f) 
 
         if type(j) != type(None): j += 1 
 
