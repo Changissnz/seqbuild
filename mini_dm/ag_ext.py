@@ -1,8 +1,9 @@
 from morebs2.aprng_gauge import *
 from morebs2.matrix_methods import is_bounds_vector,is_proper_bounds_vector,is_2dmatrix  
 from types import MethodType,FunctionType
-from .seq_struct import * 
-from .extraneous import * 
+#from .seq_struct import * 
+#from .extraneous import *
+from .minmax_freq import *  
 
 def absdiff_match_func(i,i2):
     mm = dict() 
@@ -58,7 +59,7 @@ class APRNGGaugeV2(APRNGGauge):
     @staticmethod
     def match_two_intseq(i1,i2,match_func): 
         assert type(i1) == type(i2)
-        assert type(i1) == IntSeq
+        #assert type(i1) == IntSeq
         return i1.match_map(i2,match_func) 
 
     """
@@ -67,7 +68,7 @@ class APRNGGaugeV2(APRNGGauge):
     """
     @staticmethod
     def pairwise_diffs(is1):
-        assert type(is1) == IntSeq
+        #assert type(is1) == IntSeq
         if len(is1) < 2:
             return None,None,None 
         q = uwpd(np.array(is1.l),pairwise_op=lambda x1,x2: np.abs(x2 - x1),accum_op=None)
@@ -108,65 +109,3 @@ class APRNGGaugeV2(APRNGGauge):
 
     def cycle_multvec(self):
         return stdop_vec(self.cycle,zero_div0,cast_type=np.float32)
-    
-"""
-Measures categorical entropy over rows or columns of matrix `m`. The variable 
-`sl_info` is for the `seg_length` parameter of <APRNGGaugeV2.std_cat_entropy>. 
-It is one of five types: None, int (denumerator for max pairwise distance), 
-vector<int> (denumerator for each row or column), float (literal), and vector<float>. 
-"""
-def APRNGGaugeV2__matrix_cat_entropy(m,franges,is_rowwise:bool=True,is_local_frange:bool=True,\
-    sl_info = None,count_type="absdiff",round_depth:int=5):
-    assert is_2dmatrix(m)
-    m_ = m.T if not is_rowwise else m 
-    f = None 
-    i = None  
-
-    if type(franges) == type(None): 
-        if is_local_frange: 
-            franges = []
-            for x in m_: 
-                franges.append((np.min(x),np.max(x))) 
-            franges = np.array(franges,dtype=np.int32) 
-        else: 
-            franges = (np.min(m_),np.max(m_))
-
-    if is_bounds_vector(franges): 
-        assert is_proper_bounds_vector(franges)
-        assert franges.shape[0] == len(m_)
-        f,i = franges[0],0 
-    else: 
-        assert type(franges) == tuple
-        assert len(franges) == 2 
-        f = franges 
-
-    j = 0 if is_vector(sl_info) else None
-    sl = sl_info  
-
-    ag = APRNGGaugeV2(None,f,pradius=5)
-    lx = [] 
-    for x in m_: 
-        iseq = IntSeq(x) 
-
-        if type(i) != type(None): 
-            f = franges[i] 
-            ag.reload_var("frange",tuple(f) )
-
-        if type(j) != type(None):
-            sl = sl_info[j] 
-            assert sl > 0
-
-        sl_ = sl 
-        if type(sl_) in {int,np.int32,np.int64}:
-            sl_ = (f[1] - f[0]) / sl 
-
-        ce = ag.std_cat_entropy(iseq,seg_length=sl_,start_value=f[0],\
-            count_type=count_type)
-        lx.append(ce) 
-
-        if type(i) != type(None): 
-            i += 1 
-
-        if type(j) != type(None): j += 1 
-
-    return np.round(np.array(lx),round_depth)

@@ -1,5 +1,7 @@
 from morebs2.graph_basics import * 
-from .ag_ext import * 
+from morebs2.numerical_generator import modulo_in_range 
+from .seq_struct import * 
+from mini_dm.ag_ext import * 
 
 def prg__range_output_by_LCG(lcg):
     def f(): 
@@ -40,6 +42,70 @@ def travel_io_map_till_repeat(m,k):
         q.append(v) 
         k = v 
     return q 
+
+
+"""
+Measures categorical entropy over rows or columns of matrix `m`. The variable 
+`sl_info` is for the `seg_length` parameter of <APRNGGaugeV2.std_cat_entropy>. 
+It is one of five types: None, int (denumerator for max pairwise distance), 
+vector<int> (denumerator for each row or column), float (literal), and vector<float>. 
+"""
+def APRNGGaugeV2__matrix_cat_entropy(m,franges,is_rowwise:bool=True,is_local_frange:bool=True,\
+    sl_info = None,count_type="absdiff",round_depth:int=5):
+    assert is_2dmatrix(m)
+    m_ = m.T if not is_rowwise else m 
+    f = None 
+    i = None  
+
+    if type(franges) == type(None): 
+        if is_local_frange: 
+            franges = []
+            for x in m_: 
+                franges.append((np.min(x),np.max(x))) 
+            franges = np.array(franges,dtype=np.int32) 
+        else: 
+            franges = (np.min(m_),np.max(m_))
+
+    if is_bounds_vector(franges): 
+        assert is_proper_bounds_vector(franges)
+        assert franges.shape[0] == len(m_)
+        f,i = franges[0],0 
+    else: 
+        assert type(franges) == tuple
+        assert len(franges) == 2 
+        f = franges 
+
+    j = 0 if is_vector(sl_info) else None
+    sl = sl_info  
+
+    ag = APRNGGaugeV2(None,f,pradius=5)
+    lx = [] 
+    for x in m_: 
+        iseq = IntSeq(x) 
+
+        if type(i) != type(None): 
+            f = franges[i] 
+            ag.reload_var("frange",tuple(f) )
+
+        if type(j) != type(None):
+            sl = sl_info[j] 
+            assert sl > 0
+
+        sl_ = sl 
+        if type(sl_) in {int,np.int32,np.int64}:
+            sl_ = (f[1] - f[0]) / sl 
+
+        ce = ag.std_cat_entropy(iseq,seg_length=sl_,start_value=f[0],\
+            count_type=count_type)
+        lx.append(ce) 
+
+        if type(i) != type(None): 
+            i += 1 
+
+        if type(j) != type(None): j += 1 
+
+    return np.round(np.array(lx),round_depth)
+
 
 class TFunc__NoRepeats: 
 
