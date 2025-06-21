@@ -45,9 +45,8 @@ class QValueOutputter:
         diff = l - len(s_) 
         if diff > 0:
             self.set_next_q()
-
-        s_ = s_ + self.s[:diff]
-        self.s = self.s[diff:]
+            s_ = s_ + self.s[:diff]
+            self.s = self.s[diff:]
 
         return self.adjust_integer(np.int64(s_)) 
     
@@ -87,6 +86,6 @@ class QValueOutputter:
         diff = mrange[1] - mrange[0]
         i = abs(i) 
 
-        while i > diff:
+        while i >= diff:
             i = i / 10
         return mrange[0] + i
