@@ -1,9 +1,9 @@
 from morebs2.aprng_gauge import *
 from morebs2.matrix_methods import is_bounds_vector,is_proper_bounds_vector,is_2dmatrix  
 from types import MethodType,FunctionType
-#from .seq_struct import * 
-#from .extraneous import *
 from .minmax_freq import *  
+from intigers.process_seq import stdop_vec
+from intigers.extraneous import zero_div0 
 
 def absdiff_match_func(i,i2):
     mm = dict() 
