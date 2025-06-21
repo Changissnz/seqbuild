@@ -3,7 +3,7 @@ import unittest
 
 ### lone file test 
 """
-python3 -m tests.test_seq2graph
+python3 -m tests.test_process_seq 
 """
 ###
 class ProcessSeqMethods(unittest.TestCase):

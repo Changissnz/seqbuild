@@ -1,1 +1,0 @@
-from .seq_struct import * 
