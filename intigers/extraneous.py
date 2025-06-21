@@ -203,6 +203,25 @@ def prg__integer_seq__mult(n,c,r,crange,mrange,prg,\
 
     return qx2,len(qx2) == n
 
+def prg__LCG_to_range_outputter(lcg):
+    def f(): 
+        q1 = lcg() 
+        q2 = lcg() 
+        if q1 < q2:
+            return (q1,q2)
+        q2 = (q1 + 1) + q1 - q2 
+        return (q1,q2) 
+    return f 
+
+def prg__LCG_to_ndim_index_outputter(lcg,dim):
+
+    def f():
+        x = np.zeros((len(dim),),dtype=np.int32) 
+        for i in range(len(dim)): 
+            x[i] = lcg() % dim[i] 
+        return x 
+    return f 
+
 #------------------------------- operations related to euclid's distance
 
 """

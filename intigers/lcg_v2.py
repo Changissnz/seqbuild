@@ -3,16 +3,6 @@ from morebs2.numerical_generator import modulo_in_range
 from .seq_struct import * 
 from mini_dm.ag_ext import * 
 
-def prg__range_output_by_LCG(lcg):
-    def f(): 
-        q1 = lcg() 
-        q2 = lcg() 
-        if q1 < q2:
-            return (q1,q2)
-        q2 = (q1 + 1) + q1 - q2 
-        return (q1,q2) 
-    return f 
-
 def output_LCG_matrix(lcg,shape,range_outputter):
     assert type(shape) == tuple and len(shape) == 2
     x = np.zeros((shape[0],shape[1]))
