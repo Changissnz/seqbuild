@@ -1,5 +1,6 @@
 from desi.fraction import * 
-from morebs2.numerical_generator import prg__LCG 
+from morebs2.aprng_gauge import BatchIncrStruct
+from morebs2.numerical_generator import prg__LCG,prg__constant
 from intigers.extraneous import prg__LCG_to_range_outputter,prg__LCG_to_ndim_index_outputter
 import unittest
 
@@ -12,6 +13,17 @@ def fraction__sample_LCGs(l):
     rxi = prg__LCG_to_range_outputter(rx) 
     outi = prg__LCG_to_ndim_index_outputter(ix,(l,l))
     return outi,lx,rxi 
+
+
+def fraction__sample_LCGs_2(l): 
+    lx = prg__constant(10)
+
+    bis = BatchIncrStruct(l,is_perm=True,\
+        is_reflective=True,subset_size=2)
+    ix = bis.__next__ 
+
+    rx = prg__constant((0.,5000.0))
+    return ix,lx,rx 
 
 ### lone file test 
 """
@@ -60,6 +72,18 @@ class FractionMethods(unittest.TestCase):
 
         # different adjustment type, different output test 
         assert not np.any(l3 == l4) 
+
+    def test__QValueOutputter__next__case2(self):
+
+        intseq = IntSeq([1,2,4,2,1,4,1,2,2,4])
+        outi,lx,rxi = fraction__sample_LCGs_2(len(intseq))
+
+        qvo = QValueOutputter(intseq,outi,lx,rxi,1) 
+        l = [] 
+        for i in range(10): 
+            l.append(next(qvo))
+        assert np.all(l == [0.0, 5.0, 25.0, 5.0, 0.0, 25.0, 0.0, 5.0, 5.0, 25.0]) 
+
 
 if __name__ == '__main__':
     unittest.main()
