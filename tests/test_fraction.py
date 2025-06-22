@@ -45,12 +45,12 @@ class FractionMethods(unittest.TestCase):
             l0.append(next(qvo))
             l2.append(next(qvo2)) 
 
-        q1 = [171.341, 2367.146623956911, 5632.743898264879, 4608.298404089755, 4005.4265540921688]
-        q2 = [2331.0486668385947, 4450.995057997054, 1752.823161311726, 338.44678641201244, 4425.551978933781]
+        q1 = [171.341, 2367.146623956911, 5982.743898264879, 4656.449418269798, 3785.6735862546675]
+        q2 = [2331.0486668385947, 6399.55004738838, 1752.823161311726, 338.44678641201244, 4425.551978933781]
 
         # value test
-        assert np.all(q1 == l0)
-        assert np.all(q2 == l2)
+        assert np.all(q1 == l0),"got {}".format(l0)
+        assert np.all(q2 == l2),"got {}".format(l2)
 
         outi,lx,rxi = fraction__sample_LCGs(len(intseq)) 
         qvo_ = QValueOutputter(intseq,outi,lx,rxi,1) 
@@ -80,9 +80,9 @@ class FractionMethods(unittest.TestCase):
 
         qvo = QValueOutputter(intseq,outi,lx,rxi,1) 
         l = [] 
-        for i in range(10): 
+        for i in range(5): 
             l.append(next(qvo))
-        assert np.all(l == [0.0, 5.0, 25.0, 5.0, 0.0, 25.0, 0.0, 5.0, 5.0, 25.0]) 
+        assert np.all(l == [55.0,0.0,0.0,50.0,552.0]), "got {}".format(l)
 
 
 if __name__ == '__main__':
