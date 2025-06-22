@@ -1,7 +1,7 @@
 from intigers.seq_struct import * 
 from intigers.extraneous import zero_div0  
 from morebs2.numerical_generator import modulo_in_range
-from morebs2.matrix_methods import is_valid_range 
+from morebs2.matrix_methods import is_valid_range,float_to_string 
 from types import MethodType,FunctionType
 
 class GenericIntSeqOp: 
@@ -88,16 +88,8 @@ class QValueOutputter(GenericIntSeqOp):
         i1 = i1 % len(self.intseq)
         i2 = i2 % len(self.intseq)
         
-        q = str(zero_div0(self.intseq[i1],self.intseq[i2])) 
-        x1 = q.find(".")
-
-        if x1 != -1: 
-            q = q[x1+1:] 
-
-        x2 = q.find("E")
-
-        if x2 != -1: 
-            q = q[:x2]
+        q = zero_div0(self.intseq[i1],self.intseq[i2])
+        q = float_to_string(q,True,True)
         self.s = q 
         return q 
     
