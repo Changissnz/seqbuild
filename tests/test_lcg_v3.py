@@ -13,8 +13,10 @@ class LCGV3Methods(unittest.TestCase):
         modrange = [3,37]
         qx = modrange_for_congruence(15,25,modrange)
         assert modulo_in_range(25,qx) == 15 
+
         qx2 = modrange_for_congruence(15,5,modrange)
         assert modulo_in_range(5,qx2) == 15 
+        
         qx3 = modrange_for_congruence(15,54,modrange)
         assert modulo_in_range(54,qx3) == 15 
 
