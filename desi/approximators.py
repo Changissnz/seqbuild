@@ -1,5 +1,4 @@
-from morebs2.fit_2n2 import * 
-from intigers.extraneous import safe_div 
+from .not_equals import * 
 from .fraction import * 
 
 DEFAULT_FIT22_PARTITION_SIZE_RANGE = [5,103] 
@@ -18,7 +17,7 @@ class Fit22ValueOutputter(GenericIntSeqOp):
 
         self.p0 = None
         self.p1 = None
-        self.f = None
+        self.H = None
 
         self.x_ = None
         self.x2_ = None
@@ -36,9 +35,9 @@ class Fit22ValueOutputter(GenericIntSeqOp):
         else: pass 
 
         if self.ax: 
-            sx = self.f.f(self.x_)
+            sx = self.H.f(self.x_)
         else: 
-            sx = self.f.g(self.x_) 
+            sx = self.H.g(self.x_) 
         self.x_ += self.a_ 
 
         sx_ = float_to_string(sx,True,True)
@@ -49,11 +48,9 @@ class Fit22ValueOutputter(GenericIntSeqOp):
         # case: start 
         if type(self.p0) == type(None):
             self.p0 = self.px() 
-            self.p1 = self.px()
-            return 
-        
+            self.p1 = self.px() 
         # output 1 or 2 new points 
-        if self.point_conn_type == 1:
+        elif self.point_conn_type == 1:
             self.p0 = self.p1
             self.p1 = self.px()
         else:
@@ -84,20 +81,13 @@ class Fit22ValueOutputter(GenericIntSeqOp):
 
     
     def fix_equal_points(self):
+
         self.p0 = np.array(self.p0)
         self.p1 = np.array(self.p1)
 
-        if round(self.p0[0] - self.p1[0],5) != 0.0 and \
-            round(self.p0[1] - self.p1[1],5) != 0.0:
-            return 
-        
-        p = self.px() 
-        qr = safe_div(self.p1,p)
-
-        while round(self.p0[0] - self.p1[0],5) == 0.0 or \
-            round(self.p0[1] - self.p1[1],5) == 0.0:
-            self.p1 = self.p1 + qr 
-
+        self.p0,self.p1 = \
+            not_equals__pairvec(self.p0,self.p1,self.px,indices=None)
+            
 """
 LPS stands for Lagrange Polynomial Solver, interpolation of a 
 polynomial's span of points using the Lagrange basis.  
