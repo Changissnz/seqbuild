@@ -37,6 +37,9 @@ def not_equals__pairvec(V1,V2,prg,indices=None):
 
     return V1,V2 
 
+"""
+outputs a not_equals matrix 
+"""
 def not_equals__matrix(M,prg,modulo_range= (0.,1.),axes = {0,1}):
     assert axes.issubset({0,1})
     return -1 
