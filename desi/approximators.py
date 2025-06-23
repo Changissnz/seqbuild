@@ -86,7 +86,7 @@ class Fit22ValueOutputter(GenericIntSeqOp):
     def fix_equal_points(self):
         self.p0 = np.array(self.p0)
         self.p1 = np.array(self.p1)
-        
+
         if round(self.p0[0] - self.p1[0],5) != 0.0 and \
             round(self.p0[1] - self.p1[1],5) != 0.0:
             return 
@@ -97,3 +97,12 @@ class Fit22ValueOutputter(GenericIntSeqOp):
         while round(self.p0[0] - self.p1[0],5) == 0.0 or \
             round(self.p0[1] - self.p1[1],5) == 0.0:
             self.p1 = self.p1 + qr 
+
+"""
+LPS stands for Lagrange Polynomial Solver, interpolation of a 
+polynomial's span of points using the Lagrange basis.  
+"""
+class LPSValueOutputter(GenericIntSeqOp):
+
+    def __init__(self): 
+        return 
