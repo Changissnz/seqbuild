@@ -22,3 +22,4 @@ class PRNGPairwiseOp:
         i = self.prg() % len(self.operators)
         q = self.operators[i]
         return q(x,x2) 
+    
