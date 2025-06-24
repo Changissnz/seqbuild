@@ -1,6 +1,6 @@
 from .not_equals import * 
 from .fraction import * 
-
+from morebs2.poly_interpolation import * 
 DEFAULT_FIT22_PARTITION_SIZE_RANGE = [5,103] 
 
 class Fit22ValueOutputter(GenericIntSeqOp): 
@@ -94,5 +94,42 @@ polynomial's span of points using the Lagrange basis.
 """
 class LPSValueOutputter(GenericIntSeqOp):
 
-    def __init__(self): 
+    def __init__(self,px,length_outputter,range_outputter,bool_outputter,\
+            point_conn_type:int,adjustment_type:int=1): 
+        
+        assert type(px) in {MethodType,FunctionType}
+        self.px = px 
+
+        self.p0,self.p1 = None,None 
+        self.adder_end,self.adder,self.adder_i = None,None,None
+
+    #--------------------------------------------------------------------------
+
+    def set_next_value(self):
+        if type(self.p0) == type(None):
+            self.update_points() 
+        elif self.adder_i > self.adder_end: 
+            self.update_points() 
+        else: pass 
+
+        x = self.p0 + (self.adder_i * self.adder)
+        sx = self.lps.output_by_lagrange_basis(x)
+        sx_ = float_to_string(sx,True,True)
+        self.s = sx_ 
+
+        self.adder_i += 1 
+
         return 
+    
+    def update_points(self):
+
+        self.q = self.px() 
+
+        # assumes q is a proper set of points for 
+        # fitting via <LagrangePolySolver>
+        self.lps = LagrangePolySolver(self.q, prefetch = True)
+        self.p0,self.p1 = self.lps.minumum,self.lps.maximum 
+
+        self.adder_end = modulo_in_range(self.l_out(),DEFAULT_FIT22_PARTITION_SIZE_RANGE)
+        self.adder = (self.p1 - self.p0) / self.adder_end 
+        self.adder_i = 0    
