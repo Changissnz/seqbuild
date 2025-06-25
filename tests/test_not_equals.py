@@ -1,5 +1,5 @@
 from desi.not_equals import * 
-from morebs2.numerical_generator import prg__LCG
+from morebs2.numerical_generator import prg__LCG,prg__n_ary_alternator
 
 import unittest
 
@@ -50,7 +50,57 @@ class NotEqualsMethods(unittest.TestCase):
             '4.009146341463415,114.74573170731708,27.58079268292683', \
             '4.009345794392523,114.75327102803739,27.582554517133957', \
             '4.15,120.07000000000001,28.825'}
+        
+
+        lcg_px3 = prg__n_ary_alternator(3,5000,5)
+
+        cx2 = set() 
+        for _ in range(50): 
+            nep3 = not_equals__pairvec(v1,v2,lcg_px3) 
+            assert not np.any(nep3[0] == nep3[1])
+            cx2 |= {vector_to_string(nep3[1],float)}
+
+        assert len(cx2) == 50 
+
         return 
+    
+    def test__not_equals__matrix_whole__case1(self):
+        M = np.ones((5,3),dtype=float)
+        M = M * 30.2
+
+        prg = prg__LCG(-2,131,40,4001)
+        submat_type = "L+L"
+
+        qm = not_equals__matrix_whole(deepcopy(M),prg,submat_type)
+
+        submat_type = "L+U"
+        qm2 = not_equals__matrix_whole(deepcopy(M),prg,submat_type)
+
+        submat_type = "R+L"
+        qm3 = not_equals__matrix_whole(deepcopy(M),prg,submat_type)
+
+        submat_type = "R+U"
+        qm4 = not_equals__matrix_whole(deepcopy(M),prg,submat_type)
+
+        sol = np.array([[31.1 , 30.2 , 30.2 ],\
+            [32.  , 30.2 , 30.2 ],\
+            [33.05, 30.5 , 30.2 ],\
+            [35.  , 32.3 , 32.45],\
+            [38.45, 34.85, 34.7 ]]) 
+
+        assert np.all(np.round(np.abs(sol - qm2),5) == 0.0)
+
+
+        assert not np.any(qm == qm2) 
+        assert not np.any(qm == qm3) 
+        assert not np.any(qm == qm4) 
+        assert not np.any(qm2 == qm3) 
+        assert not np.any(qm2 == qm4) 
+
+        l = np.where(qm3 == qm4)
+        assert len(l[0]) == 3 
+
+
     
 
 if __name__ == '__main__':

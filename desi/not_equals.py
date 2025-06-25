@@ -53,9 +53,34 @@ def not_equals__pairvec(V1,V2,prg,indices=None):
 
     return V1,V2 
 
-"""
-outputs a not_equals matrix 
-"""
-def not_equals__matrix(M,prg,modulo_range= (0.,1.),axes = {0,1}):
-    assert axes.issubset({0,1})
-    return -1 
+def not_equals__matrix_whole(M,prg,submat_type):
+    assert is_2dmatrix(M) 
+    assert type(prg) in {FunctionType,MethodType}
+    assert submat_type in {"L+U","L+L","R+U","R+L"}
+
+    cx0,cx1 = M.shape[0],M.shape[1] 
+    x0,x1 = 0,0 
+    p = None
+    while x1 < cx1:
+        p = (x0,x1)
+
+        q = submatrix__2d(M,p,submat_type)
+
+        # check for uniqueness
+        ucheck = q.flatten()
+        ulen = len(ucheck)
+        ustat = ulen == len(np.unique(ucheck)) 
+
+        if not ustat: 
+            mx = modulo_in_range(prg(),[0.05,1.0]) 
+            adder = DEFAULT_NOTEQUALS_ADDITIVE(q.shape,mx)
+
+            while not ustat: 
+                q += adder 
+                ustat = ulen == len(np.unique(q.flatten()))
+
+        x1 += 1
+        x0 = int(round(x1 * (cx0 / cx1))) 
+        x0 = min([M.shape[0] - 1,x0])
+
+    return M
