@@ -1,7 +1,11 @@
 from .not_equals import * 
 from .fraction import * 
 from morebs2.poly_interpolation import * 
+
 DEFAULT_FIT22_PARTITION_SIZE_RANGE = [5,103] 
+
+DEFAULT_POLYNOMIAL_PARTITION_SIZE_RANGE = [50,1000]
+DEFAULT_POLYNOMIAL_POINT_SIZE_RANGE = [5,21] 
 
 class Fit22ValueOutputter(GenericIntSeqOp): 
 
@@ -87,21 +91,25 @@ class Fit22ValueOutputter(GenericIntSeqOp):
 
         self.p0,self.p1 = \
             not_equals__pairvec(self.p0,self.p1,self.px,indices=None)
-            
+
+
+
 """
 LPS stands for Lagrange Polynomial Solver, interpolation of a 
 polynomial's span of points using the Lagrange basis.  
 """
 class LPSValueOutputter(GenericIntSeqOp):
 
-    def __init__(self,px,length_outputter,range_outputter,bool_outputter,\
-            point_conn_type:int,adjustment_type:int=1): 
+    def __init__(self,px,length_outputter,range_outputter,\
+        adjustment_type:int=1): 
         
         assert type(px) in {MethodType,FunctionType}
         self.px = px 
 
         self.p0,self.p1 = None,None 
         self.adder_end,self.adder,self.adder_i = None,None,None
+
+        super().__init__(length_outputter,range_outputter,adjustment_type)
 
     #--------------------------------------------------------------------------
 
@@ -123,13 +131,27 @@ class LPSValueOutputter(GenericIntSeqOp):
     
     def update_points(self):
 
-        self.q = self.px() 
+        num_points = modulo_in_range(\
+            self.l_out(),DEFAULT_POLYNOMIAL_POINT_SIZE_RANGE) 
+
+        M = []
+        for _ in range(num_points):
+            M.append(self.px())
+        M = np.array(M) 
+
+        ##M = np.array(self.px()) 
+        ##print("M IS : ")
+        ##print(M)
+
+        submat_type = self.l_out() % 4 
+        t = DEFAULT_SUBMAT_TYPES[submat_type]
+        self.q = not_equals__matrix_whole(M,self.l_out,t)
 
         # assumes q is a proper set of points for 
         # fitting via <LagrangePolySolver>
         self.lps = LagrangePolySolver(self.q, prefetch = True)
         self.p0,self.p1 = self.lps.minumum,self.lps.maximum 
 
-        self.adder_end = modulo_in_range(self.l_out(),DEFAULT_FIT22_PARTITION_SIZE_RANGE)
+        self.adder_end = modulo_in_range(self.l_out(),DEFAULT_POLYNOMIAL_PARTITION_SIZE_RANGE)
         self.adder = (self.p1 - self.p0) / self.adder_end 
         self.adder_i = 0    

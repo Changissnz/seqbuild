@@ -222,6 +222,16 @@ def prg__LCG_to_ndim_index_outputter(lcg,dim):
         return x 
     return f 
 
+def prg__single_to_nvec(prg,n):
+
+    def f():
+        q = np.zeros((n,))
+        for i in range(n): 
+            q[i] = prg()
+        return q 
+    return f 
+
+
 #------------------------------- operations related to euclid's distance
 
 """

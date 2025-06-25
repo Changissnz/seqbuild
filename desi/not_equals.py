@@ -4,6 +4,7 @@ from mini_dm.minmax_freq import  vec_to_frequency_map
 from types import MethodType,FunctionType
 
 DEFAULT_ADDITIVE = 10 ** -6 
+DEFAULT_SUBMAT_TYPES = ["L+U","L+L","R+U","R+L"]
 
 def DEFAULT_NOTEQUALS_ADDITIVE(d,m): 
     assert round(m - 0.0,5) > 0.0
@@ -56,7 +57,7 @@ def not_equals__pairvec(V1,V2,prg,indices=None):
 def not_equals__matrix_whole(M,prg,submat_type):
     assert is_2dmatrix(M) 
     assert type(prg) in {FunctionType,MethodType}
-    assert submat_type in {"L+U","L+L","R+U","R+L"}
+    assert submat_type in DEFAULT_SUBMAT_TYPES
 
     cx0,cx1 = M.shape[0],M.shape[1] 
     x0,x1 = 0,0 
