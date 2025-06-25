@@ -101,6 +101,15 @@ class NotEqualsMethods(unittest.TestCase):
         assert len(l[0]) == 3 
 
 
+        M2 = np.ones((1,11),dtype=float)
+        M2 *= 40.7
+
+        for x in ["L+L","L+U","R+L","R+U"]:
+            qx = not_equals__matrix_whole(deepcopy(M2),prg,x)
+            assert len(np.unique(qx)) == len(qx.flatten()) 
+
+
+
     
 
 if __name__ == '__main__':
