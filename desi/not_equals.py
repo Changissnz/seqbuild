@@ -1,6 +1,5 @@
 from intigers.extraneous import * 
 from morebs2.fit_2n2 import * 
-##from mini_dm.minmax_freq import  vec_to_frequency_map
 from types import MethodType,FunctionType
 
 DEFAULT_ADDITIVE = 10 ** -6 

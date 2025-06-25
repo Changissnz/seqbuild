@@ -55,9 +55,9 @@ class PIDValueOutputter(GenericIntSeqOp):
             return self.__next__()
         
         x =  self.pic.x + (self.adder_i * self.adder)
-
+        q = self.pic.differential_at(x,lps_first=True)
         self.adder_i += 1 
-        return x 
+        return q 
 
     def set_next_value(self):
         starting_fvec = [self.f_out() % 2 for  _ in range(len(self.pts) - 1)]
