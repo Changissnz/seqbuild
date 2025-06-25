@@ -1,8 +1,24 @@
 from intigers.extraneous import * 
 from morebs2.fit_2n2 import * 
+from mini_dm.minmax_freq import  vec_to_frequency_map
 from types import MethodType,FunctionType
 
 DEFAULT_ADDITIVE = 10 ** -6 
+
+def DEFAULT_NOTEQUALS_ADDITIVE(d,m): 
+    assert round(m - 0.0,5) > 0.0
+
+    V = None 
+    if type(d) in {int,np.int32,np.int64}: 
+        V = np.arange(1,d+1)
+        V = V * m 
+        return V 
+
+    assert type(d) == tuple and len(d) == 2 
+    V = np.arange(1,(d[0] * d[1]) + 1)
+    V = V * m 
+    V = np.reshape(V,d)
+    return V 
 
 """
 compares two vectors V1,V2 of equal lengths. 
