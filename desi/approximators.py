@@ -139,10 +139,6 @@ class LPSValueOutputter(GenericIntSeqOp):
             M.append(self.px())
         M = np.array(M) 
 
-        ##M = np.array(self.px()) 
-        ##print("M IS : ")
-        ##print(M)
-
         submat_type = self.l_out() % 4 
         t = DEFAULT_SUBMAT_TYPES[submat_type]
         self.q = not_equals__matrix_whole(M,self.l_out,t)
