@@ -89,7 +89,7 @@ class QValueOutputter(GenericIntSeqOp):
         i2 = i2 % len(self.intseq)
         
         q = zero_div0(self.intseq[i1],self.intseq[i2])
-        q = float_to_string(q,True,True)
+        q = float_to_string(abs(q),True,True)
         self.s = q 
         return q 
     

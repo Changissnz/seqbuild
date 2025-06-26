@@ -1,7 +1,7 @@
 from desi.fraction import * 
 from morebs2.aprng_gauge import BatchIncrStruct
 from morebs2.numerical_generator import prg__LCG,prg__constant
-from intigers.extraneous import prg__LCG_to_range_outputter,prg__LCG_to_ndim_index_outputter
+from intigers.extraneous import prg__single_to_range_outputter,prg__single_to_ndim_index_outputter
 import unittest
 
 def fraction__sample_LCGs(l):
@@ -10,8 +10,8 @@ def fraction__sample_LCGs(l):
     rx = prg__LCG(166.341,-13.4567,5321.756267,5500.1543)
     ix = prg__LCG(25,3,87,2024)
 
-    rxi = prg__LCG_to_range_outputter(rx) 
-    outi = prg__LCG_to_ndim_index_outputter(ix,(l,l))
+    rxi = prg__single_to_range_outputter(rx) 
+    outi = prg__single_to_ndim_index_outputter(ix,(l,l))
     return outi,lx,rxi 
 
 

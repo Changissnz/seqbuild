@@ -18,7 +18,7 @@ class ApproximatorsMethods(unittest.TestCase):
         l_out = prg__LCG(43,21,82,505)
 
         range_outputter = prg__LCG(41.3131,50.6767,31.0121,5007.421541) 
-        range_outputter = prg__LCG_to_range_outputter(range_outputter)
+        range_outputter = prg__single_to_range_outputter(range_outputter)
 
         adjustment_type = 1 
 
@@ -41,7 +41,7 @@ class ApproximatorsMethods(unittest.TestCase):
         xr = prg__single_to_nvec(lcg_px,2)
         l_out = prg__LCG(43,21,82,505)
 
-        range_outputter = prg__LCG_to_range_outputter(l_out)
+        range_outputter = prg__single_to_range_outputter(l_out)
 
         adjustment_type = 1 
 

@@ -131,17 +131,7 @@ class LPSValueOutputter(GenericIntSeqOp):
     
     def update_points(self):
 
-        num_points = modulo_in_range(\
-            self.l_out(),DEFAULT_POLYNOMIAL_POINT_SIZE_RANGE) 
-
-        M = []
-        for _ in range(num_points):
-            M.append(self.px())
-        M = np.array(M) 
-
-        submat_type = self.l_out() % 4 
-        t = DEFAULT_SUBMAT_TYPES[submat_type]
-        self.q = not_equals__matrix_whole(M,self.l_out,t)
+        self.q = LPSValueOutputter.new_pointset(self.px,self.l_out) 
 
         # assumes q is a proper set of points for 
         # fitting via <LagrangePolySolver>
@@ -150,4 +140,23 @@ class LPSValueOutputter(GenericIntSeqOp):
 
         self.adder_end = modulo_in_range(self.l_out(),DEFAULT_POLYNOMIAL_PARTITION_SIZE_RANGE)
         self.adder = (self.p1 - self.p0) / self.adder_end 
-        self.adder_i = 0    
+        self.adder_i = 0   
+
+    @staticmethod 
+    def new_pointset(px,l_out):
+
+        num_points = modulo_in_range(\
+            l_out(),DEFAULT_POLYNOMIAL_POINT_SIZE_RANGE) 
+
+        M = []
+        for _ in range(num_points):
+            x = px() 
+            assert type(x) in {list,tuple} or is_vector(x) 
+            assert len(x) == 2 
+            M.append(x) 
+        M = np.array(M) 
+
+        submat_type = l_out() % 4 
+        t = DEFAULT_SUBMAT_TYPES[submat_type]
+        return not_equals__matrix_whole(M,l_out,t)
+
