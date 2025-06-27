@@ -4,6 +4,7 @@ Planned file that works on vector-singleton fits between vectors.
 
 from morebs2.matrix_methods import is_number,is_vector,is_valid_range
 from morebs2.numerical_generator import modulo_in_range
+from morebs2.measures import zero_div 
 import numpy as np 
 
 DEFAULT_AFFINEVEC_DIMRANGE = [3,17]
@@ -20,6 +21,24 @@ def mulo___inc1(p_current,p_ref,diff_func,delta_func,term_func,max_iterations:in
     stat = term_func(q) 
 
     return d,q,stat
+
+def ratio__type_asymmetric(q0,q1,vec_type):
+    assert vec_type in {"min 1.0", "max 1.0"}
+
+    if vec_type == "min 1.0":
+        m0,m1 = min([q0,q1]),max([q0,q1])
+    else: 
+        m0,m1 = max([q0,q1]),min([q0,q1])
+    return zero_div(m1,m0,0.0)
+
+def ratio__type_symmetric(q0,q1,ref=0):
+    assert ref in {0,1}
+
+    x = abs(q0) + abs(q1) 
+
+    if ref == 0: 
+        return zero_div(q0,x,0.0)
+    return zero_div(q1,x,0.0)
 
 """
 designed for only vector and singleton values 
@@ -59,6 +78,10 @@ class AffineDelta:
     def delta(self,dfunc): 
         m,a = dfunc(self.m,self.a) 
         return AffineDelta(m,a,self.ma_order)
+    
+    def op1(self,x):
+        if self.ma_order: return x * self.m 
+        return x + self.a 
 
     @staticmethod
     def one_instance_(prg,r_out1,r_out2,dim_range=None,ma_order=None):

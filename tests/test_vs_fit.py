@@ -9,6 +9,28 @@ python -m tests.test_vs_fit
 ###
 class VSFitMethods(unittest.TestCase):
 
+
+    def test__ratio__type_asymmetricANDsymmetric(self): 
+
+        q0,q1 = 3,4.0
+        qx = ratio__type_asymmetric(q0,q1,"min 1.0")
+        assert qx == 4 / 3
+        qx2 = ratio__type_asymmetric(q0,q1,"max 1.0")
+        assert qx2 == 3 / 4
+
+        qx3 = ratio__type_symmetric(q0,q1,ref=0)
+        qx4 = ratio__type_symmetric(q0,q1,ref=1)
+        assert qx3 + qx4 == 1.0 
+
+        q0,q1 = 0.,2. 
+        qx5 = ratio__type_symmetric(q0,q1,ref=1)
+        qx6 = ratio__type_symmetric(q0,q1,ref=0)
+        assert qx5 == 1.0 and qx6 == 0.0 
+
+        qx7 = ratio__type_asymmetric(q0,q1,"min 1.0")
+        qx8 = ratio__type_asymmetric(q0,q1,"max 1.0")
+        assert qx7 == qx8 and qx7 == 0.0 
+
     def test__AffineDelta__next__case1(self):
 
         m_type = "vec"
