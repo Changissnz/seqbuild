@@ -10,17 +10,13 @@ import numpy as np
 DEFAULT_AFFINEVEC_DIMRANGE = [3,17]
 
 
-"""
-most under or least over; 
+#-------------------- some methods on ratios 
 
-takes a delta function to increment point in search 
-"""
-def mulo___inc1(p_current,p_ref,diff_func,delta_func,term_func,max_iterations:int):
-    d = diff_func(p_ref,p_current)
-    q = delta_func(p_current)
-    stat = term_func(q) 
-
-    return d,q,stat
+# parameters for method<ratio_vector> 
+ratio_vector__types = ["a","s"]
+ratio_vector__parameter = {"a": ["min 1.0","max 1.0"],"s":[0,1]} 
+    # active var only for "a" 
+ratio_vector__parameter2 = [-1,0,1]
 
 def ratio__type_asymmetric(q0,q1,vec_type):
     assert vec_type in {"min 1.0", "max 1.0"}
@@ -55,15 +51,20 @@ def ratio__type_symmetric(q0,q1,ref=0):
     return zero_div(q1,x,0.0)
 
 def ratio_vector(q0,q1,rtype,parameter,parameter2):
-    assert rtype in {"a","s"}
-
-    if rtype == "a":
+    assert rtype in {"a","s","auto"}
+    if rtype in {"a","auto"}:
         assert parameter2 in {-1,0,1}
 
-    i = 0 if is_vector(q0) else None
-    j = 0 if is_vector(q1) else None 
-
-    if rtype == "a":
+    def qf__autolabel(qx0,qx1,param):
+        # case: use asymmetric labeling
+        if (qx0 < 0.0 and qx1 > 0.0) or \
+            (qx0 > 0.0 and qx1 < 0.0): 
+            return ratio__type_asymmetric(qx0,qx1,param)
+        return ratio__type_symmetric(qx0,qx1,param)
+    
+    if rtype == "auto":
+        qf = qf__autolabel
+    elif rtype == "a":
         def qf(qx0,qx1,param): 
             if parameter2 == -1: 
                 return ratio__type_asymmetric(qx0,qx1,param)
@@ -72,10 +73,13 @@ def ratio_vector(q0,q1,rtype,parameter,parameter2):
     else: 
         qf = ratio__type_symmetric
 
-    if i != 0 and j != 0: 
-        x = qf(q0,q1,parameter)
-        return x 
-    
+    i = 0 if is_vector(q0) else None
+    j = 0 if is_vector(q1) else None 
+
+    if i != 0 and j != 0:
+       print("-- output")
+       return qf(q0,q1,parameter)
+
     if i == j and i == 0:
         assert len(q0) == len(q1) 
 
@@ -100,8 +104,15 @@ def ratio_vector(q0,q1,rtype,parameter,parameter2):
     
     return np.array(lx) 
 
+#--------------------------- 
+
+
 """
-designed for only vector and singleton values 
+designed for only vector and singleton values. 
+This is the primary structure that fits between
+
+X_{input} <-> X_{output}; 
+X_{input},X_{output} each of type vector or singleton. 
 """
 class AffineDelta: 
 
@@ -149,10 +160,19 @@ class AffineDelta:
     def ma_ratio(self,ratio_type,parameter):
         assert ratio_type in {"a","s"}
 
+        """
+        rv = ratio_vector(self.m,self.a,\
+            ratio_type,parameter,parameter2):
+    assert rtype in {"a","s"}
+
+    if rtype == "a":
+        assert parameter2 in {-1,0,1}
+
+
         if ratio_type == "a": 
             return 
 
-        """
+        ###### 
 def safe_div(V1,V2):
 def ratio__type_asymmetric(q0,q1,vec_type):
     assert vec_type in {"min 1.0", "max 1.0"}

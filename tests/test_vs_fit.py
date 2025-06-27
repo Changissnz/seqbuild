@@ -92,6 +92,10 @@ class VSFitMethods(unittest.TestCase):
         assert equal_iterables(sol_rx,rx)
         assert equal_iterables(sol_rx2,rx2)
 
+    def test__ratio_vector__case3(self): 
+
+        return -1 
+
 
 
 
