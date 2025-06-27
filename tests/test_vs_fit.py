@@ -1,5 +1,6 @@
 from mini_dm.vs_fit import * 
 from morebs2.numerical_generator import prg__LCG, prg__constant,prg__n_ary_alternator
+from morebs2.matrix_methods import equal_iterables
 import unittest
 
 ### lone file test 
@@ -51,6 +52,47 @@ class VSFitMethods(unittest.TestCase):
 
         assert set(np.unique(rv2)) == {1.0} 
         assert np.all(rv1 == rv3) 
+
+    def test__ratio_vector__case2(self): 
+        q0 = np.array([4.0,2.1,7.7])
+        q1 = np.array([3.0,6.3,5.90])
+
+        parameter = "min 1.0"
+        parameter2 = -1 
+        rv4 = ratio_vector(q0,q1,"a",parameter,parameter2)
+
+        parameter2 = 0 
+        rv5 = ratio_vector(q0,q1,"a",parameter,parameter2)
+
+        parameter2 = 1 
+        rv6 = ratio_vector(q0,q1,"a",parameter,parameter2)
+
+        rx = np.array([rv5,rv6])
+
+        parameter = "max 1.0"
+        parameter2 = -1 
+        rv7 = ratio_vector(q0,q1,"a",parameter,parameter2)
+
+        parameter2 = 0 
+        rv8 = ratio_vector(q0,q1,"a",parameter,parameter2)
+
+        parameter2 = 1 
+        rv9 = ratio_vector(q0,q1,"a",parameter,parameter2)
+
+        rx2 = np.array([rv8,rv9])
+
+        sol_rx = np.array([\
+            [1.33333333, 1.        , 1.30508475],\
+            [1.        , 3.        , 1.        ]])
+
+        sol_rx2 = np.array([\
+            [1.        , 0.33333333, 1.        ],\
+            [0.75      , 1.        , 0.76623377]])
+
+        assert equal_iterables(sol_rx,rx)
+        assert equal_iterables(sol_rx2,rx2)
+
+
 
 
     def test__AffineDelta__next__case1(self):
