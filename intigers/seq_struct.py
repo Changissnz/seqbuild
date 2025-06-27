@@ -114,7 +114,7 @@ class IntSeq:
         return i 
 
     def remove_elements(self,elements):
-        indices = self.element_indices(element)
+        indices = self.element_indices(elements)
         self.remove_element_indices(indices)
         return 
 
