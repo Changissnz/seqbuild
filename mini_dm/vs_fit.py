@@ -31,6 +31,20 @@ def ratio__type_asymmetric(q0,q1,vec_type):
         m0,m1 = max([q0,q1]),min([q0,q1])
     return zero_div(m1,m0,0.0)
 
+def ratio__type_asymmetric__v2(q0,q1,vec_type):
+    q = ratio__type_asymmetric(q0,q1,vec_type)
+
+    x = [None,None]
+    if vec_type == "min 1.0": 
+        i0 = np.argmin([q0,q1])
+    else: 
+        i0 = np.argmax([q0,q1])
+    i1 = (i0 + 1) % 2 
+    x[i0] = 1.0
+    x[i1] = q 
+
+    return x 
+
 def ratio__type_symmetric(q0,q1,ref=0):
     assert ref in {0,1}
 
@@ -39,6 +53,52 @@ def ratio__type_symmetric(q0,q1,ref=0):
     if ref == 0: 
         return zero_div(q0,x,0.0)
     return zero_div(q1,x,0.0)
+
+def ratio_vector(q0,q1,rtype,parameter,parameter2):
+    assert rtype in {"a","s"}
+
+    if rtype == "a":
+        assert parameter2 in {-1,0,1}
+
+    i = 0 if is_vector(q0) else None
+    j = 0 if is_vector(q1) else None 
+
+    if rtype == "a":
+        def qf(qx0,qx1,param): 
+            if parameter2 == -1: 
+                return ratio__type_asymmetric(qx0,qx1,param)
+            xr = ratio__type_asymmetric__v2(qx0,qx1,param) 
+            return xr[parameter2] 
+    else: 
+        qf = ratio__type_symmetric
+
+    if i != 0 and j != 0: 
+        x = qf(q0,q1,parameter)
+        return x 
+    
+    if i == j and i == 0:
+        assert len(q0) == len(q1) 
+
+    lx = [] 
+    stat1,stat2 = True,True 
+    while stat1 and stat2: 
+
+        x1 = q0[i] if type(i) == int else q0 
+        x2 = q1[j] if type(j) == int else q1 
+
+        lx_ = qf(x1,x2,parameter)
+        lx.append(lx_)
+
+        stat1,stat2 = True,True
+
+        if type(i) == int: 
+            i += 1 
+            stat1 = not (i >= len(q0))
+        if type(j) == int: 
+            j += 1 
+            stat2 = not (j >= len(q1))
+    
+    return np.array(lx) 
 
 """
 designed for only vector and singleton values 
@@ -72,16 +132,46 @@ class AffineDelta:
             return x * self.m + self.a
         return (x + self.a) * self.m 
     
+    def op1(self,x):
+        if self.ma_order: return x * self.m 
+        return x + self.a 
+
     def diff(self,x,x2): 
         return self.fit(x) - self.fit(x2) 
     
+    def expected_diff(self,target_value,x,op_type):
+        assert op_type in {"one","all"}
+
+        if op_type == "one": 
+            return target_value - self.op1(x)
+        return target_value - self.fit(x) 
+    
+    def ma_ratio(self,ratio_type,parameter):
+        assert ratio_type in {"a","s"}
+
+        if ratio_type == "a": 
+            return 
+
+        """
+def safe_div(V1,V2):
+def ratio__type_asymmetric(q0,q1,vec_type):
+    assert vec_type in {"min 1.0", "max 1.0"}
+
+    if vec_type == "min 1.0":
+        m0,m1 = min([q0,q1]),max([q0,q1])
+    else: 
+        m0,m1 = max([q0,q1]),min([q0,q1])
+    return zero_div(m1,m0,0.0)
+
+def ratio__type_symmetric(q0,q1,ref=0):
+        return -1 
+        """ 
+
     def delta(self,dfunc): 
         m,a = dfunc(self.m,self.a) 
         return AffineDelta(m,a,self.ma_order)
     
-    def op1(self,x):
-        if self.ma_order: return x * self.m 
-        return x + self.a 
+
 
     @staticmethod
     def one_instance_(prg,r_out1,r_out2,dim_range=None,ma_order=None):
