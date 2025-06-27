@@ -20,9 +20,6 @@ class DifferentialsMethods(unittest.TestCase):
 
         lcg_px2 = prg__LCG(4.0321,-12.33333333,25.151515,800.55779)
         r_out = prg__single_to_range_outputter(lcg_px2) 
-
-        #r_out = prg__constant((0.,5005.))
-
         adjustment_type = 1
 
         #-----------------------------------------------
@@ -33,11 +30,8 @@ class DifferentialsMethods(unittest.TestCase):
         fvec = np.arange(0,14)
         fvec = fvec % 2 
 
-        #pic = PointInterpolationContainer(ps,[1,1,0,0]) 
-
         pvo = PIDValueOutputter(px,f_out,\
                 l_out,r_out,adjustment_type)
-        #pvo.set_next_value() 
 
         xr = set() 
         for _ in range(1000): 

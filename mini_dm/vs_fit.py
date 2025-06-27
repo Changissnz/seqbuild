@@ -27,8 +27,8 @@ designed for only vector and singleton values
 class AffineDelta: 
 
     def __init__(self,m,a,ma_order:int): 
-        assert is_number(m) or is_vector(m) 
-        assert is_number(a) or is_vector(a) 
+        assert is_number(m,set()) or is_vector(m) 
+        assert is_number(a,set()) or is_vector(a) 
         assert ma_order in {0,1}
 
         self.m = m
@@ -36,6 +36,18 @@ class AffineDelta:
         self.ma_order = ma_order
         return
     
+    def type(self):
+        q = int(is_vector(self.m))
+        q2 = int(is_vector(self.a)) 
+        return q,q2 
+
+    
+    def __str__(self):
+        s = "m: {}".format(self.m)
+        s2 = "a: {}".format(self.a)
+        o = "o: {}".format(self.ma_order)
+        return s + "\n" + s2 + "\n" + o + "\n"
+
     def fit(self,x):
         if self.ma_order == 0:
             return x * self.m + self.a
@@ -47,7 +59,16 @@ class AffineDelta:
     def delta(self,dfunc): 
         m,a = dfunc(self.m,self.a) 
         return AffineDelta(m,a,self.ma_order)
-    
+
+    @staticmethod
+    def one_instance_(prg,r_out1,r_out2,dim_range=None,ma_order=None):
+        dtypes = ["vec","float"]
+
+        m_type = dtypes[prg() % 2]
+        a_type = dtypes[prg() % 2]
+        return AffineDelta.one_instance(m_type,a_type,prg,r_out1,r_out2,\
+            dim_range,ma_order)
+
     @staticmethod 
     def one_instance(m_type,a_type,prg,r_out1,r_out2,dim_range=None,ma_order=None):
         M,A = AffineDelta.one_instance_vars(m_type,a_type,prg,r_out1,r_out2,dim_range)
@@ -67,8 +88,8 @@ class AffineDelta:
         if (m_type == "vec" or a_type == "vec") and \
             type(dim_range) == type(None): 
             dim_range = DEFAULT_AFFINEVEC_DIMRANGE
-        else: 
-            assert is_valid_range(dim_range)
+        #else: 
+        #    assert is_valid_range(dim_range)
 
         def output_one_value(value_idn,sz=None):
             assert value_idn in {0,1} 
@@ -88,7 +109,7 @@ class AffineDelta:
                     ql = sz 
 
                 q = np.zeros((ql,),dtype=np.float64) 
-                assert is_valid_range(rx)
+                assert is_valid_range(rx,False)
 
                 for i in range(len(q)):
                     v = modulo_in_range(prg(),rx) 
