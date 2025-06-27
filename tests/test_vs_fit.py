@@ -122,6 +122,16 @@ class VSFitMethods(unittest.TestCase):
         assert equal_iterables(sol4,rvx4)
         assert equal_iterables(sol5,rvx5)
 
+        # test w/ full output vector of element (float,type)
+        rvx5 = ratio_vector(q0,q1,"auto","min 1.0",0,rvp,1) 
+
+        sol6 = np.array([\
+            ['0.7777777777777778', 's'],\
+            ['0.75', 's'],\
+            ['0.375', 's'],\
+            ['-2.0', 'a']], dtype='<U32')
+
+        assert np.all(sol6 == rvx5)
         return 
 
     def test__AffineDelta__next__case1(self):
