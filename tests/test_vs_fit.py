@@ -31,6 +31,28 @@ class VSFitMethods(unittest.TestCase):
         qx8 = ratio__type_asymmetric(q0,q1,"max 1.0")
         assert qx7 == qx8 and qx7 == 0.0 
 
+    def test__ratio_vector__case1(self): 
+
+        q0 = np.array([4.0,2.1,7.7])
+        q1 = np.array([5.0,6.3,10.90])
+        rtype = "a" 
+        parameter = "min 1.0" 
+        parameter2 = -1 
+        rv1 = ratio_vector(q0,q1,rtype,parameter,parameter2)
+
+        parameter2 = 0 
+        rv2 = ratio_vector(q0,q1,rtype,parameter,parameter2)
+
+        parameter2 = 1
+        rv3 = ratio_vector(q0,q1,rtype,parameter,parameter2)
+
+        rv_sol = np.array([1.25      , 3.        , 1.41558442])
+        assert np.all(abs(rv1 - rv_sol) <= 10**-5)
+
+        assert set(np.unique(rv2)) == {1.0} 
+        assert np.all(rv1 == rv3) 
+
+
     def test__AffineDelta__next__case1(self):
 
         m_type = "vec"
