@@ -42,7 +42,7 @@ def ratio__type_asymmetric__v2(q0,q1,vec_type):
     return x 
 
 def ratio__type_symmetric(q0,q1,ref=0):
-    assert ref in {0,1}
+    assert ref in {0,1}, "got {}".format(ref)
 
     x = abs(q0) + abs(q1) 
 
@@ -50,17 +50,23 @@ def ratio__type_symmetric(q0,q1,ref=0):
         return zero_div(q0,x,0.0)
     return zero_div(q1,x,0.0)
 
-def ratio_vector(q0,q1,rtype,parameter,parameter2):
+# parameter3 := used for auto (default for a, default for s)
+def ratio_vector(q0,q1,rtype,parameter,parameter2,parameter3=None):
     assert rtype in {"a","s","auto"}
     if rtype in {"a","auto"}:
         assert parameter2 in {-1,0,1}
+
+    if rtype == "auto":
+        assert set(parameter3.keys()) == set(["a","s"])
+        assert parameter3["a"] in ratio_vector__parameter["a"]
+        assert parameter3["s"] in ratio_vector__parameter["s"]
 
     def qf__autolabel(qx0,qx1,param):
         # case: use asymmetric labeling
         if (qx0 < 0.0 and qx1 > 0.0) or \
             (qx0 > 0.0 and qx1 < 0.0): 
-            return ratio__type_asymmetric(qx0,qx1,param)
-        return ratio__type_symmetric(qx0,qx1,param)
+            return ratio__type_asymmetric(qx0,qx1,parameter3["a"])
+        return ratio__type_symmetric(qx0,qx1,parameter3["s"])
     
     if rtype == "auto":
         qf = qf__autolabel

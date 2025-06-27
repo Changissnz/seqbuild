@@ -92,12 +92,37 @@ class VSFitMethods(unittest.TestCase):
         assert equal_iterables(sol_rx,rx)
         assert equal_iterables(sol_rx2,rx2)
 
+    # tests for rtype == "auto" 
     def test__ratio_vector__case3(self): 
+        q0 = np.array([4.,5.,15.,-27.])
+        q1 = np.array([14.,15.,9.,54.])
+        rvp = {"a":"min 1.0","s":1}
 
-        return -1 
+        rvx1 = ratio_vector(q0,q1,"auto","min 1.0",0,rvp)
 
+        rvp = {"a":"max 1.0","s":0}
+        rvx2 = ratio_vector(q0,q1,"auto",None,0,rvp)
 
+        rvp = {"a":"max 1.0","s":1}
+        rvx3 = ratio_vector(q0,q1,"auto","min 1.0",0,rvp)
 
+        rvp = {"a":"min 1.0","s":0}
+        rvx4 = ratio_vector(q0,q1,"auto","min 1.0",0,rvp)
+
+        rvp = {"a":"min 1.0","s":1}
+        rvx5 = ratio_vector(q0,q1,"auto","min 1.0",0,rvp)
+
+        sol2 = np.array([ 0.22222222,0.25,0.625,-0.5])
+        sol3 = np.array([ 0.77777778,0.75,0.375,-0.5])
+        sol4 = np.array([ 0.22222222,0.25,0.625,-2.])
+        sol5 = np.array([ 0.77777778,0.75,0.375,-2.])
+
+        assert equal_iterables(sol2,rvx2)
+        assert equal_iterables(sol3,rvx3)
+        assert equal_iterables(sol4,rvx4)
+        assert equal_iterables(sol5,rvx5)
+
+        return 
 
     def test__AffineDelta__next__case1(self):
 
