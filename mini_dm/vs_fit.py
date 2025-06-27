@@ -5,10 +5,10 @@ Planned file that works on vector-singleton fits between vectors.
 from morebs2.matrix_methods import is_number,is_vector,is_valid_range
 from morebs2.numerical_generator import modulo_in_range
 from morebs2.measures import zero_div 
+from intigers.extraneous import to_trinary_relation_v2
 import numpy as np 
 
 DEFAULT_AFFINEVEC_DIMRANGE = [3,17]
-
 
 #-------------------- some methods on ratios 
 
@@ -50,7 +50,10 @@ def ratio__type_symmetric(q0,q1,ref=0):
         return zero_div(q0,x,0.0)
     return zero_div(q1,x,0.0)
 
+# parameter2 := 
 # parameter3 := used for auto (default for a, default for s)
+# auto_output := 0 for ratio vector, 
+#                1 for ratio vector + corresponding "s/a" status 
 def ratio_vector(q0,q1,rtype,parameter,parameter2,parameter3=None,\
     auto_output=0):
     assert rtype in {"a","s","auto"}
@@ -117,6 +120,45 @@ def ratio_vector(q0,q1,rtype,parameter,parameter2,parameter3=None,\
 
 #--------------------------- 
 
+"""
+container that describes the geometric relation of 
+an <AffineDelta>'s variables.
+"""
+class MADescriptor:
+
+    def __init__(self,rv_vec,rvt_vec,t_vec,s_vec,d_vec):
+        self.rv_vec = rv_vec 
+        self.rvt_vec = rvt_vec
+        self.t_vec = t_vec
+        self.s_vec = s_vec
+        self.d_vec = d_vec 
+        return 
+    
+    def solve(self,ma_order,ma_dim): 
+        return -1 
+    
+    @staticmethod
+    def from_AffineDelta(ad,p3):
+
+        q0,q1 = ad.m,ad.a
+        parameter2 = -1
+        rv = ratio_vector(q0,q1,"auto",None,\
+            parameter2,parameter3=p3,auto_output=1)
+        
+        if ad.ma_order == 0:
+            qref,qref2 = ad.m,ad.a 
+        else: 
+            qref,qref2 = ad.a,ad.m
+        rx = [qref,qref2]
+        tvec = to_trinary_relation_v2(rx[0],rx[1])
+        
+        qref3 = 0.0 if not is_vector(rx[0]) else np.zeros((len(rx[0]),))
+        svec = to_trinary_relation_v2(qref,qref3) 
+
+        dvec = np.abs(qref2 - qref)
+
+        return MADescriptor(np.array(rv[:,0],dtype=float),\
+            rv[:,1],tvec,svec,dvec) 
 
 """
 designed for only vector and singleton values. 
@@ -168,42 +210,13 @@ class AffineDelta:
             return target_value - self.op1(x)
         return target_value - self.fit(x) 
     
-    def ma_ratio(self,ratio_type,parameter):
-        assert ratio_type in {"a","s"}
-
-        """
-        rv = ratio_vector(self.m,self.a,\
-            ratio_type,parameter,parameter2):
-    assert rtype in {"a","s"}
-
-    if rtype == "a":
-        assert parameter2 in {-1,0,1}
-
-
-        if ratio_type == "a": 
-            return 
-
-        ###### 
-def safe_div(V1,V2):
-def ratio__type_asymmetric(q0,q1,vec_type):
-    assert vec_type in {"min 1.0", "max 1.0"}
-
-    if vec_type == "min 1.0":
-        m0,m1 = min([q0,q1]),max([q0,q1])
-    else: 
-        m0,m1 = max([q0,q1]),min([q0,q1])
-    return zero_div(m1,m0,0.0)
-
-def ratio__type_symmetric(q0,q1,ref=0):
-        return -1 
-        """ 
+    def to_ma_descriptor(self,p3):
+        return MADescriptor.from_AffineDelta(self,p3)
 
     def delta(self,dfunc): 
         m,a = dfunc(self.m,self.a) 
         return AffineDelta(m,a,self.ma_order)
     
-
-
     @staticmethod
     def one_instance_(prg,r_out1,r_out2,dim_range=None,ma_order=None):
         dtypes = ["vec","float"]

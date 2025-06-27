@@ -1,5 +1,6 @@
 from morebs2.graph_basics import * 
-from morebs2.numerical_generator import modulo_in_range 
+from morebs2.numerical_generator import modulo_in_range,prg__LCG
+from .extraneous import to_trinary_relation
 from .seq_struct import * 
 from mini_dm.ag_ext import * 
 

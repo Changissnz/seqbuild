@@ -7,6 +7,42 @@ from math import ceil
 
 zero_div0 = lambda num,denum: zero_div(num,denum,0)
 
+def to_trinary_relation(v1,v2):
+    if v1 == v2: return 0 
+    if v1 > v2: return 1 
+    return -1 
+
+def to_trinary_relation_v2(v1,v2):
+
+    stat1 = is_vector(v1)
+    stat2 = is_vector(v2) 
+
+    def next_index(i):
+        v1_ = v1 if not stat1 else v1[i]
+        v2_ = v2 if not stat2 else v2[i]
+        return v1_,v2_ 
+
+    l = None 
+    if stat1 and stat2: 
+        l = len(v1) 
+        assert l == len(v2)
+    elif stat1:
+        l = len(v1) 
+    elif stat2:
+        l = len(v2) 
+    else:
+        pass
+
+    if type(l) == None:
+        return to_trinary_relation(v1,v2)
+    
+    i = 0 
+    lx = [] 
+    while i < l:
+        x1,x2 = next_index(i)
+        lx.append(to_trinary_relation(x1,x2)) 
+    return np.array(lx) 
+
 #------------------------- safe division 
 
 def safe_div(V1,V2):
