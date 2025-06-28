@@ -20,7 +20,8 @@ ratio_vector__parameter2 = [-1,0,1]
 
 """
 outputs the non-1.0 value from the scaling of 
-pair (q0,q1) 
+pair (q0,q1) according to pair relation of 
+min|max 1.0. 
 """
 def ratio__type_asymmetric(q0,q1,vec_type):
     assert vec_type in {"min 1.0", "max 1.0"}
@@ -153,12 +154,18 @@ an <AffineDelta>'s variables.
 """
 class MADescriptor:
 
-    def __init__(self,rv_vec,rvt_vec,t_vec,s_vec,d_vec):
+    def __init__(self,rv_vec,rvt_vec,t_vec,s_vec,d_vec,ma_order=None):
+        # ratio vector 
         self.rv_vec = rv_vec 
+        # symmetric status vector 
         self.rvt_vec = rvt_vec
+        # relation of first w/ second (according to MA order)
         self.t_vec = t_vec
+        # sign vector 
         self.s_vec = s_vec
+        # absolute distance vector 
         self.d_vec = d_vec 
+        self.ma_order = ma_order
         return 
     
     def __str__(self):
@@ -170,8 +177,93 @@ class MADescriptor:
         s += "* D: " + str(self.d_vec) + "\n"
         return s
     
-    def solve(self,ma_order,ma_dim): 
-        return -1 
+    def dim(self):
+        if not is_vector(self.rv_vec): 
+            l = 0  
+        else: 
+            l = len(self.rv_vec)
+        return l 
+
+    # outputs (multiple m,adder a) pair; 
+    # m,a are each one of float or vector. 
+    def solve(self,ma_dim): 
+        d = self.dim()
+
+        assert max(ma_dim) == d
+
+        X = [None,None]
+         
+        X[0] = 0.0 if ma_dim[0] == 0 else \
+            np.zeros((ma_dim[0],),dtype=float)
+
+        X[1] = 0.0 if ma_dim[1] == 0 else \
+            np.zeros((ma_dim[1],),dtype=float)
+        
+        def add_at_i(i,y0,y1):
+
+            if type(X[0]) == float: 
+                X[0] = y0
+            else: 
+                X[0][i] = y0 
+
+            if type(X[1]) == float: 
+                X[1] = y1
+            else: 
+                X[1][i] = y1
+            return        
+
+        # single for both 
+        if d == 0: 
+            return self.solve_at_(\
+                self.rvt_vec,self.d_vec,\
+                self.s_vec,self.rv_vec)
+
+        for i in range(d): 
+            q0,q1 = self.solve_at(i)
+            add_at_i(i,q0,q1)
+        return X 
+    
+    def solve_at(self,i):
+        a_stat = self.rvt_vec[i] 
+        d = self.d_vec[i] 
+        s = self.s_vec[i] 
+        r = self.rv_vec[i]
+
+        return self.solve_at_(a_stat,d,s,r) 
+
+    def solve_at_(self,a_stat,d,s,r):
+    
+        x0,x1 = None,None 
+        if a_stat == 'a': 
+            # min 1.0
+            ##a_stat = "min 1.0" if q <= 1.0 else "max 1.0"
+            total = 1.0 + r
+
+            base_one = safe_div(1.0,total)
+            other = 1.0 - base_one
+
+            base_share = d * base_one
+            other_share = d * other 
+
+            qshare = sorted([base_share,other_share])
+            index = 1 if self.t_vec[i] == 1 else 0 
+
+            if s == -1:
+                qshare[index] = -1 * qshare[index] 
+            else: 
+                qshare[(index+1)%2] = -1 * \
+                    qshare[(index+1)%2] 
+
+            q0 = qshare[index] 
+            q1 = qshare[(index + 1) % 2]
+            return (q0,q1)
+        
+        q = r * d 
+        q2 = d - q 
+
+        q,q2 = q * s,\
+            q2 * s
+        return q,q2 
     
     @staticmethod
     def from_AffineDelta(ad,p3,d_operator=lambda x2,x1:x2-x1):
@@ -185,14 +277,14 @@ class MADescriptor:
         else: 
             qref,qref2 = ad.a,ad.m
         rx = [qref,qref2]
-        tvec = to_trinary_relation_v2(rx[0],rx[1])
+        tvec = to_trinary_relation_v2(np.abs(rx[0]),np.abs(rx[1]))
         qref3 = 0.0 if not is_vector(rx[0]) else np.zeros((len(rx[0]),))
         svec = to_trinary_relation_v2(qref,qref3) 
 
         dvec = np.abs(d_operator(qref2,qref)) 
 
         return MADescriptor(np.array(rv[:,0],dtype=float),\
-            rv[:,1],tvec,svec,dvec) 
+            rv[:,1],tvec,svec,dvec,ad.ma_order) 
 
 """
 designed for only vector and singleton values. 
