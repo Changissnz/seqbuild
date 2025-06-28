@@ -5,7 +5,7 @@ Planned file that works on vector-singleton fits between vectors.
 from morebs2.matrix_methods import is_number,is_vector,is_valid_range
 from morebs2.numerical_generator import modulo_in_range
 from morebs2.measures import zero_div 
-from intigers.extraneous import to_trinary_relation_v2
+from intigers.extraneous import to_trinary_relation_v2,safe_div
 import numpy as np 
 
 DEFAULT_AFFINEVEC_DIMRANGE = [3,17]
@@ -217,6 +217,22 @@ class AffineDelta:
         m,a = dfunc(self.m,self.a) 
         return AffineDelta(m,a,self.ma_order)
     
+    '''
+    contribution vector for M and A w.r.t. input x 
+    '''
+    def cvec(self,x):
+
+        q1 = self.op1(x)
+        q2 = self.fit(x)  
+
+        t1 = np.abs(x - q1)
+        t2 = np.abs(q2 - q1)
+        t = t1 + t2  
+
+        rx = safe_div(t1,t)
+        rx2 = safe_div(t2,t)
+        return rx,rx2 
+     
     @staticmethod
     def one_instance_(prg,r_out1,r_out2,dim_range=None,ma_order=None):
         dtypes = ["vec","float"]

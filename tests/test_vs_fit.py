@@ -164,6 +164,28 @@ class VSFitMethods(unittest.TestCase):
         assert ad4.type() == (0, 1)
         assert ad5.type() == (1, 1)
 
+    def test__AffineDelta__cvec__case1(self):
+        m_type = "vec"
+        a_type = "vec" 
+        prg = prg__LCG(71,688,31,900) 
+        r_out1 = prg__constant((50.,5000.))
+        r_out2 = prg__constant((50.,5000.))
+        ma_order = 0
+
+        ad = AffineDelta.one_instance(m_type,a_type,prg,r_out1,r_out2,dim_range=None,ma_order=ma_order)
+
+        sol = "m: [329. 333. 385. 161.]\na: [849. 793.  65. 501.]\no: 0\n"
+        assert str(ad) == sol 
+
+        cvec = ad.cvec(12)
+        cvec2 = ad.cvec(150)
+
+        assert np.all(cvec[0] + cvec[1] - 1.0 <= 10** -5) 
+        assert np.all(cvec2[0] + cvec2[1] - 1.0 <= 10** -5) 
+        assert not np.any(cvec[0] == cvec2[0])
+        assert not np.any(cvec[1] == cvec2[1])
+        return 
+
 
 if __name__ == '__main__':
     unittest.main()
