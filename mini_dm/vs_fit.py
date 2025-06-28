@@ -119,7 +119,6 @@ def ratio_vector(q0,q1,rtype,parameter,parameter2,parameter3=None,\
     j = 0 if is_vector(q1) else None 
 
     if i != 0 and j != 0:
-       print("-- output")
        return qf(q0,q1,parameter)
 
     if i == j and i == 0:
@@ -147,6 +146,8 @@ def ratio_vector(q0,q1,rtype,parameter,parameter2,parameter3=None,\
     return np.array(lx) 
 
 #--------------------------- 
+
+DEFAULT_MA_DISTANCE_FUNCTION = lambda x,x2: np.abs(x) + np.abs(x2)
 
 """
 container that describes the geometric relation of 
@@ -201,12 +202,12 @@ class MADescriptor:
         
         def add_at_i(i,y0,y1):
 
-            if type(X[0]) == float: 
+            if is_number(X[0],set()): 
                 X[0] = y0
             else: 
                 X[0][i] = y0 
 
-            if type(X[1]) == float: 
+            if is_number(X[1],set()): 
                 X[1] = y1
             else: 
                 X[1][i] = y1
@@ -216,7 +217,7 @@ class MADescriptor:
         if d == 0: 
             return self.solve_at_(\
                 self.rvt_vec,self.d_vec,\
-                self.s_vec,self.rv_vec)
+                self.s_vec,self.rv_vec,self.t_vec)
 
         for i in range(d): 
             q0,q1 = self.solve_at(i)
@@ -224,21 +225,24 @@ class MADescriptor:
         return X 
     
     def solve_at(self,i):
-        a_stat = self.rvt_vec[i] 
-        d = self.d_vec[i] 
-        s = self.s_vec[i] 
-        r = self.rv_vec[i]
+        def varvalue(value,i):
+            if is_number(value,set()): return value 
+            return value[i] 
 
-        return self.solve_at_(a_stat,d,s,r) 
-
-    def solve_at_(self,a_stat,d,s,r):
+        a_stat = varvalue(self.rvt_vec,i) 
+        d = varvalue(self.d_vec,i)
+        s = varvalue(self.s_vec,i)
+        r = varvalue(self.rv_vec,i)
+        t = varvalue(self.t_vec,i)
+        return self.solve_at_(a_stat,d,s,r,t) 
+    
+    def solve_at_(self,a_stat,d,s,r,t):
     
         x0,x1 = None,None 
         if a_stat == 'a': 
             # min 1.0
             ##a_stat = "min 1.0" if q <= 1.0 else "max 1.0"
             total = 1.0 + r
-
             base_one = safe_div(1.0,total)
             other = 1.0 - base_one
 
@@ -246,7 +250,7 @@ class MADescriptor:
             other_share = d * other 
 
             qshare = sorted([base_share,other_share])
-            index = 1 if self.t_vec[i] == 1 else 0 
+            index = 1 if t == 1 else 0 
 
             if s == -1:
                 qshare[index] = -1 * qshare[index] 
@@ -260,6 +264,8 @@ class MADescriptor:
         
         q = r * d 
         q2 = d - q 
+        
+        if s == 0: s = 1 
 
         q,q2 = q * s,\
             q2 * s
@@ -269,22 +275,32 @@ class MADescriptor:
     def from_AffineDelta(ad,p3,d_operator=lambda x2,x1:x2-x1):
 
         q0,q1 = ad.m,ad.a
+        if ad.ma_order == 0:
+            qx0 = [ad.m,ad.a]
+        else: qx0 = [ad.a,ad.m]
+
         parameter2 = -1
-        rv = ratio_vector(q0,q1,"auto",None,\
+        rv = ratio_vector(qx0[0],qx0[1],"auto",None,\
             parameter2,parameter3=p3,auto_output=1)
         if ad.ma_order == 0:
             qref,qref2 = ad.m,ad.a 
         else: 
             qref,qref2 = ad.a,ad.m
         rx = [qref,qref2]
+
         tvec = to_trinary_relation_v2(np.abs(rx[0]),np.abs(rx[1]))
         qref3 = 0.0 if not is_vector(rx[0]) else np.zeros((len(rx[0]),))
         svec = to_trinary_relation_v2(qref,qref3) 
 
         dvec = np.abs(d_operator(qref2,qref)) 
-
-        return MADescriptor(np.array(rv[:,0],dtype=float),\
-            rv[:,1],tvec,svec,dvec,ad.ma_order) 
+        
+        if type(rv) == tuple: 
+            qx1,qx2 = np.abs(rv[0]),rv[1]
+        else: 
+            qx1,qx2 =np.abs(np.array(rv[:,0],dtype=float)),\
+                rv[:,1]
+        return MADescriptor(qx1,qx2,tvec,\
+            svec,dvec,ad.ma_order) 
 
 """
 designed for only vector and singleton values. 

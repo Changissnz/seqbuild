@@ -36,7 +36,7 @@ def to_trinary_relation_v2(v1,v2):
     else:
         pass
 
-    if type(l) == None:
+    if type(l) == type(None):
         return to_trinary_relation(v1,v2)
     
     i = 0 

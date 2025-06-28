@@ -210,5 +210,76 @@ class VSFitMethods(unittest.TestCase):
         md2 = ad.to_ma_descriptor(p3,d_operator=lambda x,x2: np.abs(x) + np.abs(x2)) 
         assert not np.any(md.d_vec == md2.d_vec)
 
+    def test__MADescriptor__solve_case1(self): 
+        # case 1
+        x1,x2 = 3.0,7.0 
+        ad = AffineDelta(x1,x2,0)
+
+        p3 = {"a":"max 1.0","s":0}
+        md = ad.to_ma_descriptor(p3,d_operator=DEFAULT_MA_DISTANCE_FUNCTION) 
+
+        assert md.solve([0,0]) == (x1,x2) 
+
+        # case 2 
+        ad2 = AffineDelta(x1,x2,1) 
+        md2 = ad2.to_ma_descriptor(p3,d_operator=DEFAULT_MA_DISTANCE_FUNCTION)
+
+        sol_md = "* RV: 0.3\n* RVT: s\n* T: -1\n* S: 1\n* D: 10.0\n"
+        assert str(md) == sol_md
+
+        sol_md2 = "* RV: 0.7\n* RVT: s\n* T: 1\n* S: 1\n* D: 10.0\n"
+        assert str(md2) == sol_md2
+
+        # case 3
+        x1,x2 = 3.0,np.array([1.0,7.0,-5.0])
+        ad3 = AffineDelta(x1,x2,0)
+
+        md3 = ad3.to_ma_descriptor(p3,d_operator=DEFAULT_MA_DISTANCE_FUNCTION)
+        qr = md3.solve([0,3])
+
+        assert abs(qr[0] - x1) < 10 ** -5 
+        assert equal_iterables(x2,qr[1])
+
+        # case 4 
+        x1,x2 = np.array([0.5,15.0,12.0]),np.array([1.0,7.0,-5.0])
+
+        ad4 = AffineDelta(x1,x2,1) 
+
+        md4 = ad4.to_ma_descriptor(p3,d_operator=DEFAULT_MA_DISTANCE_FUNCTION)
+        qr2 = md4.solve([3,3]) 
+
+        assert equal_iterables(qr2[0],x2)
+        assert equal_iterables(qr2[1],x1)
+
+    def test__MADescriptor__solve_case2(self): 
+        # case 1 
+        x1,x2 = np.array([0.0,15.0,12.0]),np.array([1.0,0.0,-5.0])
+
+        ad5 = AffineDelta(x1,x2,1) 
+        p3 = {"a":"max 1.0","s":0}
+
+        md5 = ad5.to_ma_descriptor(p3,d_operator=DEFAULT_MA_DISTANCE_FUNCTION)
+        qr3 = md5.solve([3,3]) 
+
+        assert equal_iterables(qr3[0],x2)
+        assert equal_iterables(qr3[1],x1)
+
+        # case 2 
+        x1,x2 = np.array([-10.0,5.0,27.0]),15.0 
+
+        ad6 = AffineDelta(x1,x2,1) 
+        p3 = {"a":"max 1.0","s":0}
+
+        md6 = ad6.to_ma_descriptor(p3,d_operator=DEFAULT_MA_DISTANCE_FUNCTION)
+        qr4 = md6.solve([0,3]) 
+        qr5 = md6.solve([3,0])
+
+        assert qr4[0] == x2
+        assert equal_iterables(qr4[1],x1) 
+
+        assert np.all(np.round(qr5[0],5) == [15,15,15.0]) and qr5[1] == 27.0 
+
+
+
 if __name__ == '__main__':
     unittest.main()
