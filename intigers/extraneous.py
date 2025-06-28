@@ -12,6 +12,9 @@ def to_trinary_relation(v1,v2):
     if v1 > v2: return 1 
     return -1 
 
+"""
+vector-input version of method<to_trinary_relation> 
+"""
 def to_trinary_relation_v2(v1,v2):
 
     stat1 = is_vector(v1)
@@ -41,6 +44,7 @@ def to_trinary_relation_v2(v1,v2):
     while i < l:
         x1,x2 = next_index(i)
         lx.append(to_trinary_relation(x1,x2)) 
+        i += 1
     return np.array(lx) 
 
 #------------------------- safe division 

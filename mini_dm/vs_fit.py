@@ -18,6 +18,10 @@ ratio_vector__parameter = {"a": ["min 1.0","max 1.0"],"s":[0,1]}
     # active var only for "a" 
 ratio_vector__parameter2 = [-1,0,1]
 
+"""
+outputs the non-1.0 value from the scaling of 
+pair (q0,q1) 
+"""
 def ratio__type_asymmetric(q0,q1,vec_type):
     assert vec_type in {"min 1.0", "max 1.0"}
 
@@ -27,6 +31,15 @@ def ratio__type_asymmetric(q0,q1,vec_type):
         m0,m1 = max([q0,q1]),min([q0,q1])
     return zero_div(m1,m0,0.0)
 
+"""
+outputs the corresponding pair (R(q0),R(q1)); 
+The set {R(q0),R(q1)} has the element 1.0 and either 
+a < 1.0 or > 1.0 value. The resulting output's index at 
+1.0 makes that index the reference index.
+
+NOTE: method is the complete output from the calculation 
+in method<ratio__type_asymmetric>.
+"""
 def ratio__type_asymmetric__v2(q0,q1,vec_type):
     q = ratio__type_asymmetric(q0,q1,vec_type)
 
@@ -54,8 +67,8 @@ def ratio__type_symmetric(q0,q1,ref=0):
 Calculates a ratio vector `q0/q1` that is either a float 
 or an n-dimensional vector. The parameter space is the following: 
 
-q0 := numerator 
-q1 := denumerator 
+q0 := float|vector,numerator 
+q1 := float|vector,denumerator 
 rtype := (s)ymmetric or (a)symmetric 
 parameter := primary parameter used; 
             if `s` -> [0,1], 
@@ -148,6 +161,15 @@ class MADescriptor:
         self.d_vec = d_vec 
         return 
     
+    def __str__(self):
+        s = ""
+        s += "* RV: " + str(self.rv_vec) + "\n"
+        s += "* RVT: " + str(self.rvt_vec) + "\n"
+        s += "* T: " + str(self.t_vec) + "\n"
+        s += "* S: " + str(self.s_vec) + "\n"
+        s += "* D: " + str(self.d_vec) + "\n"
+        return s
+    
     def solve(self,ma_order,ma_dim): 
         return -1 
     
@@ -158,14 +180,12 @@ class MADescriptor:
         parameter2 = -1
         rv = ratio_vector(q0,q1,"auto",None,\
             parameter2,parameter3=p3,auto_output=1)
-        
         if ad.ma_order == 0:
             qref,qref2 = ad.m,ad.a 
         else: 
             qref,qref2 = ad.a,ad.m
         rx = [qref,qref2]
         tvec = to_trinary_relation_v2(rx[0],rx[1])
-        
         qref3 = 0.0 if not is_vector(rx[0]) else np.zeros((len(rx[0]),))
         svec = to_trinary_relation_v2(qref,qref3) 
 

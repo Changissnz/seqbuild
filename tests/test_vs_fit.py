@@ -3,6 +3,18 @@ from morebs2.numerical_generator import prg__LCG, prg__constant,prg__n_ary_alter
 from morebs2.matrix_methods import equal_iterables
 import unittest
 
+def AffineDelta__sampleA():
+    m_type = "vec"
+    a_type = "vec" 
+    prg = prg__LCG(71,688,31,900) 
+    r_out1 = prg__constant((50.,5000.))
+    r_out2 = prg__constant((50.,5000.))
+    ma_order = 0
+    ad = AffineDelta.one_instance(\
+        m_type,a_type,prg,r_out1,r_out2,dim_range=None,\
+        ma_order=ma_order)
+    return ad 
+
 ### lone file test 
 """
 python -m tests.test_vs_fit
@@ -165,15 +177,7 @@ class VSFitMethods(unittest.TestCase):
         assert ad5.type() == (1, 1)
 
     def test__AffineDelta__cvec__case1(self):
-        m_type = "vec"
-        a_type = "vec" 
-        prg = prg__LCG(71,688,31,900) 
-        r_out1 = prg__constant((50.,5000.))
-        r_out2 = prg__constant((50.,5000.))
-        ma_order = 0
-
-        ad = AffineDelta.one_instance(m_type,a_type,prg,r_out1,r_out2,dim_range=None,ma_order=ma_order)
-
+        ad = AffineDelta__sampleA() 
         sol = "m: [329. 333. 385. 161.]\na: [849. 793.  65. 501.]\no: 0\n"
         assert str(ad) == sol 
 
@@ -185,6 +189,24 @@ class VSFitMethods(unittest.TestCase):
         assert not np.any(cvec[0] == cvec2[0])
         assert not np.any(cvec[1] == cvec2[1])
         return 
+    
+    def test__AffineDelta__to_ma_descriptor__case1(self): 
+        ad = AffineDelta__sampleA()
+        p3 = {"s": 0,"a":"max 1.0"} 
+        md = ad.to_ma_descriptor(p3)
+
+
+        sol_md = "* RV: [0.27928693 0.29573712 0.85555556 0.24320242]\n" + \
+                "* RVT: ['s' 's' 's' 's']\n* T: [-1 -1  1 -1]\n* S: [1 1 1 1]\n" +\
+                "* D: [520. 460. 320. 340.]\n"
+        assert sol_md == str(md )
+
+        sol_ad = "m: [329. 333. 385. 161.]\n" + \
+            "a: [849. 793.  65. 501.]\n" + \
+            "o: 0\n"
+
+        assert sol_ad == str(ad)
+
 
 
 if __name__ == '__main__':
