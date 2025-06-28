@@ -174,7 +174,7 @@ class MADescriptor:
         return -1 
     
     @staticmethod
-    def from_AffineDelta(ad,p3):
+    def from_AffineDelta(ad,p3,d_operator=lambda x2,x1:x2-x1):
 
         q0,q1 = ad.m,ad.a
         parameter2 = -1
@@ -189,7 +189,7 @@ class MADescriptor:
         qref3 = 0.0 if not is_vector(rx[0]) else np.zeros((len(rx[0]),))
         svec = to_trinary_relation_v2(qref,qref3) 
 
-        dvec = np.abs(qref2 - qref)
+        dvec = np.abs(d_operator(qref2,qref)) 
 
         return MADescriptor(np.array(rv[:,0],dtype=float),\
             rv[:,1],tvec,svec,dvec) 
@@ -246,8 +246,8 @@ class AffineDelta:
             return target_value - self.op1(x)
         return target_value - self.fit(x) 
     
-    def to_ma_descriptor(self,p3):
-        return MADescriptor.from_AffineDelta(self,p3)
+    def to_ma_descriptor(self,p3,d_operator=lambda x,x2:x2 - x):
+        return MADescriptor.from_AffineDelta(self,p3,d_operator)
 
     def delta(self,dfunc): 
         m,a = dfunc(self.m,self.a) 

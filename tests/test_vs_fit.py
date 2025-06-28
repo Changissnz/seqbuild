@@ -207,7 +207,8 @@ class VSFitMethods(unittest.TestCase):
 
         assert sol_ad == str(ad)
 
-
+        md2 = ad.to_ma_descriptor(p3,d_operator=lambda x,x2: np.abs(x) + np.abs(x2)) 
+        assert not np.any(md.d_vec == md2.d_vec)
 
 if __name__ == '__main__':
     unittest.main()
