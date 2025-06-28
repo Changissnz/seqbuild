@@ -13,9 +13,14 @@ def to_trinary_relation(v1,v2):
     return -1 
 
 """
-vector-input version of method<to_trinary_relation> 
+vector-input version of method<to_trinary_relation>; 
+
+`zero_feature` results in non-absolute comparison for cases of (v1,v2) 
+pairs that have 0.0 in them. 
+`abs_feature` results in absolute comparison. 
+To use these 2 features, set at most one of them to True. 
 """
-def to_trinary_relation_v2(v1,v2):
+def to_trinary_relation_v2(v1,v2,zero_feature:bool=False,abs_feature:bool=True):
 
     stat1 = is_vector(v1)
     stat2 = is_vector(v2) 
@@ -37,13 +42,26 @@ def to_trinary_relation_v2(v1,v2):
         pass
 
     if type(l) == type(None):
-        return to_trinary_relation(v1,v2)
+        if zero_feature: 
+            if v1 == 0.0 or v2 == 0.0:
+                return to_trinary_relation(v1,v2)
+        if abs_feature: 
+            v1,v2 = np.abs(v1),np.abs(v2) 
+        return to_trinary_relation(v1,v2) 
     
     i = 0 
     lx = [] 
     while i < l:
         x1,x2 = next_index(i)
-        lx.append(to_trinary_relation(x1,x2)) 
+
+        if zero_feature and (x1 == 0.0 or x2 == 0.0): 
+            q = to_trinary_relation(x1,x2)
+        elif abs_feature: 
+            q = to_trinary_relation(np.abs(x1),np.abs(x2))
+        else: 
+            q = to_trinary_relation(x1,x2)
+
+        lx.append(q) 
         i += 1
     return np.array(lx) 
 

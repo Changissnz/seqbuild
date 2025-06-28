@@ -149,6 +149,7 @@ def ratio_vector(q0,q1,rtype,parameter,parameter2,parameter3=None,\
 
 DEFAULT_MA_DISTANCE_FUNCTION = lambda x,x2: np.abs(x) + np.abs(x2)
 
+
 """
 container that describes the geometric relation of 
 an <AffineDelta>'s variables.
@@ -252,23 +253,28 @@ class MADescriptor:
             qshare = sorted([base_share,other_share])
             index = 1 if t == 1 else 0 
 
-            if s == -1:
-                qshare[index] = -1 * qshare[index] 
-            else: 
-                qshare[(index+1)%2] = -1 * \
-                    qshare[(index+1)%2] 
-
             q0 = qshare[index] 
             q1 = qshare[(index + 1) % 2]
+
+            if s == 0: 
+                s = -t
+            elif r == 1.0 and a_stat == "s": 
+                s = t   
+            q0,q1 = q0 * s,q1 * -s 
+            
             return (q0,q1)
         
         q = r * d 
         q2 = d - q 
         
-        if s == 0: s = 1 
-
+        if s == 0: 
+            s = -t 
+        elif r == 1.0 and a_stat == "s": 
+            s = t 
+            #s = 1 if t == -1 else -1 
         q,q2 = q * s,\
             q2 * s
+
         return q,q2 
     
     @staticmethod
@@ -288,9 +294,9 @@ class MADescriptor:
             qref,qref2 = ad.a,ad.m
         rx = [qref,qref2]
 
-        tvec = to_trinary_relation_v2(np.abs(rx[0]),np.abs(rx[1]))
+        tvec = to_trinary_relation_v2(rx[0],rx[1],True)
         qref3 = 0.0 if not is_vector(rx[0]) else np.zeros((len(rx[0]),))
-        svec = to_trinary_relation_v2(qref,qref3) 
+        svec = to_trinary_relation_v2(qref,qref3,False,False) 
 
         dvec = np.abs(d_operator(qref2,qref)) 
         
