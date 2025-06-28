@@ -50,10 +50,24 @@ def ratio__type_symmetric(q0,q1,ref=0):
         return zero_div(q0,x,0.0)
     return zero_div(q1,x,0.0)
 
-# parameter2 := 
-# parameter3 := used for auto (default for a, default for s)
-# auto_output := 0 for ratio vector, 
-#                1 for ratio vector + corresponding "s/a" status 
+"""
+Calculates a ratio vector `q0/q1` that is either a float 
+or an n-dimensional vector. The parameter space is the following: 
+
+q0 := numerator 
+q1 := denumerator 
+rtype := (s)ymmetric or (a)symmetric 
+parameter := primary parameter used; 
+            if `s` -> [0,1], 
+            if `a` -> [min 1.0,max 1.0].
+parameter2 := used if rtype is `s`; 
+                [-1,0,1]
+parameter3 := dict, used for `auto` rtype. 
+                key is `s`|`a`,
+                value is default argument. 
+auto_output := 0 for ratio vector, 
+                1 for ratio vector + corresponding "s/a" status 
+"""
 def ratio_vector(q0,q1,rtype,parameter,parameter2,parameter3=None,\
     auto_output=0):
     assert rtype in {"a","s","auto"}
@@ -191,6 +205,8 @@ class AffineDelta:
         o = "o: {}".format(self.ma_order)
         return s + "\n" + s2 + "\n" + o + "\n"
 
+    #------------------------------------- i/o methods 
+
     def fit(self,x):
         if self.ma_order == 0:
             return x * self.m + self.a
@@ -232,7 +248,9 @@ class AffineDelta:
         rx = safe_div(t1,t)
         rx2 = safe_div(t2,t)
         return rx,rx2 
-     
+
+    #------------------------------ instantiation methods      
+
     @staticmethod
     def one_instance_(prg,r_out1,r_out2,dim_range=None,ma_order=None):
         dtypes = ["vec","float"]
