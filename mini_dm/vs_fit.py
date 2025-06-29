@@ -367,6 +367,55 @@ class AffineDelta:
         m,a = dfunc(self.m,self.a) 
         return AffineDelta(m,a,self.ma_order)
     
+    def delta_function_from_prg(self,prg,ro_prg):
+        t0,t1 = self.type()
+        t = [(self.m,t0),(self.a,t1)] 
+        if self.ma_order == 1: 
+            t = t[::-1] 
+        
+        d = None 
+        if t[0][1] == 1:
+            d = len(t[0][0]) 
+        elif t[1] == 1:
+            d = len(t[1][0])
+        else: 
+            d = 0
+
+        dim_t = [None,None]
+        if d != 0: 
+            # decision for `first` to be multi-dim or 1
+                # index to consider at step 0 
+            i = prg() % 2 
+            i2 = (i + 1) % 2 
+
+            is1 = prg() % 2
+            v1,v2 = None,None
+            if not is1:
+                v1 = 1 
+                v2 = d 
+            else: 
+                v1 = d 
+                is2 = int(round(prg() % 2))
+                v2 = is2 * d 
+
+            dim_t[i],dim_t[i2] = v1,v2 
+
+        def out_one():
+            q = modulo_in_range(prg(),ro_prg())
+            return q
+        
+        res = [None,None]
+        for (i,x) in dim_t:
+            if x == 0:
+                q = out_one() 
+                res[i] = q
+            else:    
+                q = np.zeros((x,),dtype=float)
+                for j in range(x):
+                    q[j] = out_one() 
+                res[i] = q
+        return AffineDelta(res[0],res[1],self.ma_order)
+        
     '''
     contribution vector for M and A w.r.t. input x 
     '''
