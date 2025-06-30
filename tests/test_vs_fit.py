@@ -364,6 +364,19 @@ class VSFitMethods(unittest.TestCase):
             df = ad3.delta_function_from_prg(prg,ro_prg)
             assert df.type() == (0,1)
 
+    def test__MADescriptor__default_set_naive__case1(self):
+
+        m,a = 34,np.array([4,-14.0,29,79.0])
+        ad = AffineDelta(m,a,0)
+
+        p3 = {"a":"max 1.0","s":0}
+        md = ad.to_ma_descriptor(p3)
+
+        md2 = md.default_set_naive("rv_vec")
+        md3 = md2.default_set_naive("rvt_vec")
+
+        assert np.all(md3.rv_vec == 0.5)
+        assert np.all(md3.rvt_vec == 's')
 
 
 if __name__ == '__main__':

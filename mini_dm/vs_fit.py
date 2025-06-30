@@ -9,6 +9,7 @@ from intigers.extraneous import to_trinary_relation_v2,safe_div
 from operator import sub 
 
 import numpy as np 
+from copy import deepcopy
 
 DEFAULT_AFFINEVEC_DIMRANGE = [3,17]
 
@@ -173,6 +174,39 @@ class MADescriptor:
         self.ma_order = ma_order
         return 
     
+    def default_set_naive(self,varname):
+
+        assert varname in {"rv_vec","rvt_vec"}
+
+        if varname == "rv_vec": 
+            if is_vector(self.rv_vec):
+                q = np.ones((len(self.rv_vec),),dtype=float) 
+                q *= 0.5 
+            else:
+                q = self.rv_vec
+            return self.set_naive(varname,q,True)
+        
+        if is_vector(self.rvt_vec):
+            q = np.empty((len(self.rvt_vec),))
+            q = ["s" for _ in range(len(self.rvt_vec))]
+            q = np.array(q) 
+ 
+        else:
+            q = "s"
+        return self.set_naive(varname,q,True) 
+    
+    def set_naive(self,varname,new_value,output_new:bool):
+        assert varname in {"rv_vec","rvt_vec","t_vec","s_vec","d_vec"}
+
+        q = None
+        if output_new:
+            q = deepcopy(self)
+        else:
+            q = self 
+
+        setattr(q,varname,new_value) 
+        return q
+
     def __str__(self):
         s = ""
         s += "* RV: " + str(self.rv_vec) + "\n"
