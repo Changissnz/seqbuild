@@ -223,6 +223,18 @@ class MADescriptor:
             l = len(self.rv_vec)
         return l 
 
+    def solve_into_AffineDelta(self,ma_dim,ma_order=None):
+        q = self.solve(ma_dim)
+        m,a = q[0],q[1]
+        
+        if type(ma_order) == type(None): 
+            if self.ma_order in {0,1}: 
+                ma_order = self.ma_order
+            else: 
+                ma_order = 0 
+        assert ma_order in {0,1}
+        return AffineDelta(m,a,ma_order)
+
     # outputs (multiple m,adder a) pair; 
     # m,a are each one of float or vector. 
     def solve(self,ma_dim): 

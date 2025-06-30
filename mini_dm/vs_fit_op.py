@@ -71,6 +71,20 @@ class IOFit:
 
     def hyp_proc(self):
         assert type(self.hyp) == MADHyp
+
+        # convert to <AffineDelta>. 
+        dim = self.hyp.dim() 
+        ad = self.hyp.solve_into_AffineDelta(dim)
+
+        # convert to <VSTransform>
+        vst = VSTransform(ad) 
+        self.hfunc = vst.to_hypdiff_func()
+        return self.hfunc 
+    
+    def hyp_diff(self,x):
+        q = self.unknownf(x) 
+        return self.hfunc(x,q)
+
         return -1 
 
     def io_sample_proc(self,i,default_source = "y"):
