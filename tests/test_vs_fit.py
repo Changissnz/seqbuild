@@ -328,7 +328,7 @@ class VSFitMethods(unittest.TestCase):
         assert equal_iterables(qr3[0],x1)
         assert equal_iterables(qr3[1],x2)
 
-    def test__MADescriptor__delta_function_from_prg__case1(self):
+    def test__AffineDelta__delta_function_from_prg__case1(self):
         p3 = {"a":"max 1.0","s":0}
         x1,x2 = 3.0,np.array([1.0,7.0,-5.0])
         ad3 = AffineDelta(x1,x2,0)

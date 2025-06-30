@@ -8,5 +8,9 @@ class MADHyp(MADescriptor):
 
 class VSTransform:
 
-    def __init__(self):
+    def __init__(self,ad:AffineDelta):
+        assert type(ad) == AffineDelta
+        self.ad = ad
         return 
+    
+    def 

@@ -6,6 +6,8 @@ from morebs2.matrix_methods import is_number,is_vector,is_valid_range
 from morebs2.numerical_generator import modulo_in_range
 from morebs2.measures import zero_div 
 from intigers.extraneous import to_trinary_relation_v2,safe_div
+from operator import sub 
+
 import numpy as np 
 
 DEFAULT_AFFINEVEC_DIMRANGE = [3,17]
@@ -350,15 +352,15 @@ class AffineDelta:
         if self.ma_order: return x * self.m 
         return x + self.a 
 
-    def diff(self,x,x2): 
-        return self.fit(x) - self.fit(x2) 
+    def diff(self,x,x2,dfunc=sub): 
+        return dfunc(self.fit(x),self.fit(x2))
     
-    def expected_diff(self,target_value,x,op_type):
+    def expected_diff(self,target_value,x,op_type,dfunc=sub):
         assert op_type in {"one","all"}
 
         if op_type == "one": 
-            return target_value - self.op1(x)
-        return target_value - self.fit(x) 
+            return dfunc(target_value,self.op1(x))
+        return dfunc(target_value,self.fit(x)) 
     
     def to_ma_descriptor(self,p3,d_operator=lambda x,x2:x2 - x):
         return MADescriptor.from_AffineDelta(self,p3,d_operator)
