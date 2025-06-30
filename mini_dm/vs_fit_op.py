@@ -44,11 +44,18 @@ class VSTransform:
             actual =  self.ad.fit(x) 
             return actual - hyp_y 
         return f 
+    
+    def to_ma_diff_func(self):
+        
+        def f(ad):
+            assert type(ad) == AffineDelta
+            return self.ad - ad 
+        return f 
 
 
 class IOFit:
 
-    def __init__(self,x,y,unknown_func,hypdiff_func):
+    def __init__(self,x,y,unknown_func,hypdiff_func,madiff_func):
         assert type(unknown_func) in {type(None),FunctionType,MethodType}
 
         self.x = x
@@ -56,6 +63,7 @@ class IOFit:
         self.unknownf = unknown_func
         self.hyp = None 
         self.hypdiff_func = hypdiff_func
+        self.madiff_func = madiff_func 
 
     def io_stat(self):
         stat1 = type(self.x) != type(None)
@@ -84,8 +92,9 @@ class IOFit:
     def hyp_diff(self,x):
         q = self.unknownf(x) 
         return self.hfunc(x,q)
-
-        return -1 
+    
+    def ma_diff(self,ad): 
+        return self.madiff_func(ad) 
 
     def io_sample_proc(self,i,default_source = "y"):
         assert default_source in {"y","unknown"} 
