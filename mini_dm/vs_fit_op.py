@@ -7,6 +7,14 @@ class MADHyp(MADescriptor):
         super().__init__(rv_vec,rvt_vec,t_vec,s_vec,d_vec,ma_order)
         return 
     
+    @staticmethod
+    def naive_hyp_for_MADescriptor(md):
+        md2 = md.default_set_naive("rv_vec")
+        md2 = md2.default_set_naive("rvt_vec")
+
+        return MADHyp(md2.rv_vec,md2.rvt_vec,\
+            md2.t_vec,md2.s_vec,md2.d_vec,\
+            md2.ma_order)
 
 
 class VSTransform:
@@ -73,16 +81,18 @@ class IOFit:
             assert len(self.x) == len(self.y)
         return stat1,stat2 
     
-    def load_hyp(self,hyp): 
+    def load_hyp(self,hyp,ma_dim): 
         assert type(hyp) == MADHyp
         self.hyp = hyp 
+        self.hyp_madim = ma_dim
+        self.hyp_proc(self.hyp_madim)
 
-    def hyp_proc(self):
+    def hyp_proc(self,ma_dim):
         assert type(self.hyp) == MADHyp
 
         # convert to <AffineDelta>. 
-        dim = self.hyp.dim() 
-        ad = self.hyp.solve_into_AffineDelta(dim)
+        #dim = self.hyp.dim() 
+        ad = self.hyp.solve_into_AffineDelta(ma_dim)
 
         # convert to <VSTransform>
         vst = VSTransform(ad) 

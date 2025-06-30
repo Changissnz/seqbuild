@@ -33,7 +33,7 @@ class VSTransformMethods(unittest.TestCase):
                 dfunc=lambda x,x2: np.sum(np.abs(x - x2)))
         assert round(q4 / q3) == 12650
         return
-
+    
     def test__VSTransform__cmp_ad__case1(self):
 
         m4,a4 = np.array([440,1400,250,500]),np.array([20,30,40,50])
@@ -52,6 +52,43 @@ class VSTransformMethods(unittest.TestCase):
 
         assert abs(round(q[0] - 0.4,5)) < 10 ** -5 
         assert abs(round(q[1] - 0.4,5)) < 10 ** -5 
+
+
+    def test__IOFit__diff__case1(self):
+        m,a = 34,np.array([4,-14.0,29,79.0])
+        ad = AffineDelta(m,a,0)
+
+        vst = VSTransform(ad) 
+        hdf = vst.to_hypdiff_func() 
+        maf = vst.to_ma_diff_func()
+
+        X = np.array([45,52,61,15,150])
+        Y = np.array([ad.fit(x) for x in X])
+
+        unknownf = vst.ad.fit 
+
+        p3 = {"s":0,"a":"max 1.0"}
+        md = ad.to_ma_descriptor(p3,d_operator=DEFAULT_MA_DISTANCE_FUNCTION)
+        md_hyp = MADHyp.naive_hyp_for_MADescriptor(md)
+
+        ad2 = md_hyp.solve_into_AffineDelta([0,4],ma_order=0)
+        vst2 = VSTransform(ad2) 
+        maf = vst2.to_ma_diff_func() 
+
+
+        iof = IOFit(X,Y,unknownf,hdf,maf)
+        iof.load_hyp(md_hyp,[4,4])
+
+        dx = set() 
+        for x in X: 
+            q = iof.hyp_diff(45) 
+            dx |= {str(q)}
+            
+        assert len(dx) == 1 
+
+        ad_diff = iof.ma_diff(ad)
+        assert ad_diff.m != 0.0 
+        assert not np.any(ad_diff == 0.)
 
 if __name__ == '__main__':
     unittest.main()
