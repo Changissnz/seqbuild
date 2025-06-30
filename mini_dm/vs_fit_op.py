@@ -28,4 +28,11 @@ class VSTransform:
         tv = ad1.fit(x)
         return self.ad.expected_diff(tv,x,op_type,\
             dfunc)
-        ##def expected_diff(self,target_value,x,op_type,dfunc=sub):
+
+    def diff_derivative(self,x,m_delta,a_delta,dfunc=lambda x,x2:x-x2):
+        ad1 = AffineDelta(self.m + m_delta,self.a + a_delta,\
+            self.ad.ma_order)
+        return dfunc(ad1.fit(x),self.ad.fit(x))
+
+    def cvec_diff_ad(self,x1,x2,dfunc=lambda x,x2:np.abs(x - x2)):
+        return dfunc(self.ad.cvec(x1),self.ad.cvec(x2))

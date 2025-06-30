@@ -21,8 +21,6 @@ class VSTransformMethods(unittest.TestCase):
 
         vst = VSTransform(ad4)
 
-        #q = vst.cmp_ad(ad5)
-
         q2 = vst.diff_ad(24,ad5,op_type="all",\
                 dfunc=lambda x,x2: np.sum(np.abs(x - x2)))
         q2_ = vst.diff_ad(24,ad5,op_type="one",\
@@ -36,8 +34,24 @@ class VSTransformMethods(unittest.TestCase):
         assert round(q4 / q3) == 12650
         return
 
+    def test__VSTransform__cmp_ad__case1(self):
 
+        m4,a4 = np.array([440,1400,250,500]),np.array([20,30,40,50])
+        ad4 = AffineDelta(m4,a4,0)
 
+        m5,a5 = 0.05,0.05 
+        ad5 = AffineDelta(m4+m5,a4+a5,0) 
+
+        vst = VSTransform(ad4)
+        vst2 = VSTransform(ad5)
+
+        q = vst.cmp_ad(ad5)
+        q2 = vst2.cmp_ad(ad4)
+
+        assert q == q2 
+
+        assert abs(round(q[0] - 0.4,5)) < 10 ** -5 
+        assert abs(round(q[1] - 0.4,5)) < 10 ** -5 
 
 if __name__ == '__main__':
     unittest.main()
