@@ -21,3 +21,11 @@ class VSTransform:
         sz_diff = abs(self.ad.size() - ad1.size())
         diff_ad = (self.ad - ad1).size() 
         return sz_diff,diff_ad 
+    
+    def diff_ad(self,x,ad1,op_type="all",\
+        dfunc=lambda x,x2: np.sum(np.abs(x - x2))): 
+
+        tv = ad1.fit(x)
+        return self.ad.expected_diff(tv,x,op_type,\
+            dfunc)
+        ##def expected_diff(self,target_value,x,op_type,dfunc=sub):

@@ -1,0 +1,43 @@
+from mini_dm.vs_fit_op import * 
+from morebs2.numerical_generator import prg__LCG, prg__constant,prg__n_ary_alternator
+from morebs2.matrix_methods import equal_iterables
+import unittest
+
+
+### lone file test 
+"""
+python -m tests.test_vs_fit_op
+"""
+###
+class VSTransformMethods(unittest.TestCase):
+
+    def test__VSTransform__diff_ad__case1(self):
+
+        m4,a4 = np.array([440,1400,250,500]),np.array([20,30,40,50])
+        ad4 = AffineDelta(m4,a4,0)
+
+        m5,a5 = 0.05,0.05 
+        ad5 = AffineDelta(m4+m5,a4+a5,0) 
+
+        vst = VSTransform(ad4)
+
+        #q = vst.cmp_ad(ad5)
+
+        q2 = vst.diff_ad(24,ad5,op_type="all",\
+                dfunc=lambda x,x2: np.sum(np.abs(x - x2)))
+        q2_ = vst.diff_ad(24,ad5,op_type="one",\
+                dfunc=lambda x,x2: np.sum(np.abs(x - x2)))
+        assert round(q2_ / q2) == 12414
+
+        q3 = vst.diff_ad(45,ad5,op_type="all",\
+                dfunc=lambda x,x2: np.sum(np.abs(x - x2)))
+        q4 = vst.diff_ad(45,ad5,op_type="one",\
+                dfunc=lambda x,x2: np.sum(np.abs(x - x2)))
+        assert round(q4 / q3) == 12650
+        return
+
+
+
+
+if __name__ == '__main__':
+    unittest.main()
