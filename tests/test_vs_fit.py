@@ -328,6 +328,43 @@ class VSFitMethods(unittest.TestCase):
         assert equal_iterables(qr3[0],x1)
         assert equal_iterables(qr3[1],x2)
 
+    def test__MADescriptor__delta_function_from_prg__case1(self):
+        p3 = {"a":"max 1.0","s":0}
+        x1,x2 = 3.0,np.array([1.0,7.0,-5.0])
+        ad3 = AffineDelta(x1,x2,0)
+
+        prg = prg__LCG(30,53,-61,500) 
+        ro_prg = prg__constant((-20.05,20.05))
+
+        dfs = [] 
+        for _ in range(20): 
+            df = ad3.delta_function_from_prg(prg,ro_prg)
+            dfs.append(df) 
+
+        sdf = set()
+        tx = (1,0)
+        for df in dfs: 
+            assert df.type() == tx 
+            sdf |= {str(df.m)}
+        assert len(sdf) == 20 
+
+        prg = prg__LCG(-1,4,5,50)
+        dfs = [] 
+        for _ in range(10): 
+            df = ad3.delta_function_from_prg(prg,ro_prg)
+            assert df.type() == (1,1)
+
+        prg = prg__LCG(3,2,1,500)
+        for _ in range(5): 
+            df = ad3.delta_function_from_prg(prg,ro_prg)
+            assert df.type() == (1,1)
+
+        prg = prg__LCG(132,27,22,400)
+        for _ in range(5): 
+            df = ad3.delta_function_from_prg(prg,ro_prg)
+            assert df.type() == (0,1)
+
+
 
 if __name__ == '__main__':
     unittest.main()

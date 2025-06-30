@@ -376,7 +376,7 @@ class AffineDelta:
         d = None 
         if t[0][1] == 1:
             d = len(t[0][0]) 
-        elif t[1] == 1:
+        elif t[1][1] == 1:
             d = len(t[1][0])
         else: 
             d = 0
@@ -391,7 +391,7 @@ class AffineDelta:
             is1 = prg() % 2
             v1,v2 = None,None
             if not is1:
-                v1 = 1 
+                v1 = 0 
                 v2 = d 
             else: 
                 v1 = d 
@@ -399,13 +399,15 @@ class AffineDelta:
                 v2 = is2 * d 
 
             dim_t[i],dim_t[i2] = v1,v2 
+        else: 
+            dim_t[0],dim_t[1] = 0,0 
 
         def out_one():
             q = modulo_in_range(prg(),ro_prg())
             return q
         
         res = [None,None]
-        for (i,x) in dim_t:
+        for (i,x) in enumerate(dim_t):
             if x == 0:
                 q = out_one() 
                 res[i] = q
