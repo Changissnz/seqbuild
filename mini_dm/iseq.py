@@ -1,6 +1,7 @@
 import numpy as np 
 from morebs2.numerical_generator import prg_seqsort
 from operator import add,sub,mul,truediv,floordiv
+from math import ceil 
 import random
 
 
@@ -71,6 +72,28 @@ def gleqvec(l,rounding_depth=5):
             continue 
         d.append(-1) if l1 > l2 else d.append(1)
     return np.array(d,dtype='int32')
+
+#---------------------------------------------------------------------
+#----------------------- vector-to-vector operation 
+
+def modulated_vec_op(v1,v2,op):
+
+    V,V2 = None,None 
+    if len(v1) > len(v2): 
+        V,V2 = v1,v2
+    else:
+        V,V2 = v2,v1 
+
+    q = []
+    for (i,v) in enumerate(V): 
+        i2 = i % len(V2)
+        v_ = V2[i2] 
+        q.append(op(v,v_))
+    return np.array(q) 
+
+def modulated_vecdot(v1,v2,op1,op2):
+    V = modulated_vec_op(v1,v2,op1)
+    return op2(V)
 
 #---------------------------------------------------------------------
 

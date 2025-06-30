@@ -163,12 +163,13 @@ class MADescriptor:
         self.rv_vec = rv_vec 
         # symmetric status vector 
         self.rvt_vec = rvt_vec
-        # relation of first w/ second (according to MA order)
+        # trinary relation of first w/ second (according to MA order)
         self.t_vec = t_vec
         # sign vector 
         self.s_vec = s_vec
         # absolute distance vector 
         self.d_vec = d_vec 
+        # 0 (M) OR 1 (A) first 
         self.ma_order = ma_order
         return 
     
@@ -329,6 +330,12 @@ class AffineDelta:
         self.ma_order = ma_order
         return
     
+    def size(self):
+        t = self.type()
+        s0 = np.sum(np.abs(self.m)) if t[0] else self.m 
+        s1 = np.sum(np.abs(self.a)) if t[1] else self.a 
+        return s0 + s1 
+    
     def type(self):
         q = int(is_vector(self.m))
         q2 = int(is_vector(self.a)) 
@@ -340,6 +347,21 @@ class AffineDelta:
         s2 = "a: {}".format(self.a)
         o = "o: {}".format(self.ma_order)
         return s + "\n" + s2 + "\n" + o + "\n"
+    
+    def __add__(self,ax):
+        assert type(ax) == AffineDelta
+
+        m2 = self.m + ax.m 
+        a2 = self.a + ax.a 
+        return AffineDelta(m2,a2,self.ma_order) 
+    
+    def __mul__(self,m):
+        assert is_number(m,set()) 
+        return AffineDelta(self.m*m,self.a*m,self.ma_order)
+    
+    def __sub__(self,ax):
+        q = ax * -1 
+        return self + q 
 
     #------------------------------------- i/o methods 
 

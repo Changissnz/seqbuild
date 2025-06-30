@@ -114,27 +114,6 @@ def safe_npint32__prg_vec(prg,sz):
         v[i] = safe_npint32_value(prg()) 
     return v 
 
-#----------------------- vector-to-vector operation 
-
-def modulated_vec_op(v1,v2,op):
-
-    V,V2 = None,None 
-    if len(v1) > len(v2): 
-        V,V2 = v1,v2
-    else:
-        V,V2 = v2,v1 
-
-    q = []
-    for (i,v) in enumerate(V): 
-        i2 = i % len(V2)
-        v_ = V2[i2] 
-        q.append(op(v,v_))
-    return np.array(q) 
-
-def modulated_vecdot(v1,v2,op1,op2):
-    V = modulated_vec_op(v1,v2,op1)
-    return op2(V)
-
 #------------------------ operations related to LCM and GCD 
 
 def lcm_times(x0,x1,m): 

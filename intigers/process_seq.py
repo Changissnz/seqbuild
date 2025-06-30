@@ -1,9 +1,6 @@
 """
 file contains methods to aid in calculating analytical values on integer vectors
 """
-
-import numpy as np
-from math import ceil
 from mini_dm.iseq import * 
 
 def affine_fit_for_pair__multiple(i1,i2): 
