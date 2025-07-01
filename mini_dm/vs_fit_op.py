@@ -1,6 +1,9 @@
 from .vs_fit import * 
 from types import MethodType,FunctionType
 
+"""
+a hypothesis container for an <MADescriptor> instance. 
+"""
 class MADHyp(MADescriptor):
 
     def __init__(self,rv_vec,rvt_vec,t_vec,s_vec,d_vec,ma_order=None):
@@ -16,13 +19,14 @@ class MADHyp(MADescriptor):
             md2.t_vec,md2.s_vec,md2.d_vec,\
             md2.ma_order)
 
-
 class VSTransform:
 
     def __init__(self,ad:AffineDelta):
         assert type(ad) == AffineDelta
         self.ad = ad
         return 
+    
+    #------------------------ auto-correcting and processing functions 
     
     #------------------------ I/O comparison functions
     
@@ -68,10 +72,18 @@ class IOFit:
 
         self.x = x
         self.y = y 
+        # function w/ unknown parameter values 
         self.unknownf = unknown_func
+        # hypothesis function for x-to-y mappings 
         self.hyp = None 
+        # expected/actual output difference b/t `unknownf` and `hyp`
         self.hypdiff_func = hypdiff_func
+        # MA difference b/t actual and hypothesis 
         self.madiff_func = madiff_func 
+
+    def ranged_process(self,prange): 
+
+        return -1 
 
     def io_stat(self):
         stat1 = type(self.x) != type(None)
@@ -91,7 +103,6 @@ class IOFit:
         assert type(self.hyp) == MADHyp
 
         # convert to <AffineDelta>. 
-        #dim = self.hyp.dim() 
         ad = self.hyp.solve_into_AffineDelta(ma_dim)
 
         # convert to <VSTransform>
@@ -99,6 +110,9 @@ class IOFit:
         self.hfunc = vst.to_hypdiff_func()
         return self.hfunc 
     
+
+    #-------------------------- expected/actual difference functions 
+
     def hyp_diff(self,x):
         q = self.unknownf(x) 
         return self.hfunc(x,q)

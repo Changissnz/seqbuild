@@ -58,6 +58,7 @@ class VSTransformMethods(unittest.TestCase):
         m,a = 34,np.array([4,-14.0,29,79.0])
         ad = AffineDelta(m,a,0)
 
+        # case 1
         vst = VSTransform(ad) 
         hdf = vst.to_hypdiff_func() 
         maf = vst.to_ma_diff_func()
@@ -81,14 +82,30 @@ class VSTransformMethods(unittest.TestCase):
 
         dx = set() 
         for x in X: 
-            q = iof.hyp_diff(45) 
+            q = iof.hyp_diff(x) 
             dx |= {str(q)}
-            
-        assert len(dx) == 1 
+
+        assert len(dx) == len(X)  
 
         ad_diff = iof.ma_diff(ad)
         assert ad_diff.m != 0.0 
         assert not np.any(ad_diff == 0.)
+
+        # case 2 
+        X20 = [4,5,6,7]
+        X21 = [-3,13,10,9] 
+        X2 = np.array([X20,X21])
+        Y2 = np.array([ad.fit(x) for x in X2])
+
+        iof2 = IOFit(X2,Y2,unknownf,hdf,maf)
+        iof2.load_hyp(md_hyp,[4,4])
+
+        S2 = set() 
+        for x in X2: 
+            q = iof.hyp_diff(x) 
+            assert len(q) == 4 
+            S2 |= {str(q)}
+        assert len(S2) == len(X2)
 
 if __name__ == '__main__':
     unittest.main()

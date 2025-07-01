@@ -160,6 +160,18 @@ an <AffineDelta>'s variables.
 class MADescriptor:
 
     def __init__(self,rv_vec,rvt_vec,t_vec,s_vec,d_vec,ma_order=None):
+
+        if not is_number(rv_vec,set()): 
+            rv_vec = np.array(rv_vec)
+        if not is_number(rvt_vec,set()): 
+            rvt_vec = np.array(rvt_vec)
+        if not is_number(t_vec,set()): 
+            t_vec = np.array(t_vec)
+        if type(s_vec) in {list}:
+            s_vec = np.array(s_vec) 
+        if not is_number(d_vec,set()):
+            d_vec = np.array(d_vec)
+
         # ratio vector 
         self.rv_vec = rv_vec 
         # symmetric status vector 
@@ -174,6 +186,8 @@ class MADescriptor:
         self.ma_order = ma_order
         return 
     
+    #---------------------------- getter/setter methods 
+
     def default_set_naive(self,varname):
 
         assert varname in {"rv_vec","rvt_vec"}
@@ -222,6 +236,8 @@ class MADescriptor:
         else: 
             l = len(self.rv_vec)
         return l 
+    
+    #---------------------- <AffineDelta> conversion methods 
 
     def solve_into_AffineDelta(self,ma_dim,ma_order=None):
         q = self.solve(ma_dim)
@@ -325,6 +341,21 @@ class MADescriptor:
             q2 * s
 
         return q,q2 
+
+    #------------------------- representational methods 
+    
+    def vector_seq(self):
+        stat = is_vector(self.rv_vec)
+
+        l = [] 
+        l.append(deepcopy(self.rv_vec))
+
+        rvt = [1 if s == 's' else 0 for s in self.rvt_vec] 
+        l.append(np.array(rvt) )
+        l.append(deepcopy(self.t_vec))
+        l.append(deepcopy(self.s_vec))
+        l.append(deepcopy(self.d_vec))
+        return np.array(l),stat
     
     @staticmethod
     def from_AffineDelta(ad,p3,d_operator=lambda x2,x1:x2-x1):
@@ -344,7 +375,7 @@ class MADescriptor:
         rx = [qref,qref2]
 
         tvec = to_trinary_relation_v2(rx[0],rx[1],True)
-        qref3 = 0.0 if not is_vector(rx[0]) else np.zeros((len(rx[0]),))
+        qref3 = 0.0 if not is_vector(rx[1]) else np.zeros((len(rx[1]),))
         svec = to_trinary_relation_v2(qref,qref3,False,False) 
 
         dvec = np.abs(d_operator(qref2,qref)) 
