@@ -1,5 +1,6 @@
 from .vs_fit import * 
 from types import MethodType,FunctionType
+from collections import defaultdict
 
 """
 a hypothesis container for an <MADescriptor> instance. 
@@ -19,6 +20,10 @@ class MADHyp(MADescriptor):
             md2.t_vec,md2.s_vec,md2.d_vec,\
             md2.ma_order)
 
+"""
+structure that aids in modifying and applying an 
+<AffineDelta> instance. 
+"""
 class VSTransform:
 
     def __init__(self,ad:AffineDelta):
@@ -30,11 +35,22 @@ class VSTransform:
     
     #------------------------ I/O comparison functions
     
+    """
+    outputs the two size differences 
+    (0) diffabs (absolute size difference) 
+    (1) diffsize (size of difference)
+    """
     def cmp_ad(self,ad1):
         sz_diff = abs(self.ad.size() - ad1.size())
         diff_ad = (self.ad - ad1).size() 
         return sz_diff,diff_ad 
     
+    """
+    calculates the difference in expected 
+    output value between <AffineDelta> `ad1` 
+    and the class <AffineDelta> `ad` with `x` 
+    as the input. 
+    """
     def diff_ad(self,x,ad1,op_type="all",\
         dfunc=lambda x,x2: np.sum(np.abs(x - x2))): 
 
@@ -47,9 +63,16 @@ class VSTransform:
             self.ad.ma_order)
         return dfunc(ad1.fit(x),self.ad.fit(x))
 
+    """
+    calculates the difference in contribution vectors of input values 
+    `x1`,`x2`. 
+    """
     def cvec_diff_ad(self,x1,x2,dfunc=lambda x,x2:np.abs(x - x2)):
         return dfunc(self.ad.cvec(x1),self.ad.cvec(x2))
 
+    """
+    outputs a function, hypothesis output difference. 
+    """
     def to_hypdiff_func(self): 
 
         def f(x,hyp_y):
@@ -57,6 +80,9 @@ class VSTransform:
             return actual - hyp_y 
         return f 
     
+    """
+    outputs a function, multiple-additive (MA) difference. 
+    """
     def to_ma_diff_func(self):
         
         def f(ad):
@@ -84,6 +110,43 @@ class IOFit:
     def ranged_process(self,prange): 
 
         return -1 
+    
+    """
+    outputs a description of the x and y types of the class 
+    data. The description for each of x,y is 
+            u | {unique data element dimensions}
+    """
+    def type(self):
+        xinf = self.stat_count("x")
+        yinf = self.stat_count("y")
+
+        x = "u" if type(xinf) == type(None) else \
+            set(xinf.keys())
+        y = "u" if type(yinf) == type(None) else \
+            set(yinf.keys())
+        return x,y 
+    
+    def stat_count(self,seq="x"):
+        assert seq in {"x","y"} 
+        q = getattr(self,seq) 
+
+        if type(q) == type(None):
+            return None
+        
+        dcount = defaultdict(int) 
+        for q_ in q:
+            if is_vector(q_):
+                dcount[len(q_)] += 1
+            else: 
+                dcount[0] += 1 
+        return dcount 
+
+    def add_value(self,x_,y_):
+        self.x.append(x_)
+
+        if type(self.y) != type(None): 
+            self.y.append(y_)
+        return
 
     def io_stat(self):
         stat1 = type(self.x) != type(None)

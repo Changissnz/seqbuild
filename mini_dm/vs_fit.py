@@ -343,7 +343,7 @@ class MADescriptor:
         return q,q2 
 
     #------------------------- representational methods 
-    
+
     def vector_seq(self):
         stat = is_vector(self.rv_vec)
 
@@ -351,7 +351,7 @@ class MADescriptor:
         l.append(deepcopy(self.rv_vec))
 
         rvt = [1 if s == 's' else 0 for s in self.rvt_vec] 
-        l.append(np.array(rvt) )
+        l.append(np.array(rvt))
         l.append(deepcopy(self.t_vec))
         l.append(deepcopy(self.s_vec))
         l.append(deepcopy(self.d_vec))
