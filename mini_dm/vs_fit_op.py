@@ -3,24 +3,6 @@ from types import MethodType,FunctionType
 from collections import defaultdict
 
 """
-a hypothesis container for an <MADescriptor> instance. 
-"""
-class MADHyp(MADescriptor):
-
-    def __init__(self,rv_vec,rvt_vec,t_vec,s_vec,d_vec,ma_order=None):
-        super().__init__(rv_vec,rvt_vec,t_vec,s_vec,d_vec,ma_order)
-        return 
-    
-    @staticmethod
-    def naive_hyp_for_MADescriptor(md):
-        md2 = md.default_set_naive("rv_vec")
-        md2 = md2.default_set_naive("rvt_vec")
-
-        return MADHyp(md2.rv_vec,md2.rvt_vec,\
-            md2.t_vec,md2.s_vec,md2.d_vec,\
-            md2.ma_order)
-
-"""
 structure that aids in modifying and applying an 
 <AffineDelta> instance. 
 """
