@@ -468,6 +468,13 @@ class AffineDelta:
         m,a = dfunc(self.m,self.a) 
         return AffineDelta(m,a,self.ma_order)
     
+    """
+    outputs a new <AffineDelta> instance that is this 
+    <AffineDelta> instance changed by `prg` and `ro_prg`. 
+
+    prg := parameter-less function, pseudo-random number generator. 
+    ro_prg := parameter-less function, range outputter.
+    """
     def delta_function_from_prg(self,prg,ro_prg):
         t0,t1 = self.type()
         t = [(self.m,t0),(self.a,t1)] 
@@ -520,7 +527,16 @@ class AffineDelta:
         return AffineDelta(res[0],res[1],self.ma_order)
         
     '''
-    contribution vector for M and A w.r.t. input x 
+    contribution vector for M and A w.r.t. input x. 
+
+    The cumulative absolute change of an input `x` is 
+    the sum 
+        C = abs(F_1(x) - F_0(x)) + abs(`x` - `F_0(x)`). 
+
+    The contribution vector is 
+        (abs(`x` - `F_0(x)`) / C, abs(F_1(x) - F_0(x))). 
+    F_0 is the first sub-function, and F_1 the second 
+    sub-function in the affine function.
     '''
     def cvec(self,x):
 
@@ -534,6 +550,11 @@ class AffineDelta:
         rx = safe_div(t1,t)
         rx2 = safe_div(t2,t)
         return rx,rx2 
+    
+    @staticmethod 
+    def io_to_AffineDelta(x,y,d,cv,ma_dim,ma_order): 
+        return -1 
+
 
     #------------------------------ instantiation methods      
 

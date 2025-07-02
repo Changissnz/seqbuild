@@ -1,4 +1,4 @@
-from .vs_fit import * 
+from .vs_fit_mem import * 
 from types import MethodType,FunctionType
 from collections import defaultdict
 
@@ -176,13 +176,26 @@ class IOFit:
 
     #-------------------------- expected/actual difference functions 
 
+    """
+    difference in output values of `x` b/t hypothesis and 
+    function `U` (`unknownf`) [expected]: 
+
+        [got w/ hypothesis] - [output from `U`] 
+    """
     def hyp_diff(self,x):
         q = self.unknownf(x) 
         return self.hfunc(x,q)
     
+    """
+    outputs an <AffineDelta> instance ad2, 
+    ad2 = (actual MA) - (MA for ad). 
+    """
     def ma_diff(self,ad): 
         return self.madiff_func(ad) 
 
+    """
+    fetches the i'th sample from either `x` or `y`. 
+    """
     def io_sample_proc(self,i,default_source = "y"):
         assert default_source in {"y","unknown"} 
         q = self.x[i]
