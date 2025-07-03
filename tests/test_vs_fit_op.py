@@ -25,13 +25,13 @@ class VSTransformMethods(unittest.TestCase):
                 dfunc=lambda x,x2: np.sum(np.abs(x - x2)))
         q2_ = vst.diff_ad(24,ad5,op_type="one",\
                 dfunc=lambda x,x2: np.sum(np.abs(x - x2)))
-        assert round(q2_ / q2) == 12414
+        assert round(q2_ / q2) == 29,"got {}".format(q2_/q2)
 
         q3 = vst.diff_ad(45,ad5,op_type="all",\
                 dfunc=lambda x,x2: np.sum(np.abs(x - x2)))
         q4 = vst.diff_ad(45,ad5,op_type="one",\
                 dfunc=lambda x,x2: np.sum(np.abs(x - x2)))
-        assert round(q4 / q3) == 12650
+        assert round(q4 / q3) == 16, "got {}".format(q4/q3)
         return
     
     def test__VSTransform__cmp_ad__case1(self):

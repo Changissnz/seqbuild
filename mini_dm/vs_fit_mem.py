@@ -68,17 +68,9 @@ class MAHypMach:
 
     @staticmethod 
     def io_to_AffineDelta(x,y,d,cv,ma_dim,ma_order): 
-        if ma_order == 1: 
-            cv = cv[::-1] 
-
-
         q = np.abs(y - x)
-
-        # case: M,A are singletons 
-        if is_number(q,set()): 
-            return -1 
-
-        assert len(d) == len(q) 
+        if not is_number(q,set()): 
+            assert len(d) == len(q) 
 
         # set the initial MA pair 
         ma = [None,None]
@@ -94,38 +86,94 @@ class MAHypMach:
             ma[1] = np.zeros((len(q),),dtype=float)
 
         sz_ma = []
-        for x in ma:
-            if is_number(x,set()):
+        for x_ in ma:
+            if is_number(x_,set()):
                 sz_ma.append(0)
             else:
-                sz_ma.append(len(x))
+                sz_ma.append(len(x_))
 
-        if is_number(y): assert max(sz_ma) == 0
+        if is_number(y,set()): assert max(sz_ma) == 0
         else: 
             assert max(sz_ma) == len(y) 
 
         def place_element(ma_index,e_index,element):
-            if is_number(ma[ma_index]):
+            if is_number(ma[ma_index],set()):
                 ma[ma_index] = element 
                 return 
             ma[ma_index][e_index] = element
             return   
+        
+        def get_x(i): 
+            if is_number(x,set()): return x 
+            return x[i] 
+        
+        def get_y(i):
+            if is_number(y,set()): return y 
+            return y[i] 
+        
+        def get_d(i): 
+            if is_number(d,set()): return d 
+            return d[i]
+        
+        def get_cv(i1,i2):
+            if is_number(cv[i1],set()): 
+                return cv[i1] 
+            return cv[i1][i2] 
+        
+        # case: M,A are singletons 
+        if is_number(q,set()): 
+            q = [q] 
 
+        # iterate through and solve for every index 
         for (i,q_) in enumerate(q): 
-                if q_ < d[i]: 
-                    other = d[i] - q_ 
 
-                    if cv[0] < cv[1]: 
-                        place_element(0,i,min([q_,other]))
-                        place_element(1,i,max([q_,other]))
-                    else: 
-                        place_element(0,i,max([q_,other]))
-                        place_element(0,i,min([q_,other]))
-                elif q_ == d[i]: 
-                    place_element(0,i,cv[0][i] * d[i])
-                    place_element(1,i,cv[1][i] * d[i])
+            d_ = get_d(i)
+            cv0_ = get_cv(0,i)
+            cv1_ = get_cv(1,i)
+
+            x_ = get_x(i) 
+            y_ = get_y(i)
+            if q_ < d_: 
+                c1,c2 = cv0_ * d_,cv1_ * d_ 
+
+                cx = [c1,c2]
+                if y_ > x_: 
+                    j = np.argmin(cx) 
                 else: 
-                    raise ValueError("d[{}] has to be at least the absolute diff. of y and x.".format(i))
+                    j = np.argmax(cx) 
+                cx[j] *= -1 
+                c1,c2 = cx[0],cx[1] 
+
+                if ma_order == 0: 
+                    mx = safe_div(x_ + c1,x_)
+                    mx2 = c2 
+                else: 
+                    mx = c1 
+                    mx2 = safe_div(y_,x_ + c1)  
+
+                mxs = [mx,mx2]
+                place_element(0,i,mxs[ma_order])
+                place_element(1,i,mxs[(ma_order + 1) % 2])
+            elif q_ == d_: 
+
+                if y_ < x_: 
+                    d_ = -d_ 
+                q = cv0_ * d_
+
+                if ma_order == 0:
+                    mx = safe_div(x_ + q,x_)
+                else: 
+                    mx = q
+                place_element(ma_order,i,mx) 
+
+                q = cv1_ * d_
+                if ma_order == 0: 
+                    mx2 = q 
+                else:
+                    mx2 = safe_div(y_,x_ + (cv0_ * d_)) 
+                place_element((ma_order + 1) % 2,i,mx2)
+            else: 
+                raise ValueError("d[{}] has to be at least the absolute diff. of y and x.".format(i))
 
         return AffineDelta(ma[0],ma[1],ma_order) 
 

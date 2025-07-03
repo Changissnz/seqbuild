@@ -448,7 +448,7 @@ class AffineDelta:
         return (x + self.a) * self.m 
     
     def op1(self,x):
-        if self.ma_order: return x * self.m 
+        if not self.ma_order: return x * self.m 
         return x + self.a 
 
     def diff(self,x,x2,dfunc=sub): 
@@ -539,17 +539,24 @@ class AffineDelta:
     sub-function in the affine function.
     '''
     def cvec(self,x):
-
-        q1 = self.op1(x)
-        q2 = self.fit(x)  
-
-        t1 = np.abs(x - q1)
-        t2 = np.abs(q2 - q1)
+        t1,t2 = self.stepwise_diff(x) 
         t = t1 + t2  
 
         rx = safe_div(t1,t)
         rx2 = safe_div(t2,t)
         return rx,rx2 
+    
+    def abssum_diff(self,x): 
+        t1,t2 = self.stepwise_diff(x)
+        return t1 + t2 
+
+    def stepwise_diff(self,x): 
+        q1 = self.op1(x)
+        q2 = self.fit(x)  
+
+        t1 = np.abs(x - q1)
+        t2 = np.abs(q2 - q1)
+        return t1,t2 
     
     #------------------------------ instantiation methods      
 
