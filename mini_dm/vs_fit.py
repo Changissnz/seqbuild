@@ -2,7 +2,8 @@
 Planned file that works on vector-singleton fits between vectors. 
 """
 
-from morebs2.matrix_methods import is_number,is_vector,is_valid_range
+from morebs2.matrix_methods import is_number,is_vector,\
+    is_valid_range,equal_iterables
 from morebs2.numerical_generator import modulo_in_range
 from morebs2.measures import zero_div 
 from intigers.extraneous import to_trinary_relation_v2,safe_div
@@ -439,6 +440,28 @@ class AffineDelta:
     def __sub__(self,ax):
         q = ax * -1 
         return self + q 
+    
+    def __eq__(self,adx): 
+
+        def value_check(varname):
+            v1,v2 = getattr(self,varname),getattr(adx,varname)
+            s0 = is_vector(v1)
+            s1 = is_vector(v2)
+
+            if (int(s0) + int(s1)) % 2: 
+                return False 
+
+            if not s0 and not s1: 
+                if np.round(np.abs(v1 - v2),5) != 0.0: 
+                    return False 
+                return True  
+            return equal_iterables(v1,v2) 
+        
+        stat0 = value_check("m")
+        stat1 = value_check("a")
+        stat2 = True if getattr(self,"ma_order") == \
+            getattr(adx,"ma_order") else False         
+        return stat0 and stat1 and stat2 
 
     #------------------------------------- i/o methods 
 

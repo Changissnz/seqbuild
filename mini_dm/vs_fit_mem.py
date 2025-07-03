@@ -1,4 +1,5 @@
 from .vs_fit import * 
+from morebs2.matrix_methods import is_2dmatrix
 
 def get_vs_element(L,i,cf=lambda x: is_number(x,set())): 
     if cf(L): return L 
@@ -55,9 +56,8 @@ class MAHypMem:
 class MAHypMach:
 
     def __init__(self,x,y,d=None,mem_type="MA"):
-        #assert x and is_vector(y) 
-        assert None not in x 
-        assert None not in y
+        assert not np.any(x == None)
+        assert not np.any(y == None) 
         assert len(x) == len(y) 
         self.x = x 
         self.y = y 
@@ -70,7 +70,7 @@ class MAHypMach:
     def load_distance_vec(self,d): 
         if type(d) == type(None): return 
         assert len(d) == len(self.x) 
-        assert is_vector(d) 
+        assert is_vector(d) or is_2dmatrix(d) or type(d) == list 
         self.d = d 
 
     def load_mem(self,indices=[],info=[]): 

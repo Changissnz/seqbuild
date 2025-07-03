@@ -117,10 +117,10 @@ class IOFit:
         mem_type = "MA"
 
         mhm = MAHypMach(xs,ys,d,mem_type=mem_type)
-        mhm.load_ma_hyp_dict(mhm,clear_mem=True)
+        mhm.load_ma_hyp_dict(dx,clear_mem=True)
+        self.mahm = mhm 
 
     def process_MAHypMach_on_auxvar(self): 
-#    def io_sample_proc(self,i,default_source = "y"):
         l = len(self.x) 
         dx = dict() 
         for i in range(l): 
@@ -220,6 +220,11 @@ class IOFit:
     """
     def ma_diff(self,ad): 
         return self.madiff_func(ad) 
+    
+    def ma_output_diff(self,ad,i,dfunc=lambda x,x2: x - x2): 
+        x,y = self.io_sample(i)
+        return dfunc(y,ad.fit(x))
+
 
     """
     fetches the i'th sample from either `x` or `y`. 

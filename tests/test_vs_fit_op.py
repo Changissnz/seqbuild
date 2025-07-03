@@ -76,7 +76,6 @@ class VSTransformMethods(unittest.TestCase):
         vst2 = VSTransform(ad2) 
         maf = vst2.to_ma_diff_func() 
 
-
         iof = IOFit(X,Y,unknownf,hdf,maf)
         iof.load_hyp(md_hyp,[4,4])
 
@@ -88,8 +87,9 @@ class VSTransformMethods(unittest.TestCase):
         assert len(dx) == len(X)  
 
         ad_diff = iof.ma_diff(ad)
-        assert ad_diff.m != 0.0 
-        assert not np.any(ad_diff == 0.)
+        #assert ad_diff.m != 0.0 
+        assert not np.any(ad_diff.m == 0.)
+        assert not np.any(ad_diff.a == 0)
 
         # case 2 
         X20 = [4,5,6,7]
@@ -106,6 +106,44 @@ class VSTransformMethods(unittest.TestCase):
             assert len(q) == 4 
             S2 |= {str(q)}
         assert len(S2) == len(X2)
+
+    def test__IOFit__init_MAHypMach__case1(self):
+        m,a = 34,np.array([4,-14.0,29,79.0])
+        ad = AffineDelta(m,a,0)
+
+        # case 1
+        vst = VSTransform(ad) 
+        hdf = vst.to_hypdiff_func() 
+        maf = vst.to_ma_diff_func()
+
+        X = np.array([45,52,61,15,150])
+        Y = np.array([ad.fit(x) for x in X])
+
+        unknownf = vst.ad.fit 
+
+        p3 = {"s":0,"a":"max 1.0"}
+        md = ad.to_ma_descriptor(p3,d_operator=DEFAULT_MA_DISTANCE_FUNCTION)
+        md_hyp = MADHyp.naive_hyp_for_MADescriptor(md)
+
+        ad2 = md_hyp.solve_into_AffineDelta([0,4],ma_order=0)
+        vst2 = VSTransform(ad2) 
+        maf = vst2.to_ma_diff_func() 
+
+
+        iof = IOFit(X,Y,unknownf,hdf,maf)
+        dx = np.array([vst.ad.abssum_diff(x_) for x_ in X]) 
+        cv = [ad.cvec(x_) for x_ in X]
+        ma_dim = [0,4]
+        ma_order = 0 
+        iof.load_mahyp_auxvar(dx,cv,ma_dim,ma_order)
+
+        iof.init_MAHypMach()
+
+        assert iof.mahm.mhm.indices == [0,1,2,3,4]
+        ix = iof.mahm.mhm.info[0]
+        for x in iof.mahm.mhm.info: 
+            assert x == ix 
+            print(x)
 
 if __name__ == '__main__':
     unittest.main()

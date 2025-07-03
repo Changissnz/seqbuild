@@ -364,6 +364,20 @@ class VSFitMethods(unittest.TestCase):
             df = ad3.delta_function_from_prg(prg,ro_prg)
             assert df.type() == (0,1)
 
+    def test__AffineDelta__delta_function_from_prg__case1(self):
+        adx2 = AffineDelta(3,4,0)
+        adx3 = AffineDelta(np.array([3,3]),4,0)
+        adx4 = AffineDelta(3,np.array([4,4,4]),0)
+        adx5 = AffineDelta(3,4,1)
+        adx6 = AffineDelta(3,4,0) 
+        adx7 = AffineDelta(13,4,0)
+        adx8 = AffineDelta(np.array([3,3,3]),4,0)
+
+        assert not adx2 == adx3 and not adx2 == adx4 and not adx2 == adx5 
+        assert adx2 == adx6 
+        assert not adx2 == adx7 
+        assert not adx8 == adx4 and not adx8 == adx3 
+
     def test__MADescriptor__default_set_naive__case1(self):
 
         m,a = 34,np.array([4,-14.0,29,79.0])
