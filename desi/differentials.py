@@ -7,9 +7,9 @@ class PointInterpolationContainer:
         pts = pts[np.argsort(pts[:,0])]
         self.pts = pts
         self.fvec = starting_fvec
-        self.declare_structs() 
+        self.init_structs() 
 
-    def declare_structs(self):
+    def init_structs(self):
         self.lps = LagrangePolySolver(self.pts, prefetch = False)
         self.cdc = ChainedDCurves(self.pts,self.fvec,0)
         self.cdc.draw() 

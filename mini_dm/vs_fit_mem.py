@@ -1,5 +1,13 @@
 from .vs_fit import * 
 
+def get_vs_element(L,i,cf=lambda x: is_number(x,set())): 
+    if cf(L): return L 
+    return L[i] 
+
+def vs_dim(L): 
+    if is_number(L,set()): return 0  
+    return len(L)
+
 """
 a hypothesis container for an <MADescriptor> instance. 
 """
@@ -39,6 +47,10 @@ class MAHypMem:
         self.indices.append(idn) 
         self.info.append(info)
         return
+    
+    def clear(self): 
+        self.indices.clear() 
+        self.info.clear() 
 
 class MAHypMach:
 
@@ -63,6 +75,12 @@ class MAHypMach:
 
     def load_mem(self,indices=[],info=[]): 
         self.mhm = MAHypMem(indices,info,mem_type=self.mem_type)
+
+    def load_ma_hyp_dict(self,mhd,clear_mem:bool=True):
+        if clear_mem: self.mhm.clear() 
+
+        for k,v in mhd.items(): 
+            self.mhm.add(k,v) 
 
     #------------------- hypothesis generation 
 
@@ -96,6 +114,9 @@ class MAHypMach:
         else: 
             assert max(sz_ma) == len(y) 
 
+        """
+        adds an element according to the index arguments. 
+        """
         def place_element(ma_index,e_index,element):
             if is_number(ma[ma_index],set()):
                 ma[ma_index] = element 
@@ -103,6 +124,11 @@ class MAHypMach:
             ma[ma_index][e_index] = element
             return   
         
+        """
+        functions to fetch variables 
+        """
+        ##
+        """
         def get_x(i): 
             if is_number(x,set()): return x 
             return x[i] 
@@ -114,7 +140,8 @@ class MAHypMach:
         def get_d(i): 
             if is_number(d,set()): return d 
             return d[i]
-        
+        """
+
         def get_cv(i1,i2):
             if is_number(cv[i1],set()): 
                 return cv[i1] 
@@ -126,13 +153,15 @@ class MAHypMach:
 
         # iterate through and solve for every index 
         for (i,q_) in enumerate(q): 
-
-            d_ = get_d(i)
-            cv0_ = get_cv(0,i)
+            d_ = get_vs_element(d,i) 
+            #d_ = get_d(i)
+            cv0_ = get_cv(0,i)            
             cv1_ = get_cv(1,i)
 
-            x_ = get_x(i) 
-            y_ = get_y(i)
+            x_ = get_vs_element(x,i)
+            #x_ = get_x(i) 
+            y_ = get_vs_element(y,i)
+            #y_ = get_y(i)
             if q_ < d_: 
                 c1,c2 = cv0_ * d_,cv1_ * d_ 
 
@@ -181,4 +210,7 @@ class MAHypMach:
         return 
     
     def naive_vecqual_for_sample(self,index):
+        return -1 
+    
+    def load_delta(self,d): 
         return -1 

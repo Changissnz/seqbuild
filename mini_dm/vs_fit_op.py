@@ -87,11 +87,57 @@ class IOFit:
         # expected/actual output difference b/t `unknownf` and `hyp`
         self.hypdiff_func = hypdiff_func
         # MA difference b/t actual and hypothesis 
-        self.madiff_func = madiff_func 
+        self.madiff_func = madiff_func
+
+        # used for forming hypotheses on MA 
+        self.mahm = None # <> 
+        self.d,self.cv,self.ma_dim,self.ma_order = \
+            None,None,None,None 
 
     def ranged_process(self,prange): 
-
         return -1 
+    
+    """
+    CAUTION: no type-checking of arguments 
+    """
+    def load_mahyp_auxvar(self,d,cv,ma_dim,ma_order):
+        self.d = d 
+        self.cv = cv 
+        self.ma_dim = ma_dim 
+        self.ma_order = ma_order 
+        return
+    
+    def init_MAHypMach(self):
+        dx = self.process_MAHypMach_on_auxvar()
+        ks = sorted(dx.keys())
+
+        xs = [self.x[k] for k in ks] 
+        ys = [self.y[k] for k in ks] 
+        d = np.array([self.d[k] for k in ks])
+        mem_type = "MA"
+
+        mhm = MAHypMach(xs,ys,d,mem_type=mem_type)
+        mhm.load_ma_hyp_dict(mhm,clear_mem=True)
+
+    def process_MAHypMach_on_auxvar(self): 
+#    def io_sample_proc(self,i,default_source = "y"):
+        l = len(self.x) 
+        dx = dict() 
+        for i in range(l): 
+            x,y=self.io_sample(i)
+            dim0 = vs_dim(x) 
+            dim1 = vs_dim(y) 
+
+            if max([dim0,dim1]) != max(self.ma_dim): 
+                print("not of same dim.")
+                continue 
+            
+            d = get_vs_element(self.d,i)
+            cv = get_vs_element(self.cv,i,cf=lambda x: type(x) == tuple) 
+            ad = MAHypMach.io_to_AffineDelta(x,y,d,cv,self.ma_dim,self.ma_order)
+            dx[i] = ad 
+        return dx 
+
     
     """
     outputs a description of the x and y types of the class 
@@ -170,7 +216,7 @@ class IOFit:
     
     """
     outputs an <AffineDelta> instance ad2, 
-    ad2 = (actual MA) - (MA for ad). 
+    ad2 = (actual MA) - (MA for `ad`). 
     """
     def ma_diff(self,ad): 
         return self.madiff_func(ad) 
@@ -178,7 +224,7 @@ class IOFit:
     """
     fetches the i'th sample from either `x` or `y`. 
     """
-    def io_sample_proc(self,i,default_source = "y"):
+    def io_sample(self,i,default_source = "y"):
         assert default_source in {"y","unknown"} 
         q = self.x[i]
 
