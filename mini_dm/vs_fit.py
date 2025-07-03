@@ -551,11 +551,6 @@ class AffineDelta:
         rx2 = safe_div(t2,t)
         return rx,rx2 
     
-    @staticmethod 
-    def io_to_AffineDelta(x,y,d,cv,ma_dim,ma_order): 
-        return -1 
-
-
     #------------------------------ instantiation methods      
 
     @staticmethod
