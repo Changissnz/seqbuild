@@ -399,7 +399,7 @@ X_{input},X_{output} each of type vector or singleton.
 class AffineDelta: 
 
     def __init__(self,m,a,ma_order:int): 
-        assert is_number(m,set()) or is_vector(m) 
+        assert is_number(m,set()) or is_vector(m),"got {}".format(m)
         assert is_number(a,set()) or is_vector(a) 
         assert ma_order in {0,1}
 

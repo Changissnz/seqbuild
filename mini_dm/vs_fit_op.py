@@ -256,7 +256,10 @@ class IOFit:
         dx2 = o1 - o0 
 
         dx3 = safe_div(dx2,dx1)
-        M = np.array(dx3)
+        if not is_number(dx3,set()): 
+            M = np.array(dx3)
+        else: 
+            M = dx3 
 
         # case: multiplication is first 
         if ma_order == 0: 

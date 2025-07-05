@@ -171,6 +171,26 @@ class VSTransformMethods(unittest.TestCase):
         assert ad == ad2 
         assert ad2 == ad3 
         return
+    
+    def test__IOFit__io_pointpair_to_AffineDelta__case2(self):
+        # case 1 
+        x1,x2 = 56,400 
+        ad4 = AffineDelta(4.0,5.0,0) 
+
+        y1,y2 = ad4.fit(x1),ad4.fit(x2) 
+        ad5 = IOFit.io_pointpair_to_AffineDelta(x1,x2,y1,y2,0) 
+        assert ad5 == ad4 
+
+        # case 2
+        M,A = 15.0, np.array([3,4,7,10,13.1])
+        ad6 = AffineDelta(M,A,0) 
+        y1,y2 = ad6.fit(x1),ad6.fit(x2) 
+        ad6 = IOFit.io_pointpair_to_AffineDelta(x1,x2,y1,y2,0) 
+
+        MX = np.array([15.0] * 5)
+        ad6_ = AffineDelta(MX,A,0) 
+        assert ad6 == ad6_ 
+
 
 if __name__ == '__main__':
     unittest.main()
