@@ -242,3 +242,33 @@ class IOFit:
         if type(q2) == type(None):
             q2 = self.unknownf(q)
         return (q,q2)
+    
+    @staticmethod
+    def io_pointpair_to_AffineDelta(i0,i1,o0,o1,ma_order):
+        d0 = vs_dim(i0)
+        d1 = vs_dim(i1)
+
+        assert vs_dim(o0) == vs_dim(o1) 
+
+        M,A = None,None
+
+        dx1 = i1 - i0 
+        dx2 = o1 - o0 
+
+        dx3 = safe_div(dx2,dx1)
+        M = np.array(dx3)
+
+        # case: multiplication is first 
+        if ma_order == 0: 
+            t = i0 * M 
+            A = o0 - t
+
+            t2 = i1 * M 
+            A2 = o1 - t2  
+        else: 
+            t = np.array(safe_div(o0,M)) 
+            A = t - i0
+
+            t = np.array(safe_div(o1,M)) 
+            A2 = t - i1  
+        return AffineDelta(M,A,ma_order)  
