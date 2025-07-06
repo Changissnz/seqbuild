@@ -277,3 +277,15 @@ class IOFit:
             t = np.array(safe_div(o1,M)) 
             A2 = t - i1  
         return AffineDelta(M,A,ma_order)  
+    
+    def superpart_by_AffineDelta(self,ma_order): 
+        l = len(self.x) 
+        mhm_ = MAHypMem()
+        mhm_.init_partition()
+        for i in range(l-1): 
+            x0,y0 = self.io_sample(i)
+            for j in range(i+1,l):
+                x1,y1 = self.io_sample(j) 
+                ad = IOFit.io_pointpair_to_AffineDelta(x0,x1,y0,y1,ma_order)
+                mhm_.add_to_partition((i,j),ad)
+        return mhm_ 

@@ -36,6 +36,7 @@ class MAHypMem:
         self.info = info 
         self.mem_type = mem_type  
         for i in self.info: assert self.type_check(i)
+        self.partition = None 
 
     def type_check(self,element): 
         if self.mem_type == "MA": 
@@ -48,7 +49,23 @@ class MAHypMem:
         self.indices.append(idn) 
         self.info.append(info)
         return
-    
+
+    def init_partition(self):
+        self.partition = []  
+
+    def add_to_partition(self,idn,info): 
+        ix = None 
+        for i,inf in enumerate(self.info): 
+            if inf == info:
+                ix = i 
+                break 
+        
+        if type(ix) != type(None):
+            self.partition[ix] |= {idn[0],idn[1]}
+        else: 
+            self.partition.append({idn[0],idn[1]})
+            self.info.append(info) 
+
     def clear(self): 
         self.indices.clear() 
         self.info.clear() 
@@ -124,24 +141,6 @@ class MAHypMach:
             ma[ma_index][e_index] = element
             return   
         
-        """
-        functions to fetch variables 
-        """
-        ##
-        """
-        def get_x(i): 
-            if is_number(x,set()): return x 
-            return x[i] 
-        
-        def get_y(i):
-            if is_number(y,set()): return y 
-            return y[i] 
-        
-        def get_d(i): 
-            if is_number(d,set()): return d 
-            return d[i]
-        """
-
         def get_cv(i1,i2):
             if is_number(cv[i1],set()): 
                 return cv[i1] 
