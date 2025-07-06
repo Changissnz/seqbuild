@@ -134,11 +134,17 @@ class NotEqualsMethods(unittest.TestCase):
 
         b = np.array([x2 * q5[0],x2 * q5[1]]).T 
         assert point_in_bounds(b,y2)
+        qb = b[:,1] - b[:,0] 
+        qd = safe_div(qb,1.0) 
+        assert np.all(np.array(qd,dtype=int) == qd)
 
         # case 6
         q6 = io_closest_multiples_MULO(x2,y2,unit_epsilon=2.0)
         b = np.array([x2 * q6[0],x2 * q6[1]]).T 
         assert np.all(b[:,1] - b[:,0] == 6.0 * 2.0) 
+        qb = b[:,1] - b[:,0] 
+        qd = safe_div(qb,2.0) 
+        assert np.all(np.array(qd,dtype=int) == qd)
 
         # case 7 
         q7 = io_closest_multiples_MULO(y2,x2,unit_epsilon=1.0)
