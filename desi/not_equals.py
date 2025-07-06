@@ -90,7 +90,9 @@ def not_equals__matrix_whole(M,prg,submat_type):
 finds the closest multiples m0,m1 for x so that 
 m0 * x <= y <= m1 * x. The multiples m0,m1 are 
 divisible by the `unit_epsilon`, usually set to a 
-relatively small number. 
+relatively small number.
+
+MULO stands for `most under, least over`. 
 """
 def io_closest_multiples_MULO(x,y,unit_epsilon=10**-5):
     assert is_number(unit_epsilon,set())
