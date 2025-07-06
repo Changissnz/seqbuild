@@ -108,9 +108,55 @@ class NotEqualsMethods(unittest.TestCase):
             qx = not_equals__matrix_whole(deepcopy(M2),prg,x)
             assert len(np.unique(qx)) == len(qx.flatten()) 
 
+    def test__io_closest_multiples_MULO(self): 
+        x = 300.0 
+        y = 501.0 
+        # case 1 
+        q = io_closest_multiples_MULO(x,y,unit_epsilon=10**-2)
+        assert q == (1.66,1.68)
 
+        # case 2 
+        q2 = io_closest_multiples_MULO(x,y,unit_epsilon=10**-1)
+        assert y >= q2[0] * x and y <= q2[1] * x 
 
-    
+        # case 3 
+        q3 = io_closest_multiples_MULO(x,y,unit_epsilon=1.0)
+        assert q3 == (1,2)
+
+        # case 4 
+        q4 = io_closest_multiples_MULO(x,-y,unit_epsilon=1.0)
+        assert q4 == (-2,-1)
+
+        # case 5
+        x2 = 6.0 
+        y2 = np.array([4,14,50,66.0])
+        q5 = io_closest_multiples_MULO(x2,y2,unit_epsilon=1.0)
+
+        b = np.array([x2 * q5[0],x2 * q5[1]]).T 
+        assert point_in_bounds(b,y2)
+
+        # case 6
+        q6 = io_closest_multiples_MULO(x2,y2,unit_epsilon=2.0)
+        b = np.array([x2 * q6[0],x2 * q6[1]]).T 
+        assert np.all(b[:,1] - b[:,0] == 6.0 * 2.0) 
+
+        # case 7 
+        q7 = io_closest_multiples_MULO(y2,x2,unit_epsilon=1.0)
+        b = np.array([y2 * q7[0],y2 * q7[1]]).T 
+        xx = np.ones((4,)) * x2 
+        assert point_in_bounds(b,xx)
+
+        # case 8 
+        y2[0] *= -1 
+        y2[2] *= -1 
+        q8 = io_closest_multiples_MULO(y2,x2,unit_epsilon=1.0)
+        b = np.array([y2 * q8[0],y2 * q8[1]]).T 
+        b = np.sort(b,axis = 1)
+        assert point_in_bounds(b,xx) 
+
+        # case 9 
+        b2 = io_closest_range_MULO(y2,x2,unit_epsilon=1.0) 
+        assert equal_iterables(b,b2)
 
 if __name__ == '__main__':
     unittest.main()

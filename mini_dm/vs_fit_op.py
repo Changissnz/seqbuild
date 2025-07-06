@@ -266,12 +266,14 @@ class IOFit:
             t = i0 * M 
             A = o0 - t
 
+            # ? 
             t2 = i1 * M 
             A2 = o1 - t2  
         else: 
             t = np.array(safe_div(o0,M)) 
             A = t - i0
 
+            # ? 
             t = np.array(safe_div(o1,M)) 
             A2 = t - i1  
         return AffineDelta(M,A,ma_order)  
