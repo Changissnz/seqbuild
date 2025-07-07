@@ -28,10 +28,10 @@ class MADHyp(MADescriptor):
             md2.ma_order)
 
 
-class MAHypMem: 
+class HypMem: 
 
     def __init__(self,indices=[],info=[],mem_type="MA"):
-        assert mem_type in {"MA","VECQUAL"}
+        assert mem_type in {"MA","VECQUAL","ERROR"}
         self.indices = indices 
         self.info = info 
         self.mem_type = mem_type  
@@ -41,8 +41,10 @@ class MAHypMem:
     def type_check(self,element): 
         if self.mem_type == "MA": 
             return type(element) == AffineDelta
-        else: 
+        elif self.mem_type == "VECQUAL": 
             return type(element) == MADHyp
+        else: 
+            return is_number(element,set()) or is_vector(element)
         
     def add(self,idn,info): 
         assert self.type_check(info) 
@@ -65,6 +67,15 @@ class MAHypMem:
         else: 
             self.partition.append({idn[0],idn[1]})
             self.info.append(info) 
+
+    def condense_error_term(self,cfunc): 
+        assert self.mem_type == "ERROR" 
+
+    def cmp_error(self,hm):
+        assert type(hm) == HypMem
+        assert hm.mem_type == "ERROR" 
+        assert hm.mem_type == self.mem_type 
+        return -1 
 
     def clear(self): 
         self.indices.clear() 
@@ -91,7 +102,7 @@ class MAHypMach:
         self.d = d 
 
     def load_mem(self,indices=[],info=[]): 
-        self.mhm = MAHypMem(indices,info,mem_type=self.mem_type)
+        self.mhm = HypMem(indices,info,mem_type=self.mem_type)
 
     def load_ma_hyp_dict(self,mhd,clear_mem:bool=True):
         if clear_mem: self.mhm.clear() 
