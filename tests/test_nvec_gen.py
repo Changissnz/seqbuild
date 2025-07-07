@@ -12,7 +12,7 @@ python3 -m tests.test_nvec_gen
 
 class PointSetGen__TypeAffineMethods(unittest.TestCase):
 
-    def test__PointSetGen__TypeAffine_generate_points(self): 
+    def test__PointSetGen__TypeAffine_generate_points__case1(self): 
 
         num_points = 12 
         ro_prg_ = prg__LCG(3,-13,42,990)
@@ -64,8 +64,28 @@ class PointSetGen__TypeAffineMethods(unittest.TestCase):
 
         psg.generate_points(is_ordered=False,clear_data=False) 
         assert len(psg.ad_indices_seq[-1]) == 0 
-        assert len(psg.ad_indices_seq[-3]) == 0     
+        assert len(psg.ad_indices_seq[-3]) == 0   
 
+    def test__PointSetGen__TypeAffine_generate_points__case2(self): 
+
+        num_points = 12 
+        ro_prg_ = prg__LCG(3,-13,42,990)
+        ro_prg_ = prg__LCG(4,-13,42,990)
+        ro_prg = prg__single_to_range_outputter(ro_prg_) 
+
+        ro_prg2 = prg__LCG(37,-131,4211,9800)
+        ro_prg2 = prg__single_to_range_outputter(ro_prg2) 
+
+        prg = prg__constant(5000)
+        prg = prg__LCG(6,3,2,350)
+        psg = PointSetGen__TypeAffine(num_points,prg,ro_prg,ro_prg2)
+        psg.generate_points(is_ordered=True,clear_data=True)
+
+        psg.gen_ad_parameters[2] = psg.gen_ad_parameters[0][0]
+        psg.generate_points(is_ordered=True,clear_data=False)
+
+        qx = np.array(psg.input_seq[-12:]) 
+        assert qx.shape == (12,9)  
     
 
 if __name__ == '__main__':
