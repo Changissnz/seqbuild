@@ -285,7 +285,9 @@ class IOFit:
     """
     calculates a super-partition P, consisting of subsets of 
     indices, the indices corresponding to the (x_i,y_i) i/o 
-    samples. 
+    samples. Each subset of the super-partition is indices of 
+    the elements (x_i,y_i) that are part of one <AffineDelta> 
+    instance. 
 
     A super-partition contains all indices 0,1,...,(|x|-1), 
     and an index i_j can exist in more than one subset. 
