@@ -28,12 +28,30 @@ class MADHyp(MADescriptor):
             md2.ma_order)
 
 
+def default_cfunc1(S): 
+    S_ = None 
+    try:
+        S_ = np.array(S) 
+    except:
+        assert False, "sequence of elements is irregular in shape."
+
+    if len(S_.shape) == 1:
+        return np.mean(S_) 
+    return np.mean(S_,axis=0)
+
+"""
+memory structure to contain values for qualities of 
+hypotheses on the mapping function between the input and 
+output space. 
+"""
 class HypMem: 
 
     def __init__(self,indices=[],info=[],mem_type="MA"):
         assert mem_type in {"MA","VECQUAL","ERROR"}
         self.indices = indices 
         self.info = info 
+        self.condensed_error1 = None 
+        self.condensed_error2 = None 
         self.mem_type = mem_type  
         for i in self.info: assert self.type_check(i)
         self.partition = None 
@@ -68,14 +86,39 @@ class HypMem:
             self.partition.append({idn[0],idn[1]})
             self.info.append(info) 
 
-    def condense_error_term(self,cfunc): 
+    def condense_error_term(self,cfunc1=default_cfunc1,cfunc2=default_cfunc1): 
         assert self.mem_type == "ERROR" 
+        self.condensed_error1 = cfunc1(self.info) 
+        if is_vector(self.info):
+            self.condensed_error2 = cfunc2(self.info) 
+    
+    def c_error(self,i): 
+        assert i in {1,2} 
+        x = self.condensed_error1 if i == 1 else self.condensed_error2
 
-    def cmp_error(self,hm):
+        if type(x) == type(None): 
+            self.condense_error_term() 
+        return self.condensed_error1 if i == 1 else self.condensed_error2
+
+    def cmp_error(self,hm,cfunc1=default_cfunc1,cfunc2=default_cfunc1):
         assert type(hm) == HypMem
         assert hm.mem_type == "ERROR" 
         assert hm.mem_type == self.mem_type 
-        return -1 
+
+        self.condense_error_term(cfunc1,cfunc2) 
+        hm.condense_error_term(cfunc1,cfunc2) 
+
+        # get trinary relation 
+        c0,c1 = None,None 
+
+        c0 = to_trinary_relation_v2(self.condensed_error1,\
+            hm.condensed_error1,zero_feature=False,abs_feature=True)
+        
+        if type(self.condensed_error2) != type(None) and \
+            type(hm.condensed_error2) != type(None): 
+            c1 = to_trinary_relation_v2(self.condensed_error2,\
+                hm.condensed_error2,zero_feature=False,abs_feature=True) 
+        return c0,c1 
 
     def clear(self): 
         self.indices.clear() 
