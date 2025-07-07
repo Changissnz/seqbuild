@@ -7,6 +7,12 @@ def vec_to_frequency_map(V):
     for v_ in V: dx[v_] += 1
     return dx 
 
+def setseq_to_frequency_map(S): 
+    dx = defaultdict(int)
+    for s in S: 
+        assert type(s) == set 
+        for s_ in s: dx[s_] += 1 
+    return dx 
 """
 given a dictionary with string-like key and value as list, <MinMaxFreq> 
 calculates the frequency of each element in the value. 

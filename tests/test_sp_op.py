@@ -1,6 +1,6 @@
 from mini_dm.sp_op import * 
 from morebs2.numerical_generator import prg__LCG
-
+from mini_dm.minmax_freq import * 
 import unittest
 
 ### lone file test 
@@ -32,11 +32,15 @@ class SuperPartitionOpMethods(unittest.TestCase):
             if p in qx: 
                 continue 
             qx.append(p) 
-
         assert len(qx) == 5 
+
         rx = flatten_setseq(sp2) 
         for qx_ in qx: 
             assert flatten_setseq(qx_) == rx 
+            fm = setseq_to_frequency_map(qx_)
+            vfm = set(fm.values())
+            assert vfm == {1}
+
         return 
     
 
