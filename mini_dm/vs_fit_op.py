@@ -243,6 +243,10 @@ class IOFit:
             q2 = self.unknownf(q)
         return (q,q2)
     
+    """
+    given 2 points `(i0,o0)` and `(i1,o1)`, calculates 
+    an <AffineDelta> that fits the two. 
+    """
     @staticmethod
     def io_pointpair_to_AffineDelta(i0,i1,o0,o1,ma_order):
         d0 = vs_dim(i0)
@@ -277,7 +281,15 @@ class IOFit:
             t = np.array(safe_div(o1,M)) 
             A2 = t - i1  
         return AffineDelta(M,A,ma_order)  
-    
+
+    """
+    calculates a super-partition P, consisting of subsets of 
+    indices, the indices corresponding to the (x_i,y_i) i/o 
+    samples. 
+
+    A super-partition contains all indices 0,1,...,(|x|-1), 
+    and an index i_j can exist in more than one subset. 
+    """
     def superpart_by_AffineDelta(self,ma_order): 
         l = len(self.x) 
         mhm_ = MAHypMem()

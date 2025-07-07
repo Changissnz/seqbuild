@@ -9,7 +9,6 @@ import unittest
 python3 -m tests.test_nvec_gen 
 """
 ###
-
 class PointSetGen__TypeAffineMethods(unittest.TestCase):
 
     def test__PointSetGen__TypeAffine_generate_points__case1(self): 
