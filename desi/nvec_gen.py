@@ -4,6 +4,14 @@ from morebs2.numerical_generator import prg_partition_for_sz__n_rounds
 
 DEFAULT_POINTSET_PARTSIZE_RATIO_RANGE = [0.15,0.23] 
 
+"""
+generates points using <AffineDelta> instances, which are in turn 
+created through `prg`. Ordering of points can correspond to that of 
+the <AffineDelta> sequence, or be unordered. 
+
+Main method is `generate_points`. Main variables are 
+`input_seq` and `point_seq`. 
+"""
 class PointSetGen__TypeAffine:
 
     def __init__(self,num_points,prg,ro_prg,ro_prg2,ro_prg3=None):
@@ -23,7 +31,11 @@ class PointSetGen__TypeAffine:
         # spare, used for output 
         self.ro_prg3 = ro_prg3
 
-        self.point_seq = [] 
+        # output sequence 
+        self.point_seq = []
+        # input sequence 
+        self.input_seq = [] 
+
         # information pertaining to `point_seq`
         # every element is (affine delta, list of indices)
         self.ad_seq = []
@@ -31,7 +43,9 @@ class PointSetGen__TypeAffine:
 
         self.prt = None 
 
-        self.gen_ad_parameters = [None,None]
+        # to set parameter values for 
+        #       [dim_range,ma_order,input_dim]
+        self.gen_ad_parameters = [None,None,None]
         self.set_new_gen_ad_parameters()
 
     def generate_n_partition(self,n):
@@ -53,13 +67,19 @@ class PointSetGen__TypeAffine:
         dim = int(modulo_in_range(self.prg(),DEFAULT_AFFINEVEC_DIMRANGE))
         dim_range = [dim,dim+1]
         ma_order = int((self.prg() % 2)) 
-        self.gen_ad_parameters = [dim_range,ma_order]
+
+        if int(self.prg() % 2): 
+            input_dim = dim 
+        else: 
+            input_dim = 0 
+
+        self.gen_ad_parameters = [dim_range,ma_order,input_dim]
 
     def clear(self): 
         self.point_seq.clear()
         self.ad_seq.clear() 
         self.ad_indices_seq.clear() 
-        self.gen_ad_parameters = [None,None]
+        self.gen_ad_parameters = [None,None,None]
 
     def one_new_AffineDelta(self):
         return AffineDelta.one_instance_(self.prg,\
@@ -72,13 +92,30 @@ class PointSetGen__TypeAffine:
         ad = self.one_new_AffineDelta()
         num_points = modulo_in_range(self.prg(), size_range)
         L = []
-        
+        L0 = [] 
         for _ in range(num_points):
-            q = ad.fit(self.prg())
+            x,q = self.one_io_pair(ad) 
             q = self.modulate_point(q) 
+            L0.append(x) 
             L.append(q) 
-        return ad,np.array(L) 
-
+        return ad,np.array(L0),np.array(L) 
+    
+    def one_io_pair(self,ad):
+        x,y = None,None 
+        if self.gen_ad_parameters[2] == 0: 
+            x = self.prg() 
+            y = ad.fit(x) 
+        else: 
+            x = [] 
+            for _ in range(self.gen_ad_parameters[2]): 
+                x.append(self.prg()) 
+            x = np.array(x) 
+            y = ad.fit(x) 
+        return x,y 
+         
+    """
+    main method 
+    """
     def generate_points(self,is_ordered:bool,clear_data:bool=True):
 
         if clear_data: 
@@ -96,6 +133,12 @@ class PointSetGen__TypeAffine:
 
         return px 
 
+    """
+    generates points that are not ordered according to the 
+    order of <AffineDelta>s in `ad_seq`. For every point to 
+    be generated, uses `prg` to select an <AffineDelta> A, and 
+    A is used to calculate the point. 
+    """
     def generate_points__unordered(self):
 
         s = len(self.ad_indices_seq)         
@@ -119,12 +162,19 @@ class PointSetGen__TypeAffine:
             
         return
     
+    """
+    generates points that are ordered according to the 
+    order of <AffineDelta>s in `ad_seq`. Ordering of 
+    <AffineDelta>s (in `ad_seq`) is spatially correlated 
+    to the ordering of elements in `input_seq` and `point_seq`.
+    """
     def generate_points_ordered(self):
         q = 0 
         lx = len(self.point_seq) 
         for p in self.prt:
-            ad,L = self.one_pointset([p,p+1]) 
+            ad,L0,L = self.one_pointset([p,p+1]) 
             self.ad_seq.append(ad) 
+            self.input_seq.extend(L0) 
             self.point_seq.extend(L) 
             self.ad_indices_seq.append([lx + x for x in range(q,q+p)]) 
             q = q + p 
