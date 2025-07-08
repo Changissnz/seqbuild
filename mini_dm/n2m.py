@@ -1,18 +1,23 @@
-from morebs2.matrix_methods import is_number,vector_to_string
-from intigers.extraneous import to_trinary_relation
+from morebs2.matrix_methods import is_number,vector_to_string,\
+    string_to_vector,euclidean_point_distance
+from intigers.extraneous import to_trinary_relation,zero_div0
 from collections import defaultdict
+from copy import deepcopy
 import numpy as np 
+
+euclidean_point_distance__zero = lambda p : euclidean_point_distance(p,np.zeros((len(p),)))
 
 class N2MAutocorrelator:
 
     def __init__(self,nm):
         self.nm = None 
         self.set_nm(nm) 
-        # subset of input indices -> 
-        # sign-change vector for output -> 
-        # number of times of occurrence given 
+        # sign-change vector of input -> 
+        # sign-change vector of output -> 
+        # frequency of occurrence given 
         #     sample inputs 
         self.ftable = defaultdict(None)
+        self.seqc = defaultdict(list)
         return 
     
     def set_nm(self,nm): 
@@ -24,6 +29,10 @@ class N2MAutocorrelator:
 
     """
     adds a pair of (x_i,e_i) to memory; e_i the error term for input x_i. 
+
+    Outputs a boolean for the status of normal relation b/t the 
+    input variables. This status is calculated through mean-based 
+    functions.     
     """
     def add(self,x0,x1,e0,e1):
 
@@ -37,7 +46,73 @@ class N2MAutocorrelator:
         if s0 not in self.ftable: 
             self.ftable[s0] = defaultdict(int) 
         self.ftable[s0][s1] += 1
+        self.seqc[s0].append(s1)
         return
+    
+    """
+    guesses the difference 
+        `e1 -e0`, 
+    `e1` error-term for `x1` and `e0` 
+    for `x0`. Guess is based on the 
+    """
+    def induce_derivative(self,x0,x1,cfunc1,cfunc2):   
+
+        r0 = to_trinary_relation(x1,x0)
+        ks = self.closest_keyset(r0)
+        
+        qs = [] 
+        for k in ks: 
+            sk = self.summarize_key(k)
+            o = cfunc1(sk) 
+            qs.append(o) 
+        return cfunc2(qs)
+    
+    def closest_keyset(self,d,dfunc=euclidean_point_distance__zero): 
+        qx = list(self.ftable.keys()) 
+
+        # case: empty memory 
+        if len(qx) == 0: return None 
+
+        qx = [string_to_vector(qx_,castFunc=int) for qx_ in qx] 
+        qx = [(qx_,dfunc(qx_)) for qx_ in qx]
+        qx2 = sorted(qx,key=lambda x:x[1]) 
+
+        rx = qx2.pop(0) 
+        lx = [rx[0]] 
+
+        stat = True 
+        while stat: 
+            if len(qx2) == 0: 
+                stat = False 
+                continue 
+            
+            rx2 = qx2.pop(0)
+            if np.round(rx[1] - rx2[1],5) == 0.0: 
+                lx.append(rx2[0]) 
+            else: 
+                stat = False 
+         
+        lx = [vector_to_string(lx_,castFunc=int) for lx_ in lx] 
+        return lx 
+        
+    def summarize_key(self,d,output_type:str="ratio"):
+        assert output_type in {"ratio","absolute"}
+
+        if type(d) != str: 
+            d = vector_to_string(d,int) 
+        q = self.ftable[d]
+        q = [(k,v) for k,v in q.items()]
+        q = sorted(q,key=lambda x:x[1])
+
+        if output_type == "absolute": 
+            return q 
+    
+        s = sum([q_[1] for q_ in q]) 
+        q = [(q_[0],zero_div0(q_[1],s)) for q_ in q] 
+        return q 
+
+    def cycle_patterns(self): 
+        return -1 
 
 """
 def f(vec,index):
@@ -47,3 +122,4 @@ class N2MVectorFunction:
 
     def __init__(self):
         return 
+    

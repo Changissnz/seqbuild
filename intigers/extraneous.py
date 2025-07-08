@@ -12,6 +12,14 @@ def to_trinary_relation(v1,v2):
     if v1 > v2: return 1 
     return -1 
 
+def trinary_vector_to_indexvalue_map(tv):
+    q = dict() 
+    for (i,t) in enumerate(tv): 
+        assert t in {-1,0,1} 
+        if t != 0:
+            q[i] = t 
+    return q 
+
 """
 vector-input version of method<to_trinary_relation>; 
 
