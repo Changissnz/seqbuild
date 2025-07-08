@@ -39,6 +39,10 @@ def default_cfunc1(S):
         return np.mean(S_) 
     return np.mean(S_,axis=0)
 
+def default_cfunc2(S): 
+    S = np.abs(S) 
+    return default_cfunc1(S) 
+
 """
 memory structure to contain values for qualities of 
 hypotheses on the mapping function between the input and 
@@ -86,7 +90,7 @@ class HypMem:
             self.partition.append({idn[0],idn[1]})
             self.info.append(info) 
 
-    def condense_error_term(self,cfunc1=default_cfunc1,cfunc2=default_cfunc1): 
+    def condense_error_term(self,cfunc1=default_cfunc2,cfunc2=default_cfunc2): 
         assert self.mem_type == "ERROR" 
         self.condensed_error1 = cfunc1(self.info) 
         if is_vector(self.condensed_error1):
@@ -105,7 +109,7 @@ class HypMem:
     `cfunc1,cfunc2` are used to possibly condense the multi-dimensional form 
     of the initial error. 
     """
-    def cmp_error(self,hm,cfunc1=default_cfunc1,cfunc2=default_cfunc1):
+    def cmp_error(self,hm,cfunc1=default_cfunc2,cfunc2=default_cfunc2):
         assert type(hm) == HypMem
         assert hm.mem_type == "ERROR" 
         assert hm.mem_type == self.mem_type 

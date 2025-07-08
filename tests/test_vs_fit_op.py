@@ -226,7 +226,6 @@ class IOFitMethods(unittest.TestCase):
         a = 43.0 
         ad = AffineDelta(m,a,0)
 
-
         h_ = ad.fit 
         q3 = iof.cmp_two_hyp(h0,h_) 
         assert np.all(q3[0][0] == 1)

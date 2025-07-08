@@ -319,7 +319,7 @@ class IOFit:
             hm0.add(i,dx) 
         return hm0 
 
-    def cmp_two_hyp(self,h0,h1,cfunc1=default_cfunc1,cfunc2=default_cfunc1):
+    def cmp_two_hyp(self,h0,h1,cfunc1=default_cfunc2,cfunc2=default_cfunc2):
         hm0 = self.error_by_hyp(h0)
         hm1 = self.error_by_hyp(h1) 
         return hm0.cmp_error(hm1,cfunc1,cfunc2),[hm0,hm1]
