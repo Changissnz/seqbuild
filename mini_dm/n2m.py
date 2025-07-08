@@ -1,11 +1,39 @@
 from morebs2.matrix_methods import is_number,vector_to_string,\
     string_to_vector,euclidean_point_distance
-from intigers.extraneous import to_trinary_relation,zero_div0
+from intigers.extraneous import to_trinary_relation,zero_div0,safe_div
 from collections import defaultdict
 from copy import deepcopy
 import numpy as np 
 
 euclidean_point_distance__zero = lambda p : euclidean_point_distance(p,np.zeros((len(p),)))
+
+"""
+NOTE: no argument check. 
+"""
+def N2M_AC__most_frequent_cfunc(x,assume_sorted:bool=True):
+    assert len(x) > 0 
+
+    if not assume_sorted: 
+        x = sorted(x,lambda y: y[1]) 
+    return x[-1]
+
+def N2M_AC__weighted_average_cfunc(x):
+
+    assert len(x) > 0 
+
+    # iterate through and collect weighted mean 
+    vx_ = []
+    s = 0 
+    for x_ in x:
+        vx = string_to_vector(x_[0],castFunc=int) 
+        vx2 = vx * x_[1] 
+        vx_.append(vx2) 
+        s += x_[1] 
+    vx_ = np.array(vx_) 
+    vx_ = np.sum(vx_,axis=0) 
+    vx_ = safe_div(vx_,s)
+    q = np.round(vx_,1)
+    return np.array(q,dtype=int)
 
 class N2MAutocorrelator:
 
@@ -55,7 +83,9 @@ class N2MAutocorrelator:
     `e1` error-term for `x1` and `e0` 
     for `x0`. Guess is based on the 
     """
-    def induce_derivative(self,x0,x1,cfunc1,cfunc2):   
+    def induce_derivative(self,x0,x1,\
+        cfunc1=N2M_AC__most_frequent_cfunc,\
+        cfunc2=N2M_AC__weighted_average_cfunc):   
 
         r0 = to_trinary_relation(x1,x0)
         ks = self.closest_keyset(r0)
