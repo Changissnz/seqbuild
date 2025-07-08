@@ -303,3 +303,23 @@ class IOFit:
                 ad = IOFit.io_pointpair_to_AffineDelta(x0,x1,y0,y1,ma_order)
                 hm_.add_to_partition((i,j),ad)
         return hm_ 
+
+    """
+    NOTE: method assumes all (x_i,y_i) pairs are of equal 
+          dimension to one another. 
+    """    
+    def error_by_hyp(self,h0): 
+        hm0 = HypMem(indices=[],info=[],mem_type="ERROR")
+        l = len(self.x)
+        
+        for i in range(l): 
+            x,y = self.io_sample(i)
+            q0 = h0(x)
+            dx = y - q0 
+            hm0.add(i,dx) 
+        return hm0 
+
+    def cmp_two_hyp(self,h0,h1,cfunc1=default_cfunc1,cfunc2=default_cfunc1):
+        hm0 = self.error_by_hyp(h0)
+        hm1 = self.error_by_hyp(h1) 
+        return hm0.cmp_error(hm1,cfunc1,cfunc2),[hm0,hm1]

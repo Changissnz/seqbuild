@@ -89,8 +89,8 @@ class HypMem:
     def condense_error_term(self,cfunc1=default_cfunc1,cfunc2=default_cfunc1): 
         assert self.mem_type == "ERROR" 
         self.condensed_error1 = cfunc1(self.info) 
-        if is_vector(self.info):
-            self.condensed_error2 = cfunc2(self.info) 
+        if is_vector(self.condensed_error1):
+            self.condensed_error2 = cfunc2(self.condensed_error1) 
     
     def c_error(self,i): 
         assert i in {1,2} 
@@ -100,6 +100,11 @@ class HypMem:
             self.condense_error_term() 
         return self.condensed_error1 if i == 1 else self.condensed_error2
 
+    """
+    compares error values with those of another <HypMem> `hm`. The functions 
+    `cfunc1,cfunc2` are used to possibly condense the multi-dimensional form 
+    of the initial error. 
+    """
     def cmp_error(self,hm,cfunc1=default_cfunc1,cfunc2=default_cfunc1):
         assert type(hm) == HypMem
         assert hm.mem_type == "ERROR" 
@@ -207,14 +212,11 @@ class MAHypMach:
         # iterate through and solve for every index 
         for (i,q_) in enumerate(q): 
             d_ = get_vs_element(d,i) 
-            #d_ = get_d(i)
             cv0_ = get_cv(0,i)            
             cv1_ = get_cv(1,i)
 
             x_ = get_vs_element(x,i)
-            #x_ = get_x(i) 
             y_ = get_vs_element(y,i)
-            #y_ = get_y(i)
             if q_ < d_: 
                 c1,c2 = cv0_ * d_,cv1_ * d_ 
 

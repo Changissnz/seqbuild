@@ -1,4 +1,4 @@
-from mini_dm.vs_fit_op import * 
+from .iofit_sample_z import * 
 from morebs2.numerical_generator import prg__LCG, prg__constant,prg__n_ary_alternator
 from morebs2.matrix_methods import equal_iterables
 from morebs2.search_space_iterator import * 
@@ -193,35 +193,8 @@ class IOFitMethods(unittest.TestCase):
         ad6_ = AffineDelta(MX,A,0) 
         assert ad6 == ad6_ 
 
-    def test__IOFit__superpart_by_AffineDelta__case1(self):
-
-        m = np.array([4,5,16,27,54,65]) 
-        a = 43.0 
-        ad = AffineDelta(m,a,0) 
-
-        bounds = np.array([[-1.0,1.0],\
-                        [2.0,7.0],\
-                            [14.0,22.0],\
-                            [-20,-2],\
-                            [55.,105.0],\
-                            [200.,490.]])
-
-        start_point = deepcopy(bounds[:,0])
-        column_order = np.arange(6)
-        ssi_hop = np.array([2,5,8,18,50,290]) 
-        cycle_on = True 
-        cycle_is = 0 
-
-        ssi = SearchSpaceIterator(bounds,start_point,\
-            column_order,ssi_hop,cycle_on,cycle_is)
-        xs,ys = [],[]
-
-        for i in range(100):
-            x = next(ssi) 
-            xs.append(x) 
-            ys.append(ad.fit(x))
-
-        iof = IOFit(xs,ys,None,None,None)
+    def test__IOFit__cmp_two_hypANDsuperpart_by_AffineDelta__case1(self): 
+        iof = IOFit_sample_z() 
         sprt = iof.superpart_by_AffineDelta(0)
 
         lx = set() 
@@ -230,6 +203,43 @@ class IOFitMethods(unittest.TestCase):
 
         assert lx == \
             {2, 4, 5, 100, 40, 8, 10, 16, 80, 50, 20}
+
+        h0,h1 = sprt.info[0],sprt.info[6]#14] 
+        h0,h1 = h0.fit,h1.fit 
+
+        q = iof.cmp_two_hyp(h0,h1)
+
+        m = np.array([4.5,5.1,16.9,25.5,59,62]) 
+        a = 46.0 
+        ad2 = AffineDelta(m,a,0) 
+
+        m = np.array([3,4.5,14.2,29.8,50,69.9]) 
+        a = 35.0 
+        ad3 = AffineDelta(m,a,0) 
+
+        h0,h1 = ad2.fit,ad3.fit 
+
+        q2 = iof.cmp_two_hyp(h0,h1)
+        assert np.all(q2[0][0] == np.array([-1, -1, -1, -1,  1, -1])) 
+
+        m = np.array([4,5,16,27,54,65]) 
+        a = 43.0 
+        ad = AffineDelta(m,a,0)
+
+
+        h_ = ad.fit 
+        q3 = iof.cmp_two_hyp(h0,h_) 
+        assert np.all(q3[0][0] == 1)
+
+        ad4 = deepcopy(ad) 
+        ad4.m += 1 
+        h2_ = ad4.fit 
+        q4 = iof.cmp_two_hyp(h_,h2_) 
+        assert np.all(q4[0][0] == -1) 
+
+        ad4.m -= 1 
+        q5 = iof.cmp_two_hyp(h_,h2_)
+        assert np.all(q5[0][0] == 0) 
 
 if __name__ == '__main__':
     unittest.main()
