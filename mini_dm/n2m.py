@@ -1,7 +1,8 @@
 from morebs2.matrix_methods import is_number,vector_to_string,\
     string_to_vector,euclidean_point_distance
 from intigers.extraneous import to_trinary_relation,zero_div0,safe_div,\
-    trinary_vector_invertible_difference
+    trinary_vector_invertible_difference,active_trinary_vector_indices,\
+    trinary_vector_intersection
 from collections import defaultdict
 from copy import deepcopy
 import numpy as np 
@@ -39,6 +40,38 @@ def N2M_AC__weighted_average_cfunc(x):
     vx_ = safe_div(vx_,s)
     q = np.round(vx_,1)
     return np.array(q,dtype=int)
+
+"""
+function calculates an integer i that is to be a divisor 
+(or a denumerator with 1 as numerator). Integer i is 
+0 if `x0` and `x_ref` do not intersect in active indices, 
+or the number `k` of active indices in `x0` not active in 
+`x_ref` [divisor of `k + 1`]. 
+
+The intent of this function is to penalize the fit score 
+of `x0` with `x_ref` if `x0` has extra active indices in 
+comparison with `x_ref`. 
+"""
+def N2M_AC__setdiff_weighted_support_(x0,x_ref): 
+
+    tv = trinary_vector_intersection(x0,x_ref)
+
+    if np.all(tv == 0): 
+        return 0 
+
+    ai0 = active_trinary_vector_indices(x0)
+    ai1 = active_trinary_vector_indices(x_ref) 
+    sz = len(ai0 - ai1) 
+    return sz + 1 
+
+def N2M_AC__setdiff_weighted_support_function(coeff=2.0): 
+    assert coeff > 0.0
+
+    def f(x0_,x_ref_):
+        q = N2M_AC__setdiff_weighted_support_(x0_,x_ref_) 
+        return q * coeff 
+
+    return f  
 
 class N2MAutocorrelator:
 
@@ -100,11 +133,43 @@ class N2MAutocorrelator:
         qs = [] 
         for k in ks: 
             sk = self.summarize_key_relation(r0,k,frequency_type)
-            #sk = self.summarize_key(k,frequency_type)
             o = cfunc1(sk) 
             qs.append(o) 
         return cfunc2(qs)
     
+    def induce_derivative_v2(self,x0,x1):
+        r0 = to_trinary_relation(x1,x0)
+        sfunc = N2M_AC__setdiff_weighted_support_function(2.0) 
+        q = np.zeros((len(r0),))
+
+        c = 0 
+        for k in self.ftable.keys():
+            v = self.sample_support_for_dvec(k,r0)
+            if is_number(v,set()): 
+                if v != 0:  
+                    c += 1
+            q += v 
+        return safe_div(q,c) 
+    
+    def sample_support_for_dvec(self,skey,d,coefficient = 2.0): 
+        vx = string_to_vector(skey,int) 
+        f = N2M_AC__setdiff_weighted_support_function(coeff=coefficient) 
+        q = f(vx,d) 
+        if q == 0: 
+            return 0  
+
+        qs = self.summarize_key_relation(d,vx,output_type="absolute")
+        if len(qs) == 0: 
+            assert False 
+
+        qs2 = [qs_[0] * qs_[1] for qs_ in qs]
+        s = sum([qs_[1] for qs_ in qs]) 
+
+        qs2 = np.array(qs2) 
+        qs2 = np.sum(qs2,axis=0) 
+        qs2 = safe_div(qs2,s)
+        return safe_div(qs2,q)
+
     """
     Calculates the set of closest elements to 
 

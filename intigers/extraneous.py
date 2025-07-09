@@ -95,6 +95,16 @@ def to_trinary_relation_v2(v1,v2,zero_feature:bool=False,abs_feature:bool=True):
         i += 1
     return np.array(lx) 
 
+def trinary_vector_intersection(v1,v2):
+    assert is_vector(v1) and is_vector(v2) 
+    assert len(v1) == len(v2) 
+    return v1 * v2 
+
+def active_trinary_vector_indices(v1,keys=(-1,1)): 
+    return set([i for (i,v1_) in \
+        enumerate(v1) if v1_ in keys])
+
+
 #------------------------- safe division 
 
 def safe_div(V1,V2):
