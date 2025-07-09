@@ -1,5 +1,5 @@
 import numpy as np 
-from morebs2.matrix_methods import is_vector,is_valid_range 
+from morebs2.matrix_methods import is_vector,is_number,is_valid_range 
 from morebs2.measures import zero_div 
 from morebs2.numerical_generator import modulo_in_range,\
     prg__LCG,euclidean_point_distance
@@ -19,6 +19,28 @@ def trinary_vector_to_indexvalue_map(tv):
         if t != 0:
             q[i] = t 
     return q 
+
+def trinary_diff(t0,t1,invertible_weight=0.5):
+    if set([t0,t1]) == {-1,1}: 
+        return invertible_weight
+    return int(abs(t0-t1))
+
+def trinary_vector_invertible_difference(v1,v2,invertible_weight): 
+    assert is_vector(v1) and is_vector(v2) 
+    assert len(v1) == len(v2) 
+    if is_vector(invertible_weight): 
+        assert len(invertible_weight) == len(v1)
+
+    def iw(i):
+        if is_number(invertible_weight): 
+            return invertible_weight
+        return invertible_weight[i] 
+
+    vx = []
+    for (i,(v1_,v2_)) in enumerate(zip(v1,v2)):
+        iw_ = iw(i)
+        vx.append(trinary_diff(v1_,v2_,iw_)) 
+    return vx 
 
 """
 vector-input version of method<to_trinary_relation>; 

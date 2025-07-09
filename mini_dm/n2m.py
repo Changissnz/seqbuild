@@ -1,11 +1,16 @@
 from morebs2.matrix_methods import is_number,vector_to_string,\
     string_to_vector,euclidean_point_distance
-from intigers.extraneous import to_trinary_relation,zero_div0,safe_div
+from intigers.extraneous import to_trinary_relation,zero_div0,safe_div,\
+    trinary_vector_invertible_difference
 from collections import defaultdict
 from copy import deepcopy
 import numpy as np 
 
 euclidean_point_distance__zero = lambda p : euclidean_point_distance(p,np.zeros((len(p),)))
+
+def invertible_trinary_euclidean_distance(v1,v2,invertible_weight=0.5): 
+    tvdiff = trinary_vector_invertible_difference(v1,v2,invertible_weight)
+    return euclidean_point_distance__zero(tvdiff)
 
 """
 NOTE: no argument check. 
@@ -85,26 +90,37 @@ class N2MAutocorrelator:
     """
     def induce_derivative(self,x0,x1,\
         cfunc1=N2M_AC__most_frequent_cfunc,\
-        cfunc2=N2M_AC__weighted_average_cfunc):   
+        cfunc2=N2M_AC__weighted_average_cfunc,\
+        frequency_type:str="absolute"):
+        assert frequency_type in {"ratio","absolute"}
 
         r0 = to_trinary_relation(x1,x0)
         ks = self.closest_keyset(r0)
         
         qs = [] 
         for k in ks: 
-            sk = self.summarize_key(k)
+            sk = self.summarize_key_relation(r0,k,frequency_type)
+            #sk = self.summarize_key(k,frequency_type)
             o = cfunc1(sk) 
             qs.append(o) 
         return cfunc2(qs)
     
-    def closest_keyset(self,d,dfunc=euclidean_point_distance__zero): 
+    """
+    Calculates the set of closest elements to 
+
+    d := stringized vector, difference vector between two inputs x1,x0 (x1-x0). 
+    dfunc := distance function F(point1,point2); usually set to 
+                `invertible_trinary_euclidean_distance` or 
+                `euclidean_point_distance`. 
+    """
+    def closest_keyset(self,d,dfunc=invertible_trinary_euclidean_distance): 
         qx = list(self.ftable.keys()) 
 
         # case: empty memory 
         if len(qx) == 0: return None 
 
         qx = [string_to_vector(qx_,castFunc=int) for qx_ in qx] 
-        qx = [(qx_,dfunc(qx_)) for qx_ in qx]
+        qx = [(qx_,dfunc(qx_,d)) for qx_ in qx]
         qx2 = sorted(qx,key=lambda x:x[1]) 
 
         rx = qx2.pop(0) 
@@ -124,7 +140,34 @@ class N2MAutocorrelator:
          
         lx = [vector_to_string(lx_,castFunc=int) for lx_ in lx] 
         return lx 
-        
+    
+    """
+    summarizes the delta errors for an input-difference vector `d`. 
+    The reference input-difference vector `rd` is used to calculate 
+    a trinary vector that contains information on the direct or inverse 
+    correlation between the reference and `d` on the matter of `d`'s 
+    information, index correlations to the m-space (output space). 
+    """
+    def summarize_key_relation(self,rd,d,output_type:str="ratio"):
+        q = safe_div(rd,d) 
+
+        sk = self.summarize_key(d,output_type) 
+        sk2 = []
+        for sk_ in sk: 
+            qv = string_to_vector(sk_[0]) 
+            qv = qv * q 
+            sk2.append((qv,sk_[1]))
+        return sk2 
+    
+    """
+    summarizes the m-space index correlations for 
+    input-difference vector `d`. If `output_type` 
+    is `absolute`, then output a sequence with 
+    elements of the form 
+        (error delta, frequency). 
+    If mode `ratio` is used instead, then the 
+    frequencies are normalized for a sum of 1.0. 
+    """
     def summarize_key(self,d,output_type:str="ratio"):
         assert output_type in {"ratio","absolute"}
 
