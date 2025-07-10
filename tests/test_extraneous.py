@@ -66,5 +66,21 @@ class ExtraneousMethods(unittest.TestCase):
         assert c == 90 
         return
 
+    def test__extraneous__trinary_vector_invertible_difference_case1(self):
+
+        v1 = np.array([3,0,0,1,-1,1,1,0])
+        v2 = np.array([-1,0,0,-1,-1,1,1,1])
+        invertible_weight = 0.5 
+
+        try: 
+            d = trinary_vector_invertible_difference(v1,v2,invertible_weight)
+        except: 
+            assert True 
+
+        v1[0] = 1 
+        d = trinary_vector_invertible_difference(v1,v2,invertible_weight)
+        dsol = np.array([0.5, 0, 0, 0.5, 0, 0, 0, 1])
+        assert np.all(d == dsol )
+
 if __name__ == '__main__':
     unittest.main()

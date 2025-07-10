@@ -48,6 +48,8 @@ class PointSetGen__TypeAffine:
         self.gen_ad_parameters = [None,None,None]
         self.set_new_gen_ad_parameters()
 
+        self.mod_output = True 
+
     def generate_n_partition(self,n):
         # calculate the number of sets for partition 
         r = modulo_in_range(self.prg(),\
@@ -180,6 +182,9 @@ class PointSetGen__TypeAffine:
             q = q + p 
 
     def modulate_point(self,p): 
+        if not self.mod_output: 
+            return p 
+
         if type(self.ro_prg3) == type(None):
             r1 = self.ro_prg() 
             r2 = self.ro_prg2() 

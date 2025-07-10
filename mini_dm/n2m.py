@@ -1,8 +1,8 @@
 from morebs2.matrix_methods import is_number,vector_to_string,\
     string_to_vector,euclidean_point_distance
-from intigers.extraneous import to_trinary_relation,zero_div0,safe_div,\
+from intigers.extraneous import to_trinary_relation_v2,zero_div0,safe_div,\
     trinary_vector_invertible_difference,active_trinary_vector_indices,\
-    trinary_vector_intersection
+    trinary_vector_intersection,round_to_trinary_vector
 from collections import defaultdict
 from copy import deepcopy
 import numpy as np 
@@ -31,7 +31,7 @@ def N2M_AC__weighted_average_cfunc(x):
     vx_ = []
     s = 0 
     for x_ in x:
-        vx = string_to_vector(x_[0],castFunc=int) 
+        vx = x_[0] 
         vx2 = vx * x_[1] 
         vx_.append(vx2) 
         s += x_[1] 
@@ -69,6 +69,7 @@ def N2M_AC__setdiff_weighted_support_function(coeff=2.0):
 
     def f(x0_,x_ref_):
         q = N2M_AC__setdiff_weighted_support_(x0_,x_ref_) 
+        if q == 1: return q 
         return q * coeff 
 
     return f  
@@ -103,8 +104,8 @@ class N2MAutocorrelator:
     def add(self,x0,x1,e0,e1):
 
         # get the trinary vector for 
-        r0 = to_trinary_relation(x1,x0)
-        r1 = to_trinary_relation(e1,e0)  
+        r0 = to_trinary_relation_v2(x1,x0,True,False)
+        r1 = to_trinary_relation_v2(e1,e0,True,False)  
 
         s0 = vector_to_string(r0,int)
         s1 = vector_to_string(r1,int)
@@ -127,31 +128,32 @@ class N2MAutocorrelator:
         frequency_type:str="absolute"):
         assert frequency_type in {"ratio","absolute"}
 
-        r0 = to_trinary_relation(x1,x0)
+        r0 = to_trinary_relation_v2(x1,x0,True,False)
         ks = self.closest_keyset(r0)
-        
+    
         qs = [] 
         for k in ks: 
-            sk = self.summarize_key_relation(r0,k,frequency_type)
+            k_ = string_to_vector(k,int)
+            sk = self.summarize_key_relation(r0,k_,frequency_type)
             o = cfunc1(sk) 
             qs.append(o) 
         return cfunc2(qs)
     
     def induce_derivative_v2(self,x0,x1):
-        r0 = to_trinary_relation(x1,x0)
-        sfunc = N2M_AC__setdiff_weighted_support_function(2.0) 
+        r0 = to_trinary_relation_v2(x1,x0,True,False)
         q = np.zeros((len(r0),))
 
         c = 0 
+        m = 0.0 
         for k in self.ftable.keys():
             v = self.sample_support_for_dvec(k,r0)
-            if is_number(v,set()): 
-                if v != 0:  
-                    c += 1
+            m = max(np.abs(v + [m])) 
             q += v 
-        return safe_div(q,c) 
-    
-    def sample_support_for_dvec(self,skey,d,coefficient = 2.0): 
+            c += 1 
+        q = safe_div(q,m)
+        return round_to_trinary_vector(q) 
+        
+    def sample_support_for_dvec(self,skey,d,coefficient = 1.0): 
         vx = string_to_vector(skey,int) 
         f = N2M_AC__setdiff_weighted_support_function(coeff=coefficient) 
         q = f(vx,d) 
@@ -161,13 +163,9 @@ class N2MAutocorrelator:
         qs = self.summarize_key_relation(d,vx,output_type="absolute")
         if len(qs) == 0: 
             assert False 
-
         qs2 = [qs_[0] * qs_[1] for qs_ in qs]
-        s = sum([qs_[1] for qs_ in qs]) 
-
         qs2 = np.array(qs2) 
         qs2 = np.sum(qs2,axis=0) 
-        qs2 = safe_div(qs2,s)
         return safe_div(qs2,q)
 
     """
@@ -206,6 +204,7 @@ class N2MAutocorrelator:
         lx = [vector_to_string(lx_,castFunc=int) for lx_ in lx] 
         return lx 
     
+    # TODO: test this. 
     """
     summarizes the delta errors for an input-difference vector `d`. 
     The reference input-difference vector `rd` is used to calculate 
@@ -219,9 +218,17 @@ class N2MAutocorrelator:
         sk = self.summarize_key(d,output_type) 
         sk2 = []
         for sk_ in sk: 
-            qv = string_to_vector(sk_[0]) 
-            qv = qv * q 
+            qv_ = string_to_vector(sk_[0]) 
+            active_qi = active_trinary_vector_indices(qv_)
+
+            qv = qv_ * q 
+            ## NOTE 
+            for i in range(len(qv)): 
+                if qv[i] == 0 and i in active_qi: 
+                    qv[i] = qv_[i]  
+            ## 
             sk2.append((qv,sk_[1]))
+        
         return sk2 
     
     """
@@ -246,7 +253,7 @@ class N2MAutocorrelator:
             return q 
     
         s = sum([q_[1] for q_ in q]) 
-        q = [(q_[0],zero_div0(q_[1],s)) for q_ in q] 
+        q = [(q_[0],safe_div(q_[1],s)) for q_ in q] 
         return q 
 
     def cycle_patterns(self): 

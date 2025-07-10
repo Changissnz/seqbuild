@@ -21,6 +21,7 @@ def trinary_vector_to_indexvalue_map(tv):
     return q 
 
 def trinary_diff(t0,t1,invertible_weight=0.5):
+    assert t0 in {-1,1,0} and t1 in {-1,1,0}
     if set([t0,t1]) == {-1,1}: 
         return invertible_weight
     return int(abs(t0-t1))
@@ -32,7 +33,7 @@ def trinary_vector_invertible_difference(v1,v2,invertible_weight):
         assert len(invertible_weight) == len(v1)
 
     def iw(i):
-        if is_number(invertible_weight): 
+        if is_number(invertible_weight,set()): 
             return invertible_weight
         return invertible_weight[i] 
 
@@ -40,7 +41,7 @@ def trinary_vector_invertible_difference(v1,v2,invertible_weight):
     for (i,(v1_,v2_)) in enumerate(zip(v1,v2)):
         iw_ = iw(i)
         vx.append(trinary_diff(v1_,v2_,iw_)) 
-    return vx 
+    return np.array(vx)  
 
 """
 vector-input version of method<to_trinary_relation>; 
@@ -104,10 +105,26 @@ def active_trinary_vector_indices(v1,keys=(-1,1)):
     return set([i for (i,v1_) in \
         enumerate(v1) if v1_ in keys])
 
+def round_trinary(t):
+    assert is_number(t,set())
+    X = [-1,0,1]
+    i = np.argmin([abs(x - t) for x in X])
+    return X[i] 
+
+
+def round_to_trinary_vector(V):
+    if is_number(V,set()): return round_trinary(V) 
+    return np.array([round_trinary(v_) for v_ in V]) 
 
 #------------------------- safe division 
 
 def safe_div(V1,V2):
+
+    if type(V1) == list: 
+        V1 = np.array(V1) 
+    if type(V2) == list: 
+        V2 = np.array(V2) 
+
     stat1 = is_vector(V1)
     stat2 = is_vector(V2) 
 
@@ -126,16 +143,19 @@ def safe_div(V1,V2):
     VX = None
     f = None 
 
-    if stat1:
-        VX = V1
-        f = lambda x: zero_div0(x,V2)
-    else: 
-        VX = V2
-        f = lambda x: zero_div0(V1,x) 
+    def value_at_index(i,is_x):
+        V = V1 if is_x else V2
 
+        if is_number(V,set()): 
+            return V 
+        return V[i]
+    
+    l = len(V1) if stat1 else len(V2) 
     q = [] 
-    for x in VX:
-        q.append(f(x))
+    for i in range(l): 
+        x = value_at_index(i,True)
+        y = value_at_index(i,False) 
+        q.append(zero_div0(x,y)) 
     return q 
     
 def safe_npint32_value(v):
