@@ -55,7 +55,7 @@ def paired_n2m_partition__orderedproportional(n,m):
         ni = ni + q
     return s 
 
-def n2m_delta_correlate(delta_x_relation,delta_err): 
+def n2m_delta_correlate__orderedproportional(delta_x_relation,delta_err): 
     assert is_vector(delta_x_relation)
     assert is_vector(delta_err)
 
@@ -200,7 +200,6 @@ class N2MAutocorrelator:
 
         r0 = to_trinary_relation_v2(x1,x0,True,False)
         ks = self.closest_keyset(r0)
-    
         qs = [] 
         for k in ks: 
             k_ = string_to_vector(k,int)
@@ -211,7 +210,7 @@ class N2MAutocorrelator:
     
     def induce_derivative_v2(self,x0,x1):
         r0 = to_trinary_relation_v2(x1,x0,True,False)
-        q = np.zeros((len(r0),))
+        q = np.zeros((self.nm[1],))
 
         c = 0 
         m = 0.0 
@@ -288,7 +287,7 @@ class N2MAutocorrelator:
         sk2 = []
         for sk_ in sk: 
             qv_ = string_to_vector(sk_[0]) 
-            qv = n2m_delta_correlate(np.array(q),qv_) 
+            qv = n2m_delta_correlate__orderedproportional(np.array(q),qv_) 
             sk2.append((qv,sk_[1]))
         return sk2 
     
