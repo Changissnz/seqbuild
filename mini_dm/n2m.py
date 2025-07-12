@@ -1,11 +1,10 @@
-from morebs2.matrix_methods import is_number,vector_to_string,\
+from morebs2.matrix_methods import vector_to_string,\
     string_to_vector,euclidean_point_distance,is_vector
-from intigers.extraneous import to_trinary_relation_v2,zero_div0,safe_div,\
+from intigers.extraneous import to_trinary_relation_v2,safe_div,\
     trinary_vector_invertible_difference,active_trinary_vector_indices,\
     trinary_vector_intersection,round_to_trinary_vector,round_trinary
 from collections import defaultdict
-from math import floor 
-import numpy as np 
+from .n2m_index import * 
 
 #---------------------------------- auxiliary methods with trinary 
 #---------------------------------- vectors and n2m index-mapping 
@@ -15,45 +14,6 @@ euclidean_point_distance__zero = lambda p : euclidean_point_distance(p,np.zeros(
 def invertible_trinary_euclidean_distance(v1,v2,invertible_weight=0.5): 
     tvdiff = trinary_vector_invertible_difference(v1,v2,invertible_weight)
     return euclidean_point_distance__zero(tvdiff)
-
-def assert_nm(nm): 
-    assert type(nm) == tuple and len(nm) == 2 
-    assert type(nm[0]) in {int,np.int32,np.int64}
-    assert type(nm[1]) in {int,np.int32,np.int64}
-    assert min(nm) >= 0 
-
-# NOTE: function is similar to <morebs2.HopPattern> 
-def proportional_index__n2m(n,m,ni):
-    assert type(n) in {int,np.int32,np.int64}
-    assert type(m) in {int,np.int32,np.int64}
-    assert n > 0
-    assert m > 0 
-    assert ni < n
-    r = zero_div0(ni,(n -1)) 
-    return int(round((m-1) * r))
-
-# NOTE: function is similar to <morebs2.HopPattern> 
-def paired_n2m_partition__orderedproportional(n,m):
-    assert type(n) in {int,np.int32,np.int64}
-    assert type(m) in {int,np.int32,np.int64}
-    assert n > 0
-    assert m > 0 
-
-    q = n / m 
-    n_ = [i for i in range(n)] 
-    s = []
-    ni = 0
-    for i in range(m):
-        ni2 = int(round(ni + q))
-        
-        ni_ = floor(ni)
-        if ni2 != ni_:  
-            qx = (set(n_[ni_:ni2]),{i})
-        else: 
-            qx = (set([n_[ni_]]),{i})
-        s.append(qx) 
-        ni = ni + q
-    return s 
 
 def n2m_delta_correlate__orderedproportional(delta_x_relation,delta_err): 
     assert is_vector(delta_x_relation)
@@ -68,16 +28,6 @@ def n2m_delta_correlate__orderedproportional(delta_x_relation,delta_err):
         t = round_trinary(qr) 
         q.append(t) 
     return np.array(q) * delta_err  
-
-class N2MIndexMapper:
-
-    def __init__(self,nm,n2m_map):
-        assert_nm(nm) 
-        self.nm = nm 
-        self.n2m_map = n2m_map 
-
-    def check_map(self): 
-        return -1 
 
 #----------------------------------------------------------------------------
 
@@ -145,7 +95,9 @@ def N2M_AC__setdiff_weighted_support_function(coeff=2.0):
 
 class N2MAutocorrelator:
 
-    def __init__(self,nm):
+    def __init__(self,nm,is_active_seqc:bool=True):
+        assert type(is_active_seqc) == bool 
+
         self.nm = None 
         self.set_nm(nm) 
         # sign-change vector of input -> 
@@ -154,6 +106,7 @@ class N2MAutocorrelator:
         #     sample inputs 
         self.ftable = defaultdict(None)
         self.seqc = defaultdict(list)
+        self.seq_stat = is_active_seqc
         return 
     
     def set_nm(self,nm): 
@@ -183,7 +136,9 @@ class N2MAutocorrelator:
         if s0 not in self.ftable: 
             self.ftable[s0] = defaultdict(int) 
         self.ftable[s0][s1] += 1
-        self.seqc[s0].append(s1)
+
+        if self.seq_stat: 
+            self.seqc[s0].append(s1)
         return
     
     """
@@ -318,13 +273,3 @@ class N2MAutocorrelator:
 
     def cycle_patterns(self): 
         return -1 
-
-"""
-def f(vec,index):
-    return 
-"""
-class N2MVectorFunction:
-
-    def __init__(self):
-        return 
-    

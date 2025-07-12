@@ -5,6 +5,7 @@ from morebs2 import aprng_gauge
 from morebs2.poly_struct import CEPoly 
 from morebs2.numerical_generator import modulo_in_range
 from .extraneous import safe_npint32_value
+from math import floor 
 
 # function used to help ensure variable does not exceed size expectations
 def BASE_CHECK_FOR_EXP(b,exp): 
