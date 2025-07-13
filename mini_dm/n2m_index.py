@@ -1,5 +1,5 @@
 from morebs2.poly_struct import CEPoly 
-from morebs2.matrix_methods import is_valid_range,vector_to_string
+from morebs2.matrix_methods import is_valid_range,vector_to_string,string_to_vector
 from morebs2.numerical_generator import modulo_in_range,prg_choose_n
 from math import floor 
 from intigers.extraneous import zero_div0
@@ -74,7 +74,11 @@ class N2MIndexMap:
         return -1 
     
     def degree_of_mindex(self,j):
-        return -1 
+        c = 0
+        for m in self.n2m_map: 
+            m1 = string_to_vector(m[1]) 
+            if j in m1: c += 1 
+        return c 
 
     def add(self,p): 
         assert type(p) == tuple and len(p) == 2 
@@ -169,7 +173,7 @@ class N2MIndexMapGen:
         ai = ai2 
 
         ccs = ClosestCombinationSearch(msize,ai,cfunc,num_attempts = 10 ** 5)
-        q,x = ccs.find() 
+        mset,x = ccs.find() 
 
         if x: 
             stat = self.add_relation(nset,mset)
