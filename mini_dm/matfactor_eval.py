@@ -1,4 +1,5 @@
 from collections import defaultdict 
+from .n2m_index import indexvalue_map_to_vector,vector_to_indexvalue_map
 import numpy as np 
 
 """
@@ -107,18 +108,6 @@ def columnfactor_identity(seq,num_rows):
         if b: 
             q.append(r1)
     return q 
-
-def indexvalue_map_to_vector(m,sz): 
-    l = np.zeros((sz,))
-    for k,v in m.items(): 
-        l[k] = v 
-    return l 
-
-def vector_to_indexvalue_map(v): 
-    d = {}
-    for (i,v_) in enumerate(v): 
-        d[i] = v_
-    return d 
 
 """
 Evaluates factors between rows of a matrix for 

@@ -1,11 +1,25 @@
 from morebs2.poly_struct import CEPoly 
 from morebs2.matrix_methods import is_valid_range,vector_to_string
-from morebs2.numerical_generator import modulo_in_range
+from morebs2.numerical_generator import modulo_in_range,prg_choose_n
 from math import floor 
 from intigers.extraneous import zero_div0
-from types import MethodType,FunctionType
 from collections import defaultdict
+from .csrch import * 
 import numpy as np 
+
+#--------------------------------------------------------------------------
+
+def indexvalue_map_to_vector(m,sz): 
+    l = np.zeros((sz,))
+    for k,v in m.items(): 
+        l[k] = v 
+    return l 
+
+def vector_to_indexvalue_map(v): 
+    d = {}
+    for (i,v_) in enumerate(v): 
+        d[i] = v_
+    return d 
 
 def assert_nm(nm): 
     assert type(nm) == tuple and len(nm) == 2 
@@ -60,8 +74,6 @@ class N2MIndexMap:
         return -1 
     
     def degree_of_mindex(self,j):
-#def prg_choose_n(Q,n,prg,is_unique_picker:bool=False):
-
         return -1 
 
     def add(self,p): 
@@ -114,16 +126,62 @@ class N2MIndexMapGen:
          return
     
     def one_new_relation(self):
-        return -1 
+        # mset is from available
+        ai = self.available_indices()
 
+        if len(ai) == 0: 
+            return None 
+
+        # nset is from static even distribution 
+        nsize = int(modulo_in_range(self.prg(),self.ns_range)) 
+        sx = [i for i in range(self.nm[0])]
+        nset = prg_choose_n(sx,nsize,self.prg,is_unique_picker=True)
+        nset = sorted(nset) 
+
+        msize = int(modulo_in_range(self.prg(),self.ms_range)) 
+        msize = min([msize,len(ai)])
+        mset_index = prg_choose_n([i for i in range(len(ai))],\
+            msize,self.prg,is_unique_picker=True) 
+        mset = sorted([ai[mi] for mi in mset_index])
+        mset = sorted(mset)
+
+        # try adding the generated (nset,mset)
+        stat = self.add_relation(nset,mset)
+        if stat: 
+            return (nset,mset) 
+
+        def cfunc(ms):
+            v1 = vector_to_string(nset) 
+            v2 = vector_to_string(ms) 
+            if (v1,v2) in self.n2m_imap.n2m_map: 
+                return False 
+            return True 
+
+        # iteration through combinations in search 
+        # of new (nset,mset) 
+        ai2 = []
+        q = set([i for i in range(msize)]) 
+        for mi in mset_index:
+            ai2.append(ai[mi]) 
+            q -= {mi}
+        q = sorted(q)
+        ai2.extend(q) 
+        ai = ai2 
+
+        ccs = ClosestCombinationSearch(msize,ai,cfunc,num_attempts = 10 ** 5)
+        q,x = ccs.find() 
+
+        if x: 
+            stat = self.add_relation(nset,mset)
+            return (nset,mset) 
+        return None 
+    
     def add_relation(self,nset,mset):
         stat = self.n2m_imap.add((nset,mset)) 
         if stat:
             for j in mset: 
                 self.dmap[j] += 1  
-            return  
-        
-        return
+        return stat 
     
     def available_indices(self):
         diffvec = []
