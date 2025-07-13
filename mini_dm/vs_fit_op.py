@@ -107,8 +107,8 @@ class IOFit:
         self.ma_order = ma_order 
         return
     
-    def init_MAHypMach(self):
-        dx = self.process_MAHypMach_on_auxvar()
+    def init_HypMach(self):
+        dx = self.process_HypMach_on_auxvar()
         ks = sorted(dx.keys())
 
         xs = [self.x[k] for k in ks] 
@@ -116,11 +116,11 @@ class IOFit:
         d = np.array([self.d[k] for k in ks])
         mem_type = "MA"
 
-        mhm = MAHypMach(xs,ys,d,mem_type=mem_type)
+        mhm = HypMach(xs,ys,d,mem_type=mem_type)
         mhm.load_ma_hyp_dict(dx,clear_mem=True)
         self.mahm = mhm 
 
-    def process_MAHypMach_on_auxvar(self): 
+    def process_HypMach_on_auxvar(self): 
         l = len(self.x) 
         dx = dict() 
         for i in range(l): 
@@ -134,7 +134,7 @@ class IOFit:
             
             d = get_vs_element(self.d,i)
             cv = get_vs_element(self.cv,i,cf=lambda x: type(x) == tuple) 
-            ad = MAHypMach.io_to_AffineDelta(x,y,d,cv,self.ma_dim,self.ma_order)
+            ad = HypMach.io_to_AffineDelta(x,y,d,cv,self.ma_dim,self.ma_order)
             dx[i] = ad 
         return dx 
 

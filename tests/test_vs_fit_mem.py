@@ -10,7 +10,7 @@ python -m tests.test_vs_fit_mem
 ###
 class VSFitMemMethods(unittest.TestCase):
 
-    def test__MAHypMach__io_to_AffineDelta__case1(self):
+    def test__HypMach__io_to_AffineDelta__case1(self):
         # case 1 
         a2 = np.array([500,1000,1000,1120,2500])
         mx = np.array([100,4200,2000,200,-700])
@@ -22,7 +22,7 @@ class VSFitMemMethods(unittest.TestCase):
         cv = ad6.cvec(x) 
 
         ma_dim = [5,5] 
-        adx = MAHypMach.io_to_AffineDelta(x,y,d,cv,ma_dim,ma_order=0)
+        adx = HypMach.io_to_AffineDelta(x,y,d,cv,ma_dim,ma_order=0)
 
         assert np.all(adx.fit(x) == y) 
 
@@ -35,7 +35,7 @@ class VSFitMemMethods(unittest.TestCase):
         d = ad7.abssum_diff(x) 
         ma_order = 0 
 
-        adx3 = MAHypMach.io_to_AffineDelta(x,y,d,cv,ma_dim,ma_order)
+        adx3 = HypMach.io_to_AffineDelta(x,y,d,cv,ma_dim,ma_order)
         assert np.all((adx3.fit(45) == adx.fit(45)) == \
             np.array([ True,  True,  True,  True, False]))
 
@@ -48,7 +48,7 @@ class VSFitMemMethods(unittest.TestCase):
         d = ad8.abssum_diff(x) 
         ma_order = 0 
 
-        adx4 = MAHypMach.io_to_AffineDelta(x,y,d,cv,ma_dim,ma_order)
+        adx4 = HypMach.io_to_AffineDelta(x,y,d,cv,ma_dim,ma_order)
         assert equal_iterables(adx4.m,ad8.m) 
         assert equal_iterables(adx4.a,ad8.a) 
 
@@ -58,7 +58,7 @@ class VSFitMemMethods(unittest.TestCase):
         y = ad9.fit(x) 
         d = ad9.abssum_diff(x) 
         ma_order = 1
-        adx5 = MAHypMach.io_to_AffineDelta(x,y,d,cv,ma_dim,ma_order)
+        adx5 = HypMach.io_to_AffineDelta(x,y,d,cv,ma_dim,ma_order)
         assert np.all(adx5.m == ad9.m)
         assert np.all(adx5.a == ad9.a)
 
@@ -71,7 +71,7 @@ class VSFitMemMethods(unittest.TestCase):
         d = ad10.abssum_diff(x) 
         ma_order = 0 
 
-        adx6 = MAHypMach.io_to_AffineDelta(x,y,d,cv,[0,0],ma_order)
+        adx6 = HypMach.io_to_AffineDelta(x,y,d,cv,[0,0],ma_order)
         assert adx6.m == mx 
         assert adx6.a == a2 
 
@@ -84,7 +84,7 @@ class VSFitMemMethods(unittest.TestCase):
         d = ad11.abssum_diff(x) 
         ma_order = 0 
 
-        adx7 = MAHypMach.io_to_AffineDelta(x,y,d,cv,[0,0],ma_order)
+        adx7 = HypMach.io_to_AffineDelta(x,y,d,cv,[0,0],ma_order)
         assert adx7.a == a2 
         assert adx7.m == mx 
 
@@ -97,7 +97,7 @@ class VSFitMemMethods(unittest.TestCase):
         d = ad12.abssum_diff(x) 
         ma_order = 0 
 
-        adx8 = MAHypMach.io_to_AffineDelta(x,y,d,cv,[0,0],ma_order)
+        adx8 = HypMach.io_to_AffineDelta(x,y,d,cv,[0,0],ma_order)
         assert adx8.a == a2 
         assert adx8.m == mx 
         return 

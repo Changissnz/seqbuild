@@ -242,6 +242,7 @@ class N2MAutocorrelator:
         sk2 = []
         for sk_ in sk: 
             qv_ = string_to_vector(sk_[0]) 
+            # NOTE: v v 
             qv = n2m_delta_correlate__orderedproportional(np.array(q),qv_) 
             sk2.append((qv,sk_[1]))
         return sk2 

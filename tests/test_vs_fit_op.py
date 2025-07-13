@@ -109,7 +109,7 @@ class IOFitMethods(unittest.TestCase):
             S2 |= {str(q)}
         assert len(S2) == len(X2)
 
-    def test__IOFit__init_MAHypMach__case1(self):
+    def test__IOFit__init_HypMach__case1(self):
         m,a = 34,np.array([4,-14.0,29,79.0])
         ad = AffineDelta(m,a,0)
 
@@ -139,7 +139,7 @@ class IOFitMethods(unittest.TestCase):
         ma_order = 0 
         iof.load_mahyp_auxvar(dx,cv,ma_dim,ma_order)
 
-        iof.init_MAHypMach()
+        iof.init_HypMach()
 
         assert iof.mahm.mhm.indices == [0,1,2,3,4]
         ix = iof.mahm.mhm.info[0]

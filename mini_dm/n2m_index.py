@@ -71,7 +71,14 @@ class N2MIndexMap:
         self.check_map() 
 
     def check_map(self): 
-        return -1 
+        for m in self.n2m_map:
+            m0,m1 = string_to_vector(m[0]),string_to_vector(m[1])
+            self.check_element(m0,m1)
+        return
+    
+    def check_element(self,m0,m1):
+        assert min(m0) >= 0 and max(m0) < self.nm[0] 
+        assert min(m1) >= 0 and max(m1) < self.nm[1] 
     
     def degree_of_mindex(self,j):
         c = 0
@@ -80,8 +87,12 @@ class N2MIndexMap:
             if j in m1: c += 1 
         return c 
 
+    """
+    main method 
+    """
     def add(self,p): 
         assert type(p) == tuple and len(p) == 2 
+        self.check_element(p[0],p[1])
         p0 = vector_to_string(sorted(p[0]))
         p1 = vector_to_string(sorted(p[1]))
 
@@ -92,7 +103,10 @@ class N2MIndexMap:
 
 
     def mindex_degree_map(self):
-        return -1 
+        d = {} 
+        for j in range(self.nm[1]): 
+            d[j] = self.degree_of_mindex(j) 
+        return d 
 
 class N2MIndexMapGen: 
 
@@ -129,25 +143,36 @@ class N2MIndexMapGen:
             self.dmap[i] = 0 
          return
     
+    """
+    main function 
+    """
+    def make(self): 
+        stat = True 
+        while stat: 
+            r = self.one_new_relation() 
+            if type(r) == type(None):
+                stat = False 
+        return
+    
     def one_new_relation(self):
         # mset is from available
         ai = self.available_indices()
 
         if len(ai) == 0: 
             return None 
-
-        # nset is from static even distribution 
-        nsize = int(modulo_in_range(self.prg(),self.ns_range)) 
-        sx = [i for i in range(self.nm[0])]
-        nset = prg_choose_n(sx,nsize,self.prg,is_unique_picker=True)
-        nset = sorted(nset) 
-
+        
         msize = int(modulo_in_range(self.prg(),self.ms_range)) 
         msize = min([msize,len(ai)])
         mset_index = prg_choose_n([i for i in range(len(ai))],\
             msize,self.prg,is_unique_picker=True) 
         mset = sorted([ai[mi] for mi in mset_index])
         mset = sorted(mset)
+
+        # nset is from static even distribution 
+        nsize = int(modulo_in_range(self.prg(),self.ns_range)) 
+        sx = [i for i in range(self.nm[0])]
+        nset = prg_choose_n(sx,nsize,self.prg,is_unique_picker=True)
+        nset = sorted(nset) 
 
         # try adding the generated (nset,mset)
         stat = self.add_relation(nset,mset)

@@ -1,4 +1,3 @@
-#from morebs2.aprng_gauge import * 
 from itertools import combinations
 from morebs2.matrix_methods import is_vector
 from types import MethodType,FunctionType
@@ -44,6 +43,9 @@ class ClosestCombinationSearch:
         self.l_term = False
         return 
     
+    """
+    main method 
+    """
     def find(self): 
         stat = True
         q,stat3 = None,False 

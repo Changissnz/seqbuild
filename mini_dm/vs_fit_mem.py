@@ -133,7 +133,7 @@ class HypMem:
         self.indices.clear() 
         self.info.clear() 
 
-class MAHypMach:
+class HypMach:
 
     def __init__(self,x,y,d=None,mem_type="MA"):
         assert not np.any(x == None)
