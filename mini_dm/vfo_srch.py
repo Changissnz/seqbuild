@@ -4,6 +4,7 @@ from intigers.mod_prng import *
 from morebs2.numerical_generator import prg__constant
 
 DEFAULT_VFO_AFFINEHYP_POINTSIZE_RANGE = [10,26]
+DEFAULT_DX_MULTIPLE_RANGE = [0.5,4]
 
 class VFOSearch(IOFit):
 
@@ -56,5 +57,33 @@ class VFOSearch(IOFit):
 
         self.init_HypMach_v2(ma_order,index0_vec,\
             index1_function)
-        
         return 
+    
+    def preproc_v2(self,ma_dim,ma_order): 
+        cv = (0.5,0.5) 
+        dx = self.default_dx_() 
+        self.load_mahyp_auxvar(dx,cv,ma_dim,ma_order) 
+        self.init_HypMach() 
+    
+    def default_dx_(self):
+        l = len(self.x)
+        dx_vec = [] 
+        for i in range(l): 
+            x,y = self.io_sample(i)
+            dx = y - x 
+
+            if is_number(dx):
+                r = [int(DEFAULT_DX_MULTIPLE_RANGE[0] * dx),\
+                     int(DEFAULT_DX_MULTIPLE_RANGE[1] * dx) + 1] 
+                x = modulo_in_range(self.prg(),r) 
+                dx_vec.append(x) 
+                continue
+
+            r0 = np.array(DEFAULT_DX_MULTIPLE_RANGE[0] * dx,\
+                dtype=int) 
+            r1 = np.array(DEFAULT_DX_MULTIPLE_RANGE[1] * dx + 1,\
+                dtype= int)
+            r = np.array([r0,r1]).T 
+            dx = [modulo_in_range(self.prg(),r_) for r_ in r] 
+            dx_vec.append(dx) 
+        return dx_vec 
