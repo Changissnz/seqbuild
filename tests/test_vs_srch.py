@@ -1,4 +1,4 @@
-from mini_dm.vfo_srch import * 
+from mini_dm.vs_srch import * 
 from desi.nvec_gen import * 
 from morebs2.numerical_generator import prg__LCG
 import unittest
@@ -21,18 +21,18 @@ def pointset_sample_z():
 
 ### lone file test 
 """
-python -m tests.test_vfo_srch 
+python -m tests.test_vs_srch 
 """
 ###
-class VFOSearchMethods(unittest.TestCase):
+class VSSearchMethods(unittest.TestCase):
 
     '''
     tests for crash-less execution
     '''
-    def test__VFOSearch__preproc(self):
+    def test__VSSearch__preproc(self):
         psg = pointset_sample_z() 
         prg = prg__LCG(16,7,5,3220) 
-        vs = VFOSearch(psg.input_seq,psg.point_seq,\
+        vs = VSSearch(psg.input_seq,psg.point_seq,\
             None,None,None,prg)         
         vs2 = deepcopy(vs) 
 

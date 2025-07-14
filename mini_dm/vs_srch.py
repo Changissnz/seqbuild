@@ -6,7 +6,7 @@ from morebs2.numerical_generator import prg__constant
 DEFAULT_VFO_AFFINEHYP_POINTSIZE_RANGE = [10,26]
 DEFAULT_DX_MULTIPLE_RANGE = [1.0,4]
 
-class VFOSearch(IOFit):
+class VSSearch(IOFit):
 
     def __init__(self,x,y,unknown_func,hypdiff_func,madiff_func,\
         prg):
@@ -27,6 +27,8 @@ class VFOSearch(IOFit):
         self.n2mac = N2MAutocorrelator((k0,k1),False)
         return
     
+    #------------------------- preprocessing methods 
+    #------------------------- for initial hypotheses 
     """
     hypotheses of <AffineDelta> instances 
     """
