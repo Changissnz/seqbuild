@@ -14,6 +14,8 @@ class VSSearch(IOFit):
         assert type(prg) in {FunctionType,MethodType}
         self.prg = prg 
         self.n2mac = None
+
+        self.soln = [] # 
         self.init_n2m_ac() 
 
     def init_n2m_ac(self):
@@ -89,3 +91,6 @@ class VSSearch(IOFit):
             dx = [modulo_in_range(self.prg(),r_) for r_ in r] 
             dx_vec.append(dx) 
         return dx_vec 
+    
+    def move_one_hyp(self): 
+        return -1 

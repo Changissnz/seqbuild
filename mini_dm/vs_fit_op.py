@@ -1,5 +1,4 @@
 from .vs_fit_mem import * 
-from types import MethodType,FunctionType
 from collections import defaultdict
 
 """

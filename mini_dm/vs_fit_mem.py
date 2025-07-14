@@ -1,4 +1,5 @@
 from .vs_fit import * 
+from types import MethodType,FunctionType
 from morebs2.matrix_methods import is_2dmatrix
 
 def get_vs_element(L,i,cf=lambda x: is_number(x,set())): 
@@ -27,6 +28,25 @@ class MADHyp(MADescriptor):
             md2.t_vec,md2.s_vec,md2.d_vec,\
             md2.ma_order)
 
+"""
+abstract representation of a general hypothesis, which 
+consists of 1 function `h` and the capability to update 
+`h` given 1 input value. 
+"""
+class GHyp: 
+
+    def __init__(self,h,dx_h):
+        assert type(h) in {MethodType,FunctionType}
+        assert type(dx_h) in {MethodType,FunctionType}
+        self.h = h 
+        self.dx_h = dx_h 
+        self.num_updates = 0 
+
+    def update(self,q,make_copy:bool=False):
+        g = self if not make_copy else deepcopy(self) 
+        g.h = g.dx_h.update(q) 
+        g.num_updates += 1 
+        return g 
 
 def default_cfunc1(S): 
     S_ = None 
@@ -51,13 +71,18 @@ output space.
 class HypMem: 
 
     def __init__(self,indices=[],info=[],mem_type="MA"):
-        assert mem_type in {"MA","VECQUAL","ERROR"}
+        assert mem_type in {"MA","VECQUAL","ERROR","GHYP"}
         self.indices = indices 
         self.info = info 
-        self.condensed_error1 = None 
-        self.condensed_error2 = None 
+
         self.mem_type = mem_type  
         for i in self.info: assert self.type_check(i)
+
+        # vars. used for `mem_type` := ERROR 
+        self.condensed_error1 = None 
+        self.condensed_error2 = None 
+
+        # vars used for partitioning of function set 
         self.partition = None 
 
     def type_check(self,element): 
@@ -65,6 +90,8 @@ class HypMem:
             return type(element) == AffineDelta
         elif self.mem_type == "VECQUAL": 
             return type(element) == MADHyp
+        elif self.mem_type == "GHYP": 
+            return type(element) == GHyp
         else: 
             return is_number(element,set()) or is_vector(element)
         
