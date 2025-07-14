@@ -146,15 +146,15 @@ class N2MIndexMapGen:
     """
     main function 
     """
-    def make(self): 
+    def make(self,attempts_per_relation:int = 10 ** 5): 
         stat = True 
         while stat: 
-            r = self.one_new_relation() 
+            r = self.one_new_relation(attempts_per_relation) 
             if type(r) == type(None):
                 stat = False 
         return
     
-    def one_new_relation(self):
+    def one_new_relation(self,num_attempts = 10** 5):
         # mset is from available
         ai = self.available_indices()
 
@@ -197,7 +197,7 @@ class N2MIndexMapGen:
         ai2.extend(q) 
         ai = ai2 
 
-        ccs = ClosestCombinationSearch(msize,ai,cfunc,num_attempts = 10 ** 5)
+        ccs = ClosestCombinationSearch(msize,ai,cfunc,num_attempts = num_attempts)
         mset,x = ccs.find() 
 
         if x: 

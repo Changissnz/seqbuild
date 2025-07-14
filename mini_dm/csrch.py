@@ -4,10 +4,10 @@ from types import MethodType,FunctionType
 import numpy as np
 
 """
-a "one-searcher" algorithm. Given a sequence 
-S, with the first k elements of S as S' being 
-the target combination, algorithm terminates 
-search upon reaching a combination C (ideally, 
+a "one-searcher" algorithm (outputs the first solution 
+it finds). Given a sequence S, with the first k elements 
+of S as S' being the target combination, algorithm 
+terminates search upon reaching a combination C (ideally, 
 this would be S) that satisfies conditional 
 function `cfunc`. The elements of S are ordered 
 in decreasing priority for being considered a 
