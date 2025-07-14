@@ -33,9 +33,19 @@ class VFOSearchMethods(unittest.TestCase):
         psg = pointset_sample_z() 
         prg = prg__LCG(16,7,5,3220) 
         vs = VFOSearch(psg.input_seq,psg.point_seq,\
-            None,None,None,prg) 
+            None,None,None,prg)         
+        vs2 = deepcopy(vs) 
+
         vs.preproc() 
-        assert True 
+        ma_dim = [0,8] 
+        ma_order = 0
+
+        vs2.preproc_v2(ma_dim,ma_order)
+        
+        assert len(vs.mahm.mhm.info) == 77 
+        assert len(vs2.mahm.mhm.info) == 96 
+
+        
 
 if __name__ == '__main__':
     unittest.main()

@@ -4,7 +4,7 @@ from intigers.mod_prng import *
 from morebs2.numerical_generator import prg__constant
 
 DEFAULT_VFO_AFFINEHYP_POINTSIZE_RANGE = [10,26]
-DEFAULT_DX_MULTIPLE_RANGE = [0.5,4]
+DEFAULT_DX_MULTIPLE_RANGE = [1.0,4]
 
 class VFOSearch(IOFit):
 
