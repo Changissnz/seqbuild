@@ -50,6 +50,10 @@ class PointSetGen__TypeAffine:
 
         self.mod_output = True 
 
+    def set_mod_output(self,b:bool): 
+        assert type(b) == bool 
+        self.mod_output = b 
+
     def generate_n_partition(self,n):
         # calculate the number of sets for partition 
         r = modulo_in_range(self.prg(),\

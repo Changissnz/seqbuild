@@ -164,6 +164,7 @@ class N2MAutocorrelator:
         return cfunc2(qs)
     
     def induce_derivative_v2(self,x0,x1):
+        ## NOTE: v v 
         r0 = to_trinary_relation_v2(x1,x0,True,False)
         q = np.zeros((self.nm[1],))
 

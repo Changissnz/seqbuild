@@ -1,0 +1,42 @@
+from mini_dm.vfo_srch import * 
+from desi.nvec_gen import * 
+from morebs2.numerical_generator import prg__LCG
+import unittest
+
+def pointset_sample_z():
+    num_points = 96
+    ro_prg = prg__constant((-3,1200))
+    ro_prg2 = prg__constant((-31,1101))
+
+    prg = prg__LCG(16,7,5,3220) 
+    psg = PointSetGen__TypeAffine(num_points,prg,ro_prg,ro_prg2)
+    psg.set_mod_output(False)
+
+    for _ in range(3):
+        psg.set_new_gen_ad_parameters() 
+
+    psg.generate_points(is_ordered=True,clear_data=False) 
+    return psg 
+
+
+### lone file test 
+"""
+python -m tests.test_vfo_srch 
+"""
+###
+class VFOSearchMethods(unittest.TestCase):
+
+    '''
+    tests for crash-less execution
+    '''
+    def test__VFOSearch__preproc(self):
+        psg = pointset_sample_z() 
+        prg = prg__LCG(16,7,5,3220) 
+        vs = VFOSearch(psg.input_seq,psg.point_seq,\
+            None,None,None,prg) 
+        vs.preproc() 
+        assert True 
+
+if __name__ == '__main__':
+    unittest.main()
+

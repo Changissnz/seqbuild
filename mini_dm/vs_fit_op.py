@@ -120,6 +120,15 @@ class IOFit:
         mhm.load_ma_hyp_dict(dx,clear_mem=True)
         self.mahm = mhm 
 
+    def init_HypMach_v2(self,ma_order,index0_vec=None,\
+        index1_function=None): 
+        hm = self.superpart_by_AffineDelta(ma_order,\
+            index0_vec=index0_vec,index1_function=index1_function)
+        
+        mhm = HypMach(self.x,self.y,None,mem_type="MA") 
+        mhm.mhm = hm 
+        self.mahm = mhm 
+
     def process_HypMach_on_auxvar(self): 
         l = len(self.x) 
         dx = dict() 
@@ -176,13 +185,26 @@ class IOFit:
             self.y.append(y_)
         return
 
+    """
+    return: 
+        (is input X null?,is input X partially null?),
+        (is input Y null?,is input Y partially null?)
+    """
     def io_stat(self):
         stat1 = type(self.x) != type(None)
         stat2 = type(self.y) != type(None)
 
         if stat1 and stat2: 
             assert len(self.x) == len(self.y)
-        return stat1,stat2 
+        
+        stat3,stat4 = True,True 
+        if stat1:
+            stat3 = None not in self.x 
+        
+        if stat2: 
+            stat4 = None not in self.y 
+
+        return (stat1,stat3),(stat2,stat4) 
     
     def load_hyp(self,hyp,ma_dim): 
         assert type(hyp) == MADHyp
@@ -249,8 +271,6 @@ class IOFit:
     """
     @staticmethod
     def io_pointpair_to_AffineDelta(i0,i1,o0,o1,ma_order):
-        d0 = vs_dim(i0)
-        d1 = vs_dim(i1)
 
         assert vs_dim(o0) == vs_dim(o1) 
 
@@ -292,13 +312,20 @@ class IOFit:
     A super-partition contains all indices 0,1,...,(|x|-1), 
     and an index i_j can exist in more than one subset. 
     """
-    def superpart_by_AffineDelta(self,ma_order): 
+    def superpart_by_AffineDelta(self,ma_order,\
+        index0_vec=None,index1_function=None): 
+
         l = len(self.x) 
+        if type(index0_vec) == type(None): 
+            index0_vec = [i for i in range(0,l)]  
+            index1_function = lambda x: [i for i in range(x+1,l)] 
+
         hm_ = HypMem()
         hm_.init_partition()
-        for i in range(l-1): 
+        for i in index0_vec: 
             x0,y0 = self.io_sample(i)
-            for j in range(i+1,l):
+            rx = index1_function(i) 
+            for j in rx: 
                 x1,y1 = self.io_sample(j) 
                 ad = IOFit.io_pointpair_to_AffineDelta(x0,x1,y0,y1,ma_order)
                 hm_.add_to_partition((i,j),ad)
