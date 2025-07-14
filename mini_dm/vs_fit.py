@@ -487,9 +487,10 @@ class AffineDelta:
     def to_ma_descriptor(self,p3,d_operator=lambda x,x2:x2 - x):
         return MADescriptor.from_AffineDelta(self,p3,d_operator)
 
-    # NOTE: unused
-    def delta(self,dfunc): 
-        m,a = dfunc(self.m,self.a) 
+    # NOTE: no argument-check 
+    def update(self,ma):
+        m = self.m + ma[0]  
+        a = self.a + ma[1] 
         return AffineDelta(m,a,self.ma_order)
     
     """

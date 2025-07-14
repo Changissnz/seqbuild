@@ -9,7 +9,7 @@ DEFAULT_DX_MULTIPLE_RANGE = [1.0,4]
 class VSSearch(IOFit):
 
     def __init__(self,x,y,unknown_func,hypdiff_func,madiff_func,\
-        prg):
+        prg,depth_range=10,depth_risk:float=1.0): 
         super().__init__(x,y,unknown_func,hypdiff_func,madiff_func)
         assert type(prg) in {FunctionType,MethodType}
         self.prg = prg 
@@ -92,5 +92,29 @@ class VSSearch(IOFit):
             dx_vec.append(dx) 
         return dx_vec 
     
-    def move_one_hyp(self): 
+    """
+    sets initial hypotheses using <AffineDelta> instances, then 
+    clears the variable `mahm`, used to calculate those <AffineDelta>
+    instances. 
+    """
+    def initial_hypotheses(self): 
+        if type(self.mahm.mhm.partition) != type(None): 
+            q = [(x,len(self.mahm.mhm.partition[i])) for (i,x) in \
+                enumerate(self.mahm.mhm.info)] 
+            q = sorted(q,key=lambda x: x[1],reverse=True) 
+            q = [q_[0] for q_ in q] 
+        else: 
+            q = self.mahm.mhm.info
+        
+        self.hmem = HypMem([],[],mem_type="GHYP") 
+        for (i,q_) in enumerate(q):
+            h = q_.fit 
+            dx_h = q_.update 
+            error_term = None
+            gh = GHyp(h,dx_h,error_term) 
+            self.hmem.add(i,gh) 
+        self.mahm = None 
+    
+    def move_one_hyp(self,i):
+        q = self.hmem.info[i] 
         return -1 

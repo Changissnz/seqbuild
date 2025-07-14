@@ -35,18 +35,26 @@ consists of 1 function `h` and the capability to update
 """
 class GHyp: 
 
-    def __init__(self,h,dx_h):
+    def __init__(self,h,dx_h,error_term=None):
         assert type(h) in {MethodType,FunctionType}
         assert type(dx_h) in {MethodType,FunctionType}
+        assert is_number(error_term) or is_vector(error_term) \
+            or type(error_term) == type(None)
+        
         self.h = h 
         self.dx_h = dx_h 
         self.num_updates = 0 
+        self.error_term = error_term
 
     def update(self,q,make_copy:bool=False):
         g = self if not make_copy else deepcopy(self) 
         g.h = g.dx_h.update(q) 
         g.num_updates += 1 
         return g 
+    
+    def load_error(self,et):
+        assert is_number(et) or is_vector(et) 
+        self.error_term = et 
 
 def default_cfunc1(S): 
     S_ = None 
@@ -76,6 +84,7 @@ class HypMem:
         self.info = info 
 
         self.mem_type = mem_type  
+        
         for i in self.info: assert self.type_check(i)
 
         # vars. used for `mem_type` := ERROR 
