@@ -90,9 +90,15 @@ class N2MIndexMap:
     """
     main method 
     """
-    def add(self,p): 
+    def add(self,p,assert_check:bool=True): 
         assert type(p) == tuple and len(p) == 2 
-        self.check_element(p[0],p[1])
+        if assert_check: 
+            self.check_element(p[0],p[1])
+        else: 
+            nm0 = min([self.nm[0],len(p[0])]) 
+            nm1 = max([self.nm[1],len(p[1])]) 
+            self.nm = (nm0,nm1) 
+
         p0 = vector_to_string(sorted(p[0]))
         p1 = vector_to_string(sorted(p[1]))
 
@@ -146,12 +152,15 @@ class N2MIndexMapGen:
     """
     main function 
     """
-    def make(self,attempts_per_relation:int = 10 ** 5): 
-        stat = True 
+    def make(self,num_iter:int= 10 ** 5,attempts_per_relation:int = 10 ** 5): 
+        stat = num_iter > 0 
         while stat: 
+            stat = num_iter > 0 
             r = self.one_new_relation(attempts_per_relation) 
             if type(r) == type(None):
-                stat = False 
+                stat = False
+            num_iter -= 1 
+
         return
     
     def one_new_relation(self,num_attempts = 10** 5):
@@ -206,7 +215,7 @@ class N2MIndexMapGen:
         return None 
     
     def add_relation(self,nset,mset):
-        stat = self.n2m_imap.add((nset,mset)) 
+        stat = self.n2m_imap.add((nset,mset),assert_check=False) 
         if stat:
             for j in mset: 
                 self.dmap[j] += 1  
