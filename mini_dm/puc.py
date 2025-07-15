@@ -1,9 +1,17 @@
-"Partitioned Uniform Crawler through a solution space"
 
 import numpy as np  
 from morebs2.numerical_generator import * 
 from morebs2.search_space_iterator import * 
 
+"""
+Partitioned Uniform Crawler through a solution space. 
+Crawler takes a positive real number `unit`, and searches 
+the vicinity of vector `v`. This search is comprised of 
+a sequence of vectors. Each element in this sequence is 
+formatted in the manner of `partition`, a variable that 
+specifies output dimensionality, before being outputted 
+by the `next(PUCrawler)` call. 
+"""
 class PUCrawler: 
 
     def __init__(self,v,unit:float,partition): 

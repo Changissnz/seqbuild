@@ -72,6 +72,19 @@ class VSTransform:
         return f 
 
 
+"""
+container that holds an input-output pair of sequences `x` and `y`. 
+Either the input `x` or output `y` can be unknown, although 
+implementation for that is lacking as of this point in development. 
+The `unknown_func` is usually the target function (to be found) 
+that outputs the correct y_i for an input x_i. Both the 
+`hypdiff_func` and `madiff_func` can be used as metrical functions 
+for solution improvement (reduction in error in x-to-y mapping).  
+
+Container is integrated with affine functions as the primary 
+function form to fit the points. As for other function forms, 
+those have to be user-specified. 
+"""
 class IOFit:
 
     def __init__(self,x,y,unknown_func,hypdiff_func,madiff_func):
