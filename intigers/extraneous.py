@@ -105,16 +105,22 @@ def active_trinary_vector_indices(v1,keys=(-1,1)):
     return set([i for (i,v1_) in \
         enumerate(v1) if v1_ in keys])
 
-def round_trinary(t):
+def round_trinary(t,is_distance_roundtype:bool=True):
     assert is_number(t,set())
-    X = [-1,0,1]
-    i = np.argmin([abs(x - t) for x in X])
-    return X[i] 
+
+    if is_distance_roundtype: 
+        X = [-1,0,1]
+        i = np.argmin([abs(x - t) for x in X])
+        return X[i] 
+    if t < 0: return -1
+    if t > 0: return 1 
+    return 0 
 
 
-def round_to_trinary_vector(V):
-    if is_number(V,set()): return round_trinary(V) 
-    return np.array([round_trinary(v_) for v_ in V]) 
+def round_to_trinary_vector(V,is_distance_roundtype:bool=True):
+    if is_number(V,set()): return round_trinary(V,is_distance_roundtype) 
+    return np.array([round_trinary(v_,is_distance_roundtype) \
+        for v_ in V]) 
 
 #------------------------- safe division 
 

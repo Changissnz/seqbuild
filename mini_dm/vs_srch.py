@@ -7,6 +7,19 @@ from morebs2.numerical_generator import prg__constant
 DEFAULT_VFO_AFFINEHYP_POINTSIZE_RANGE = [10,26]
 DEFAULT_DX_MULTIPLE_RANGE = [1.0,4]
 
+"""
+NOTE: elements of error_vector exist in continuum 
+    of negative through positive real numbers. 
+
+    Negative errors are prominently used in difference 
+    measures between calculated (expected) and actual. 
+"""
+def error_improvement_value(error_value):
+    q = error_value * -1
+    if is_number(q): 
+        return round_trinary(q,is_distance_roundtype=False)
+    return round_to_trinary_vector(q,is_distance_roundtype=False)
+
 class VSSearch(IOFit):
 
     def __init__(self,x,y,unknown_func,hypdiff_func,madiff_func,\
@@ -134,10 +147,9 @@ class VSSearch(IOFit):
 
     """
     applies changes to 1 hypothesis function to produce 
-    a sequence of candidate hypothesis functions. The 
+    a sequence of candidate hypothesis functions. These 
+    changes are in the form of the `uniform crawl`. The 
     objective is to minimize error. 
-
-    These changes are in the form of the `uniform crawl`
     """
     def move_one_hyp__uc(self,unit=10**-1,err_type:int=2): 
         assert err_type in {1,2}
@@ -153,10 +165,44 @@ class VSSearch(IOFit):
 
         z = np.zeros((len(vq),),dtype=float)
         uc = PUCrawler(z,unit,p)
+
+        self.move_one__loopty_doo(q,hm0,vq,\
+            uc.__next__,err_type)
+        return 
+    
+    """
+    moves by auto-correlation 
+    """
+    def move_one_hyp__ac(self,unit=10**-1,err_type:int=1): 
+        q = self.search_queue.pop(0) 
+        vq,_ = q.vector_form()
+
+        hm0 = self.error_by_hyp(q.h)
+        hm0.condense_error_term(cfunc1=default_cfunc2,\
+            cfunc2=default_cfunc1)
+        error_value = hm0.c_error(err_type)
+
+        target = self.error_improvement_value(error_value)
+        rdelta = self.rank_xdelta_by_target(target) 
+
+        l = int(round(self.depth_risk * len(rdelta)))
+        rdelta = rdelta[:l] 
+        rdelta = [r[0] * unit for r in rdelta] 
+
+        if len(rdelta) == 0: 
+            return 
+
+        pi = prg__iterable(rdelta,False)
+        self.move_one__loopty_doo(q,hm0,vq,pi,err_type)
+
+    """
+    loop process used by method<move_one_hyp__ac>,
+    method<move_one_hyp__uc>
+    """
+    def move_one__loopty_doo(self,q,hm0,vq,itrtr,err_type):
         stat = True 
-        
         while stat: 
-            n = next(uc) 
+            n = itrtr() 
             stat = not type(n) == type(None) 
             if not stat: continue 
 
@@ -167,14 +213,32 @@ class VSSearch(IOFit):
 
             # case: there is improvement in cost 
             if xr[1] == 1: 
-                #q_.num_updates -= 1 
                 q_.num_updates = 0 
 
             vq2,_ = q_.vector_form()
             self.update_soln_set(q_,hs[1].c_error(2))
             self.add_back_to_queue(q_) 
             self.n2mac.add_v2(vq,vq2,xr_)  
-        return 
+
+    def rank_xdelta_by_target(self,target):
+        rx = []
+
+        # choose a delta x 
+        for k in self.n2mac.ftable.keys(): 
+            kvec = string_to_vector(k) 
+
+            z = None 
+            if is_vector(kvec): 
+                z = np.zeros((len(kvec),)) 
+            else:
+                z = 0 
+            j_ = self.n2mac.induce_derivative_v2(\
+                z,kvec) 
+            tv = trinary_vector_invertible_difference(j_,target,\
+                invertible_weight=2.0) 
+            rx.append((kvec,tv)) 
+        rx = sorted(rx,key = lambda x: x[1])
+        return rx 
     
     def add_back_to_queue(self,q_): 
 

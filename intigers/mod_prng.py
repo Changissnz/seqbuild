@@ -22,17 +22,24 @@ class ModPRNGOutputter:
 
 class BasicIterableContainer:
 
-    def __init__(self,L):
+    def __init__(self,L,cycle_on:bool=True):
         assert type(L) == list
         assert len(L) > 0 
         self.l = L
+        self.cycle_on = cycle_on
         self.i = 0 
 
     def __next__(self):
+        if self.i >= len(self.l): 
+            return None
+
         q = self.l[self.i] 
-        self.i = (self.i + 1)  % len(self.l)
+        self.i = self.i + 1
+        
+        if self.cycle_on: 
+            self.i = self.i % len(self.l)
         return q 
 
-def prg__iterable(L):
-    bic = BasicIterableContainer(L)
+def prg__iterable(L,cycle_on:bool=True):
+    bic = BasicIterableContainer(L,cycle_on)
     return bic.__next__ 
