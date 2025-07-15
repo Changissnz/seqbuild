@@ -35,26 +35,31 @@ consists of 1 function `h` and the capability to update
 """
 class GHyp: 
 
-    def __init__(self,h,dx_h,error_term=None):
+    def __init__(self,h,dx_h,vf,error_term=None):
         assert type(h) in {MethodType,FunctionType}
         assert type(dx_h) in {MethodType,FunctionType}
+        assert type(vf) in {MethodType,FunctionType}
         assert is_number(error_term) or is_vector(error_term) \
             or type(error_term) == type(None)
         
         self.h = h 
         self.dx_h = dx_h 
+        self.vf = vf 
         self.num_updates = 0 
         self.error_term = error_term
 
-    def update(self,q,make_copy:bool=False):
+    def update(self,q,make_copy:bool=True): 
         g = self if not make_copy else deepcopy(self) 
-        g.h = g.dx_h.update(q) 
+        g.h,g.vf = g.dx_h.update(q) 
         g.num_updates += 1 
         return g 
     
     def load_error(self,et):
         assert is_number(et) or is_vector(et) 
         self.error_term = et 
+
+    def vector_form(self): 
+        return self.vf() 
 
 def default_cfunc1(S): 
     S_ = None 
@@ -106,8 +111,17 @@ class HypMem:
         
     def add(self,idn,info): 
         assert self.type_check(info) 
-        self.indices.append(idn) 
-        self.info.append(info)
+        if self.mem_type != "GHYP":
+            self.indices.append(idn) 
+            self.info.append(info)
+        else:
+            i = len(self.info) 
+            for (j,i2) in enumerate(self.info): 
+                if i2.error > info.error:
+                    i = j
+                    break 
+            self.info.insert(i,info) 
+
         return
 
     def init_partition(self):

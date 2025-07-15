@@ -418,8 +418,21 @@ class AffineDelta:
         q = int(is_vector(self.m))
         q2 = int(is_vector(self.a)) 
         return q,q2 
-
     
+    def vectorize(self):
+        t1,t2 = self.type() 
+        l = [] 
+        if not t1: 
+            l.append(self.m) 
+        else: 
+            l.extend(self.m)
+
+        if not t2: 
+            l.append(self.a)
+        else: 
+            l.extend(self.a) 
+        return np.array(l) 
+
     def __str__(self):
         s = "m: {}".format(self.m)
         s2 = "a: {}".format(self.a)

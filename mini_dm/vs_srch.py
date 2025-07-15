@@ -10,10 +10,16 @@ DEFAULT_DX_MULTIPLE_RANGE = [1.0,4]
 class VSSearch(IOFit):
 
     def __init__(self,x,y,unknown_func,hypdiff_func,madiff_func,\
-        prg,depth_range=10,depth_risk:float=1.0): 
+        prg,depth_rank=10,depth_risk:float=1.0): 
         super().__init__(x,y,unknown_func,hypdiff_func,madiff_func)
         assert type(prg) in {FunctionType,MethodType}
+        assert type(depth_rank) in {int,np.int32,np.int64} 
+        assert depth_rank > 0 
+        assert depth_risk >= 0.0 and depth_risk <= 1.0 
+
         self.prg = prg 
+        self.depth_rank = depth_rank
+        self.depth_risk = depth_risk
         self.n2mac = None
 
         self.soln = [] # 
@@ -110,11 +116,15 @@ class VSSearch(IOFit):
         self.hmem = HypMem([],[],mem_type="GHYP") 
         for (i,q_) in enumerate(q):
             h = q_.fit 
-            dx_h = q_.update 
-            error_term = None
-            gh = GHyp(h,dx_h,error_term) 
+
+            def dx_h(x): 
+                r = q_.update(x) 
+                return r.fit,r.vectorize 
+                        
+            vf = q_.vectorize 
+            hm0 = self.error_by_hyp(q.h) 
+            error_term = hm0.c_error(2) 
+
+            gh = GHyp(h,dx_h,vf,error_term) 
             self.hmem.add(i,gh) 
         self.mahm = None 
-    
-    def move_one_hyp__uc(self,i,unit=10**-1,is_err1:bool=True):
-        return -1 
