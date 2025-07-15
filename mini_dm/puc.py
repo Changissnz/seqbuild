@@ -35,7 +35,7 @@ class PUCrawler:
     def init_ssi(self):
         bx = self.v - self.unit 
         bx1 = self.v + self.unit
-        bx2 = bx1 + self.unit
+        bx2 = bx1 + self.unit + self.unit 
         bounds = np.array([bx,bx2]).T 
         startPoint = bounds[:,0] 
         columnOrder = [i for i in range(len(self.v))]  
