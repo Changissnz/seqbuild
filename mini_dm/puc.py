@@ -2,6 +2,7 @@
 
 import numpy as np  
 from morebs2.numerical_generator import * 
+from morebs2.search_space_iterator import * 
 
 class PUCrawler: 
 
@@ -16,6 +17,40 @@ class PUCrawler:
         else: 
             assert sum(partition) == len(v) 
 
+        self.v = v 
         self.unit = unit 
         self.partition = partition 
+        self.ssi = None 
+        self.init_ssi() 
         return 
+    
+    def init_ssi(self):
+        bx = self.v - self.unit 
+        bx1 = self.v + self.unit
+        bx2 = bx1 + self.unit
+        bounds = np.array([bx,bx2]).T 
+        startPoint = bounds[:,0] 
+        columnOrder = [i for i in range(len(self.v))]  
+        self.ssi = SearchSpaceIterator(bounds,startPoint,\
+            columnOrder,SSIHop=2,cycleOn=False,\
+            cycleIs=0)
+        
+    def __next__(self):
+        if self.ssi.reached_end(): return None
+        v = next(self.ssi) 
+        pv = PUCrawler.vec_to_partition_(v,self.partition) 
+        return pv 
+
+    @staticmethod 
+    def vec_to_partition_(v,p): 
+
+        if type(p) == tuple: 
+            return v.reshape(p) 
+
+        i = 0 
+        q = []
+        for p_ in p:
+            v_ = v[i:i+p_] 
+            q.append(deepcopy(v_)) 
+            i = i + p_ 
+        return q 
