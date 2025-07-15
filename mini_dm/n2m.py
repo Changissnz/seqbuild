@@ -127,8 +127,14 @@ class N2MAutocorrelator:
         assert len(e0) == self.nm[1] 
 
         # get the trinary vector for 
-        r0 = to_trinary_relation_v2(x1,x0,True,False)
         r1 = to_trinary_relation_v2(e1,e0,True,False)  
+        self.add_v2(x0,x1,r1)
+
+        return
+    
+    def add_v2(self,x0,x1,dx_err): 
+        r0 = to_trinary_relation_v2(x1,x0,True,False)
+        r1 = dx_err 
 
         s0 = vector_to_string(r0,int)
         s1 = vector_to_string(r1,int)
@@ -139,8 +145,7 @@ class N2MAutocorrelator:
 
         if self.seq_stat: 
             self.seqc[s0].append(s1)
-        return
-    
+
     """
     guesses the difference 
         `e1 -e0`, 

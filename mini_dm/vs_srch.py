@@ -1,5 +1,6 @@
 from .n2m import * 
 from .vs_fit_op import * 
+from .puc import * 
 from intigers.mod_prng import * 
 from morebs2.numerical_generator import prg__constant
 
@@ -115,6 +116,5 @@ class VSSearch(IOFit):
             self.hmem.add(i,gh) 
         self.mahm = None 
     
-    def move_one_hyp(self,i):
-        q = self.hmem.info[i] 
+    def move_one_hyp__uc(self,i,unit=10**-1,is_err1:bool=True):
         return -1 
