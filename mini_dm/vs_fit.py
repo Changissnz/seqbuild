@@ -14,6 +14,16 @@ from copy import deepcopy
 
 DEFAULT_AFFINEVEC_DIMRANGE = [3,17]
 
+#--------------------- methods for vector,singleton types 
+
+def get_vs_element(L,i,cf=lambda x: is_number(x,set())): 
+    if cf(L): return L 
+    return L[i] 
+
+def vs_dim(L): 
+    if is_number(L,set()): return 0  
+    return len(L)
+
 #-------------------- some methods on ratios 
 
 # parameters for method<ratio_vector> 
@@ -419,19 +429,28 @@ class AffineDelta:
         q2 = int(is_vector(self.a)) 
         return q,q2 
     
+    """
+    return: 
+    - vector of M+A values, corresponding M+A partition
+    """
     def vectorize(self):
         t1,t2 = self.type() 
         l = [] 
+        p = [] 
         if not t1: 
             l.append(self.m) 
+            p.append(1)
         else: 
             l.extend(self.m)
+            p.append(len(self.m))
 
         if not t2: 
             l.append(self.a)
+            p.append(1) 
         else: 
             l.extend(self.a) 
-        return np.array(l) 
+            p.append(len(self.a))
+        return np.array(l), p 
 
     def __str__(self):
         s = "m: {}".format(self.m)
@@ -505,6 +524,20 @@ class AffineDelta:
         m = self.m + ma[0]  
         a = self.a + ma[1] 
         return AffineDelta(m,a,self.ma_order)
+    
+    def update_v2(self,v):
+        d0 = vs_dim(self.m)
+        d1 = vs_dim(self.a) 
+        if d0 == 0: d0 += 1 
+        if d1 == 0: d1 += 1 
+
+        m = v[:d0] 
+        a = v[d0:]
+
+        if len(m) == 1: m = m[0] 
+        if len(a) == 1: a = a[0]
+        return self.update((m,a))  
+
     
     """
     outputs a new <AffineDelta> instance that is this 

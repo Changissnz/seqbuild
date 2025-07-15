@@ -2,14 +2,6 @@ from .vs_fit import *
 from types import MethodType,FunctionType
 from morebs2.matrix_methods import is_2dmatrix
 
-def get_vs_element(L,i,cf=lambda x: is_number(x,set())): 
-    if cf(L): return L 
-    return L[i] 
-
-def vs_dim(L): 
-    if is_number(L,set()): return 0  
-    return len(L)
-
 """
 a hypothesis container for an <MADescriptor> instance. 
 """
@@ -47,10 +39,16 @@ class GHyp:
         self.vf = vf 
         self.num_updates = 0 
         self.error_term = error_term
+        self.mark = False 
 
-    def update(self,q,make_copy:bool=True): 
-        g = self if not make_copy else deepcopy(self) 
-        g.h,g.vf = g.dx_h.update(q) 
+    def update(self,q,make_copy:bool=True):
+        if make_copy: 
+            g = deepcopy(self) 
+            g.mark = False 
+        else: 
+            g = self 
+
+        g.h,g.vf = g.dx_h(q) 
         g.num_updates += 1 
         return g 
     
@@ -117,7 +115,7 @@ class HypMem:
         else:
             i = len(self.info) 
             for (j,i2) in enumerate(self.info): 
-                if i2.error > info.error:
+                if i2.error_term > info.error_term:
                     i = j
                     break 
             self.info.insert(i,info) 

@@ -10,19 +10,23 @@ DEFAULT_DX_MULTIPLE_RANGE = [1.0,4]
 class VSSearch(IOFit):
 
     def __init__(self,x,y,unknown_func,hypdiff_func,madiff_func,\
-        prg,depth_rank=10,depth_risk:float=1.0): 
+        prg,depth_rank=10,depth_risk:float=1.0,sol_maxsize:int=1000): 
         super().__init__(x,y,unknown_func,hypdiff_func,madiff_func)
         assert type(prg) in {FunctionType,MethodType}
         assert type(depth_rank) in {int,np.int32,np.int64} 
         assert depth_rank > 0 
         assert depth_risk >= 0.0 and depth_risk <= 1.0 
+        assert type(sol_maxsize) in {int,np.int32,np.int64} 
+        assert sol_maxsize > 0 
 
         self.prg = prg 
         self.depth_rank = depth_rank
         self.depth_risk = depth_risk
+        self.sol_maxsize = sol_maxsize
         self.n2mac = None
 
         self.soln = [] # 
+        self.search_queue = []
         self.init_n2m_ac() 
 
     def init_n2m_ac(self):
@@ -105,26 +109,85 @@ class VSSearch(IOFit):
     instances. 
     """
     def initial_hypotheses(self): 
-        if type(self.mahm.mhm.partition) != type(None): 
-            q = [(x,len(self.mahm.mhm.partition[i])) for (i,x) in \
-                enumerate(self.mahm.mhm.info)] 
-            q = sorted(q,key=lambda x: x[1],reverse=True) 
-            q = [q_[0] for q_ in q] 
-        else: 
-            q = self.mahm.mhm.info
-        
+        q = self.mahm.mhm.info 
+
         self.hmem = HypMem([],[],mem_type="GHYP") 
         for (i,q_) in enumerate(q):
             h = q_.fit 
 
             def dx_h(x): 
-                r = q_.update(x) 
+                r = q_.update(x)  
                 return r.fit,r.vectorize 
                         
             vf = q_.vectorize 
-            hm0 = self.error_by_hyp(q.h) 
+            hm0 = self.error_by_hyp(q_.fit) 
             error_term = hm0.c_error(2) 
-
             gh = GHyp(h,dx_h,vf,error_term) 
             self.hmem.add(i,gh) 
+        self.search_queue = self.hmem.info 
         self.mahm = None 
+
+    #--------------------------------- hypothesis update methods     
+    # TODO: test this 
+
+    def move_one_hyp__uc(self,unit=10**-1,err_type:int=2): 
+        assert err_type in {1,2}
+        q = self.search_queue.pop(0) 
+
+        # case: depth exceeded
+        if q.num_updates >= self.depth_rank: 
+            return 
+
+        hm0 = self.error_by_hyp(q.h) 
+        vq,p = q.vector_form()
+        self.update_soln_set(q,hm0.c_error(2))
+
+        uc = PUCrawler(vq,unit,p)
+        stat = True 
+        
+        while stat: 
+            n = next(uc) 
+            stat = not type(n) == type(None) 
+            if not stat: continue 
+
+            q_ = q.update(n,make_copy=True)
+            xr,hs = self.cmp_move(hm0,q_.h) 
+
+            xr_ = xr[0] if err_type == 1 else xr[1] 
+            if xr[1] == 1: q_.num_updates -= 1 
+
+            vq2,_ = q_.vector_form()
+            self.update_soln_set(q_,hs[1].c_error(2))
+            self.n2mac.add_v2(vq,vq2,xr_)  
+        return 
+
+    def cmp_move(self,hm0,h1):
+        hm1 = self.error_by_hyp(h1) 
+        return hm0.cmp_error(hm1),[hm0,hm1]
+
+    def update_soln_set(self,h,error): 
+        # already considered 
+        if h.mark: 
+            return 
+        
+        h.error_term = error 
+        
+        h.mark = True 
+        if len(self.soln) == 0: 
+            self.soln.append((h,error))
+            self.soln_size_check()
+            return 
+        
+        i = len(self.soln)
+        for (j,s) in enumerate(self.soln):
+            if s[1] >= error:
+                i = j 
+                break 
+
+        self.soln.insert(i,(h,error))
+        self.soln_size_check()
+        return
+    
+    def soln_size_check(self):
+        while len(self.soln) > self.sol_maxsize: 
+            self.soln.pop(-1) 

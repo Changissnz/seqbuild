@@ -1,5 +1,5 @@
 from morebs2.matrix_methods import vector_to_string,\
-    string_to_vector,euclidean_point_distance,is_vector
+    string_to_vector,euclidean_point_distance,is_vector,is_number
 from intigers.extraneous import to_trinary_relation_v2,safe_div,\
     trinary_vector_invertible_difference,active_trinary_vector_indices,\
     trinary_vector_intersection,round_to_trinary_vector,round_trinary
@@ -135,6 +135,8 @@ class N2MAutocorrelator:
     def add_v2(self,x0,x1,dx_err): 
         r0 = to_trinary_relation_v2(x1,x0,True,False)
         r1 = dx_err 
+        if is_number(r1):
+            r1 = [r1] 
 
         s0 = vector_to_string(r0,int)
         s1 = vector_to_string(r1,int)
