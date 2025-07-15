@@ -10,7 +10,8 @@ DEFAULT_DX_MULTIPLE_RANGE = [1.0,4]
 class VSSearch(IOFit):
 
     def __init__(self,x,y,unknown_func,hypdiff_func,madiff_func,\
-        prg,depth_rank=10,depth_risk:float=1.0,sol_maxsize:int=1000): 
+        prg,depth_rank=10,depth_risk:float=1.0,sol_maxsize:int=1000,\
+        is_bfs_queue:bool=False): 
         super().__init__(x,y,unknown_func,hypdiff_func,madiff_func)
         assert type(prg) in {FunctionType,MethodType}
         assert type(depth_rank) in {int,np.int32,np.int64} 
@@ -23,6 +24,7 @@ class VSSearch(IOFit):
         self.depth_rank = depth_rank
         self.depth_risk = depth_risk
         self.sol_maxsize = sol_maxsize
+        self.is_bfs_queue = is_bfs_queue
         self.n2mac = None
 
         self.soln = [] # 
@@ -130,6 +132,13 @@ class VSSearch(IOFit):
     #--------------------------------- hypothesis update methods     
     # TODO: test this 
 
+    """
+    applies changes to 1 hypothesis function to produce 
+    a sequence of candidate hypothesis functions. The 
+    objective is to minimize error. 
+
+    These changes are in the form of the `uniform crawl`
+    """
     def move_one_hyp__uc(self,unit=10**-1,err_type:int=2): 
         assert err_type in {1,2}
         q = self.search_queue.pop(0) 
@@ -142,7 +151,8 @@ class VSSearch(IOFit):
         vq,p = q.vector_form()
         self.update_soln_set(q,hm0.c_error(2))
 
-        uc = PUCrawler(vq,unit,p)
+        z = np.zeros((len(vq),),dtype=float)
+        uc = PUCrawler(z,unit,p)
         stat = True 
         
         while stat: 
@@ -154,11 +164,32 @@ class VSSearch(IOFit):
             xr,hs = self.cmp_move(hm0,q_.h) 
 
             xr_ = xr[0] if err_type == 1 else xr[1] 
-            if xr[1] == 1: q_.num_updates -= 1 
+
+            # case: there is improvement in cost 
+            if xr[1] == 1: 
+                #q_.num_updates -= 1 
+                q_.num_updates = 0 
 
             vq2,_ = q_.vector_form()
             self.update_soln_set(q_,hs[1].c_error(2))
+            self.add_back_to_queue(q_) 
             self.n2mac.add_v2(vq,vq2,xr_)  
+        return 
+    
+    def add_back_to_queue(self,q_): 
+
+        # case: positive feedback, resort to default ordering 
+        if q_.num_updates == 0: 
+            i = 0 if not self.is_bfs_queue else len(self.search_queue) 
+            self.search_queue.insert(i,q_)
+            return 
+        
+        # case: draw number, using prg, that determines  
+        #       whether to add `q_` to beginning or end of queue. 
+        n = (self.prg() % 1000) / 1000.0
+        i = 0 if n < self.depth_risk \
+            else len(self.search_queue)
+        self.search_queue.insert(i,q_)
         return 
 
     def cmp_move(self,hm0,h1):

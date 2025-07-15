@@ -45,6 +45,22 @@ class VSSearchMethods(unittest.TestCase):
         assert len(vs.mahm.mhm.info) == 77 
         assert len(vs2.mahm.mhm.info) == 96 
 
+    def test__VSSearch__move_one_hyp__uc__case1(self):
+        psg = pointset_sample_z() 
+
+        prg = prg__LCG(16,7,5,3220) 
+        vs = VSSearch(psg.input_seq,psg.point_seq,\
+            None,None,None,prg,sol_maxsize=10) 
+
+        ma_dim = [0,8] 
+        ma_order = 0
+        vs.preproc_v2(ma_dim,ma_order) 
+
+        vs.initial_hypotheses() 
+        r = vs.move_one_hyp__uc(unit=100.,err_type=2)
+
+        assert len(vs.search_queue) == 607 
+        assert len(vs.soln) == 10 
         
 
 if __name__ == '__main__':
