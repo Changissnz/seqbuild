@@ -8,7 +8,7 @@ python -m tests.test_puc
 ###
 class PUCrawlerMethods(unittest.TestCase):
 
-    def test__PUCrawler__one_new_RCHAccuGen__v1__case1(self):
+    def test__PUCrawler__next__case1(self):
 
         v = np.zeros((12,)) 
         u = 0.05 
