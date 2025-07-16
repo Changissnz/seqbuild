@@ -280,7 +280,11 @@ class VSSearch(IOFit):
         if len(self.soln) == 0: 
             self.soln.append((h,error))
             self.soln_size_check()
-            return True 
+            return True
+
+        stat = self.already_exists(h)
+        if stat: 
+            return True  
         
         i = len(self.soln)
         for (j,s) in enumerate(self.soln):
@@ -292,7 +296,15 @@ class VSSearch(IOFit):
         stat = i < self.sol_maxsize 
         self.soln_size_check()
         return stat 
+
+    def already_exists(self,h):
+        for s in self.soln: 
+
+            if s[0].hstruct == h.hstruct: 
+                return True 
+        return False 
     
     def soln_size_check(self):
         while len(self.soln) > self.sol_maxsize: 
             self.soln.pop(-1) 
+    

@@ -62,6 +62,9 @@ class VSSearchMethods(unittest.TestCase):
         assert len(vs.search_queue) == 193,"got {}".format(len(vs.search_queue))
         assert len(vs.soln) == 10 
         assert len(vs.n2mac.ftable) == 1000 
+
+        q = set([v[1] for v in vs.soln])
+        assert len(q) == len(vs.soln) - 2,"len {}".format(len(q))
         
 
 if __name__ == '__main__':

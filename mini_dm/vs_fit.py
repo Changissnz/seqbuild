@@ -486,14 +486,15 @@ class AffineDelta:
             if not s0 and not s1: 
                 if np.round(np.abs(v1 - v2),5) != 0.0: 
                     return False 
-                return True  
-            return equal_iterables(v1,v2) 
+                return True 
+            return equal_iterables(v1,v2,roundPlaces=5) 
         
         stat0 = value_check("m")
         stat1 = value_check("a")
-        stat2 = True if getattr(self,"ma_order") == \
-            getattr(adx,"ma_order") else False         
-        return stat0 and stat1 and stat2 
+        stat2 = getattr(self,"ma_order") == \
+            getattr(adx,"ma_order")
+        qx = stat0 and stat1 and stat2 
+        return qx 
 
     #------------------------------------- i/o methods 
 
