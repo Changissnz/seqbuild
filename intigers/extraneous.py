@@ -27,6 +27,9 @@ def trinary_diff(t0,t1,invertible_weight=0.5):
     return int(abs(t0-t1))
 
 def trinary_vector_invertible_difference(v1,v2,invertible_weight): 
+    if type(v1) == list: v1 = np.array(v1) 
+    if type(v2) == list: v2 = np.array(v2) 
+
     assert is_vector(v1) and is_vector(v2) 
     assert len(v1) == len(v2) 
     if is_vector(invertible_weight): 

@@ -59,8 +59,9 @@ class VSSearchMethods(unittest.TestCase):
         vs.initial_hypotheses() 
         r = vs.move_one_hyp__uc(unit=100.,err_type=2)
 
-        assert len(vs.search_queue) == 607 
+        assert len(vs.search_queue) == 193,"got {}".format(len(vs.search_queue))
         assert len(vs.soln) == 10 
+        assert len(vs.n2mac.ftable) == 1000 
         
 
 if __name__ == '__main__':

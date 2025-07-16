@@ -32,8 +32,13 @@ class PUCrawlerMethods(unittest.TestCase):
                 break 
             s = s_ 
 
+        sol2 = [np.array([ 0.  , -0.05]), \
+            np.array([0.05, 0.  , 0.05, 0.  ]),\
+            np.array([ 0.05,  0.  , -0.05, -0.05, -0.05, -0.05])]
+
+
         for(i,q_) in enumerate(s):
-            assert np.all(q_ == -sol1[i]) 
+            assert np.all(q_ == sol2[i]) 
 
 
 if __name__ == '__main__':

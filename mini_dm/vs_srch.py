@@ -129,15 +129,9 @@ class VSSearch(IOFit):
         self.hmem = HypMem([],[],mem_type="GHYP") 
         for (i,q_) in enumerate(q):
             h = q_.fit 
-
-            def dx_h(x): 
-                r = q_.update(x)  
-                return r.fit,r.vectorize 
-                        
-            vf = q_.vectorize 
             hm0 = self.error_by_hyp(q_.fit) 
             error_term = hm0.c_error(2) 
-            gh = GHyp(h,dx_h,vf,error_term) 
+            gh = GHyp(h,q_,error_term) 
             self.hmem.add(i,gh) 
         self.search_queue = self.hmem.info 
         self.mahm = None 
@@ -151,7 +145,8 @@ class VSSearch(IOFit):
     changes are in the form of the `uniform crawl`. The 
     objective is to minimize error. 
     """
-    def move_one_hyp__uc(self,unit=10**-1,err_type:int=2): 
+    def move_one_hyp__uc(self,unit=10**-1,err_type:int=2,\
+        num_attempts:int=1000): 
         assert err_type in {1,2}
         q = self.search_queue.pop(0) 
 
@@ -167,7 +162,7 @@ class VSSearch(IOFit):
         uc = PUCrawler(z,unit,p)
 
         self.move_one__loopty_doo(q,hm0,vq,\
-            uc.__next__,err_type)
+            uc.__next__,err_type,num_attempts) 
         return 
     
     """
@@ -182,13 +177,11 @@ class VSSearch(IOFit):
             cfunc2=default_cfunc1)
         error_value = hm0.c_error(err_type)
 
-        target = self.error_improvement_value(error_value)
+        target = error_improvement_value(error_value)
         rdelta = self.rank_xdelta_by_target(target) 
-
         l = int(round(self.depth_risk * len(rdelta)))
         rdelta = rdelta[:l] 
         rdelta = [r[0] * unit for r in rdelta] 
-
         if len(rdelta) == 0: 
             return 
 
@@ -199,11 +192,16 @@ class VSSearch(IOFit):
     loop process used by method<move_one_hyp__ac>,
     method<move_one_hyp__uc>
     """
-    def move_one__loopty_doo(self,q,hm0,vq,itrtr,err_type):
+    def move_one__loopty_doo(self,q,hm0,vq,itrtr,err_type,\
+        num_attempts:int=1000):
         stat = True 
+        c = 0 
         while stat: 
             n = itrtr() 
-            stat = not type(n) == type(None) 
+            c += 1 
+
+            stat = not type(n) == type(None)
+            stat = stat and c <= num_attempts
             if not stat: continue 
 
             q_ = q.update(n,make_copy=True)
@@ -216,8 +214,10 @@ class VSSearch(IOFit):
                 q_.num_updates = 0 
 
             vq2,_ = q_.vector_form()
-            self.update_soln_set(q_,hs[1].c_error(2))
-            self.add_back_to_queue(q_) 
+            stat2 = self.update_soln_set(q_,hs[1].c_error(2))
+            if stat2: 
+                self.add_back_to_queue(q_) 
+
             self.n2mac.add_v2(vq,vq2,xr_)  
 
     def rank_xdelta_by_target(self,target):
@@ -225,18 +225,28 @@ class VSSearch(IOFit):
 
         # choose a delta x 
         for k in self.n2mac.ftable.keys(): 
-            kvec = string_to_vector(k) 
+            kvec = np.array(string_to_vector(k))
 
             z = None 
             if is_vector(kvec): 
                 z = np.zeros((len(kvec),)) 
             else:
                 z = 0 
+
             j_ = self.n2mac.induce_derivative_v2(\
                 z,kvec) 
-            tv = trinary_vector_invertible_difference(j_,target,\
-                invertible_weight=2.0) 
-            rx.append((kvec,tv)) 
+
+            if is_number(target) and not is_number(j_):
+                j_ = default_cfunc1(j_)
+
+            if is_number(j_) and is_number(target): 
+                tv = trinary_diff(j_,target,invertible_weight=2.0) 
+            else: 
+                tv = trinary_vector_invertible_difference(j_,target,\
+                    invertible_weight=2.0) 
+                tv = sum(tv)
+            rx.append((kvec,tv))
+
         rx = sorted(rx,key = lambda x: x[1])
         return rx 
     
@@ -263,15 +273,14 @@ class VSSearch(IOFit):
     def update_soln_set(self,h,error): 
         # already considered 
         if h.mark: 
-            return 
+            return False 
         
         h.error_term = error 
-        
         h.mark = True 
         if len(self.soln) == 0: 
             self.soln.append((h,error))
             self.soln_size_check()
-            return 
+            return True 
         
         i = len(self.soln)
         for (j,s) in enumerate(self.soln):
@@ -280,8 +289,9 @@ class VSSearch(IOFit):
                 break 
 
         self.soln.insert(i,(h,error))
+        stat = i < self.sol_maxsize 
         self.soln_size_check()
-        return
+        return stat 
     
     def soln_size_check(self):
         while len(self.soln) > self.sol_maxsize: 

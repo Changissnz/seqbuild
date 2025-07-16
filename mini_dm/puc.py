@@ -35,12 +35,12 @@ class PUCrawler:
     def init_ssi(self):
         bx = self.v - self.unit 
         bx1 = self.v + self.unit
-        bx2 = bx1 + self.unit + self.unit 
+        bx2 = bx1 + self.unit 
         bounds = np.array([bx,bx2]).T 
         startPoint = bounds[:,0] 
         columnOrder = [i for i in range(len(self.v))]  
         self.ssi = SearchSpaceIterator(bounds,startPoint,\
-            columnOrder,SSIHop=2,cycleOn=False,\
+            columnOrder,SSIHop=3,cycleOn=False,\
             cycleIs=0)
         
     def __next__(self):

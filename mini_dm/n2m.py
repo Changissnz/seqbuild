@@ -1,6 +1,6 @@
 from morebs2.matrix_methods import vector_to_string,\
     string_to_vector,euclidean_point_distance,is_vector,is_number
-from intigers.extraneous import to_trinary_relation_v2,safe_div,\
+from intigers.extraneous import trinary_diff,to_trinary_relation_v2,safe_div,\
     trinary_vector_invertible_difference,active_trinary_vector_indices,\
     trinary_vector_intersection,round_to_trinary_vector,round_trinary
 from collections import defaultdict
@@ -179,6 +179,7 @@ class N2MAutocorrelator:
         m = 0.0 
         for k in self.ftable.keys():
             v = self.sample_support_for_dvec(k,r0)
+            if is_number(v): v = [v] 
             m = max(np.abs(v + [m])) 
             q += v 
             c += 1 

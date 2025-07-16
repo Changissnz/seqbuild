@@ -1,5 +1,6 @@
 from .vs_fit import * 
 from types import MethodType,FunctionType
+#from inspect import isclass
 from morebs2.matrix_methods import is_2dmatrix
 
 """
@@ -27,16 +28,18 @@ consists of 1 function `h` and the capability to update
 """
 class GHyp: 
 
-    def __init__(self,h,dx_h,vf,error_term=None):
+    def __init__(self,h,hstruct,error_term=None):
         assert type(h) in {MethodType,FunctionType}
-        assert type(dx_h) in {MethodType,FunctionType}
-        assert type(vf) in {MethodType,FunctionType}
+        #assert type(dx_h) in {MethodType,FunctionType}
+        #assert isclass(hstruct), "got {}".format(hstruct)
+        #assert type(vf) in {MethodType,FunctionType}
         assert is_number(error_term) or is_vector(error_term) \
             or type(error_term) == type(None)
         
         self.h = h 
-        self.dx_h = dx_h 
-        self.vf = vf 
+        #self.dx_h = dx_h 
+        #self.vf = vf 
+        self.hstruct = hstruct 
         self.num_updates = 0 
         self.error_term = error_term
         self.mark = False 
@@ -48,7 +51,8 @@ class GHyp:
         else: 
             g = self 
 
-        g.h,g.vf = g.dx_h(q) 
+        g.hstruct = g.hstruct.update_v2(q)
+        g.h = g.hstruct.fit  
         g.num_updates += 1 
         return g 
     
@@ -57,7 +61,7 @@ class GHyp:
         self.error_term = et 
 
     def vector_form(self): 
-        return self.vf() 
+        return self.hstruct.vectorize() 
 
 def default_cfunc1(S): 
     S_ = None 
