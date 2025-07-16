@@ -199,13 +199,17 @@ class VSSearch(IOFit):
         vq,_ = q.vector_form()
         hm0 = self.error_by_hyp(q.h)
 
-        prg = prg__single_to_trinary_vector(self.prg,len(vq)) 
+        x = prg__single_to_trinary_vector(self.prg,len(vq)) 
+
+        def prg(): 
+            return x() * unit 
+
         self.move_one__loopty_doo(q,hm0,vq,prg,err_type,num_attempts)
         return
 
     """
     loop process used by method<move_one_hyp__ac>,
-    method<move_one_hyp__uc>
+    method<move_one_hyp__uc>,method<move_one_hyp__prg_guided>. 
     """
     def move_one__loopty_doo(self,q,hm0,vq,itrtr,err_type,\
         num_attempts:int=1000):
@@ -234,6 +238,10 @@ class VSSearch(IOFit):
                 self.add_back_to_queue(q_) 
 
             self.n2mac.add_v2(vq,vq2,xr_)  
+
+        stat2 = self.update_soln_set(q,hm0.c_error(2))
+        if stat2: 
+            self.add_back_to_queue(q) 
 
     def rank_xdelta_by_target(self,target):
         rx = []
