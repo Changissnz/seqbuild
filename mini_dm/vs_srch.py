@@ -3,6 +3,7 @@ from .vs_fit_op import *
 from .puc import * 
 from intigers.mod_prng import * 
 from morebs2.numerical_generator import prg__constant
+from intigers.extraneous import prg__single_to_trinary_vector
 
 DEFAULT_VFO_AFFINEHYP_POINTSIZE_RANGE = [10,26]
 DEFAULT_DX_MULTIPLE_RANGE = [1.0,4]
@@ -187,6 +188,20 @@ class VSSearch(IOFit):
 
         pi = prg__iterable(rdelta,False)
         self.move_one__loopty_doo(q,hm0,vq,pi,err_type)
+
+    """
+    moves using output from the pseudo-random number generator 
+    `prg`. 
+    """
+    def move_one_hyp__prg_guided(self,unit=10**-1,err_type:int=1,\
+        num_attempts:int=1000): 
+        q = self.search_queue.pop(0) 
+        vq,_ = q.vector_form()
+        hm0 = self.error_by_hyp(q.h)
+
+        prg = prg__single_to_trinary_vector(self.prg,len(vq)) 
+        self.move_one__loopty_doo(q,hm0,vq,prg,err_type,num_attempts)
+        return
 
     """
     loop process used by method<move_one_hyp__ac>,
