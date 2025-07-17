@@ -237,7 +237,7 @@ class VSSearch(IOFit):
             if stat2: 
                 self.add_back_to_queue(q_) 
 
-            self.n2mac.add_v2(vq,vq2,xr_)  
+            self.n2mac.add_v2(vq,vq2,xr_,True)   
 
         stat2 = self.update_soln_set(q,hm0.c_error(2))
         if stat2: 

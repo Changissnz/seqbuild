@@ -105,6 +105,11 @@ class N2MAutocorrelator:
         # frequency of occurrence given 
         #     sample inputs 
         self.ftable = defaultdict(None)
+        # similar to `ftable`, except the output is 
+        # weight (instead of frequency). Used to specify 
+        # on distance (instead of relative GLEq). 
+        # element := (average,number of samples)
+        self.wtable = defaultdict(None)
         self.seqc = defaultdict(list)
         self.seq_stat = is_active_seqc
         return 
@@ -120,7 +125,7 @@ class N2MAutocorrelator:
     input variables. This status is calculated through mean-based 
     functions.     
     """
-    def add(self,x0,x1,e0,e1):
+    def add(self,x0,x1,e0,e1,save_weight:bool=False):
         assert len(x0) == len(x1) 
         assert len(x0) == self.nm[0] 
         assert len(e0) == len(e1) 
@@ -128,22 +133,39 @@ class N2MAutocorrelator:
 
         # get the trinary vector for 
         r1 = to_trinary_relation_v2(e1,e0,True,False)  
-        self.add_v2(x0,x1,r1)
+        self.add_v2(x0,x1,r1,save_weight)
 
         return
     
-    def add_v2(self,x0,x1,dx_err): 
+    def add_v2(self,x0,x1,dx_err,save_weight:bool=False): 
         r0 = to_trinary_relation_v2(x1,x0,True,False)
         r1 = dx_err 
+        dx_err2 = None 
         if is_number(r1):
             r1 = [r1] 
+            dx_err2 = r1
+        else: 
+            dx_err2 = default_cfunc2(r1) 
 
         s0 = vector_to_string(r0,int)
         s1 = vector_to_string(r1,int)
 
         if s0 not in self.ftable: 
             self.ftable[s0] = defaultdict(int) 
+            self.wtable[s0] = defaultdict(None)
+
         self.ftable[s0][s1] += 1
+
+        if save_weight:
+            if s1 in self.wtable[s0]:
+                s_ = self.wtable[s0][s1] 
+                s2 = s_[0] * s_[1] 
+                s2 += dx_err2 
+                s2_ = s_[1] + 1 
+                s2 /= s2_ 
+                self.wtable[s0][s1] = (s2,s2_) 
+            else: 
+                self.wtable[s0][s1] = (dx_err2,1)
 
         if self.seq_stat: 
             self.seqc[s0].append(s1)
