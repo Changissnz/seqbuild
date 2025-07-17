@@ -107,8 +107,8 @@ class N2MAutocorrelator:
         self.ftable = defaultdict(None)
         # similar to `ftable`, except the output is 
         # weight (instead of frequency). Used to specify 
-        # on distance (instead of relative GLEq). 
-        # element := (average,number of samples)
+        # on distance (instead of relative GLEq);  
+        # weight typically set by mean function.
         self.wtable = defaultdict(None)
         self.seqc = defaultdict(list)
         self.seq_stat = is_active_seqc
@@ -158,14 +158,11 @@ class N2MAutocorrelator:
 
         if save_weight:
             if s1 in self.wtable[s0]:
-                s_ = self.wtable[s0][s1] 
-                s2 = s_[0] * s_[1] 
-                s2 += dx_err2 
-                s2_ = s_[1] + 1 
-                s2 /= s2_ 
-                self.wtable[s0][s1] = (s2,s2_) 
+                q = (self.ftable[s0][s1] - 1) * self.wtable[s0][s1] 
+                q = (q + dx_err2) / self.ftable[s0][s1]
+                self.wtable[s0][s1] = q 
             else: 
-                self.wtable[s0][s1] = (dx_err2,1)
+                self.wtable[s0][s1] = dx_err2 
 
         if self.seq_stat: 
             self.seqc[s0].append(s1)
