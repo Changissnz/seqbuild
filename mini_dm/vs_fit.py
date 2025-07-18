@@ -522,8 +522,17 @@ class AffineDelta:
 
     # NOTE: no argument-check 
     def update(self,ma):
-        m = self.m + ma[0]  
-        a = self.a + ma[1] 
+        q0,q1 = ma[0],ma[1]
+
+        if is_vector(ma[0]): 
+            q0 = ma[0][0] if len(ma[0]) == 1 \
+                else ma[0] 
+        if is_vector(ma[1]):
+            q1 = ma[1][0] if len(ma[1]) == 1 \
+                else ma[1] 
+        
+        m = self.m + q0
+        a = self.a + q1  
         return AffineDelta(m,a,self.ma_order)
     
     def update_v2(self,v):

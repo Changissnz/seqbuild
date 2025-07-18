@@ -1,7 +1,7 @@
 from .vs_fit import * 
 from types import MethodType,FunctionType
-#from inspect import isclass
 from morebs2.matrix_methods import is_2dmatrix
+from .n2m import default_cfunc1,default_cfunc2 
 
 """
 a hypothesis container for an <MADescriptor> instance. 
@@ -62,21 +62,6 @@ class GHyp:
 
     def vector_form(self): 
         return self.hstruct.vectorize() 
-
-def default_cfunc1(S): 
-    S_ = None 
-    try:
-        S_ = np.array(S) 
-    except:
-        assert False, "sequence of elements is irregular in shape."
-
-    if len(S_.shape) == 1:
-        return np.mean(S_) 
-    return np.mean(S_,axis=0)
-
-def default_cfunc2(S): 
-    S = np.abs(S) 
-    return default_cfunc1(S) 
 
 """
 memory structure to contain values for qualities of 

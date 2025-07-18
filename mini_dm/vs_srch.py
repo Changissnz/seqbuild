@@ -160,16 +160,20 @@ class VSSearch(IOFit):
         self.update_soln_set(q,hm0.c_error(2))
 
         z = np.zeros((len(vq),),dtype=float)
-        uc = PUCrawler(z,unit,p)
+
+        uc = PUCrawler(z,unit,[len(vq)])
+        def ucfunc():
+            return next(uc)[0]
 
         self.move_one__loopty_doo(q,hm0,vq,\
-            uc.__next__,err_type,num_attempts) 
+            ucfunc,err_type,num_attempts) 
         return 
     
     """
     moves by auto-correlation 
     """
-    def move_one_hyp__ac(self,unit=10**-1,err_type:int=1): 
+    def move_one_hyp__ac(self,unit=10**-1,err_type:int=1,\
+        num_attempts:int=1000): 
         q = self.search_queue.pop(0) 
         vq,_ = q.vector_form()
 
@@ -187,7 +191,7 @@ class VSSearch(IOFit):
             return 
 
         pi = prg__iterable(rdelta,False)
-        self.move_one__loopty_doo(q,hm0,vq,pi,err_type)
+        self.move_one__loopty_doo(q,hm0,vq,pi,err_type,num_attempts)
 
     """
     moves using output from the pseudo-random number generator 
@@ -218,11 +222,9 @@ class VSSearch(IOFit):
         while stat: 
             n = itrtr() 
             c += 1 
-
             stat = not type(n) == type(None)
             stat = stat and c <= num_attempts
-            if not stat: continue 
-
+            if not stat: continue             
             q_ = q.update(n,make_copy=True)
             xr,hs = self.cmp_move(hm0,q_.h) 
 
@@ -245,8 +247,8 @@ class VSSearch(IOFit):
 
     def rank_xdelta_by_target(self,target):
         rx = []
-
         # choose a delta x 
+        c = 0 
         for k in self.n2mac.ftable.keys(): 
             kvec = np.array(string_to_vector(k))
 
@@ -255,6 +257,7 @@ class VSSearch(IOFit):
                 z = np.zeros((len(kvec),)) 
             else:
                 z = 0 
+            c += 1 
 
             j_ = self.n2mac.induce_derivative_v2(\
                 z,kvec) 
@@ -269,8 +272,7 @@ class VSSearch(IOFit):
                     invertible_weight=2.0) 
                 tv = sum(tv)
             rx.append((kvec,tv))
-
-        rx = sorted(rx,key = lambda x: x[1])
+        rx = prg_seqsort_ties(rx,self.prg,vf=lambda x:x[1])
         return rx 
     
     def add_back_to_queue(self,q_): 

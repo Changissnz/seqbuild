@@ -29,6 +29,21 @@ def n2m_delta_correlate__orderedproportional(delta_x_relation,delta_err):
         q.append(t) 
     return np.array(q) * delta_err  
 
+def default_cfunc1(S): 
+    S_ = None 
+    try:
+        S_ = np.array(S) 
+    except:
+        assert False, "sequence of elements is irregular in shape."
+
+    if len(S_.shape) == 1:
+        return np.mean(S_) 
+    return np.mean(S_,axis=0)
+
+def default_cfunc2(S): 
+    S = np.abs(S) 
+    return default_cfunc1(S) 
+
 #----------------------------------------------------------------------------
 
 
@@ -142,8 +157,8 @@ class N2MAutocorrelator:
         r1 = dx_err 
         dx_err2 = None 
         if is_number(r1):
-            r1 = [r1] 
             dx_err2 = r1
+            r1 = [r1] 
         else: 
             dx_err2 = default_cfunc2(r1) 
 
