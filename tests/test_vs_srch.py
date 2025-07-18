@@ -66,7 +66,7 @@ class VSSearchMethods(unittest.TestCase):
         q = set([v[1] for v in vs.soln])
         assert len(q) == len(vs.soln) - 2,"len {}".format(len(q))
 
-    def test__VSSearch__move_one_hyp__case2(self):
+    def test__VSSearch__move_one_hyp__prg_guided(self):
         
         psg = pointset_sample_z() 
         prg = prg__LCG(16,7,5,3220) 
