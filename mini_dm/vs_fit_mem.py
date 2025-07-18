@@ -296,12 +296,4 @@ class HypMach:
                 raise ValueError("d[{}] has to be at least the absolute diff. of y and x.".format(i))
 
         return AffineDelta(ma[0],ma[1],ma_order) 
-
-    def naive_MA_for_sample(x,y,ma_dim,ma_order):
-        return 
     
-    def naive_vecqual_for_sample(self,index):
-        return -1 
-    
-    def load_delta(self,d): 
-        return -1 
