@@ -21,6 +21,19 @@ def error_improvement_value(error_value):
         return round_trinary(q,is_distance_roundtype=False)
     return round_to_trinary_vector(q,is_distance_roundtype=False)
 
+"""
+Extension of <IOFit>. Has navigational features for handling 
+parameter search space. These features allow this structure to 
+improve its solution to the question of the function F, such 
+that F(X:input) |--> Y:output. 
+
+Programmed specifically for use with <AffineDelta>. However, other 
+class structures can be used as long as they have these functionally 
+equivalent methods `fit`,`vectorize`,`update_v2` to that of <AffineDelta>. 
+
+NOTE: to devise alternative fitting structure to the line-based one 
+      provided by <AffineDelta>, see those methods in file<vs_fit>. 
+"""
 class VSSearch(IOFit):
 
     def __init__(self,x,y,unknown_func,hypdiff_func,madiff_func,\
@@ -58,6 +71,7 @@ class VSSearch(IOFit):
     
     #------------------------- preprocessing methods 
     #------------------------- for initial hypotheses 
+
     """
     hypotheses of <AffineDelta> instances 
     """
@@ -90,12 +104,25 @@ class VSSearch(IOFit):
             index1_function)
         return 
     
+    """
+    sets the M+A auxiliary variables of a <HypMach> 
+    instance with partially constant values. The constant 
+    values are the contribution vector at (0.5,0.5) and 
+    a distance vector that consists of values v_i that 
+    fall in the range of : (y_i - x_i) x [1.0,4.0]. 
+    """
     def preproc_v2(self,ma_dim,ma_order): 
         cv = (0.5,0.5) 
         dx = self.default_dx_() 
         self.load_mahyp_auxvar(dx,cv,ma_dim,ma_order) 
         self.init_HypMach() 
     
+    """
+    generates a distance vector to correspond to 
+    the data (`x`,`y`). Distance vector that consists of 
+    values v_i that fall in the range of : 
+            (y_i - x_i) x [1.0,4.0].
+    """
     def default_dx_(self):
         l = len(self.x)
         dx_vec = [] 
@@ -137,7 +164,8 @@ class VSSearch(IOFit):
         self.search_queue = self.hmem.info 
         self.mahm = None 
 
-    #--------------------------------- hypothesis update methods     
+    #--------------------------------- single hypothesis update methods     
+
     # TODO: test this 
 
     """
@@ -210,6 +238,9 @@ class VSSearch(IOFit):
 
         self.move_one__loopty_doo(q,hm0,vq,prg,err_type,num_attempts)
         return
+
+    #---------------------------------- methods to aid in adjusting 1 
+    #---------------------------------- hypothesis in parameter search. 
 
     """
     loop process used by method<move_one_hyp__ac>,

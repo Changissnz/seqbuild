@@ -30,15 +30,10 @@ class GHyp:
 
     def __init__(self,h,hstruct,error_term=None):
         assert type(h) in {MethodType,FunctionType}
-        #assert type(dx_h) in {MethodType,FunctionType}
-        #assert isclass(hstruct), "got {}".format(hstruct)
-        #assert type(vf) in {MethodType,FunctionType}
         assert is_number(error_term) or is_vector(error_term) \
             or type(error_term) == type(None)
         
         self.h = h 
-        #self.dx_h = dx_h 
-        #self.vf = vf 
         self.hstruct = hstruct 
         self.num_updates = 0 
         self.error_term = error_term
