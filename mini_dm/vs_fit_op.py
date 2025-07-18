@@ -138,6 +138,8 @@ class IOFit:
             index0_vec=index0_vec,index1_function=index1_function)
         
         mhm = HypMach(self.x,self.y,None,mem_type="MA") 
+
+
         mhm.mhm = hm 
         self.mahm = mhm 
 
@@ -332,7 +334,7 @@ class IOFit:
             index0_vec = [i for i in range(0,l)]  
             index1_function = lambda x: [i for i in range(x+1,l)] 
 
-        hm_ = HypMem()
+        hm_ = HypMem([],[],"MA")
         hm_.init_partition()
         for i in index0_vec: 
             x0,y0 = self.io_sample(i)

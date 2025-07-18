@@ -16,7 +16,7 @@ def pointset_sample_z():
         psg.set_new_gen_ad_parameters() 
 
     psg.generate_points(is_ordered=True,clear_data=False) 
-    return psg 
+    return deepcopy(psg )
 
 
 ### lone file test 
@@ -65,7 +65,22 @@ class VSSearchMethods(unittest.TestCase):
 
         q = set([v[1] for v in vs.soln])
         assert len(q) == len(vs.soln) - 2,"len {}".format(len(q))
+
+    def test__VSSearch__move_one_hyp__case2(self):
         
+        psg = pointset_sample_z() 
+        prg = prg__LCG(16,7,5,3220) 
+        vs = VSSearch(psg.input_seq,psg.point_seq,\
+            None,None,None,prg,sol_maxsize=10,is_bfs_queue=False) 
+        vs.preproc() 
+    
+        vs.initial_hypotheses() 
+
+        for i in range(5): 
+            print("move {}".format(i))
+            r = vs.move_one_hyp__prg_guided(unit=100.,err_type=2)
+        assert len(vs.n2mac.ftable) == 96 
+    
 
 if __name__ == '__main__':
     unittest.main()
