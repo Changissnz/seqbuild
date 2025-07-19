@@ -3,6 +3,11 @@ from desi.nvec_gen import *
 from morebs2.numerical_generator import prg__LCG
 import unittest
 
+# NOTE 
+"""
+estimated time for completion: < 25 seconds.
+"""
+
 def pointset_sample_z():
     num_points = 96
     ro_prg = prg__constant((-3,1200))
@@ -80,6 +85,24 @@ class VSSearchMethods(unittest.TestCase):
             print("move {}".format(i))
             r = vs.move_one_hyp__prg_guided(unit=100.,err_type=2)
         assert len(vs.n2mac.ftable) == 96 
+
+    # 
+    def test__VSSearch__measure_soln_vector__case1(self):
+        psg = pointset_sample_z() 
+        prg = prg__LCG(16,7,5,3220) 
+        vs3 = VSSearch(psg.input_seq,psg.point_seq,\
+            None,None,None,prg,sol_maxsize=50)    
+        vs3.preproc()   
+        vs3.initial_hypotheses() 
+
+        for _ in range(5): 
+            r = vs3.move_one_hyp__prg_guided(unit=100.,err_type=2)
+
+        soln = VSSearch.measure_soln_vector(vs3.soln,varname="parameter")
+        soln2 = VSSearch.measure_soln_vector(vs3.soln,varname="error")
+
+        print("SOLN1 DIM: ",len(soln))
+        print("SOLN2: ",soln2)
     
 
 if __name__ == '__main__':

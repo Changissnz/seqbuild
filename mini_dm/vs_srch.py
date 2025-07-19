@@ -377,7 +377,7 @@ class VSSearch(IOFit):
         return -1 
 
     @staticmethod 
-    def measure_one_soln(soln,varname="error"):
+    def measure_soln_vector(soln,varname="error"):
         assert varname in {"error","parameter"} 
 
         # make the iterator of the terms
@@ -387,9 +387,13 @@ class VSSearch(IOFit):
             it = [soln_[1] for soln_ in soln]
             prg = prg__iterable(it) 
             ag = APRNGGaugeV2(prg,(0.,1.),0.5)
-            return ag.measure_matrix_chunk(None,len(it),1)            
+
+            return ag.measure_cycle(len(it),\
+                term_func=lambda l,l2: type(l) != type(None),\
+                auto_frange=True,auto_prange=True,\
+                do_cycle_update=True)
         else: 
-            itx = [soln_[0].vectorize() for soln_ in soln] 
+            itx = [soln_[0].vector_form()[0] for soln_ in soln] 
             it = []
             for itx_ in itx: 
                 d0 = len(itx_)

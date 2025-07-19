@@ -44,7 +44,8 @@ class APRNGGaugeV2(APRNGGauge):
         self.cycle = None 
 
     def update_cycle(self,max_size:int,term_func):
-        self.cycle = self.cycle_one(max_size,term_func)
+        q = self.cycle_one(max_size,term_func)
+        self.cycle = q 
         return
 
     def measure_cycle(self,max_size,\
@@ -89,7 +90,7 @@ class APRNGGaugeV2(APRNGGauge):
             m = self.output_to_matrix(d0,d1)
         else: 
             assert m.shape == (d0,d1)  
-
+            
         # do along each axis, measure cycle 
         D = dict() 
         while len(axes) > 0: 
@@ -121,7 +122,7 @@ class APRNGGaugeV2(APRNGGauge):
             q = next_vec(i) 
             iseq = IntSeq(q)
             ent0 = AG.std_cat_entropy(iseq,seg_length=None,\
-            start_value=None,count_type="absdiff")
+                start_value=None,count_type="absdiff")
             pdiff0 = APRNGGaugeV2.pairwise_diff_metrics(iseq) 
 
             AG.assign_cycle(q) 
