@@ -80,7 +80,7 @@ class APRNGGaugeV2(APRNGGauge):
     D: axis -> index -> 
         [0] (coverage,unidirectional weighted point distance)
         [1] entropy::float 
-        [2] (min, max,mean) pairwise difference
+        [2] (min,max,mean) pairwise difference
     """
     def measure_matrix_chunk(self,m,d0,d1,axes={0,1}): 
         assert axes.issubset({0,1}) 
