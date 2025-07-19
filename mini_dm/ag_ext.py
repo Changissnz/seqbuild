@@ -5,8 +5,14 @@ from .minmax_freq import *
 from intigers.process_seq import stdop_vec
 from intigers.extraneous import zero_div0 
 
+"""
+chooses the element of i2 closest in absolute distance 
+to float i. 
+
+i := float 
+i2 := vector 
+"""
 def absdiff_match_func(i,i2):
-    mm = dict() 
     x = abs(i2 - i)
     q = min(x)
     indices = np.where(x == q)[0]
@@ -36,11 +42,65 @@ class APRNGGaugeV2(APRNGGauge):
     def clear_cycle(self):
         self.cycle = None 
 
+    def update_cycle(self,max_size:int,term_func):
+        self.cycle = self.cycle_one(max_size,term_func)
+        return
+
     def measure_cycle(self,max_size,\
         term_func=lambda l,l2: type(l) == type(None),\
-        auto_frange:bool=False): 
+        auto_frange:bool=False,do_cycle_update:bool=False):
+
+        if do_cycle_update:
+            self.update_cycle(max_size,term_func) 
+
         q = super().measure_cycle(max_size,term_func,auto_frange) 
         return q
+
+    # CAUTION: does not check if dim. (d0,d1) is possible. 
+    def output_to_matrix(self,d0,d1):
+        m = []
+        term_func=lambda l,l2: type(l) != type(None)
+
+        for _ in range(d0):
+            self.update_cycle(d1,term_func)
+            assert len(self.cycle) == d1  
+            m.append(deepcopy(self.cycle))  
+        return np.array(m) 
+
+    def measure_matrix_chunk(self,m,d0,d1,axes={0,1}): 
+        assert axes.issubset({0,1}) 
+
+        if not is_2d_matrix(m): 
+            m = self.output_to_matrix(d0,d1)
+        else: 
+            assert m.shape == (d0,d1)  
+
+        # do along each axis, measure cycle 
+        D = dict() 
+        while len(axes) > 0: 
+            A = axes.pop() 
+            D = APRNGGaugeV2.measure_matrix__rc_wise(D,m,A)
+        return D 
+
+    @staticmethod 
+    def measure_matrix__rc_wise(D,m,a): 
+        assert a in {0,1}
+
+        D[a] = dict()
+        d = m.shape[a]
+
+        def next_vec(i):
+            q = m[:,i] if a == 1 else m[i,:] 
+            return q 
+
+        for i in range(d): 
+            q = next_vec(i) 
+            iseq = IntSeq(q)
+            ent0 = self.std_cat_entropy(iseq,seg_length=None,\
+            start_value=None,count_type="absdiff")
+            pdiff0 = APRNGGaugeV2.pairwise_diff_metrics(iseq) 
+            D[a][i] = (ent0,pdiff0)
+        return D 
 
     @staticmethod 
     def measure_match(match_map):
@@ -67,7 +127,7 @@ class APRNGGaugeV2(APRNGGauge):
     - min,max,mean of pairwise differences from is1
     """
     @staticmethod
-    def pairwise_diffs(is1):
+    def pairwise_diff_metrics(is1):
         #assert type(is1) == IntSeq
         if len(is1) < 2:
             return None,None,None 
@@ -91,7 +151,7 @@ class APRNGGaugeV2(APRNGGauge):
             return 0.0 
 
         if type(seg_length) == type(None):
-            _,_,seg_length = APRNGGaugeV2.pairwise_diffs(is1)
+            _,_,seg_length = APRNGGaugeV2.pairwise_diff_metrics(is1)
 
         if seg_length == 0.0: return 0.0 
         self.catvec = is1.diffcat_vec(seg_length,start_value)

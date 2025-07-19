@@ -1,6 +1,8 @@
 from .n2m import * 
 from .vs_fit_op import * 
 from .puc import * 
+from .ag_ext import * 
+from .iseq import * 
 from intigers.mod_prng import * 
 from morebs2.numerical_generator import prg__constant
 from intigers.extraneous import prg__single_to_trinary_vector
@@ -364,3 +366,5 @@ class VSSearch(IOFit):
         while len(self.soln) > self.sol_maxsize: 
             self.soln.pop(-1) 
     
+
+    #---------------------------------------------------
