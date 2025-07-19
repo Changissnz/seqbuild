@@ -102,7 +102,11 @@ class VSSearchMethods(unittest.TestCase):
         soln2 = VSSearch.measure_soln_vector(vs3.soln,varname="error")
 
         print("SOLN1 DIM: ",len(soln))
+        assert len(soln) == 2 
+        assert len(soln[0]) == 50 
+        assert len(soln[1]) == 16 
         print("SOLN2: ",soln2)
+        assert soln2 == [np.float64(0.56822), np.float64(0.20384)]
     
 
 if __name__ == '__main__':
