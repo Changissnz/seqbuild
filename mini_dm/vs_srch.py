@@ -370,3 +370,35 @@ class VSSearch(IOFit):
     
 
     #--------------------------------------------------
+    #---------------------------- methods to measure changes to solution over 
+    #---------------------------- the course of search 
+
+    def measure_soln_log(self):
+        return -1 
+
+    @staticmethod 
+    def measure_one_soln(soln,varname="error"):
+        assert varname in {"error","parameter"} 
+
+        # make the iterator of the terms
+        v = []
+        d0,d1 = None,None 
+        if varname == "error":
+            it = [soln_[1] for soln_ in soln]
+            prg = prg__iterable(it) 
+            ag = APRNGGaugeV2(prg,(0.,1.),0.5)
+            return ag.measure_matrix_chunk(None,len(it),1)            
+        else: 
+            itx = [soln_[0].vectorize() for soln_ in soln] 
+            it = []
+            for itx_ in itx: 
+                d0 = len(itx_)
+                if type(d1) != type(None): 
+                    assert d0 == d1
+                d1 = d0 
+                it.extend(itx_)
+            d1 = len(itx)
+
+            prg = prg__iterable(it) 
+            ag = APRNGGaugeV2(prg,(0.,1.),0.5)
+            return ag.measure_matrix_chunk(None,d1,d0)
