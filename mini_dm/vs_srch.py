@@ -40,7 +40,7 @@ class VSSearch(IOFit):
 
     def __init__(self,x,y,unknown_func,hypdiff_func,madiff_func,\
         prg,depth_rank=10,depth_risk:float=1.0,sol_maxsize:int=1000,\
-        is_bfs_queue:bool=False): 
+        is_bfs_queue:bool=False,soln_log_size:int=100): 
         super().__init__(x,y,unknown_func,hypdiff_func,madiff_func)
         assert type(prg) in {FunctionType,MethodType}
         assert type(depth_rank) in {int,np.int32,np.int64} 
@@ -54,9 +54,11 @@ class VSSearch(IOFit):
         self.depth_risk = depth_risk
         self.sol_maxsize = sol_maxsize
         self.is_bfs_queue = is_bfs_queue
+        self.soln_log_size = soln_log_size 
         self.n2mac = None
 
         self.soln = [] # 
+        self.soln_log = [] 
         self.search_queue = []
         self.init_n2m_ac() 
 
@@ -367,4 +369,4 @@ class VSSearch(IOFit):
             self.soln.pop(-1) 
     
 
-    #---------------------------------------------------
+    #--------------------------------------------------

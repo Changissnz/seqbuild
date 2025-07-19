@@ -127,6 +127,44 @@ class APRNGGaugeV2Methods(unittest.TestCase):
         q2 = APRNGGaugeV2.measure_match(match)
         assert q2[0] == 3 
         assert q2[1] == [4]
+
+    def test__APRNGGaugeV2__measure_matrix_chunk__case1(self):
+        # case 1 
+        d1 = 3 
+        d0 = 5 
+        m = None 
+
+        m_ = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14]
+        prg = prg__iterable(m_)
+        ag = APRNGGaugeV2(prg,frange=(0.,1.),pradius=0.5) 
+        d = ag.measure_matrix_chunk(m,d0,d1,axes={0,1}) 
+        dsol00 = ([np.float64(1.0), np.float64(0.66667)], \
+            0.5, (np.int32(1), np.int32(2), np.float64(1.3333333333333333)))
+        assert np.all(np.round(np.array(d[0][0][0]) - dsol00[0]) <= 10 ** -5)
+        assert d[0][0][1] == dsol00[1] 
+        assert np.all(np.round(np.array(d[0][0][2]) - dsol00[2]) <= 10 ** -5)
+
+        # case 2 
+        e1 = [np.float64(250296.0533854167), np.float64(281979.40234375), \
+            np.float64(283329.5872395834), np.float64(283616.1731770834), \
+            np.float64(284118.4674479166), np.float64(284310.3658854166), \
+            np.float64(284608.9049479166), np.float64(286900.2955729167), \
+            np.float64(287596.70703125), np.float64(290375.7799479167)]
+        e2 = [np.float64(328849.97374206624), np.float64(328852.83832539956), \
+            np.float64(328854.1404087329), np.float64(328857.78624206624), \
+            np.float64(328861.6924920663), np.float64(328863.2549920663), \
+            np.float64(328863.5154087329), np.float64(328863.77582539956), \
+            np.float64(328864.55707539956), np.float64(328866.6404087329)]
+        m_ = e1 + e2 
+        prg2 = prg__iterable(m_)
+        ag2 = APRNGGaugeV2(prg2,frange=(0.,1.),pradius=0.5) 
+        d2 = ag2.measure_matrix_chunk(None,2,len(e1),axes={0,1}) 
+        d2sol10 = ([np.float64(1.0), np.float64(1.0)], \
+            1.0, (np.int32(78553), np.int32(78553), np.float64(78553.0)))
+        assert np.all(np.round(np.array(d2[1][0][0]) - d2sol10[0]) <= 10 ** -5)
+        assert d2[1][0][1] == d2sol10[1] 
+        assert np.all(np.round(np.array(d2[1][0][2]) - d2sol10[2]) <= 10 ** -5)
+
         
 if __name__ == '__main__':
     unittest.main()
