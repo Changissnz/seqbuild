@@ -182,6 +182,8 @@ class VSSearch(IOFit):
         num_attempts:int=1000): 
         assert err_type in {1,2}
         q = self.search_queue.pop(0) 
+        
+        self.save_soln_to_log()
 
         # case: depth exceeded
         if q.num_updates >= self.depth_rank: 
@@ -207,6 +209,8 @@ class VSSearch(IOFit):
     def move_one_hyp__ac(self,unit=10**-1,err_type:int=1,\
         num_attempts:int=1000): 
         q = self.search_queue.pop(0) 
+
+        self.save_soln_to_log()
         vq,_ = q.vector_form()
 
         hm0 = self.error_by_hyp(q.h)
@@ -232,6 +236,7 @@ class VSSearch(IOFit):
     def move_one_hyp__prg_guided(self,unit=10**-1,err_type:int=1,\
         num_attempts:int=1000): 
         q = self.search_queue.pop(0) 
+        self.save_soln_to_log()
         vq,_ = q.vector_form()
         hm0 = self.error_by_hyp(q.h)
 
@@ -373,9 +378,109 @@ class VSSearch(IOFit):
     #---------------------------- methods to measure changes to solution over 
     #---------------------------- the course of search 
 
-    def measure_soln_log(self):
-        return -1 
+    def soln_error_matrix(self):
+        q = []
+        for x in self.soln_log:
+            x2 = [x_[1] for x_ in x]
+            q.append(x2) 
+        return np.array(q) 
 
+    # TODO: test this. 
+    """
+    calculates measures on solution log. Outputs 
+    4 (4 x 6) matrices. Each of these matrices are 
+    of the form: 
+    row (0:MIN),(1:MIN),(2:MEAN),(3:VAR) 
+    column (0:coverage),(1:uwpd),(2:ent),(3:min),(4:max),(5:mean). 
+
+    The first two matrices measure the parameter vectors of the 
+    solution, column-wise and row-wise respectively. The last 
+    two matrices are likewise measurement values for the error 
+    vectors.  
+    """
+    def measure_soln_log(self):
+        if len(self.soln_log) == 0: return None 
+
+        def element_to_vector(x):
+            x_= []
+            x_.extend(x[0])
+            x_.append(x[1])
+            x_.extend(x[2])
+            return x_ 
+
+        def d2matrix(d):
+            q = list(d.values())
+            q_ = [] 
+            for q1 in q: 
+                q_.append(element_to_vector(q1)) 
+            return np.array(q_) 
+
+        def summarize_matrix(m):
+            q = np.array([np.min(m,axis=0),\
+                np.max(m,axis=0),np.mean(m,axis=0),\
+                np.var(m,axis=0)]) 
+            return q 
+        
+        def update_accum(acc,s): 
+            for i in range(len(acc)): 
+                acc[i] += s[i] 
+
+        # measure parameters
+        s0accum,s1accum = np.zeros((4,6),dtype=float), \
+            np.zeros((4,6),dtype=float)
+
+        for s in self.soln_log:
+            q = VSSearch.measure_soln_vector(s,"parameter")
+            
+            d0 = d2matrix(q[0]) 
+            s0 = summarize_matrix(d0) 
+            update_accum(s0accum,s0)
+
+            d1 = d2matrix(q[1])
+            s1 = summarize_matrix(d1)  
+            update_accum(s1accum,s1)
+
+        s0accum /= len(self.soln_log)
+        s1accum /= len(self.soln_log) 
+
+        # measure error 
+        sm = self.soln_error_matrix()
+        d0,d1 = sm.shape 
+        prg = prg__iterable(list(sm.flatten()),False)  
+        ag = APRNGGaugeV2(prg,(0.,1.),0.5)
+        dx2 = ag.measure_matrix_chunk(None,d0,d1,{0,1})
+
+        dxm = d2matrix(dx2[0])         
+        s20 = summarize_matrix(dxm) 
+        dxm = d2matrix(dx2[1])
+        s21 = summarize_matrix(dxm) 
+
+        return (s0accum,s1accum),(s20,s21)
+
+    def save_soln_to_log(self): 
+        if len(self.soln) == 0: 
+            return 
+
+        q = deepcopy(self.soln)
+        self.soln_log.append(q) 
+
+        sz = len(self.soln_log) - self.soln_log_size
+        while sz > 0:
+            self.soln_log.pop(0)
+            sz -= 1
+
+
+    """
+    outputs a measurement for the solution vector `soln`. 
+
+    If `varname` is `error`, outputs 
+        (coverage,unidirectional weighted point distance).
+    If `varname` is `parameter`, outputs dict 
+        D: axis -> index -> 
+            [0] (coverage,unidirectional weighted point distance)
+            [1] entropy::float 
+            [2] (min,max,mean) pairwise difference.
+    """
     @staticmethod 
     def measure_soln_vector(soln,varname="error"):
         assert varname in {"error","parameter"} 
@@ -405,4 +510,4 @@ class VSSearch(IOFit):
 
             prg = prg__iterable(it) 
             ag = APRNGGaugeV2(prg,(0.,1.),0.5)
-            return ag.measure_matrix_chunk(None,d1,d0)
+            return ag.measure_matrix_chunk(None,d1,d0,{0,1})

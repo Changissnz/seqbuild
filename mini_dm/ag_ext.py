@@ -58,7 +58,8 @@ class APRNGGaugeV2(APRNGGauge):
 
         if auto_prange:
             sz0,sz1 = min(self.cycle),max(self.cycle)
-            self.pradius = APRNGGaugeV2.default_pradius(sz0,sz1,len(self.cycle)) 
+            self.pradius = APRNGGaugeV2.default_pradius(sz0,sz1,len(self.cycle))
+            self.pradius = max([self.pradius,10 ** -5])
 
         q = super().measure_cycle(max_size,term_func,auto_frange) 
         return q
@@ -75,8 +76,8 @@ class APRNGGaugeV2(APRNGGauge):
         return np.array(m) 
 
     """
-    measures a matrix `m` for qualities. Stores 
-    values into dictionary 
+    measures a matrix `m` along its rows or columns 
+    for qualities. Stores values into dictionary 
 
     D: axis -> index -> 
         [0] (coverage,unidirectional weighted point distance)
@@ -90,7 +91,7 @@ class APRNGGaugeV2(APRNGGauge):
             m = self.output_to_matrix(d0,d1)
         else: 
             assert m.shape == (d0,d1)  
-            
+
         # do along each axis, measure cycle 
         D = dict() 
         while len(axes) > 0: 
