@@ -1,10 +1,5 @@
 from .n2m_index import * 
-
-class VectorFunctionGen:
-
-    def __init__(self): 
-
-        return -1 
+from .iseq import modulated_vec_op,modulated_vecdot 
 
 class N2MVectorFunction:
 
@@ -68,7 +63,3 @@ class N2MVectorFunction:
             if ip_index in v: 
                 return k 
         return None
-
-    @staticmethod
-    def generate_instance(fgen,prg): 
-        return -1 
