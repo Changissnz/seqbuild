@@ -23,3 +23,28 @@ class PRNGPairwiseOp:
         q = self.operators[i]
         return q(x,x2) 
     
+"""
+return: 
+- a function built from the base function, `pairwise_op`, and 
+the operator of the float `weight`, `weight_op`. 
+"""
+def one_weighted_pairwise_operator(pairwise_op,weight_op,weight,order=0):
+    assert order in {0,1,2}  
+
+    if order == 0:
+        return lambda x,x2: pairwise_op(weight_op(weight,x),x2)
+    elif order == 1:
+        return lambda x,x2: pairwise_op(x,weight_op(weight,x2))
+    else:  # order == 2
+        return lambda x,x2: weight_op(weight,pairwise_op(x,x2))
+    
+def prg__one_weighted_pairwise_operator(prg,base_op,weight_op):
+    weight = prg() 
+    op1 = int(prg() % len(base_op))
+    op2 = int(prg() % len(weight_op))
+
+    op1 = base_op[op1]
+    op2 = weight_op[op2] 
+
+    weight_order = int(prg() % 3) 
+    return one_weighted_pairwise_operator(op1,op2,weight,weight_order)

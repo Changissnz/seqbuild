@@ -3,12 +3,15 @@ from .iseq import modulated_vec_op,modulated_vecdot
 
 class N2MVectorFunction:
 
-    def __init__(self,nm,indexset_pair_seq,function_map):
+    def __init__(self,nm,indexset_pair_seq,function_map,mode="replace"):
         assert_nm(nm)  
         self.check_args(indexset_pair_seq,function_map)
+        assert mode in {"replace","cumulative"}
+
         self.nm = nm 
         self.indexset_pair_seq = indexset_pair_seq
         self.function_map = function_map
+        self.mode = mode 
         return 
 
     def check_args(self,ip_seq,f_map): 
@@ -55,7 +58,11 @@ class N2MVectorFunction:
         assert type(f) != type(None)
         
         vx2 = f(vx)
-        mvec[indices1] = vx2
+
+        if self.mode == "replace":
+            mvec[indices1] = vx2
+        else: 
+            mvec[indices1] += vx2 
         return mvec 
 
     def ip_index_to_function(self,ip_index:int):

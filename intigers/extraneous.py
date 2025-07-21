@@ -395,3 +395,19 @@ def multiple_sqrt_seq(x,mrange,output_type=0):
         y = (i,dx) if output_type else dx 
         qx.append(y) 
     return qx 
+
+#------------------------- subvector operations 
+
+def subvec(l,start_index,length):
+    assert 0 <= start_index < self.nm[0]
+    assert 0 < length <= self.nm[0]
+    assert is_vector(l) or type(l) == list 
+
+    q = list(l[start_index:start_index+length])
+
+    l1 = len(q) 
+    excess = length - l1
+    q2 = [] 
+    if excess > 0: 
+        q2 = list(l[:excess]) 
+    return q + q2 
