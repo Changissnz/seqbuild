@@ -38,7 +38,7 @@ def one_weighted_pairwise_operator(pairwise_op,weight_op,weight,order=0):
     else:  # order == 2
         return lambda x,x2: weight_op(weight,pairwise_op(x,x2))
     
-def prg__one_weighted_pairwise_operator(prg,base_op,weight_op):
+def prg__one_weighted_pairwise_operator(prg,base_op_seq,weight_op_seq):
     weight = prg() 
     op1 = int(prg() % len(base_op))
     op2 = int(prg() % len(weight_op))

@@ -86,14 +86,28 @@ class LCPVectorMap__TypeCShift:
 
 class ModulatedN2MVectorMap:
 
-    def __init__(self):
-        return -1 
-        #modulated_vec_op(v1,v2,op)
+    def __init__(self,v,op):
+        assert is_vector(v)
+        assert len(v) > 0
+        assert type(op) in {MethodType,FunctionType}
+        self.v = v
+        self.op = op
+        return
+    
+    def apply(self,x): 
+        assert is_vector(x)
+        q = modulated_vec_op(self.v,x,self.op)
+        return q[:len(v)]
+
+    @staticmethod 
+    def one_instance(prg,l,op): 
+        vx = [prg() for _ in range(l)]
+        vx = np.array(vx) 
+        return ModulatedN2MVectorMap(vx,op) 
 
 DEFAULT_N2MVF_INDEX_DEGREE_RANGE = (1,20) 
 DEFAULT_N2MVF_NSET_SIZE_RATIO_RANGE = (0.22,0.6)
 DEFAULT_N2MVF_MSET_SIZE_RATIO_RANGE = (0.05,0.8)
-
 
 class N2MVectorFunctionGen:
 

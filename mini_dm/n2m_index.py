@@ -157,6 +157,9 @@ class N2MIndexMapGen:
             self.dmap[i] = 0 
          return
 
+    """
+    output from generator 
+    """
     def map(self): 
         return self.n2m_imap.n2m_map
     
