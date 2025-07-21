@@ -77,8 +77,13 @@ class VSSearch(IOFit):
     #------------------------- for initial hypotheses 
 
     """
-    hypotheses of <AffineDelta> instances 
-    """
+    Loads a <HypMach> instance for initial hypotheses on 
+    the fitting function F for F(X) = Y. Hypotheses consist 
+    of <AffineDelta> instances, calculated via a super-partitioning 
+    of the (x_i,y_i) pairs. Super-partitioning uses the 
+    condition of being fitted by a common affine function 
+    for each of the super-partition sets. 
+    """ 
     def preproc(self,ma_order=0): 
         # calculating initial affine hypotheses 
         l = len(self.x) 
@@ -114,6 +119,9 @@ class VSSearch(IOFit):
     values are the contribution vector at (0.5,0.5) and 
     a distance vector that consists of values v_i that 
     fall in the range of : (y_i - x_i) x [1.0,4.0]. 
+
+    By this preprocessing scheme, every (x_i,y_i) pair 
+    is associated with one affine function. 
     """
     def preproc_v2(self,ma_dim,ma_order): 
         cv = (0.5,0.5) 
@@ -171,7 +179,6 @@ class VSSearch(IOFit):
     #--------------------------------- single hypothesis update methods     
 
     # TODO: test this 
-
     """
     applies changes to 1 hypothesis function to produce 
     a sequence of candidate hypothesis functions. These 
@@ -388,19 +395,19 @@ class VSSearch(IOFit):
     # TODO: test this. 
     """
     calculates measures on solution log. Outputs 
-    4 (4 x 6) matrices. Each of these matrices are 
+    4 (4 x 6) matrices. Each of these matrices is 
     of the form: 
     row (0:MIN),(1:MIN),(2:MEAN),(3:VAR) 
-    column (0:coverage),(1:uwpd),(2:ent),(3:min),(4:max),(5:mean). 
+    column (0:coverage),(1:uwpd),(2:categorical entropy),(3:min),(4:max),(5:mean). 
 
     The first two matrices measure the parameter vectors of the 
-    solution, column-wise and row-wise respectively. The last 
+    solutions, column-wise and row-wise respectively. The last 
     two matrices are likewise measurement values for the error 
     vectors.  
     """
     def measure_soln_log(self):
         if len(self.soln_log) == 0: return None 
-
+        
         def element_to_vector(x):
             x_= []
             x_.extend(x[0])

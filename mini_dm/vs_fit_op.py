@@ -80,6 +80,20 @@ The `unknown_func` is usually the target function (to be found)
 that outputs the correct y_i for an input x_i. Both the 
 `hypdiff_func` and `madiff_func` can be used as metrical functions 
 for solution improvement (reduction in error in x-to-y mapping).  
+The `madiff_func` is used specifically for measuring the parametric 
+differences between two affine functions, while `hypdiff_func` 
+is applicable for the general case of any function intended to 
+fit `x` to `y`'. Initializing the hypothesis container via a 
+<HypMach> instance can proceed by one of two ways:
+1. via the `init_HypMach` method, which uses the 
+   `process_HypMach_on_auxvar` method to form hypotheses 
+   based on the auxiliary variables `d`, `cv`, `ma_dim`, and 
+   `ma_order` provided by program user. Every (x_i,y_i) pair
+    is associated with one affine function as a hypothesis. 
+2. via the `init_HypMach_v2` method, which uses the
+   `superpart_by_AffineDelta` method to form hypotheses. 
+   The super-partitioning is done by the condition of being 
+   fitted by a common affine function for each of the sets. 
 
 Container is integrated with affine functions as the primary 
 function form to fit the points. As for other function forms, 
