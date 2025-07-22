@@ -168,3 +168,56 @@ class N2MVectorFunctionGen:
         self.prg = prg 
         self.prg = prg2
         self.mode = mode 
+
+    def one_N2MVF(self): 
+        nset_min = int(ceil(DEFAULT_N2MVF_NSET_SIZE_RATIO_RANGE[0] * self.nm[0]))
+        nset_max = int(ceil(DEFAULT_N2MVF_NSET_SIZE_RATIO_RANGE[1] * self.nm[0]))
+        
+        mset_min = int(ceil(DEFAULT_N2MVF_MSET_SIZE_RATIO_RANGE[0] * self.nm[1]))
+        mset_max = int(ceil(DEFAULT_N2MVF_MSET_SIZE_RATIO_RANGE[1] * self.nm[1]))
+
+        if nset_min == nset_max: nset_max = nset_max + 1
+        if mset_min == mset_max: mset_max = mset_max + 1
+
+        n2mgen = N2MIndexMapGen(self.nm,\
+            DEFAULT_N2MVF_INDEX_DEGREE_RANGE,[nset_min,nset_max],\
+            [mset_min,mset_max],self.prg,index_degree_is_geq=False)
+        
+        n2mgen.make() 
+        M = n2mgen.map()
+
+        fmap = [] 
+        for m in M: 
+            is_lcpvm = bool(int(self.prg2() % 2)) 
+
+            n0 = len(string_to_vector(m[0])) 
+            m1 = len(string_to_vector(m[1])) 
+
+            fx = self.nm_to_vmap(n0,m1,is_lcpvm).apply 
+            fmap.append(fx) 
+            
+        fmap = {(fx,[i]) for (i,fx) in enumerate(fmap)}
+        mode = "replace" if int(self.prg() %2) else "accumulate" 
+        return N2MVectorFunction(self.nm,M,fmap,mode="replace")
+
+    """
+    """
+    def nm_to_vmap(self,n,m,is_lcpvm:bool):
+        
+        # case: LCPVectorMap__TypeCShift
+        if is_lcpvm:
+            subvec_size_shifter = self.one_subvec_size_shifter(n) 
+            return LCPVectorMap__TypeCShift.one_LCPVectorMap(\
+                self.nm,subvec_size_shifter,self.prg,self.prg2)
+
+        # case: ModulatedN2MVectorMap
+        # NOTE: algorithm always uses weighted pairwise operator. 
+        op = prg__one_weighted_pairwise_operator(self.prg,\
+            deepcopy(DEFAULT_PAIRWISE_OPS),deepcopy(DEFAULT_PAIRWISE_OPS))
+        return ModulatedN2MVectorMap.one_instance(self.prg,m,op)
+
+    def one_subvec_size_shifter(self,n0,sz=5): 
+        s = [int(modulo_in_range(self.prg(),DEFAULT_N2MVF_INDEX_DEGREE_RANGE)) \
+            for _ in range(sz)]
+        s = [s_ % n0 for s_ in s]
+        return prg__iterable(s)
