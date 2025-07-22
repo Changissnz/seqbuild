@@ -583,7 +583,6 @@ class LinCombo:
         s += str(self.x[-1])
         return s 
 
-
     def degree(self): 
         return len(self.x) - 1 
 

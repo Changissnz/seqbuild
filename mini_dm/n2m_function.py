@@ -1,12 +1,16 @@
 from .n2m_index import * 
 from .iseq import modulated_vec_op,modulated_vecdot 
 
+"""
+class that operates an n-to-m vector function to map 
+any n-vector to m-vector, both of real numbers. 
+"""
 class N2MVectorFunction:
 
     def __init__(self,nm,indexset_pair_seq,function_map,mode="replace"):
         assert_nm(nm)  
         self.check_args(indexset_pair_seq,function_map)
-        assert mode in {"replace","cumulative"}
+        assert mode in {"replace","accumulate"}
 
         self.nm = nm 
         self.indexset_pair_seq = indexset_pair_seq

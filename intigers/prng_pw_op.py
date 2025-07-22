@@ -1,4 +1,7 @@
 from types import MethodType,FunctionType
+from extraneous import safe_div 
+
+DEFAULT_PAIRWISE_OPS = [add,sub,mul,safe_div] 
 
 """
 for every pair of input integers (x1,x2), chooses 
@@ -40,11 +43,11 @@ def one_weighted_pairwise_operator(pairwise_op,weight_op,weight,order=0):
     
 def prg__one_weighted_pairwise_operator(prg,base_op_seq,weight_op_seq):
     weight = prg() 
-    op1 = int(prg() % len(base_op))
-    op2 = int(prg() % len(weight_op))
+    op1 = int(prg() % len(base_op_seq))
+    op2 = int(prg() % len(weight_op_seq))
 
-    op1 = base_op[op1]
-    op2 = weight_op[op2] 
+    op1 = base_op_seq[op1]
+    op2 = weight_op_seq[op2] 
 
     weight_order = int(prg() % 3) 
     return one_weighted_pairwise_operator(op1,op2,weight,weight_order)

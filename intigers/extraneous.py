@@ -399,9 +399,9 @@ def multiple_sqrt_seq(x,mrange,output_type=0):
 #------------------------- subvector operations 
 
 def subvec(l,start_index,length):
-    assert 0 <= start_index < self.nm[0]
-    assert 0 < length <= self.nm[0]
     assert is_vector(l) or type(l) == list 
+    assert 0 <= start_index < len(l)
+    assert 0 < length <= len(l) 
 
     q = list(l[start_index:start_index+length])
 
