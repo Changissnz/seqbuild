@@ -52,6 +52,8 @@ class N2MVectorFunctionGenMethods(unittest.TestCase):
 
     """
     demonstrates deterministic quality of <N2MVectorFunction> 
+    and difference in values between modes `replace` and 
+    `accumulate`. 
     """
     def test__N2MVectorFunctionGen__one_N2MVF__case1(self): 
         nm = (5,12) 
@@ -59,6 +61,7 @@ class N2MVectorFunctionGenMethods(unittest.TestCase):
         prg2 = prg__LCG(145,68,-100,411)
 
         nvfg = N2MVectorFunctionGen(nm,prg,prg2,mode="replace")
+        nvfg_ = deepcopy(nvfg) 
         q = nvfg.one_N2MVF() 
 
         x = np.array([4,14,3,13,32])
@@ -66,6 +69,11 @@ class N2MVectorFunctionGenMethods(unittest.TestCase):
         sol1 = np.array([ 300.,596.,2316.,596.,4980.,\
             2316.,424.,596.,443.,808.,596.,596.])
         assert np.all(r1 == sol1)
+
+        nvfg_.mode = "accumulate" 
+        q2 = nvfg_.one_N2MVF() 
+        r2 = q2.apply(x) 
+        assert not np.any(r1 == r2) 
 
 if __name__ == '__main__':
     unittest.main()
