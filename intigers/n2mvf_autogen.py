@@ -90,7 +90,7 @@ class LCPVectorMap__TypeCShift:
         self.subvec_size_shifter = subvec_size_shifter
         return 
 
-    def fit(self,x):
+    def apply(self,x):
         assert len(x) == self.nm[0] 
         assert is_vector(x) 
 
@@ -136,7 +136,7 @@ class ModulatedN2MVectorMap:
     def __init__(self,v,op):
         assert is_vector(v)
         assert len(v) > 0
-        assert type(op) in {MethodType,FunctionType}
+
         self.v = v
         self.op = op
         return
