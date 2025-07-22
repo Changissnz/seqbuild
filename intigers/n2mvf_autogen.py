@@ -1,5 +1,17 @@
 """
-file contains code that auto-generates a <N2MVectorFunction> instance. 
+file contains code that auto-generates a <N2MVectorFunction> instance.
+There are no constraints on functions from n to m space, as long as 
+said function `f` is capable of 
+    `f(V_n) = V_m`, V_n and V_m are two subvectors associated with the 
+            n-vector and m-vector, respectively. The specific sizes of 
+            `V_n` and `V_m` are determined by user or machine input 
+            for the corresponding (n,m) index-set pair. 
+
+However, two popular mathematical forms are linear combinations 
+and polynomials. These two forms are represented by 
+    class<LCPVectorMap__TypeCShift>. 
+Additionally, modulated vector operations are possible through 
+class<ModulatedN2MVectorMap>. 
 """
 
 from mini_dm.n2m_function import * 
@@ -10,8 +22,8 @@ from morebs2.numerical_generator import prg__constant
 from intigers.prng_pw_op import * 
 
 """
-function input dimension; used specifically for 
-<LinCombo> and <CEPoly> instances. 
+outputs function input dimension; used specifically 
+for <LinCombo> and <CEPoly> instances. 
 """
 def lcp_dim(F): 
     assert type(F) in {LinCombo,CEPoly}
@@ -65,15 +77,17 @@ class LCPGen:
 """
 linear-combination-and-polynomial vector map 
 from n to m space. Map is capable of contiguous 
-shifts of the input n-vector. The dictionary `fmap`
-is the mapping of abstract functions to indices, 
-so class is not exclusively programmed for linear 
-combinations and polynomial functions. 
-
+shifts of the input n-vector. The list of 
+functions `fmap` is a 1-to-1 mapping, such that 
+every j'th function corresponds to the m-vector's 
+j'th index. Every function f is an abstract function 
+operated by the call `f()`, so class is not exclusively 
+programmed for linear combinations and polynomial functions. 
 The variables `index_shifter` and `subvec_size_shifter`
 are parameter-less functions that return integers. They 
-effectively determine each subvector of the input n-vector 
-`x` that corresponds to each index in the output m-vector.
+effectively determine each contiguous subvector of the 
+input n-vector `x` that corresponds to each index in the 
+output m-vector.
 """
 class LCPVectorMap__TypeCShift: 
 
@@ -133,7 +147,14 @@ class LCPVectorMap__TypeCShift:
 
         return LCPVectorMap__TypeCShift(nm,fmap_,index_shifter,subvec_size_shifter)
 
-
+"""
+structure transforms the pairwise operator `modulated_vec_op` 
+into a uni-wise operator. Uses `v` as the base vector (first 
+argument to `modulated_vec_op`) and operator `op` for the 
+application, 
+        `f(x) = modulated_vec_op(v,x,op)`. 
+Every output from `apply` is a vector of length `|v|`. 
+"""
 class ModulatedN2MVectorMap:
 
     def __init__(self,v,op):
@@ -172,6 +193,9 @@ class N2MVectorFunctionGen:
         self.prg2 = prg2
         self.mode = mode 
 
+    """
+    main method 
+    """
     def one_N2MVF(self): 
         nset_min = int(ceil(DEFAULT_N2MVF_NSET_SIZE_RATIO_RANGE[0] * self.nm[0]))
         nset_max = int(ceil(DEFAULT_N2MVF_NSET_SIZE_RATIO_RANGE[1] * self.nm[0]))
@@ -205,6 +229,9 @@ class N2MVectorFunctionGen:
         return N2MVectorFunction(self.nm,M,fmap,self.mode)
 
     """
+    generates a <LCPVectorMap__TypeCShift> or <ModulatedN2MVectorMap>
+    instance, based on reference to `n` and `m`, the sizes for the 
+    n-set and m-set that this method's output function corresponds to. 
     """
     def nm_to_vmap(self,n,m,is_lcpvm:bool):
         
@@ -220,6 +247,11 @@ class N2MVectorFunctionGen:
             deepcopy(DEFAULT_PAIRWISE_OPS),deepcopy(DEFAULT_PAIRWISE_OPS))
         return ModulatedN2MVectorMap.one_instance(self.prg,m,op)
 
+    """
+    generates an iterable over a sequence of 
+    subvector sizes, each no greater than 
+    `n0`. 
+    """
     def one_subvec_size_shifter(self,n0,sz=5): 
         s = [int(modulo_in_range(self.prg(),DEFAULT_N2MVF_INDEX_DEGREE_RANGE)) \
             for _ in range(sz)]

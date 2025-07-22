@@ -5,7 +5,7 @@ from copy import deepcopy
 
 """
 class that operates an n-to-m vector function to map 
-any n-vector to m-vector, both of real numbers. 
+any n-vector to an m-vector, both of real numbers. 
 """
 class N2MVectorFunction:
 
@@ -48,6 +48,9 @@ class N2MVectorFunction:
         assert np.all(qx2 == np.arange(len(ip_seq),dtype=np.int32)) 
         return
 
+    """
+    main method 
+    """
     def apply(self,x,default_value=0.0): 
         assert is_vector(x) 
         assert len(x) == self.nm[0]
