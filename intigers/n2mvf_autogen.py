@@ -7,6 +7,7 @@ from intigers.poly_output_fitter_ import *
 from intigers.mod_prng import prg__iterable
 from intigers.extraneous import subvec
 from morebs2.numerical_generator import prg__constant
+from intigers.prng_pw_op import * 
 
 """
 function input dimension; used specifically for 
@@ -115,14 +116,16 @@ class LCPVectorMap__TypeCShift:
         dim_fmap = [lcp_dim(x) for x in fmap]
         subvec_size_shifter = prg__iterable(dim_fmap)
 
+        def make_function(f0,is_poly:bool):
+            if is_poly: 
+                return lambda x: f0.apply(x[0]) 
+            return lambda x: f0.apply(x) 
+
         # change the fmap from container of <CEPoly> + <LinCombo>
         # to that of abstract functions. 
         fmap_ = [] 
         for f in fmap: 
-            if type(f) == CEPoly:
-                fx = lambda x: f.apply(x[0]) 
-            else: 
-                fx = f.apply 
+            fx = make_function(f,type(f) == CEPoly)
             fmap_.append(fx)
 
         # make the index shifter 
@@ -166,7 +169,7 @@ class N2MVectorFunctionGen:
 
         self.nm = nm  
         self.prg = prg 
-        self.prg = prg2
+        self.prg2 = prg2
         self.mode = mode 
 
     def one_N2MVF(self): 
@@ -184,7 +187,9 @@ class N2MVectorFunctionGen:
             [mset_min,mset_max],self.prg,index_degree_is_geq=False)
         
         n2mgen.make() 
-        M = n2mgen.map()
+        M = list(n2mgen.map()) 
+        M = sorted(M,key=lambda x: x[0] + x[1]) 
+        M = prg_seqsort(M,self.prg) 
 
         fmap = [] 
         for m in M: 
@@ -196,9 +201,8 @@ class N2MVectorFunctionGen:
             fx = self.nm_to_vmap(n0,m1,is_lcpvm).apply 
             fmap.append(fx) 
             
-        fmap = {(fx,[i]) for (i,fx) in enumerate(fmap)}
-        mode = "replace" if int(self.prg() %2) else "accumulate" 
-        return N2MVectorFunction(self.nm,M,fmap,mode="replace")
+        fmap = {fx: [i] for (i,fx) in enumerate(fmap)}
+        return N2MVectorFunction(self.nm,M,fmap,self.mode)
 
     """
     """
@@ -208,7 +212,7 @@ class N2MVectorFunctionGen:
         if is_lcpvm:
             subvec_size_shifter = self.one_subvec_size_shifter(n) 
             return LCPVectorMap__TypeCShift.one_LCPVectorMap(\
-                self.nm,subvec_size_shifter,self.prg,self.prg2)
+                (n,m),subvec_size_shifter,self.prg,self.prg2)
 
         # case: ModulatedN2MVectorMap
         # NOTE: algorithm always uses weighted pairwise operator. 
@@ -219,5 +223,11 @@ class N2MVectorFunctionGen:
     def one_subvec_size_shifter(self,n0,sz=5): 
         s = [int(modulo_in_range(self.prg(),DEFAULT_N2MVF_INDEX_DEGREE_RANGE)) \
             for _ in range(sz)]
-        s = [s_ % n0 for s_ in s]
-        return prg__iterable(s)
+        s2 = [] 
+        for s_ in s: 
+            if s_ > n0:
+                s1 = modulo_in_range(s_,[2,n0+1]) 
+            else: 
+                s1 = s_ 
+            s2.append(s1) 
+        return prg__iterable(s2)

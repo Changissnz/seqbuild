@@ -1,5 +1,6 @@
 from types import MethodType,FunctionType
-from extraneous import safe_div 
+from operator import add,sub,mul
+from .extraneous import safe_div 
 
 DEFAULT_PAIRWISE_OPS = [add,sub,mul,safe_div] 
 

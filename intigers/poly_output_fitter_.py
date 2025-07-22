@@ -575,7 +575,7 @@ class LinCombo:
         s = ""
         L = len(self.x) 
 
-        for i in range(L[:-1]): 
+        for i in range(len(self.x) - 1): 
             j = L - i
             x = str(self.x[i]) + "X_" + str(j) + " + "
             s += x

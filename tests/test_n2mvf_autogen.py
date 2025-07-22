@@ -48,6 +48,25 @@ class ModulatedN2MVectorMapMethods(unittest.TestCase):
         x3 = modmap.apply(np.array([10,20]))
         assert np.all(sol3 == x3) 
 
+class N2MVectorFunctionGenMethods(unittest.TestCase): 
+
+    """
+    demonstrates deterministic quality of <N2MVectorFunction> 
+    """
+    def test__N2MVectorFunctionGen__one_N2MVF__case1(self): 
+        nm = (5,12) 
+        prg = prg__LCG(45,60,100,312)
+        prg2 = prg__LCG(145,68,-100,411)
+
+        nvfg = N2MVectorFunctionGen(nm,prg,prg2,mode="replace")
+        q = nvfg.one_N2MVF() 
+
+        x = np.array([4,14,3,13,32])
+        r1 =q.apply(x)
+        sol1 = np.array([ 300.,596.,2316.,596.,4980.,\
+            2316.,424.,596.,443.,808.,596.,596.])
+        assert np.all(r1 == sol1)
+
 if __name__ == '__main__':
     unittest.main()
 

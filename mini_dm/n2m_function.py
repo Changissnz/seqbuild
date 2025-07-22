@@ -1,5 +1,7 @@
 from .n2m_index import * 
 from .iseq import modulated_vec_op,modulated_vecdot 
+from morebs2.matrix_methods import is_number 
+from copy import deepcopy 
 
 """
 class that operates an n-to-m vector function to map 
@@ -9,10 +11,12 @@ class N2MVectorFunction:
 
     def __init__(self,nm,indexset_pair_seq,function_map,mode="replace"):
         assert_nm(nm)  
+        self.nm = nm 
+
         self.check_args(indexset_pair_seq,function_map)
         assert mode in {"replace","accumulate"}
 
-        self.nm = nm 
+
         self.indexset_pair_seq = indexset_pair_seq
         self.function_map = function_map
         self.mode = mode 
@@ -20,15 +24,16 @@ class N2MVectorFunction:
 
     def check_args(self,ip_seq,f_map): 
         assert len(ip_seq) > 0
+        assert type(ip_seq) == list 
         assert len(f_map) > 0 
-
+        assert type(f_map) == dict 
         # check the index set pairs 
         for x in ip_seq: 
             p0 = string_to_vector(x[0]) 
             assert min(p0) >= 0 and max(p0) < self.nm[0]
 
             p1 = string_to_vector(x[1])
-            assert min(p1) >= 0 and max(p1) < self.nm[0]
+            assert min(p1) >= 0 and max(p1) < self.nm[1]
         
         # check the function map
         qx = list(f_map.keys())
@@ -36,11 +41,14 @@ class N2MVectorFunction:
         assert qx == {True}
 
         qx2 = list(f_map.values()) 
-        qx2 = np.array(sorted(flatten_setseq(qx2)),dtype=np.int32)
+        qx2_ = []
+        for qx22 in qx2: qx2_.extend(qx22) 
+        qx2_ = sorted(qx2_)
+        qx2 = np.array(qx2_,dtype=np.int32)
         assert np.all(qx2 == np.arange(len(ip_seq),dtype=np.int32)) 
         return
 
-    def fit(self,x,default_value=0.0): 
+    def apply(self,x,default_value=0.0): 
         assert is_vector(x) 
         assert len(x) == self.nm[0]
         assert is_number(default_value)
@@ -60,7 +68,7 @@ class N2MVectorFunction:
 
         f = self.ip_index_to_function(ip_index)
         assert type(f) != type(None)
-        
+
         vx2 = f(vx)
 
         if self.mode == "replace":
