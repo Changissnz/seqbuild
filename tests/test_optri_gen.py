@@ -14,6 +14,8 @@ class OpTriGenMethods(unittest.TestCase):
         l = [2,5,1,8,13] 
         seq = IntSeq(l) 
         ot = seq.optri(sub,np.int32)
+        print("OT")
+        print(ot)
 
         c1 = triangular_matrix_perimeter(ot,0,True)
         c2 = triangular_matrix_perimeter(ot,1,True)
@@ -104,7 +106,8 @@ class OpTriGenMethods(unittest.TestCase):
         assert not otg.reloaded
         l.append(q) 
 
-        m1 = np.array([[-21, -23, -24, -19, -17],\
+        m1 = np.array([\
+            [-21, -23, -24, -19, -17],\
             [  0, -29, -28, -22, -25],\
             [  0,   0, -19, -14, -23],\
             [  0,   0,   0, -12, -26],\

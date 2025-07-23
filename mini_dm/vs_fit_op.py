@@ -23,8 +23,8 @@ class VSTransform:
     """
     def cmp_ad(self,ad1):
         sz_diff = abs(self.ad.size() - ad1.size())
-        diff_ad = (self.ad - ad1).size() 
-        return sz_diff,diff_ad 
+        diff_ad0 = (self.ad - ad1).size() 
+        return sz_diff,diff_ad0 
     
     """
     calculates the difference in expected 
@@ -78,7 +78,7 @@ Either the input `x` or output `y` can be unknown.
 
 NOTE: 
     implementation for that is lacking as of this point in development. 
-    
+
 The `unknown_func` is usually the target function (to be found) 
 that outputs the correct y_i for an input x_i. Both the 
 `hypdiff_func` and `madiff_func` can be used as metrical functions 
