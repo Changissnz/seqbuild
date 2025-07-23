@@ -14,7 +14,8 @@ class LCPVectorMap__TypeCShiftMethods(unittest.TestCase):
     via comparison of the two "very" different output vectors, 
     despite the only difference in index-to-index comparison of 
     input vectors being index 4. These changes could not have been 
-    possible under linear vector multiplication (normal,index-to-index). 
+    possible under linear vector operations (normal,index-to-index), 
+    such as multiplication. 
     '''
     def test__LCPVectorMap__TypeCShift__one_LCPVectorMap__case1(self):
         nm = (5,9)

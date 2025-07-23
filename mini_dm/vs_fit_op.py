@@ -74,8 +74,11 @@ class VSTransform:
 
 """
 container that holds an input-output pair of sequences `x` and `y`. 
-Either the input `x` or output `y` can be unknown, although 
-implementation for that is lacking as of this point in development. 
+Either the input `x` or output `y` can be unknown. 
+
+NOTE: 
+    implementation for that is lacking as of this point in development. 
+    
 The `unknown_func` is usually the target function (to be found) 
 that outputs the correct y_i for an input x_i. Both the 
 `hypdiff_func` and `madiff_func` can be used as metrical functions 
