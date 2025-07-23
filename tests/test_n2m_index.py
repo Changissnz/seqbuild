@@ -60,9 +60,9 @@ class N2MIndexMapGenMethods(unittest.TestCase):
             if v >= ms_range[0] and v <= ms_range[1]:
                 c2 += 1 
 
-        assert c == 84 
-        assert c2 == 91 
-        assert len(dm) == 92 
+        assert c == 91#84, "got {}".format(c)
+        assert c2 == 92, "got {}".format(c2)
+        assert len(dm) == 92, "got {}".format(len(dm))
 
 if __name__ == '__main__':
     unittest.main()

@@ -75,6 +75,45 @@ class N2MVectorFunctionGenMethods(unittest.TestCase):
         r2 = q2.apply(x) 
         assert not np.any(r1 == r2) 
 
+    """
+    observes the degrees of the m-space indices. 
+    """
+    def test__N2MVectorFunctionGen__one_N2MVF__case2(self): 
+
+        # case 1 
+        prg = prg__LCG(23,3,4,1200) 
+        prg2 = prg__LCG(15,-68,100,4110)
+
+        nm = (2,10) 
+        nvfg = N2MVectorFunctionGen(nm,prg,prg2,mode="replace")
+        q = nvfg.one_N2MVF() 
+
+        mindex_q = {0: 2, 1: 2, 2: 2, 3: 2, \
+                4: 0, 5: 0, 6: 2, 7: 2, 8: 3, \
+                9: 2}
+        assert q.mindex == mindex_q 
+
+        x0 = np.array([4,13])
+        r0 =q.apply(x0)
+
+        x1 = np.array([4,7]) 
+        r1 =q.apply(x1)
+
+        assert np.all(np.where(r0 == r1)[0] == [4,5])
+
+        x2 = np.array([14,13]) 
+        r2 =q.apply(x2)
+        assert np.all(r0 == r2)
+
+        # case 2 
+        prg = prg__LCG(22,41,170,20010) # performs well! 
+        nm = (4,9) 
+        nvfg2 = N2MVectorFunctionGen(nm,prg,prg2,mode="replace")
+        q2 = nvfg2.one_N2MVF() 
+
+        mindex_q2 = {0: 6, 1: 12, 2: 18, 3: 12, 4: 12, 5: 6, 6: 6, 7: 13, 8: 6}
+        assert mindex_q2 == q2.mindex 
+
 if __name__ == '__main__':
     unittest.main()
 

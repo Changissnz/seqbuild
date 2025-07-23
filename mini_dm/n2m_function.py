@@ -16,11 +16,15 @@ class N2MVectorFunction:
         self.check_args(indexset_pair_seq,function_map)
         assert mode in {"replace","accumulate"}
 
-
         self.indexset_pair_seq = indexset_pair_seq
+        self.load_mindex() 
         self.function_map = function_map
         self.mode = mode 
         return 
+
+    def load_mindex(self): 
+        nmap = N2MIndexMap(self.nm,n2m_map=set(self.indexset_pair_seq)) 
+        self.mindex = nmap.mindex_degree_map()
 
     def check_args(self,ip_seq,f_map): 
         assert len(ip_seq) > 0

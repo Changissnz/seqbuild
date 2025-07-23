@@ -196,7 +196,7 @@ class N2MVectorFunctionGen:
     """
     main method 
     """
-    def one_N2MVF(self): 
+    def one_N2MVF(self,map_gen_attempts_per=100): 
         nset_min = int(ceil(DEFAULT_N2MVF_NSET_SIZE_RATIO_RANGE[0] * self.nm[0]))
         nset_max = int(ceil(DEFAULT_N2MVF_NSET_SIZE_RATIO_RANGE[1] * self.nm[0]))
         
@@ -210,7 +210,9 @@ class N2MVectorFunctionGen:
             DEFAULT_N2MVF_INDEX_DEGREE_RANGE,[nset_min,nset_max],\
             [mset_min,mset_max],self.prg,index_degree_is_geq=False)
         
-        n2mgen.make() 
+        # max attempts is square that of `map_gen_attempts_per`
+        n2mgen.make(num_iter=map_gen_attempts_per,\
+            attempts_per_relation=map_gen_attempts_per) 
         M = list(n2mgen.map()) 
         M = sorted(M,key=lambda x: x[0] + x[1]) 
         M = prg_seqsort(M,self.prg) 
@@ -232,6 +234,9 @@ class N2MVectorFunctionGen:
     generates a <LCPVectorMap__TypeCShift> or <ModulatedN2MVectorMap>
     instance, based on reference to `n` and `m`, the sizes for the 
     n-set and m-set that this method's output function corresponds to. 
+
+    NOTE: algorithm always uses weighted pairwise operator for 
+          <ModulatedN2MVectorMap>. 
     """
     def nm_to_vmap(self,n,m,is_lcpvm:bool):
         
@@ -242,7 +247,6 @@ class N2MVectorFunctionGen:
                 (n,m),subvec_size_shifter,self.prg,self.prg2)
 
         # case: ModulatedN2MVectorMap
-        # NOTE: algorithm always uses weighted pairwise operator. 
         op = prg__one_weighted_pairwise_operator(self.prg,\
             deepcopy(DEFAULT_PAIRWISE_OPS),deepcopy(DEFAULT_PAIRWISE_OPS))
         return ModulatedN2MVectorMap.one_instance(self.prg,m,op)
@@ -258,7 +262,8 @@ class N2MVectorFunctionGen:
         s2 = [] 
         for s_ in s: 
             if s_ > n0:
-                s1 = modulo_in_range(s_,[2,n0+1]) 
+                q = max([3,n0+1])
+                s1 = modulo_in_range(s_,[2,q]) 
             else: 
                 s1 = s_ 
             s2.append(s1) 
