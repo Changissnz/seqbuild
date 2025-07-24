@@ -421,12 +421,6 @@ class VSSearch(IOFit):
             for q1 in q: 
                 q_.append(element_to_vector(q1)) 
             return np.array(q_) 
-
-        def summarize_matrix(m):
-            q = np.array([np.min(m,axis=0),\
-                np.max(m,axis=0),np.mean(m,axis=0),\
-                np.var(m,axis=0)]) 
-            return q 
         
         def update_accum(acc,s): 
             for i in range(len(acc)): 

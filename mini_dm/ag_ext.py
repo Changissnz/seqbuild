@@ -19,6 +19,12 @@ def absdiff_match_func(i,i2):
     indices = np.where(x == q)[0]
     return list(i2[indices])
 
+def summarize_matrix(m):
+    q = np.array([np.min(m,axis=0),\
+        np.max(m,axis=0),np.mean(m,axis=0),\
+        np.var(m,axis=0)]) 
+    return q 
+
 class APRNGGaugeV2(APRNGGauge):
 
     def __init__(self,aprng,frange,pradius:float):
@@ -48,6 +54,22 @@ class APRNGGaugeV2(APRNGGauge):
         self.cycle = q 
         return
 
+    """
+    NOTE: 
+    in some cases with excessively large values, 
+    such as with np.int32 values that are almost the 
+    maximum np.int32, the output measurement 
+        [0] coverage
+        [1] normalized unidirectional weighted point distance
+    may not make sense, especially [1] when [1] is not in the 
+    range [0.,1.] (that is the appropriate range for normalized 
+    u.w.p.d.).
+
+    When the u.w.p.d. is erroneous, implying the involvement of 
+    an excessively large value, there is usually a warning during 
+    Python program execution that reads 
+        >>> RuntimeWarning: overflow encountered
+    """
     def measure_cycle(self,max_size,\
         term_func=lambda l,l2: type(l) == type(None),\
         auto_frange:bool=False,auto_prange:bool=False,\
@@ -96,7 +118,8 @@ class APRNGGaugeV2(APRNGGauge):
         D = dict() 
         while len(axes) > 0: 
             A = axes.pop() 
-            D = APRNGGaugeV2.measure_matrix__rc_wise(self,D,m,A)
+            D = APRNGGaugeV2.measure_matrix__rc_wise(self,D,m,A,\
+                auto_frange=True,auto_prange=True)
         return D 
 
     """
@@ -108,7 +131,8 @@ class APRNGGaugeV2(APRNGGauge):
     a := axis, either 0 or 1. 
     """
     @staticmethod 
-    def measure_matrix__rc_wise(AG,D,m,a): 
+    def measure_matrix__rc_wise(AG,D,m,a,\
+        auto_frange=True,auto_prange=True): 
         assert a in {0,1}
 
         D[a] = dict()
@@ -128,8 +152,8 @@ class APRNGGaugeV2(APRNGGauge):
 
             AG.assign_cycle(q) 
             m0 = AG.measure_cycle(len(q),\
-                term_func=tfunc,auto_frange=True,\
-                auto_prange=True,do_cycle_update=False)
+                term_func=tfunc,auto_frange=auto_frange,\
+                auto_prange=auto_prange,do_cycle_update=False)
             D[a][i] = (m0,ent0,pdiff0)
         return D 
 
@@ -189,6 +213,7 @@ class APRNGGaugeV2(APRNGGauge):
 
         if type(seg_length) == type(None):
             _,_,seg_length = APRNGGaugeV2.pairwise_diff_metrics(is1)
+        seg_length = abs(seg_length)
 
         if seg_length == 0.0: return 0.0 
         self.catvec = is1.diffcat_vec(seg_length,start_value)
@@ -200,7 +225,6 @@ class APRNGGaugeV2(APRNGGauge):
             if q == 0.0: continue 
 
             c += 1 if count_type == "equals" else q 
-        
         qc = max(self.catvec) if count_type == "absdiff" else 1 
         return c / (qc * (len(self.catvec) - 1)) 
 

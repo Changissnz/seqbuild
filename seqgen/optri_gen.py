@@ -286,7 +286,19 @@ class OpTriFlipDerivation:
         otfd = OpTriFlipDerivation(ot,self.intseed,\
             self.opfunc,self.axis)
         return otfd 
-     
+
+"""
+Typically integer generator. <OpTriGen> uses the 
+upper-right triangular matrix that is the output 
+from an `optri` function call to a specific integer 
+sequence <IntSeq>. There are two generator types, 
+one each for <OpTri45N90Split> and <OpTriFlipDerivation>. 
+The argument `intseed` is used only for generator type 2. 
+The `forward_func` and `backward_func` are typically 
+inverse operations of each. The functions process 
+pairs of integers from vectors, and these vectors are 
+sourced from matrix `m`. 
+"""
 class OpTriGen:
 
     def __init__(self,intseed,m,prg,gentype:int,\
