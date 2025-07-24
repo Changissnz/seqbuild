@@ -217,14 +217,14 @@ class ModuloDecomp:
         self.continuous_merge(exclude_neg) 
         i = 1 
         while i < len(self.gleqvec_prt): 
-            stat = self.premerge_contiguous(i,exclude_neg) 
+            stat = self.premerge_contiguous(i,exclude_neg)  
             if not stat: 
                 i += 1 
         self.fin = True 
 
     def continuous_merge(self,exclude_neg:bool=True):
         for i in range(len(self.gleqvec_prt)): 
-            self.afs_on_subsequence(i,exclude_neg)
+            self.afs_on_subsequence(i,exclude_neg) 
         return
 
     def premerge_contiguous(self,i,exclude_neg:bool=True): 
@@ -264,6 +264,15 @@ class ModuloDecompRepr:
         assert type(md) == ModuloDecomp
         self.load(md)
         return 
+    
+    @staticmethod 
+    def from_list(l,exclude_neg:bool=True):
+        seq = IntSeq(l) 
+        md = ModuloDecomp(seq)
+        md.merge(exclude_neg)
+        mdr = ModuloDecompRepr(md)
+        mdr.reconstruct()
+        return mdr 
 
     def load(self,md):
         self.gleqvec_prt = md.gleqvec_prt
