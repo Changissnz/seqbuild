@@ -44,7 +44,8 @@ integer v2 of S1 result in
     difference = (v * m + a) - v2 such that 
     |difference| < v2, 
 the deficit of feed-backward processing does not permit S0 
-to be calculated into S1 via its (m,a) and modulus (from `afs_prt_mod`). 
+to be calculated into S1 via its (m,a) and modulus (of `afs_prt_mod`), 
+the modulus being `difference`. 
 
 <ModuloDecompV2> uses a feed-forward indexing scheme to overcome 
 this deficit of its superclass. 
