@@ -38,9 +38,10 @@ which suffered from a deficit due to constraints of feed-backward
 processing, a trait indicated by the indexing style of its 
 variable `afs_prt`. 
 
-When given two contiguous subsequences of an `afs_prt` 
-S0 = S[i] and S1 = S[i+1], and the last integer v of S0 and first 
-integer v2 of S1 result in 
+When given two contiguous subsequences from an `afs_prt`, 
+S0 = S[i] and S1 = S[i+1], S0 and S1 are subsequences of `l`,
+and the last integer v of S0 and first integer v2 of S1 result 
+in 
     difference = (v * m + a) - v2 such that 
     |difference| < v2, 
 the deficit of feed-backward processing does not permit v 
