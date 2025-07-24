@@ -11,8 +11,8 @@ Consider the format for one element in `afs_prt`:
 
 [0] (start range, end range) 
 [1] [[(m_0, a_0), [i_00, i_01]],...,[(m_j,a_j),[i_j0,i_j1]]; 
-    m_0 := start range, 
-    a_j := end range. 
+    i_00 := start range, 
+    i_j1 := end range. 
 
 In a feed-backward indexing, the output value at the `i_x0`'th index 
 uses as input the (`i_x0` - 1)'th output value. 
