@@ -104,7 +104,21 @@ class AffineFitSearch:
 
 """
 contains a decomposition scheme for integer sequences, based on 
-the modulo operation. 
+the modulo operation. Scheme splits an integer sequence into 
+contiguous subsequences based on the condition of the (i +1)'th 
+value being greater than the i'th value. 
+
+`gleqvec_prt`: partition of the indices of integer sequence `l` based 
+            on the (i + 1)'th value of `l` being less than the i'th 
+            value. 
+`afs_prt`: corresponding index spans and (multiple,additive) for `gleqvec_prt1`. 
+           The form is 
+    [0] (start range, end range) 
+    [1] [[(m_0, a_0), [i_00, i_01]],...,[(m_j,a_j),[i_j0,i_j1]]; 
+        m_0 := start range, 
+        a_j := end range. 
+`afs_prt_mod`: corresponding modulus separating every subsequence of 
+            `gleqvec_prt`. Number of modulus is |`afs_prt`| - 1. 
 """
 class ModuloDecomp: 
 
@@ -260,9 +274,11 @@ class ModuloDecomp:
 
 class ModuloDecompRepr: 
 
-    def __init__(self,md): 
-        assert type(md) == ModuloDecomp
+    def __init__(self,md,reconstruct_type:int=1):
+        assert reconstruct_type in {1,2}  
+        assert issubclass(type(md),ModuloDecomp)
         self.load(md)
+        self.rtype = reconstruct_type 
         return 
     
     @staticmethod 
@@ -287,7 +303,6 @@ class ModuloDecompRepr:
         prev_ma = None  
         while i < len(self.gleqvec_prt): 
             q = self.afs_prt[i]
-
             if i > 0: 
                 assert type(prev_ma) != type(None) 
                 mod_val = self.afs_prt_mod[i-1] 
@@ -305,8 +320,32 @@ class ModuloDecompRepr:
 
         return l
 
+    def reconstruct_v2_(self,first):
+        i = 0 
+        l = [first]
+        prev_ma = None  
+        while i < len(self.gleqvec_prt): 
+            q = self.afs_prt[i]            
+            for x in q[1]:
+                ma = x[0]
+                for j in range(x[1][0],x[1][1] + 1): 
+                    val = l[-1] * ma[0] + ma[1] 
+                    l.append(val)
+
+            if i < len(self.gleqvec_prt) - 1:  
+                mod_val = self.afs_prt_mod[i] 
+                l[-1] = l[-1] % mod_val  
+
+            i += 1 
+            if len(q[1]) > 0: 
+                prev_ma = q[1][-1][0] 
+
+        return l
+
     def reconstruct(self): 
-        return self.reconstruct_(self.first)
+        if self.rtype == 1:
+            return self.reconstruct_(self.first)
+        return self.reconstruct_v2_(self.first) 
 
     def reset_first(self,f): 
         assert type(f) in {int,np.int32}
