@@ -39,7 +39,7 @@ processing, a trait indicated by the indexing style of its
 variable `afs_prt`. 
 
 When given two contiguous subsequences of an `afs_prt` 
-S0 = S[i] and S1 = S[i+1], the last integer v of S0 and first 
+S0 = S[i] and S1 = S[i+1], and the last integer v of S0 and first 
 integer v2 of S1 result in 
     difference = (v * m + a) - v2 such that 
     |difference| < v2, 
