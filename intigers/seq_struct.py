@@ -106,7 +106,7 @@ class AffineFitSearch:
 contains a decomposition scheme for integer sequences, based on 
 the modulo operation. Scheme splits an integer sequence into 
 contiguous subsequences based on the condition of the (i +1)'th 
-value being greater than the i'th value. 
+value being less than the i'th value. 
 
 `gleqvec_prt`: partition of the indices of integer sequence `l` based 
             on the (i + 1)'th value of `l` being less than the i'th 
