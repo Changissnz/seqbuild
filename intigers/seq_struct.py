@@ -282,12 +282,17 @@ class ModuloDecompRepr:
         return 
     
     @staticmethod 
-    def from_list(l,exclude_neg:bool=True):
+    def from_list(l,exclude_neg:bool=True,md_type:int=1):
+        assert md_type in {1,2}
+
         seq = IntSeq(l) 
-        md = ModuloDecomp(seq)
-        md.merge(exclude_neg)
-        mdr = ModuloDecompRepr(md)
-        mdr.reconstruct()
+
+        if md_type == 1: 
+            md = ModuloDecomp(seq)
+            md.merge(exclude_neg)
+        else: 
+            md = ModuloDecompV2(seq,exclude_neg)
+        mdr = ModuloDecompRepr(md,md_type) 
         return mdr 
 
     def load(self,md):
