@@ -1,5 +1,21 @@
 from .seq_struct import * 
+from .extraneous import safe_div 
 
+def afs_prt__size(afs_prt):
+    c = 0 
+    for x in afs_prt:  
+        c += len(x[1])
+    return c 
+
+def afs_prt__density(afs_prt): 
+    if len(afs_prt) == 0: return 0.0 
+
+    start_index = afs_prt[0][0][0]
+    end_index = afs_prt[-1][0][1] 
+
+    # get active ranges 
+    c = afs_prt__size(afs_prt) 
+    return safe_div(end_index-start_index,c)
 
 """
 transforms a list `afs_prt`, representing an partition 
@@ -60,7 +76,13 @@ class ModuloDecompV2(ModuloDecomp):
         self.afs_prt = afs_prt__feedbw2feedfw(self.afs_prt)
 
         for i in range(len(self.afs_prt) - 1):
-            self.fix_subend(i) 
+            self.fix_subend(i)
+
+    def size(self):
+        return afs_prt__size(self.afs_prt)
+
+    def density(self): 
+        return  afs_prt__density(self.afs_prt)
 
     def check_subend(self,ap_index): 
         ix = self.gleqvec_prt[ap_index] 
