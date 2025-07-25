@@ -220,7 +220,7 @@ class ModuloDecomp:
         value = prev * m + a     
         mod_val = value - now
 
-        if now < 0: 
+        if now < 0 or prev < 0:  
             mod_val *= -1 
         return mod_val
 

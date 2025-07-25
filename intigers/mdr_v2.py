@@ -96,7 +96,7 @@ class ModuloDecompV2(ModuloDecomp):
         x = m * prev + a 
         diff = x - now
         index = 0 if prev != 0 else 1 
-        while diff < abs(now): 
+        while abs(diff) < abs(now): 
             add_one(index) 
             got = prev * MA[0] + MA[1] 
             diff = got - now 

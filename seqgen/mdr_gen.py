@@ -159,7 +159,8 @@ class MDRGen:
             self.mdr2.reset_first(np.int32(i))
         
     """
-    generates sequences until no new sequence for any integer seed is outputted. 
+    generates sequences until no new sequence for any integer seed is outputted, 
+    or until number of sequences equals that of `max_sequences`. 
     """
     def generate_sequence__type_novelgen(self,intseed_cycle,max_sequences:int,\
         clear_prev_info:bool=True):
