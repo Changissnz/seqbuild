@@ -13,6 +13,7 @@ class ModuloDecompV2Methods(unittest.TestCase):
     from <ModuloDecomp> to <ModuloDecompV2>. 
     """
     def test__ModuloDecompV2__fix_subend__case1(self):
+        
         l2 = [2, 59, 140, 113, 122, 119, 20, 53, 242, 179]
 
         intsq = IntSeq(l2) 
@@ -25,7 +26,8 @@ class ModuloDecompV2Methods(unittest.TestCase):
         mdr2_ = ModuloDecompRepr(md2,1) 
         r2_ = mdr2_.reconstruct()
         assert not np.all(r2_ == l2) 
-
+        
+        return 
 
     def test__ModuloDecompV2__reconstruct__case1(self):
 

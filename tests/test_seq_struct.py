@@ -123,7 +123,7 @@ class SeqStructMethods(unittest.TestCase):
         q = md.continuous_merge(False)
         assert md.gleqvec_prt == [1, 2]
         assert md.afs_prt == [((0, 2), [[(1, -6), [1, 1]]]), ((2, 3), [])]
-        assert md.afs_prt_mod == [np.int32(-12)]
+        assert md.afs_prt_mod == [np.int32(12)]
 
         # case 5 
         l = [-6,0,6]
@@ -156,7 +156,7 @@ class SeqStructMethods(unittest.TestCase):
         md = ModuloDecomp(intsq)
         md.merge(False)
         assert md.gleqvec_prt == [5, 6]
-        assert md.afs_prt_mod == [np.int32(-1822)], "got {}".format(md.afs_prt_mod)
+        assert md.afs_prt_mod == [np.int32(1822)], "got {}".format(md.afs_prt_mod)
         assert md.afs_prt == [((0, 6), [[(-3, 2), [1, 5]]]), ((6, 7), [])]
 
     def test__ModuloDecompRepr__reconstruct__case1(self):

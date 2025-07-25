@@ -68,12 +68,14 @@ class ModuloDecompV2(ModuloDecomp):
         m,a = qseq[-1][0]
 
         prev,now = self.l.l[ix],self.l.l[ix+1] 
-
         x = m * prev + a 
+
+        mx = self.afs_prt_mod[ap_index]
+        if x % mx == now: 
+            return True 
+
         diff = x - now
-        if diff < abs(now):
-            return False 
-        return True 
+        return not diff < abs(now)
 
     def fix_subend(self,ap_index): 
         stat = self.check_subend(ap_index) 

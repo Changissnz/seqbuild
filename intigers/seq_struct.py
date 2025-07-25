@@ -160,7 +160,6 @@ class ModuloDecomp:
                     if ilist[-1] != i -1: 
                         ilist.append(i)
                 else: ilist.append(i)
-
         ilist.append(len(self.gvec)) 
         return ilist 
 
@@ -220,8 +219,15 @@ class ModuloDecomp:
         value = prev * m + a     
         mod_val = value - now
 
+        ## ?? 
         if now < 0 or prev < 0:  
             mod_val *= -1 
+        if now > 0 and mod_val < 0:
+            mod_val *= -1
+        elif now < 0 and mod_val > 0: 
+            mod_val *= -1 
+        ## ?? 
+
         return mod_val
 
     """
