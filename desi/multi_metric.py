@@ -8,7 +8,7 @@ class MultiMetric:
 
     def __init__(self,l):
         self.l = np.array(l)
-        assert is_vector(self.l) 
+        assert is_vector(self.l)
 
     def summarize(self):
         return -1 

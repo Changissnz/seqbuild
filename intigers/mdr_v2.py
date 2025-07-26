@@ -18,7 +18,7 @@ def afs_prt__density(afs_prt):
     return safe_div(end_index-start_index,c)
 
 """
-transforms a list `afs_prt`, representing an partition 
+transforms a list `afs_prt`, representing a partition 
 from an affine-fit search over an integer sequence, from 
 a feed-backward to a feed-forward indexing. There is one 
 key difference between these two indexing schemes. 
