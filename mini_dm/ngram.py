@@ -55,7 +55,25 @@ class NGrammer2D:
     def check_dim2(self,dim2): 
         assert_nm(dim2) 
         assert dim2[0] * dim2[1] == self.n
-    
+
+    def one_cycle(self,ref_index=0): 
+        assert type(ref_index) in {int,np.int32,np.int64} 
+        assert 0 <= ref_index < self.n
+        self.ref_index = ref_index 
+
+        c = 0
+        while self.ref_index != ref_index or c < 1:
+            if self.ref_index == ref_index: 
+                c += 1 
+
+                if c == 1:
+                    yield self.__next__() 
+                else: 
+                    continue 
+            
+            yield self.__next__()
+        return 
+
     def __next__(self):
         sv = subvec(self.l,self.ref_index,self.n)
         self.ref_index = (self.ref_index + 1) % len(self.l) 
