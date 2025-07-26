@@ -8,6 +8,8 @@ from math import ceil
 zero_div0 = lambda num,denum: zero_div(num,denum,0)
 
 def to_trinary_relation(v1,v2):
+    if type(v2) == type(None):
+        v2 = 0 
     if v1 == v2: return 0 
     if v1 > v2: return 1 
     return -1 
@@ -57,6 +59,10 @@ To use these 2 features, set at most one of them to True.
 def to_trinary_relation_v2(v1,v2,zero_feature:bool=False,abs_feature:bool=True):
 
     stat1 = is_vector(v1)
+
+    if type(v2) == type(None):
+        v2 = 0 
+
     stat2 = is_vector(v2) 
 
     def next_index(i):
@@ -395,19 +401,3 @@ def multiple_sqrt_seq(x,mrange,output_type=0):
         y = (i,dx) if output_type else dx 
         qx.append(y) 
     return qx 
-
-#------------------------- subvector operations 
-
-def subvec(l,start_index,length):
-    assert is_vector(l) or type(l) == list 
-    assert 0 <= start_index < len(l)
-    assert 0 < length <= len(l) 
-
-    q = list(l[start_index:start_index+length])
-
-    l1 = len(q) 
-    excess = length - l1
-    q2 = [] 
-    if excess > 0: 
-        q2 = list(l[:excess]) 
-    return q + q2 

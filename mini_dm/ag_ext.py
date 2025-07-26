@@ -50,6 +50,7 @@ class APRNGGaugeV2(APRNGGauge):
         self.cycle = None 
 
     def update_cycle(self,max_size:int,term_func):
+        self.clear_cycle() 
         q = self.cycle_one(max_size,term_func)
         self.cycle = q 
         return
@@ -172,9 +173,9 @@ class APRNGGaugeV2(APRNGGauge):
         return q,fx 
 
     @staticmethod
-    def match_two_intseq(i1,i2,match_func): 
-        assert type(i1) == type(i2)
-        #assert type(i1) == IntSeq
+    def match_two_intseq(i1,i2,match_func):
+        assert issubclass(type(i1),IntSeq)
+        assert issubclass(type(i2),IntSeq)
         return i1.match_map(i2,match_func) 
 
     """

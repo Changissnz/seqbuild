@@ -5,6 +5,7 @@ from math import floor
 from intigers.extraneous import zero_div0
 from collections import defaultdict
 from .csrch import * 
+from .ngram import assert_nm 
 import numpy as np 
 
 #--------------------------------------------------------------------------
@@ -20,12 +21,6 @@ def vector_to_indexvalue_map(v):
     for (i,v_) in enumerate(v): 
         d[i] = v_
     return d 
-
-def assert_nm(nm): 
-    assert type(nm) == tuple and len(nm) == 2 
-    assert type(nm[0]) in {int,np.int32,np.int64}
-    assert type(nm[1]) in {int,np.int32,np.int64}
-    assert min(nm) >= 0 
 
 # NOTE: function is similar to <morebs2.HopPattern> 
 def proportional_index__n2m(n,m,ni):
@@ -179,7 +174,6 @@ class N2MIndexMapGen:
     def make(self,num_iter:int= 10 ** 5,attempts_per_relation:int = 10 ** 5): 
         stat = num_iter > 0 
         while stat:
-            print("XTA: ",num_iter) 
             stat = num_iter > 0 
             r = self.one_new_relation(attempts_per_relation) 
             if type(r) == type(None):
@@ -240,12 +234,7 @@ class N2MIndexMapGen:
         return None 
     
     def add_relation(self,nset,mset):
-        print("adding relation ")
-        print("\t\t",nset)
-        print("\t\t",mset)
-
         stat = self.n2m_imap.add((nset,mset),assert_check=False) 
-        print("\t\tSTAT: ",stat)
 
         if stat:
             for j in mset: 
