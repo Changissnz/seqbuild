@@ -17,12 +17,12 @@ class MultiMetric:
     for subsequence S of `l`. S starts at `ref_index` of `l` and 
     spans for `length` number of elements in increasing index order. The 
     positive integer `l2` is the subsequence length for the n-gram 
-    iteration over S. 
+    iteration over S.
     """
     def agv2_measures__ngrammer(self,ref_index,length,\
             l2,set_frange:bool=True): 
         assert l2 <= length 
-        
+
         # init the <NGrammer> 
         sv = subvec(self.l,ref_index,length) 
 
@@ -47,6 +47,13 @@ class MultiMetric:
 
         # return the measurements from 
         return np.array(agv2.measurements)
+
+    # TODO 
+    def vector_measures(self):
+        # get diff0,diff1 vectors 
+        v0 = stdop_vec(self.l,sub,np.float32)
+        v1 = stdop_vec(v0,sub,np.float32) 
+        return (v0,v1) 
 
     def summarize(self):
         return -1 

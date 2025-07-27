@@ -28,6 +28,9 @@ def trinary_diff(t0,t1,invertible_weight=0.5):
         return invertible_weight
     return int(abs(t0-t1))
 
+def trinary_diff_(invertible_weight=0.5):
+    return lambda x0,x1: trinary_diff(x0,x1,invertible_weight) 
+
 def trinary_vector_invertible_difference(v1,v2,invertible_weight): 
     if type(v1) == list: v1 = np.array(v1) 
     if type(v2) == list: v2 = np.array(v2) 
