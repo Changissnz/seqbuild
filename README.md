@@ -5,9 +5,9 @@ Sequentete...sequentete, my son.
 *Work-in-progress* 
 
 Project is being developed in conjunction with 
-that of library, `morebs2`. Started out as a 
-research project, and I am starting to wrap ends 
-to it before the project branches off into 
+that of dependency library, `morebs2`. Started out 
+as a research project, and I am starting to wrap 
+ends to it before the project branches off into 
 development hell terrain. 
 
 And here is this, because and for the 

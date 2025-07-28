@@ -49,11 +49,30 @@ class MultiMetric:
         return np.array(agv2.measurements)
 
     # TODO 
-    def vector_measures(self):
+    """
+    calculates the Kolmogorov complexity via 
+    size of the contiguous representation of the 
+    1st-order difference and 2nd-order difference; 
+    these differences are in trinary form before 
+    being mapped into contiguous representation.
+
+    Outputs a pair of non-negative integers 
+    (p1,p2), in which p1 is the size of the contiguous 
+    representation of the 1st-order difference (in trinary form) 
+    and p2 likewise for the 2nd-order difference. 
+    """
+    def diff_measures(self):
         # get diff0,diff1 vectors 
+            # pairwise diff
         v0 = stdop_vec(self.l,sub,np.float32)
+            # change in pairwise diff
         v1 = stdop_vec(v0,sub,np.float32) 
-        return (v0,v1) 
+        trel0 = to_trinary_relation_v2(v0,None,True,False)
+        trel1 = to_trinary_relation_v2(v1,None,True,False)
+
+        q = contiguous_repr__sequence(trel0) 
+        q2 = contiguous_repr_sequence(trel1) 
+        return len(q),len(q2) 
 
     def summarize(self):
         return -1 
