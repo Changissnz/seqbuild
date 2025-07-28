@@ -89,5 +89,10 @@ class MultiMetric:
             diff_type2="best",basis="median")
         return zero_div0(d,len(self.l))
 
-    def summarize(self):
-        return -1 
+    def summarize(self,ngram):
+        m1 = self.agv2_measures__ngrammer(0,len(self.l),\
+            ngram,set_frange:bool=True)
+        m1 = np.mean(m1,axis=0)
+        m2 = self.diff_measures()
+        m3 = self.mcs_kcomplexity()
+        return m1,m2,m3
