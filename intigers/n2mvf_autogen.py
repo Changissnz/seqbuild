@@ -17,7 +17,7 @@ class<ModulatedN2MVectorMap>.
 from mini_dm.n2m_function import * 
 from intigers.poly_output_fitter_ import * 
 from intigers.mod_prng import prg__iterable
-from mini_dm.ngram import subvec
+from mini_dm.ngram import *
 from morebs2.numerical_generator import prg__constant
 from intigers.prng_pw_op import * 
 

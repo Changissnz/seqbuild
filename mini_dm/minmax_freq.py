@@ -1,18 +1,6 @@
 from collections import defaultdict 
 from morebs2.matrix_methods import is_vector
-
-def vec_to_frequency_map(V):
-    assert is_vector(V)
-    dx = defaultdict(int)
-    for v_ in V: dx[v_] += 1
-    return dx 
-
-def setseq_to_frequency_map(S): 
-    dx = defaultdict(int)
-    for s in S: 
-        assert type(s) == set 
-        for s_ in s: dx[s_] += 1 
-    return dx 
+from morebs2.measures import vec_to_frequency_map,setseq_to_frequency_map
 """
 given a dictionary with string-like key and value as list, <MinMaxFreq> 
 calculates the frequency of each element in the value. 

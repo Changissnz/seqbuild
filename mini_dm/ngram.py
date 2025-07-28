@@ -1,21 +1,5 @@
 import numpy as np 
-from morebs2.matrix_methods import is_vector
-
-#------------------------- subvector operations 
-
-def subvec(l,start_index,length):
-    assert is_vector(l) or type(l) == list 
-    assert 0 <= start_index < len(l)
-    assert 0 < length <= len(l) 
-
-    q = list(l[start_index:start_index+length])
-
-    l1 = len(q) 
-    excess = length - l1
-    q2 = [] 
-    if excess > 0: 
-        q2 = list(l[:excess]) 
-    return q + q2 
+from morebs2.matrix_methods import is_vector,subvec
 
 #------------------------- arg. check 
 
