@@ -72,7 +72,22 @@ class MultiMetric:
 
         q = contiguous_repr__sequence(trel0) 
         q2 = contiguous_repr_sequence(trel1) 
+
         return len(q),len(q2) 
+
+    """
+    Kolmogorov complexity by calculation involving most common 
+    subsequence (actually, the technical term is subsequence of 
+    median frequency).  
+
+    Value falls in range [0.,1.] and is directly proportional to 
+    the complexity (measured by the error of the subsequence fitted 
+    to the target sequence `l`) of representing `l`. 
+    """
+    def mcs_kcomplexity(self):
+        d = MCS_kcomplexity(self.l,float,diff_type="bool",\
+            diff_type2="best",basis="median")
+        return zero_div0(d,len(self.l))
 
     def summarize(self):
         return -1 
