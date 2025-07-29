@@ -39,6 +39,9 @@ the |`l`|'th most frequent factors of the elements
 of `l`, and corresponding value the Kolmogorov 
 complexity of contiguous condensed representations 
 for 1st and 2nd order differences. 
+
+NOTE: modular characteristic always includes 2, so the 
+      number of factors may be either |`l`| or |`1`| + 1. 
 """
 class ModChar: 
 
