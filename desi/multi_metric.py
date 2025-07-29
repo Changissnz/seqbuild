@@ -1,9 +1,72 @@
 from intigers.mdr_v2 import * 
 from intigers.extraneous import * 
 from intigers.tvec import *
+from intigers.intfactor import * 
 from mini_dm.ag_ext import *  
 from mini_dm.ngram import *
 from morebs2.seq_repr import * 
+
+"""
+calculates the Kolmogorov complexity via 
+size of the contiguous representation of the 
+1st-order difference and 2nd-order difference; 
+these differences are in trinary form before 
+being mapped into contiguous representation.
+
+Outputs a pair of non-negative integers 
+(p1,p2), in which p1 is the size of the contiguous 
+representation of the 1st-order difference (in trinary form) 
+and p2 likewise for the 2nd-order difference. 
+"""
+def trinary_diffvec_kcomplexity(l):
+    # get diff0,diff1 vectors 
+        # pairwise diff
+    v0 = stdop_vec(l,sub,np.float32)
+        # change in pairwise diff
+    v1 = stdop_vec(v0,sub,np.float32) 
+    trel0 = to_trinary_relation_v2(v0,None,True,False)
+    trel1 = to_trinary_relation_v2(v1,None,True,False)
+
+    q = contiguous_repr__sequence(trel0) 
+    q2 = contiguous_repr__sequence(trel1) 
+
+    return len(q),len(q2) 
+
+"""
+Modular characteristic of integer sequence `l`. 
+Calculates a map consisting of keys that are 
+the |`l`|'th most frequent factors of the elements 
+of `l`, and corresponding value the Kolmogorov 
+complexity of contiguous condensed representations 
+for 1st and 2nd order differences. 
+"""
+class ModChar: 
+
+    def __init__(self,l): 
+        assert type(l) == list or is_vector(l) 
+        self.l = np.array(l,dtype="int32") 
+        self.factors,self.complexity_map = None,None 
+        self.init_factors()
+        return
+
+    def init_factors(self): 
+        isfso = ISFactorSetOps(self.l,int_limit=DEFAULT_INT_MAX_THRESHOLD)
+        isfso.factor_count_() 
+        dx2 = isfso.dsort(pkeys=None)[::-1] 
+
+        l = len(self.l)
+        dx_ = [dx2_[0] for dx2_ in dx2[:l]] 
+        self.factors = dx_ 
+        if 2 not in self.factors: self.factors.insert(0,2) 
+
+    """
+    main method 
+    """
+    def modular_complexity(self): 
+        self.complexity_map = dict()
+        for f in self.factors: 
+            l2 = np.array([l_ % f for l_ in self.l])
+            self.complexity_map[f] = trinary_diffvec_kcomplexity(l2)
 
 """
 similar to a swiss-knife but for measuring qualities 
@@ -14,7 +77,12 @@ class MultiMetric:
     def __init__(self,l):
         self.l = np.array(l,dtype=np.float64)
         assert is_vector(self.l)
-        self.ref_index = 0 
+        self.modcomplex_map = None 
+
+    def load_mc_map(self):
+        mc = ModCond(self.l) 
+        mc.modular_complexity()
+        self.modcomplex_map = mc.complexity_map 
 
     """
     produces sequence of two-dimensional measures 
@@ -64,32 +132,11 @@ class MultiMetric:
         ce_vec = ce_vec.reshape((len(ce_vec),1))
         return np.hstack((q,ce_vec))
 
-    # TODO 
     """
-    calculates the Kolmogorov complexity via 
-    size of the contiguous representation of the 
-    1st-order difference and 2nd-order difference; 
-    these differences are in trinary form before 
-    being mapped into contiguous representation.
-
-    Outputs a pair of non-negative integers 
-    (p1,p2), in which p1 is the size of the contiguous 
-    representation of the 1st-order difference (in trinary form) 
-    and p2 likewise for the 2nd-order difference. 
+    see method<trinary_diffvec_kcomplexity>
     """
     def diff_measures(self):
-        # get diff0,diff1 vectors 
-            # pairwise diff
-        v0 = stdop_vec(self.l,sub,np.float32)
-            # change in pairwise diff
-        v1 = stdop_vec(v0,sub,np.float32) 
-        trel0 = to_trinary_relation_v2(v0,None,True,False)
-        trel1 = to_trinary_relation_v2(v1,None,True,False)
-
-        q = contiguous_repr__sequence(trel0) 
-        q2 = contiguous_repr__sequence(trel1) 
-
-        return len(q),len(q2) 
+        return trinary_diffvec_kcomplexity(self.l) 
 
     """
     Kolmogorov complexity by calculation involving most common 
