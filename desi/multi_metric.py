@@ -146,7 +146,7 @@ class MultiMetric:
 
     """
     Kolmogorov complexity by calculation involving most common 
-    subsequence (actually, the technical term is subsequence of 
+    subsequence (actually, the technical wording is subsequence of 
     median frequency).  
 
     Value falls in range [0.,1.] and is directly proportional to 
