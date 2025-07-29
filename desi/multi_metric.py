@@ -79,8 +79,11 @@ class MultiMetric:
         assert is_vector(self.l)
         self.modcomplex_map = None 
 
+    """
+    loads map describing modular characteristic of `l`. 
+    """
     def load_mc_map(self):
-        mc = ModCond(self.l) 
+        mc = ModChar(self.l) 
         mc.modular_complexity()
         self.modcomplex_map = mc.complexity_map 
 
