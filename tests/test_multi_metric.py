@@ -1,5 +1,6 @@
 from desi.multi_metric import * 
-from morebs2.numerical_generator import prg__LCG
+from morebs2.numerical_generator import prg__LCG,\
+    prg__n_ary_alternator,prg__constant
 import unittest
 
 ### lone file test 
@@ -32,8 +33,46 @@ class MultiMetricMethods(unittest.TestCase):
             [0.82432, 0.58931],\
             [0.97958, 0.58931]])
 
-        assert np.all(r == rsol)
+        assert np.all(r[:,[0,1]] == rsol)
 
+    def test__MultiMetric__summarize__case1(self):
+
+        prg = prg__LCG(-13,1400,-52421,3245329670)
+        L = [prg() for _ in range(10**3)] 
+        ML = MultiMetric(L[:100])
+        q = ML.summarize(ngram=10)
+        assert equal_iterables(q[0],np.array([0.8373328 , 0.3676976 , 0.40110277]))
+        assert q[1] == (65, 70) 
+        assert q[2] == np.float64(0.7)
+
+        prg2 = prg__LCG(13,4,14,3245329670)
+        L2 = [prg2() for _ in range(10**3)] 
+        ML2 = MultiMetric(L2[:100])
+        q2 = ML2.summarize(ngram=10)
+        assert equal_iterables(q2[0],np.array([0.8043259 , 0.3383135 , 0.29560167])) 
+        assert q2[1] == (49, 61)
+        assert q2[2] == np.float64(0.7)
+
+        prg3 = prg__n_ary_alternator(-500,500,-500) 
+        L3 = [prg3() for _ in range(10**3)] 
+        ML3 = MultiMetric(L3[:100])
+        q3 = ML3.summarize(ngram=10)
+        assert equal_iterables(q3[0],np.array([0.124363  , 0.0703733 , 0.03626311]))
+        assert q3[1] == (1, 1) and q3[2] == 0.7
+
+        prg4 = prg__constant(6) 
+        L4 = [prg4() for _ in range(10**3)] 
+        ML4 = MultiMetric(L4[:100])
+        q4 = ML4.summarize(ngram=10)
+        assert q4[1] == (1,1) 
+        assert q4[2] == 0.0 
+
+        prg5 = prg__LCG(0,1,2,10000) 
+        L5 = [prg5() for _ in range(10**3)] 
+        ML5 = MultiMetric(L5[:100])
+        q5 = ML5.summarize(ngram=10)
+        assert q5[1] == (1,1) 
+        assert q5[2] == 0.7
 
 if __name__ == '__main__':
     unittest.main()

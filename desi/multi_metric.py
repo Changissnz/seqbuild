@@ -3,11 +3,16 @@ from intigers.extraneous import *
 from intigers.tvec import *
 from mini_dm.ag_ext import *  
 from mini_dm.ngram import *
+from morebs2.seq_repr import * 
 
+"""
+similar to a swiss-knife but for measuring qualities 
+of sequence `l`. 
+"""
 class MultiMetric:
 
     def __init__(self,l):
-        self.l = np.array(l)
+        self.l = np.array(l,dtype=np.float64)
         assert is_vector(self.l)
         self.ref_index = 0 
 
@@ -34,9 +39,12 @@ class MultiMetric:
         fmin,fmax = 0.,1.
         if set_frange: 
             fmin,fmax = np.min(self.l),np.max(self.l) 
+        
+        start_value = np.min(self.l)
 
         agv2 = APRNGGaugeV2(f,(fmin,fmax),0.5) 
 
+        ce_vec = []
         for c in chunks:  
             cs = c.flatten()
             agv2.assign_cycle(cs)
@@ -45,8 +53,16 @@ class MultiMetric:
                 auto_frange=not set_frange,auto_prange=True,\
                 do_cycle_update=False) 
 
+            is1 = IntSeq(cs) 
+            ce = agv2.std_cat_entropy(is1,seg_length=None,start_value=start_value,\
+                count_type="absdiff")
+            ce_vec.append(ce) 
+
         # return the measurements from 
-        return np.array(agv2.measurements)
+        q = np.array(agv2.measurements)
+        ce_vec = np.array(ce_vec)
+        ce_vec = ce_vec.reshape((len(ce_vec),1))
+        return np.hstack((q,ce_vec))
 
     # TODO 
     """
@@ -71,7 +87,7 @@ class MultiMetric:
         trel1 = to_trinary_relation_v2(v1,None,True,False)
 
         q = contiguous_repr__sequence(trel0) 
-        q2 = contiguous_repr_sequence(trel1) 
+        q2 = contiguous_repr__sequence(trel1) 
 
         return len(q),len(q2) 
 
@@ -89,9 +105,23 @@ class MultiMetric:
             diff_type2="best",basis="median")
         return zero_div0(d,len(self.l))
 
+    """
+    Provides a summarization of sequence `l`. The `ngram` argument 
+    specifies the length of contiguous subsequences from `l` that are 
+    measured for particular qualities (see description of these values 
+    below `return`). 
+
+    return: 
+    [0] (coverage, normalized unidirectional weighted point distance, 
+        standard categorical entropy)
+    [1] Kolmogorov complexity of representing 1st-order difference,
+        Kolmogorov complexity of representing 2nd-order difference,
+    [2] Kolmogorov complexity of difference b/t `l` and its most 
+        common subsequence. 
+    """
     def summarize(self,ngram):
         m1 = self.agv2_measures__ngrammer(0,len(self.l),\
-            ngram,set_frange:bool=True)
+            ngram,set_frange=True)
         m1 = np.mean(m1,axis=0)
         m2 = self.diff_measures()
         m3 = self.mcs_kcomplexity()
