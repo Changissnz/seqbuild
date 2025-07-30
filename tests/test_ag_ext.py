@@ -165,6 +165,35 @@ class APRNGGaugeV2Methods(unittest.TestCase):
         assert d2[1][0][1] == d2sol10[1] 
         assert np.all(np.round(np.array(d2[1][0][2]) - d2sol10[2]) <= 10 ** -5)
 
+class AGExtOtherMethods(unittest.TestCase):
+
+    def test__ranged_delta_decomposition__case1(self): 
+
+        S = np.array([13,14,40,10,70,10,31,42])
+        rdd = ranged_delta_decomposition(S,i=3,rv=(0.,100.),d=1)
+        rdd1 = ranged_delta_decomposition(S,i=3,rv=(-20.,100.),d=-1)
+
+        rdd_sol = [((0,3),-5),((3,4),-3),((4,21),-1),((21,30),1),((30,32),3),((32,60),5),((60,90),7)]
+        rdd1_sol = [((0,-30),7)]
+
+        assert rdd == rdd_sol
+        assert rdd1 == rdd1_sol 
+
+        S2 = np.array([13.5,14.9,39.1,10.15,69.7,8.1,33.4,44.4]) 
+        rdd2 = ranged_delta_decomposition(S2,i=3,rv=(0.,100.),d=1)
+        rdd3 = ranged_delta_decomposition(S2,i=3,rv=(-20.,100.),d=-1)
+
+        rdd2_sol = [((0,3.35),-5),((3.35,4.75),-3),\
+                ((4.75,23.25),-1),((23.25,28.95),1),\
+                ((28.95,34.25),3),((34.25,59.55),5),\
+                ((59.55,89.85),7)]
+        assert rdd2 == rdd2_sol 
+
+        rdd3_sol = [((0,-2.05),5),((-2.05,-30.15),7)] 
+        assert rdd3 == rdd3_sol 
+
+        assert False 
+
         
 if __name__ == '__main__':
     unittest.main()

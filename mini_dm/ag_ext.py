@@ -4,7 +4,7 @@ from types import MethodType,FunctionType
 from .minmax_freq import *  
 from .iseq import * 
 from intigers.process_seq import stdop_vec
-from intigers.extraneous import zero_div0  
+from intigers.extraneous import zero_div0,to_trinary_relation_v2
 
 """
 chooses the element of i2 closest in absolute distance 
@@ -24,6 +24,83 @@ def summarize_matrix(m):
         np.max(m,axis=0),np.mean(m,axis=0),\
         np.var(m,axis=0)]) 
     return q 
+
+#---------------- methods used for sequence modification according 
+#---------------- to metrics such as coverage. 
+
+def trinary_vec_for_element(S,i):
+    dv = to_trinary_relation_v2(S,S[i],True,False) 
+    return dv 
+    
+"""
+calculates a sequence D, named ranged-delta decomposition, 
+w.r.t. the i'th element of `S`. The direction of changing 
+S[i] is either -1 or 1. The elements of D  are of the form: 
+    ((start additive,end additive), rate of change). 
+The super-bound of these additives w.r.t. S[i] is 
+    [rv[0] - S[i],0] if d == -1 and 
+    [0,rv[1] - S[i]] if d == 1. 
+
+The sequence D is a partitioning used to measure the 
+change of unidirectional weighted point distance 
+from the change of S[i] over spans of additives to 
+S[i]. 
+"""
+def ranged_delta_decomposition(S,i,rv=None,d=1):
+    assert d in {-1,1} 
+
+    mn,mx = np.min(S),np.max(S) 
+    if type(rv) == type(None):
+        rv = (mn,mx) 
+    assert is_valid_range(rv,False,True) 
+    assert rv[0] <= mn <= rv[1]
+    assert rv[0] <= mx <= rv[1]
+
+    dvec = trinary_vec_for_element(S,i) 
+
+    iset0,iset1 = np.where(dvec == -1)[0],\
+        np.where(dvec == 1)[0]
+
+    # d = -1 -> (-1,-1),(1,1) 
+    # d = 1 -> (-1,1),(1,-1) 
+    isets = [iset0,iset1]
+
+    dx = d if d == 1 else 0 
+    max_diff = rv[dx] - S[i]
+
+
+    indices = isets[dx]
+    diff_vec = [] 
+    for j in indices:
+        diff = abs(S[j] - S[i])
+        diff_vec.append(diff)
+    diff_vec = sorted(diff_vec) 
+
+    start_index = 0.0 
+    iset_count = [len(isets[0]),len(isets[1])] 
+    iset_ = set(np.where(dvec == 0)[0]) - {i}
+    iset_count[(dx + 1) % 2] = iset_count[(dx + 1) % 2] + \
+        len(iset_)
+
+    decomp = []
+    for dv in diff_vec:
+        end_index = round(dv * d,5)
+        r = (start_index,end_index) 
+        per = iset_count[(dx + 1) % 2] - iset_count[dx]
+        decomp.append((r,per)) 
+        start_index = end_index 
+
+        if iset_count[dx] == 0: 
+            continue
+        iset_count[dx] -= 1 
+        iset_count[(dx+1)%2] += 1 
+   
+    if start_index != max_diff:
+        r = (start_index,max_diff) 
+        per = iset_count[(dx + 1) % 2] - iset_count[dx]
+        decomp.append((r,per))
+
+    return decomp 
 
 class APRNGGaugeV2(APRNGGauge):
 
@@ -231,3 +308,12 @@ class APRNGGaugeV2(APRNGGauge):
 
     def cycle_multvec(self):
         return stdop_vec(self.cycle,zero_div0,cast_type=np.float32)
+
+    @staticmethod
+    def modify_sequence_coverage(seq,new_coverage):
+
+        return -1 
+
+    @staticmethod
+    def modify_sequence_uwpd_(seq,rv,new_uwpd,prg): 
+        return -1 
