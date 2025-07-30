@@ -92,7 +92,8 @@ class MultiMetric:
 
     """
     produces sequence of two-dimensional measures 
-    (coverage, normalized unidirectional weighted point distance) 
+    (coverage, normalized unidirectional weighted point distance), 
+        (float,float)
     for subsequence S of `l`. S starts at `ref_index` of `l` and 
     spans for `length` number of elements in increasing index order. The 
     positive integer `l2` is the subsequence length for the n-gram 
@@ -171,11 +172,15 @@ class MultiMetric:
         Kolmogorov complexity of representing 2nd-order difference,
     [2] Kolmogorov complexity of difference b/t `l` and its most 
         common subsequence. 
+
+        * every value in [0]-[2] is a float. 
     """
-    def summarize(self,ngram):
+    def summarize(self,ngram,condense_ngram_output:bool=True):
         m1 = self.agv2_measures__ngrammer(0,len(self.l),\
             ngram,set_frange=True)
-        m1 = np.mean(m1,axis=0)
+        if condense_ngram_output:
+            m1 = np.mean(m1,axis=0)
+            
         m2 = self.diff_measures()
         m3 = self.mcs_kcomplexity()
         return m1,m2,m3
