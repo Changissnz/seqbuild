@@ -6,6 +6,9 @@ from .iseq import *
 from intigers.process_seq import stdop_vec
 from intigers.extraneous import zero_div0,to_trinary_relation_v2
 
+#------------------------ auxiliary functions used by <APRNGGaugeV2> for 
+#------------------------ measures such as matching and summarization 
+
 """
 chooses the element of i2 closest in absolute distance 
 to float i. 
@@ -31,10 +34,10 @@ def summarize_matrix(m):
 def trinary_vec_for_element(S,i):
     dv = to_trinary_relation_v2(S,S[i],True,False) 
     return dv 
-    
+
 """
 calculates a sequence D, named ranged-delta decomposition, 
-w.r.t. the i'th element of `S`. The direction of changing 
+w.r.t. the i'th element of `S`. The direction `d` of changing 
 S[i] is either -1 or 1. The elements of D  are of the form: 
     ((start additive,end additive), rate of change). 
 The super-bound of these additives w.r.t. S[i] is 
@@ -68,7 +71,6 @@ def ranged_delta_decomposition(S,i,rv=None,d=1):
     dx = d if d == 1 else 0 
     max_diff = rv[dx] - S[i]
 
-
     indices = isets[dx]
     diff_vec = [] 
     for j in indices:
@@ -101,6 +103,57 @@ def ranged_delta_decomposition(S,i,rv=None,d=1):
         decomp.append((r,per))
 
     return decomp 
+
+def rdd_index_for_delta(rdd,delta): 
+    i = -1
+    s = 0
+    dstat = delta > 0 
+    for (j,x) in enumerate(rdd):
+        d = abs(x[0][1] - x[0][0]) 
+
+        if x[1] == 0: continue 
+        dx = d * x[1] 
+
+        s1 = s + dx
+        s_ = sorted([s,s1]) 
+        #if s_[0] <= delta <= s_[1]: 
+        #    if x[1] != 0: 
+        #        return j,[s,s1],delta
+
+        sdiff = s1 - s 
+        if dstat: 
+            if delta <= sdiff:
+                return j,[s,s1],delta
+        else:
+            if delta >= sdiff: 
+                return j,[s,s1],delta 
+
+        delta = delta - dx 
+        s = s1  
+    return i,None,None 
+
+
+def adjust_for_uwpd_change(S,i,c,rv=None,d_priority=1,recurse:bool=True): 
+    rdd = ranged_delta_decomposition(S,i,rv,d_priority)
+
+    di,rx,delta = rdd_index_for_delta(rdd,c) 
+
+    if di == -1:
+        if not recurse: 
+            return None
+        return adjust_for_uwpd_change(S,i,c,rv,d_priority * -1,False) 
+
+    rx_ = rdd[di][0]
+    ratio = delta / (rx[1] - rx[0])
+
+    S_ = np.asarray(S,dtype=float) 
+
+    q = delta / rdd[di][1]
+    if rx_[1] < rx_[0]:
+        q = -q 
+
+    S_[i] = S_[i] + rx_[0] + q
+    return S_ 
 
 class APRNGGaugeV2(APRNGGauge):
 

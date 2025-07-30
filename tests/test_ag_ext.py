@@ -192,8 +192,25 @@ class AGExtOtherMethods(unittest.TestCase):
         rdd3_sol = [((0,-2.05),5),((-2.05,-30.15),7)] 
         assert rdd3 == rdd3_sol 
 
-        assert False 
+    def test__adjust_for_uwpd_change__case1(self): 
+        S = np.array([13,14,40,10,70,10,31,42])
+        S_ = adjust_for_uwpd_change(S,i=3,c=50,rv=(0.,100.),d_priority=1,recurse=True)
+        S__ = adjust_for_uwpd_change(S,i=3,c=50,rv=(0.,100.),d_priority=-1,recurse=False)
+        S1 = adjust_for_uwpd_change(S,i=3,c=100,rv=(0.,100.),d_priority=1,recurse=True)
+        S2 = adjust_for_uwpd_change(S,i=3,c=-25,rv=(0.,100.),d_priority=1,recurse=True)
 
+        pd0 = uwpd(S,accum_op=lambda x1,x2: x1 + x2)
+        pd0_ = uwpd(S_,accum_op=lambda x1,x2: x1 + x2)
+        assert pd0 + 50 == pd0_ 
+
+        pd0__ = uwpd(S__,accum_op=lambda x1,x2: x1 + x2)
+        assert pd0 + 50 == pd0__
+
+        pd1 = uwpd(S1,accum_op=lambda x1,x2: x1 + x2)
+        assert pd0 + 100 == pd1
+
+        pd2 = uwpd(S2,accum_op=lambda x1,x2: x1 + x2)
+        assert pd0 -25 == pd2
         
 if __name__ == '__main__':
     unittest.main()
