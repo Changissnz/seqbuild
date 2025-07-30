@@ -104,6 +104,18 @@ def ranged_delta_decomposition(S,i,rv=None,d=1):
 
     return decomp 
 
+"""
+determines the index of the delta range in `rdd`, 
+a ranged-delta decomposition, for the wanted change 
+`delta` to occur. If there is no possibility for `delta` 
+to occur, given `rdd`, then the algorithm outputs -1 
+as the index. 
+
+return: 
+- index of `rdd` 
+- range of change for `rdd`[index]
+- remaining of `delta` at that index in `rdd` 
+"""
 def rdd_index_for_delta(rdd,delta): 
     i = -1
     s = 0
@@ -115,10 +127,7 @@ def rdd_index_for_delta(rdd,delta):
         dx = d * x[1] 
 
         s1 = s + dx
-        s_ = sorted([s,s1]) 
-        #if s_[0] <= delta <= s_[1]: 
-        #    if x[1] != 0: 
-        #        return j,[s,s1],delta
+        s_ = sorted([s,s1])
 
         sdiff = s1 - s 
         if dstat: 
@@ -133,6 +142,14 @@ def rdd_index_for_delta(rdd,delta):
     return i,None,None 
 
 
+"""
+adjusts the i'th value of S so that the unidirectional weighted point 
+distance (u.w.p.d) after the adjustment is of difference `c` to the original 
+u.w.p.d. Depending on the magnitude and sign of `c`, it may not be possible 
+to achieve that change in u.w.p.d. In these cases, method outputs None. 
+The new value of S[i], if `c` is possible to achieve, is in the confines of 
+the super-range `rv`, which is (min(S),max(S)) if set to None. 
+"""
 def adjust_for_uwpd_change(S,i,c,rv=None,d_priority=1,recurse:bool=True): 
     rdd = ranged_delta_decomposition(S,i,rv,d_priority)
 
