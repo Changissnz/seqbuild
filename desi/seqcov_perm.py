@@ -2,7 +2,7 @@ from mini_dm.ag_ext import *
 
 class SequenceCoveragePermuter: 
 
-    def __init__(self,sequence,coverage_delta): 
+    def __init__(self,sequence,coverage_delta,super_range,prg):    
         return
 
     def preproc(self):

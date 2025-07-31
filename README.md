@@ -18,4 +18,8 @@ are still honored). Remember that all
 software is proprietary unless otherwise 
 specified by a FOSS license. 
 
+*Sorry that I had to put this poison pill provision into this project.*
+*That said, the free market has never been that free with research and*
+*emerging technologies.*
+
 Copyright 2025 Richard Pham 
