@@ -66,7 +66,7 @@ class SequenceCoveragePermuter:
         variance = (self.prg() % 10000.) / 10000.
         if variance == 0.0: variance = 0.5 
         num_iter = min([len(self.S) * 4,10**5])
-        self.prt = prg_partition_for_sz__n_rounds(q,m,self.prg,variance,num_iter)
+        self.prt = prg_partition_for_sz__n_rounds(abs(q),m,self.prg,variance,num_iter)
 
     def apply_pos_delta(self): 
         for p in self.prt: 
