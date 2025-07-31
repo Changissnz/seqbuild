@@ -29,7 +29,7 @@ def summarize_matrix(m):
     return q 
 
 #---------------- methods used for sequence modification according 
-#---------------- to metrics such as coverage. 
+#---------------- to metrics such as coverage and u.w.p.d. 
 
 def trinary_vec_for_element(S,i):
     dv = to_trinary_relation_v2(S,S[i],True,False) 
@@ -171,6 +171,8 @@ def adjust_for_uwpd_change(S,i,c,rv=None,d_priority=1,recurse:bool=True):
 
     S_[i] = S_[i] + rx_[0] + q
     return S_ 
+
+#----------------------------------- extension of <morebs2.APRNGGauge> 
 
 class APRNGGaugeV2(APRNGGauge):
 
