@@ -1,5 +1,20 @@
 from desi.multi_metric import * 
 
+
+"""
+container to hold 
+    (coverage,uwpd,%f_i) 
+scores over the course of some j iterations. 
+
+Used to calculate density measures 
+"""
+class AGV2VarLog:
+
+    def __init__(self): 
+        self.measures = dict() 
+
+        return -1 
+
 class AGV2GuidedGen: 
 
     def __init__(self,base_prg,aux_prg,\
@@ -14,7 +29,7 @@ class AGV2GuidedGen:
         self.guided_rep = None        
         self.density = None
         self.set_span(base_output_span)
-        self.set_density(density) 
+        self.set_density(density_measure) 
 
         self.output_mode = "base" 
         return 
