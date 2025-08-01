@@ -7,7 +7,7 @@ import unittest
 python -m tests.test_seqcov_perm
 """
 ###
-class SequenceCoveragePermuterMethods(unittest.TestCase):
+class SeqCoveragePermuterMethods(unittest.TestCase):
 
     '''
     test demonstrates sensitivity to changes in input, 
@@ -17,14 +17,14 @@ class SequenceCoveragePermuterMethods(unittest.TestCase):
     possible under linear vector operations (normal,index-to-index), 
     such as multiplication. 
     '''
-    def test__SequenceCoveragePermuter__apply_posANDneg_delta__case1(self):
+    def test__SeqCoveragePermuter__apply_posANDneg_delta__case1(self):
 
         sequence = np.array([-3,-1,0.5,0.1,7,-10,10,12,13,17])
         coverage_delta = 0.2 
         max_radius = 0.5 
         super_range = (-10,20.)
         prg = prg__LCG(78,112,-13,1112)
-        scp = SequenceCoveragePermuter(sequence,coverage_delta,max_radius,super_range,prg)
+        scp = SeqCoveragePermuter(sequence,coverage_delta,max_radius,super_range,prg)
         scp.set_partition()
 
         cov00 = scp.cov_typeabs
@@ -57,7 +57,7 @@ class SequenceCoveragePermuterMethods(unittest.TestCase):
 
         changean = 1.6 
         coverage_delta2 = coverage_delta * -1 
-        scp2 = SequenceCoveragePermuter(sequence,coverage_delta2,max_radius,super_range,prg)
+        scp2 = SeqCoveragePermuter(sequence,coverage_delta2,max_radius,super_range,prg)
         scp2.set_partition()
         cov10 = scp2.cov_typeabs
 

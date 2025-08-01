@@ -1,26 +1,41 @@
 from mini_dm.ag_ext import * 
 from morebs2.numerical_generator import prg_partition_for_float
 
-class SequenceCoveragePermuter: 
+class AGV2SeqQualPermuter:
 
-    def __init__(self,sequence,coverage_delta,max_radius,super_range,prg): 
+    def __init__(self,sequence,c_delta,super_range,prg): 
         assert is_vector(sequence) 
-        assert type(coverage_delta) in {float,np.float32,np.float64}
-        assert -1. <= coverage_delta <= 1. 
-        #assert type(max_radius) in {float,np.float32,np.float64}
+        assert type(c_delta) in {float,np.float32,np.float64}
+        assert -1. <= c_delta <= 1. 
         assert is_valid_range(super_range,False,False) or type(super_range) == type(None)
         assert type(prg) in {MethodType,FunctionType} 
-        
+
         self.l = sequence 
-        self.coverage_delta = coverage_delta 
+        self.c_delta = c_delta
+        self.srange = super_range
+        self.prg = prg 
+        return 
+
+class SeqUWPDPermuter(AGV2SeqQualPermuter):
+
+    def __init__(self,sequence,uwpd_delta,super_range,prg): 
+        super().__init__(sequence,uwpd_delta,super_range,prg)
+        return
+
+class SeqCoveragePermuter(AGV2SeqQualPermuter): 
+
+    def __init__(self,sequence,coverage_delta,max_radius,super_range,prg): 
+        super().__init__(sequence,coverage_delta,super_range,prg)
+
+        #self.l = sequence 
+        #self.coverage_delta = coverage_delta 
         self.mradius = max_radius 
-        self.srange = super_range 
-        self.prg = prg  
+        #self.srange = super_range 
+        #self.prg = prg  
 
         self.cov_typeabs,self.cov_typeabs_ = None,None
 
         self.ocov_typeabs = None 
-
         self.preproc(self.l)
         return
 
@@ -57,7 +72,6 @@ class SequenceCoveragePermuter:
         self.crs = np.array(complement_of_noncontiguous_ranges(self.rs,self.srange))
         
         self.update_cov_value() 
-
         return
 
     def update_cov_value(self): 
@@ -74,7 +88,7 @@ class SequenceCoveragePermuter:
         # get the new coverage by noncontiguous 
         # ranges
         q = self.srange[1] - self.srange[0]
-        q = q * self.coverage_delta 
+        q = q * self.c_delta 
         self.new_cov = self.cov_typeabs + q 
 
         # partition q into m pieces 
@@ -136,7 +150,6 @@ class SequenceCoveragePermuter:
         rx = (n0,n1) if ri == 0 else (n1,n0)
         return rx,(nx,nx1)
 
-
     def choose_pos_delta(self,changean):
         qrs = qualifying_ranges_for_coverage_expansion(self.rs,self.crs,changean,\
             output_type="index")           
@@ -181,6 +194,17 @@ class SequenceCoveragePermuter:
             return nr2,nr3,ref_index 
 
     #-------------------------------------------------------------
+
+    """
+    main method 
+    """
+    def apply(self):
+        if self.c_delta > 0: 
+            fx = self.apply_pos_delta
+        else: 
+            fx = self.apply_neg_delta
+        fx() 
+        return
 
     def apply_neg_delta(self): 
         for (i,p) in enumerate(self.prt): 
