@@ -1,9 +1,22 @@
 import numpy as np 
 from morebs2.numerical_generator import prg_seqsort
+from morebs2.matrix_methods import is_vector 
 from operator import add,sub,mul,truediv,floordiv
 from math import ceil 
 import random
 
+def stdcat_vec(seq,seqcat_length,start_value=None): 
+    assert is_vector(seq) 
+
+    if type(start_value) == type(None): 
+        start_value = np.min(seq) 
+
+    lx = []
+    for x in seq:
+        q = abs(x - start_value)
+        l = int(ceil(q / seqcat_length))
+        lx.append(l) 
+    return np.array(lx,dtype=int) 
 
 def intlist_no_dups_no_zero(il):
     return sorted(list(set(il) - {0}))
@@ -242,13 +255,4 @@ class IntSeq:
         return D 
 
     def diffcat_vec(self,seg_length:float,start_value = None):
-        mx0 = self.__min__() if type(start_value) \
-            == type(None) else start_value
-
-        lx = []
-        for x in self:
-            q = abs(x - mx0)
-            l = int(ceil(q / seg_length))
-            lx.append(l) 
-        return lx 
-
+        return stdcat_vec(self.l,seg_length,start_value)

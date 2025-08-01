@@ -31,7 +31,7 @@ class APRNGGaugeV2Methods(unittest.TestCase):
         qx2 = ag.std_cat_entropy(is1,seg_length=2,start_value=None,\
                 count_type="equals")
 
-        assert ag.catvec == [1, 0, 2, 3, 4, 5]
+        assert list(ag.catvec) == [1, 0, 2, 3, 4, 5]
         assert mc == [0.25, 0.42424]
         assert qx == 0.24 
         assert qx2 == 1.0 
@@ -58,7 +58,7 @@ class APRNGGaugeV2Methods(unittest.TestCase):
         assert mc2 == [1.0,0.5]
         assert qx3 == 1.0
         assert qx4 == 1.0
-        assert ag.catvec == [0, 1]
+        assert list(ag.catvec) == [0, 1]
 
         # case 3 
         l = [2,4,8,16,8,4,2,4,8,16]
@@ -72,7 +72,7 @@ class APRNGGaugeV2Methods(unittest.TestCase):
         is3 = IntSeq(ag.cycle)
         qx3 = ag.std_cat_entropy(is3,seg_length=None,start_value=None,\
                 count_type="absdiff")
-        assert ag.catvec == [0, 1, 2, 3, 2, 1, 0, 1, 2, 3]
+        assert list(ag.catvec) == [0, 1, 2, 3, 2, 1, 0, 1, 2, 3]
         return
 
     def test__APRNGGaugeV2__std_cat_entropy__case2(self):
