@@ -1,5 +1,6 @@
 from mini_dm.ag_ext import * 
 from morebs2.numerical_generator import prg_partition_for_float
+from .multi_metric import * 
 
 class AGV2SeqQualPermuter:
 
@@ -21,6 +22,7 @@ class SeqUWPDPermuter(AGV2SeqQualPermuter):
     def __init__(self,sequence,uwpd_delta,super_range,prg): 
         super().__init__(sequence,uwpd_delta,super_range,prg)
         self.l2 = None 
+        self.preproc() 
         return
 
     def preproc(self):
