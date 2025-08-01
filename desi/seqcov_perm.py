@@ -1,4 +1,5 @@
 from mini_dm.ag_ext import * 
+from morebs2.numerical_generator import prg_partition_for_float
 
 class SequenceCoveragePermuter: 
 
@@ -7,28 +8,34 @@ class SequenceCoveragePermuter:
         assert type(coverage_delta) in {float,np.float32,np.float64}
         assert -1. <= coverage_delta <= 1. 
         #assert type(max_radius) in {float,np.float32,np.float64}
-        assert is_valid_range(super_range) or type(super_range) == type(None)
+        assert is_valid_range(super_range,False,False) or type(super_range) == type(None)
         assert type(prg) in {MethodType,FunctionType} 
-
+        
         self.l = sequence 
         self.coverage_delta = coverage_delta 
         self.mradius = max_radius 
         self.srange = super_range 
         self.prg = prg  
+
+        self.cov_typeabs,self.cov_typeabs_ = None,None
+
+        self.ocov_typeabs = None 
+
         self.preproc(self.l)
         return
 
     def where_is(self,q_value,not_complement:bool=True):
-        stat0 = is_valid_range(q_value)
+
+        qx = self.rs if not_complement else self.crs 
+        stat0 = is_valid_range(tuple(q_value),False,True)
         stat1 = type(q_value) in {float,np.float32,np.float64}
         assert stat0 or stat1 
 
-        qx = self.rs if not_complement else self.crs 
 
         def whereis_cmp(q_):
             if stat1: 
                 return q_[0] == q_value or q_[1] == q_value
-            return q_ == q_value
+            return np.all(q_ == q_value)
 
         for i,q in enumerate(qx):
             if whereis_cmp(q):
@@ -36,21 +43,29 @@ class SequenceCoveragePermuter:
         return -1 
 
     def preproc(self,S):
-        #def adjust_for_coverage_change(S,c,rv=None,max_radius=None):  
         if type(self.srange) == type(None):
             mn,mx = np.min(S),np.max(S) 
             self.srange = (mn,mx)
 
         if type(self.mradius) == type(None):
             self.mradius = 0.5  
-        assert type(max_radius) in {float,np.float32,np.float64}
+        assert type(self.mradius) in {float,np.float32,np.float64}
 
-        rs = floatseq_to_rangeseq(S,self.srange,max_radius)
-        self.rs = to_noncontiguous_ranges(rs) 
+        rs = floatseq_to_rangeseq(S,self.srange,self.mradius)
+        self.rs = np.array(to_noncontiguous_ranges(rs))
         self.vci = vector_to_noncontiguous_range_indices(S,self.rs)
-        self.crs = complement_of_noncontiguous_ranges(self.rs,self.srange)
-        self.cov_typeabs = range_op(self.rs,default_value=0.,f_inner=np.subtract,f_outer=np.add)
+        self.crs = np.array(complement_of_noncontiguous_ranges(self.rs,self.srange))
+        
+        self.update_cov_value() 
+
         return
+
+    def update_cov_value(self): 
+        self.cov_typeabs_ = self.cov_typeabs 
+        self.cov_typeabs = range_op(self.rs,default_value=0.,f_inner=np.subtract,f_outer=np.add)
+
+        if type(self.ocov_typeabs) == type(None):
+            self.ocov_typeabs = self.cov_typeabs 
 
     def set_partition(self,m=9): 
         assert type(m) in {int,np.int32,np.int64} 
@@ -65,21 +80,26 @@ class SequenceCoveragePermuter:
         # partition q into m pieces 
         variance = (self.prg() % 10000.) / 10000.
         if variance == 0.0: variance = 0.5 
-        num_iter = min([len(self.S) * 4,10**5])
-        self.prt = prg_partition_for_sz__n_rounds(abs(q),m,self.prg,variance,num_iter)
+        num_iter = min([len(self.l) * 4,10**5])
+        self.prt = prg_partition_for_float(abs(q),m,self.prg,variance,n=1000,rounding_depth=5)
 
     def apply_pos_delta(self): 
         for p in self.prt: 
             self.apply_one_pos_delta(p)
 
     def apply_one_pos_delta(self,v):
-        q0,q1,q2,q3 = self.pos_delta(v)
+        q0_,q1_ = self.pos_delta(v)
+        q0,q1 = q0_ 
+        q2,q3 = q1_ 
 
         # find for `rs`
-        ix = self.where_is(q0,True)
+        ix = self.where_is(np.array(q0),True)
+        
         self.rs[ix] = q2 
-        ix2 = self.where_is(q1,False) 
-        self.crs[ix2] = q3 
+        ix2 = self.where_is(np.array(q1),False) 
+        self.crs[ix2] = q3
+        
+        self.update_cov_value()
         return
 
     """
@@ -97,7 +117,10 @@ class SequenceCoveragePermuter:
         n0,n1,ri = q 
         nx = [None,None]
         nx1 = [None,None]
-        if ri == 0:
+        nxx = [n0,n1] if ri == 0 else [n1,n0] 
+        orientation = 0 if nxx[0][1] == nxx[1][0] else 1
+
+        if orientation == 0:
             nx[1] = n0[1] + changean
             nx[0] = n0[0]
 
@@ -115,10 +138,9 @@ class SequenceCoveragePermuter:
 
 
     def choose_pos_delta(self,changean):
-        # get qualifying ranges 
         qrs = qualifying_ranges_for_coverage_expansion(self.rs,self.crs,changean,\
             output_type="index")           
-
+        
         # return the maximum 
         if len(qrs) == 0:
             crs_sum = [crs_[1] - crs_[0] for crs_ in self.crs] 
@@ -142,7 +164,8 @@ class SequenceCoveragePermuter:
             if dx >= abs(changean):
                 quallr[1] = True 
 
-        indices = np.where(quallr == True)[0] 
+        quallr = np.array([int(q) for q in quallr])
+        indices = np.where(quallr == 1)[0] 
         xr = int(self.prg()) % len(indices)
         ix = indices[xr]
 
@@ -153,15 +176,15 @@ class SequenceCoveragePermuter:
             return nr0,nr1,ref_index 
         else: 
             nr2 = self.rs[qiv] 
-            nr3 = neib[0] 
+            nr3 = neib[1] 
             ref_index= 0 
             return nr2,nr3,ref_index 
 
     #-------------------------------------------------------------
 
     def apply_neg_delta(self): 
-        for p in self.prt: 
-            self.apply_one_neg_delta(p) 
+        for (i,p) in enumerate(self.prt): 
+            self.apply_one_neg_delta(p,i) 
 
 
     def apply_one_neg_delta_(self,ncrange,ncrange_comp,v):
@@ -180,8 +203,37 @@ class SequenceCoveragePermuter:
             ncrange_comp[1] = ncrange[0]  
         return ncrange,ncrange_comp 
 
-    def apply_one_neg_delta(self,v):
+
+    def default_random_shrink_(self,dx=2.0):
+
+        ri = int(self.prg()) % len(self.rs) 
+        rx = deepcopy(self.rs[ri] )
+        d = (rx[1] - rx[0]) / dx
+        rx2 = deepcopy(rx)
+        rx2[1] = rx2[0] + d 
+
+        d2 = rx[1] - rx2[1] 
+
+        neib = neighbors_of_ncrange(self.rs,self.crs,ri)[1] 
+
+        self.rs[ri] = rx2
+
+        if type(neib) != type(None):
+            ix = self.where_is(tuple(neib)) 
+            self.crs[ix] = np.array([rx2[1],self.crs[ix][1]]) 
+        return ri,d2 
+
+    def apply_one_neg_delta(self,v,i):
         ri = qualifying_ranges_for_coverage_shrinkage(self.rs,v,output_type="index")
+
+        # no qualifying ranges for partition. have to distribute
+        # error to the rest
+        if len(ri) == 0: 
+            ri,ex = self.default_random_shrink_() 
+            ox = self.prt[i] - ex 
+            self.prt[(i+1)%len(self.prt)] += ex  
+            self.update_cov_value()
+            return 
         assert len(ri) > 0 
 
         rii = int(self.prg()) % len(ri)
@@ -210,3 +262,4 @@ class SequenceCoveragePermuter:
         q0,q1 = self.apply_one_neg_delta_(r0,r1,v)
         self.rs[xr] = q0
         self.crs[ix] = q1 
+        self.update_cov_value()
