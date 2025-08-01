@@ -20,7 +20,51 @@ class SeqUWPDPermuter(AGV2SeqQualPermuter):
 
     def __init__(self,sequence,uwpd_delta,super_range,prg): 
         super().__init__(sequence,uwpd_delta,super_range,prg)
+        self.l2 = None 
         return
+
+    def preproc(self):
+        # get max uwpd
+        mxx = max_float_uwpd(self.l,self.srange)
+        self.change_balance = mxx * self.c_delta
+
+        self.l2 = deepcopy(self.l)
+
+    def __next__(self):
+        # choose an index
+        ix = int(self.prg()) % len(self.l) 
+        vx = self.l2[ix]
+
+        # choose a change_balance 
+        x1 = self.prg() 
+        mdx = self.max_distance_at_index(ix)
+        x1 = x1 % mdx 
+        s1 = [abs(x1),10**-4]
+        x1i = np.argmin(s1) 
+        s1_ = [x1,10**-4]
+        x1 = s1_[x1i] 
+
+        x2 = int(self.prg()) % 2
+        if x2 == 0: x2 = -1  
+
+        adj_l = adjust_for_uwpd_change(self.l2,ix,x1*x2,rv=self.srange,\
+            d_priority=1,recurse=True) 
+
+        if type(adj_l) != type(None): 
+            self.l2 = adj_l 
+            self.change_balance -= abs(x1) 
+        return 
+
+    def max_distance_at_index(self,i):
+        d = 0.0
+        e0,e1 = 0.0,0.0 
+        for j in range(len(self.l)):
+            e0 = e0 + abs(self.l[j] - self.s_range[0]) 
+            e1 = e1 + abs(self.l[j] - self.s_range[1]) 
+        return max([e0,e1])
+
+    def max_by_index(self):
+        return -1 
 
 class SeqCoveragePermuter(AGV2SeqQualPermuter): 
 
