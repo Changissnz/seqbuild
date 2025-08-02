@@ -91,9 +91,10 @@ class MultiMetric:
         self.modcomplex_map = mc.complexity_map 
 
     """
-    produces sequence of two-dimensional measures 
-    (coverage, normalized unidirectional weighted point distance), 
-        (float,float)
+    produces sequence of three-dimensional measures 
+    (coverage, normalized unidirectional weighted point distance,
+    categorical entropy), 
+        (float,float,float)
     for subsequence S of `l`. S starts at `ref_index` of `l` and 
     spans for `length` number of elements in increasing index order. The 
     positive integer `l2` is the subsequence length for the n-gram 

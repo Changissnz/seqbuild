@@ -8,12 +8,29 @@ scores over the course of some j iterations.
 
 Used to calculate density measures 
 """
-class AGV2VarLog:
+class AGV2DensityLog:
 
     def __init__(self): 
         self.measures = dict() 
 
+        self.covuwpd_log = [] 
+        self.moduwpd_log = [] 
+        self.refvar = None
         return -1 
+
+def mod_uwpd_of_sequence(S,m):
+    assert m != 0 
+    S_ = np.array([s_ % m for s_ in S]) 
+    return uwpd(S_,pairwise_op=lambda x1,x2: np.abs(x2 - x1),\
+        accum_op=lambda x1,x2: x1 + x2)
+
+def factorseq_to_uwpdcov_map(seq,fseq):
+    uwpdcov = dict()
+    for m in fseq: 
+        pdseq = mod_uwpd_of_sequence(seq,m)
+        covseq = coverage_of_sequence(seq,[0,m],max_radius=0.5)
+        uwpdcov[m] = (pdseq,covseq)
+    return uwpdcov
 
 class AGV2GuidedGen: 
 
@@ -25,6 +42,8 @@ class AGV2GuidedGen:
 
         self.bspan = None 
         self.base_seq = [] 
+        self.output_queue = [] 
+
         self.bs_summary = None 
         self.guided_rep = None        
         self.density = None
@@ -38,6 +57,15 @@ class AGV2GuidedGen:
         assert is_number(span,{float,np.float16,np.float32,np.float64}) 
         assert span > 1 
         self.bspan = span 
+
+    def set_refvar(self,refvar):
+        if refvar[0] == "cov": 
+            return 
+        elif refvar[0] == "uwpd": 
+            return 
+        else: 
+            # common factor 
+            return 
 
     def set_density(self,density):
         assert type(density) == np.ndarray
@@ -54,12 +82,11 @@ class AGV2GuidedGen:
 
     def next__base(self):
         assert self.output_mode == "base" 
-        
-        if len(self.base_seq) >= self.bspan:
-            return None
 
-        x = self.base_prg()
-        self.base_seq.append(x)
+        self.base_seq.clear() 
+        for _ in range(self.bspan): 
+            x = self.base_prg()
+            self.base_seq.append(x)
         return x 
 
     def next__guidedrepl(self): 
@@ -76,3 +103,16 @@ class AGV2GuidedGen:
         mcm = mm.modcomplex_map 
         self.bs_summary = [smry,mcm]
         return self.bs_summary 
+
+    def load_into_log(self):
+        # interested only in [0][0&1] 
+        cov = self.bs_summary[0][0] 
+        uwpd_ = self.bs_summary[0][1]
+
+    def reload_mcm(self):
+        return -1 
+
+    def factor_kcomplexity(self,seq):
+        qmcm = sorted(list(self.bs_summary[1].keys()))
+        return factorseq_to_uwpdcov_map(self.base_seq,qmcm)
+        
