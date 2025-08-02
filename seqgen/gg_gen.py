@@ -27,8 +27,6 @@ class AGV2DensityLog:
         self.measures = dict() 
 
         self.covuwpd_log = [] 
-        self.moduwpd_log = [] 
-
         self.factormap_log = defaultdict(list) 
         self.refvar = None
         return 
@@ -37,7 +35,7 @@ class AGV2DensityLog:
         self.covuwpd_log.append((cov,uwpd)) 
 
     def update_factormap(self,d):
-        for k,v in self.d.items():
+        for k,v in d.items():
             self.factormap_log[k].append(v)
     
 class AGV2GuidedGen: 
