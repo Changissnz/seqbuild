@@ -30,7 +30,6 @@ class AGV2DensityLog:
 
         self.measures = dict() 
 
-
         # density measures 
             # coverage 
         self.dmap0 = defaultdict(int) 
@@ -45,8 +44,9 @@ class AGV2DensityLog:
         return 
 
 
-    def catfreq_map(self,density_measure):
+    def catfreq_map(self,density_measure,lx = None):
         q = None 
+
         if density_measure == "cov": 
             q = [c[0] for c in self.covuwpd_log]
         elif density_measure == "uwpd": 
@@ -55,7 +55,14 @@ class AGV2DensityLog:
             assert density_measure in self.factormap_log
             q = [c[0] for c in self.factormap_log[density_measure]]
 
-        scat_vec = stdcat_vec(np.array(q),self.cat_sz,0.0) 
+        clog = None 
+        if type(lx) != type(None): 
+            assert type(lx) in {int,np.int32,np.int64} 
+            clog = q[-lx:]
+        else: 
+            clog = q 
+
+        scat_vec = stdcat_vec(np.array(clog),self.cat_sz,0.0) 
         fmap = vec_to_frequency_map(scat_vec) 
         return fmap 
         
@@ -96,10 +103,6 @@ class AGV2DensityLog:
         return -1 
 
     def update_density_count(self,v): 
-        return -1 
-
-
-    def qualifying_subranges_for_density():
         return -1 
         
 class AGV2GuidedGen: 
