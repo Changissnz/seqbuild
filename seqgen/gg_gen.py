@@ -24,7 +24,11 @@ Used to calculate density measures
 """
 class AGV2DensityLog:
 
-    def __init__(self): 
+    def __init__(self,cat_sz:int=10): 
+        assert type(cat_sz) in {int,np.int32,np.int64}
+        assert cat_sz > 0 
+
+        self.cat_sz = cat_sz 
         self.measures = dict() 
 
         self.covuwpd_log = [] 
@@ -38,7 +42,13 @@ class AGV2DensityLog:
     def update_factormap(self,d):
         for k,v in d.items():
             self.factormap_log[k].append(v)
-    
+
+    @staticmethod 
+    def label_value(v,dx):
+        assert is_number(v) 
+        seqcat_length = 1.0 / dx 
+        return int(round(v/seqcat_length,0))
+        
 class AGV2GuidedGen: 
 
     def __init__(self,base_prg,aux_prg,\

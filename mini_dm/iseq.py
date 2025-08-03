@@ -5,6 +5,11 @@ from operator import add,sub,mul,truediv,floordiv
 from math import ceil 
 import random
 
+"""
+return: 
+- sequence of corresponding labels for seq; the labels are in the 
+  range [0,seqcat_length - 1].
+"""
 def stdcat_vec(seq,seqcat_length,start_value=None): 
     assert is_vector(seq) 
 
