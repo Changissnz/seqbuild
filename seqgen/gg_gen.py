@@ -25,17 +25,40 @@ Used to calculate density measures
 class AGV2DensityLog:
 
     def __init__(self,cat_sz:int=10): 
-        assert type(cat_sz) in {int,np.int32,np.int64}
-        assert cat_sz > 0 
+        self.cat_sz = None 
+        self.reload_cat_sz(cat_sz) 
 
-        self.cat_sz = cat_sz 
         self.measures = dict() 
+
+
+        # density measures 
+            # coverage 
+        self.dmap0 = defaultdict(int) 
+            # uwpd
+        self.dmap1 = defaultdict(int) 
+            # specific factor `refvar`
+        self.dmap2 = defaultdict(int) 
 
         self.covuwpd_log = [] 
         self.factormap_log = defaultdict(list) 
         self.refvar = None
         return 
 
+
+    def catfreq_map(self,density_measure):
+        q = None 
+        if density_measure == "cov": 
+            q = [c[0] for c in self.covuwpd_log]
+        elif density_measure == "uwpd": 
+            q = [c[1] for c in self.covuwpd_log] 
+        else:
+            assert density_measure in self.factormap_log
+            q = [c[0] for c in self.factormap_log[density_measure]]
+
+        scat_vec = stdcat_vec(np.array(q),self.cat_sz,0.0) 
+        fmap = vec_to_frequency_map(scat_vec) 
+        return fmap 
+        
     def update_covuwpd(self,cov,uwpd): 
         self.covuwpd_log.append((cov,uwpd)) 
 
@@ -43,11 +66,41 @@ class AGV2DensityLog:
         for k,v in d.items():
             self.factormap_log[k].append(v)
 
+    def reload_cat_sz(self,cat_sz):
+        assert type(cat_sz) in {int,np.int32,np.int64}
+        assert cat_sz > 0 
+        self.cat_sz = cat_sz 
+        return
+
+    def reload_refvar(self,refvar): 
+        if refvar == "cov":
+            self.refvar = refvar 
+        elif refvar == "uwpd": 
+            self.refvar = refvar
+        else:
+            assert is_number(refvar)
+            self.refvar = refvar
+
+        self.dmap0.clear() 
+        self.dmap1.clear() 
+        self.dmap2.clear() 
+        return
+
     @staticmethod 
     def label_value(v,dx):
         assert is_number(v) 
         seqcat_length = 1.0 / dx 
         return int(round(v/seqcat_length,0))
+
+    def density_count(self):
+        return -1 
+
+    def update_density_count(self,v): 
+        return -1 
+
+
+    def qualifying_subranges_for_density():
+        return -1 
         
 class AGV2GuidedGen: 
 
