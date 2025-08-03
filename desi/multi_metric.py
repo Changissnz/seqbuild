@@ -102,7 +102,7 @@ class MultiMetric:
     """
     def agv2_measures__ngrammer(self,ref_index,length,\
             l2,set_frange:bool=True): 
-        assert l2 <= length 
+        assert l2 <= length, "length,l2 is {}".format((length,l2))
 
         # init the <NGrammer> 
         sv = subvec(self.l,ref_index,length) 

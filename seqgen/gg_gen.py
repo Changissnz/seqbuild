@@ -10,7 +10,8 @@ def factorseq_to_uwpdcov_map(seq,fseq):
     uwpdcov = dict()
     for m in fseq: 
         pdseq = mod_uwpd_of_sequence(seq,m)
-        covseq = coverage_of_sequence(seq,[0,m],max_radius=0.5)
+        mseq = np.array([s_ % m for s_ in seq]) 
+        covseq = coverage_of_sequence(mseq,[0,m],max_radius=0.5)
         uwpdcov[m] = (pdseq,covseq)
     return uwpdcov
 
@@ -41,7 +42,7 @@ class AGV2DensityLog:
 class AGV2GuidedGen: 
 
     def __init__(self,base_prg,aux_prg,\
-        base_output_span,density_measure,ngram_length=None,):
+        base_output_span,density_measure,ngram_length=None):
 
         self.base_prg = base_prg 
         self.aux_prg = aux_prg 
@@ -60,6 +61,7 @@ class AGV2GuidedGen:
         self.output_mode = "base" 
 
         self.init_density_log() 
+        self.inspect_base_seq()
         return 
 
     def set_span(self,span):
@@ -103,9 +105,8 @@ class AGV2GuidedGen:
         return -1 
 
     def inspect_base_seq(self):
-        if type(self.ngram_length) == type(None): 
-            self.ngram_length = default_ngram_length(len(self.base_seq))  
-        
+
+        self.next__base()
         q = self.seq_summary(self.base_seq,True)  
         self.bs_summary = q 
         return self.bs_summary 
@@ -127,6 +128,14 @@ class AGV2GuidedGen:
 
     def reload_mcm(self):
         return -1 
+
+    def unguided_iter(self,num_vectors:int): 
+        assert type(num_vectors) in {int,np.int32,np.int64} 
+        assert num_vectors > 0 
+
+        for i in range(num_vectors): 
+            self.next__base()
+            self.log_seq(self.base_seq)
 
     def factor_kcomplexity(self,seq):
         qmcm = sorted(list(self.bs_summary[1].keys()))
