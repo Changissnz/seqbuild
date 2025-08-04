@@ -49,7 +49,7 @@ class AGV2DensityLog:
 
         self.cf_map = defaultdict(int)
         return 
-self.cat_sz * 
+
     """
     calculates a map with 
     key: category 
@@ -91,14 +91,14 @@ self.cat_sz *
 
     def classify_value(self,vx,l,rv):
         if self.refvar == "cov": 
-            v0 = classify_one_value(vx,1/self.cat_sz,0.0)
+            v0 = std_classify_one_value(vx,1/self.cat_sz,0.0)
 
         elif self.refvar == "uwpd": 
             max_value = max_float_uwpd(l,rv)
-            v0 = classify_one_value(vx,max_value/self.cat_sz,0.0)
+            v0 = std_classify_one_value(vx,max_value/self.cat_sz,0.0)
         else: 
             max_value = max_float_uwpd(l,self.refvar)
-            v0 = classify_one_value(vx,max_value/self.cat_sz,0.0)
+            v0 = std_classify_one_value(vx,max_value/self.cat_sz,0.0)
         return v0 
 
     def update_covuwpd(self,cov,uwpd): 

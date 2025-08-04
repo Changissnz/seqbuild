@@ -5,7 +5,7 @@ from operator import add,sub,mul,truediv,floordiv
 from math import ceil 
 import random
 
-def classify_one_value(v,seqcat_length,start_value): 
+def std_classify_one_value(v,seqcat_length,start_value): 
     q = abs(v - start_value)
     l = int(ceil(q / seqcat_length))
     return l 
@@ -23,7 +23,7 @@ def stdcat_vec(seq,seqcat_length,start_value=None):
 
     lx = []
     for x in seq:
-        l = classify_one_value(x,seqcat_length,start_value)
+        l = std_classify_one_value(x,seqcat_length,start_value)
         lx.append(l) 
     return np.array(lx,dtype=int) 
 
