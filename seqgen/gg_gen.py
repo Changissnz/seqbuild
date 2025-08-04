@@ -89,6 +89,11 @@ class AGV2DensityLog:
         self.update_covuwpd(cov,uwpd) 
         self.update_factormap(d)
 
+    """
+    method used to help with handling density measure requirements; 
+    method acts as filtration against unwanted output sequences (from 
+    <AGV2GuidedGen>).
+    """
     def classify_value(self,vx,l,rv):
         if self.refvar == "cov": 
             v0 = std_classify_one_value(vx,1/self.cat_sz,0.0)
@@ -173,6 +178,10 @@ class AGV2GuidedGen:
         assert span > 1 
         self.bspan = span 
 
+    def set_refvar(self,refvar):
+        self.agd_log.reload_refvar(refvar) 
+
+
     def set_density(self,density):
         assert type(density) == np.ndarray
         if is_vector(density):
@@ -236,6 +245,39 @@ class AGV2GuidedGen:
         qmcm = sorted(list(self.bs_summary[1].keys()))
         return factorseq_to_uwpdcov_map(self.base_seq,qmcm)
     
+    def next__guidedrepl(self): 
+        q = self.base_seq 
+
+        self.next__base() 
+
+    def classify_seq(self): 
+        # classify value 
+        qscore = self.quality_score_for_sequence(self.base_seq) 
+
+        rv = None
+        if self.agd_log.refvar == "cov": # in {"cov","uwpd"}:
+            rv = (0.,1.)
+        elif self.agd_log.refvar == "uwpd":
+            rv = (min(self.base_seq),max(self.base_seq))
+        else: 
+            rv = (0.,self.agd_log.refvar)
+
+        l = len(self.base_seq)
+        self.agd_log.classify_value(qscore,l,rv)
+
+    def quality_score_for_sequence(self,seq):
+        qs = self.seq_summary(seq,False)
+
+        if self.agd_log.refvar in {"cov","uwpd"}:
+            summry = qs[0] 
+            i = 0 if self.agd_log.refvar == "cov" else 1 
+            qx = np.mean(summry[i]) 
+            return qx
+
+        qsx = qs[1] 
+        qx = qsx[self.agd_log.ref_var]
+        return qx[0] 
+
     def log_seq(self,seq): 
         summry = self.seq_summary(seq,False)[0] 
         fmap = self.factor_kcomplexity(seq)
