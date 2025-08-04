@@ -46,8 +46,10 @@ class AGV2DensityLog:
         self.covuwpd_log = [] 
         self.factormap_log = defaultdict(list) 
         self.refvar = None
-        return 
 
+        self.cf_map = defaultdict(int)
+        return 
+self.cat_sz * 
     """
     calculates a map with 
     key: category 
@@ -70,7 +72,7 @@ class AGV2DensityLog:
         return fmap 
 
     def fetch_vec(self,density_measure):
-        assert type(density_measure) ! = type(None) 
+        assert type(density_measure) != type(None) 
 
         q = None 
         if density_measure == "cov": 
@@ -82,6 +84,22 @@ class AGV2DensityLog:
             q = [c[0] for c in self.factormap_log[density_measure]]
 
         return q 
+
+    def update_one_element(self,cov,uwpd,d): 
+        self.update_covuwpd(cov,uwpd) 
+        self.update_factormap(d)
+
+    def classify_value(self,vx,l,rv):
+        if self.refvar == "cov": 
+            v0 = classify_one_value(vx,1/self.cat_sz,0.0)
+
+        elif self.refvar == "uwpd": 
+            max_value = max_float_uwpd(l,rv)
+            v0 = classify_one_value(vx,max_value/self.cat_sz,0.0)
+        else: 
+            max_value = max_float_uwpd(l,self.refvar)
+            v0 = classify_one_value(vx,max_value/self.cat_sz,0.0)
+        return v0 
 
     def update_covuwpd(self,cov,uwpd): 
         self.covuwpd_log.append((cov,uwpd)) 
@@ -227,3 +245,7 @@ class AGV2GuidedGen:
 
         self.agd_log.update_covuwpd(cov,uwpd_) 
         self.agd_log.update_factormap(fmap)
+
+    def available_for_density(self):
+
+        return -1 
