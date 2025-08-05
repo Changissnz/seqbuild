@@ -173,6 +173,8 @@ class AGV2GuidedGen:
         self.inspect_base_seq()
         return 
 
+    #------------------------ setter functions 
+
     def set_span(self,span):
         assert is_number(span,{float,np.float16,np.float32,np.float64}) 
         assert span > 1 
@@ -195,6 +197,12 @@ class AGV2GuidedGen:
         self.density = density
         return
 
+    def init_density_log(self):
+        self.agd_log = AGV2DensityLog() 
+        return
+
+    #---------------------------- next functions 
+
     def next__base(self):
         assert self.output_mode == "base" 
 
@@ -204,31 +212,12 @@ class AGV2GuidedGen:
             self.base_seq.append(x)
         return x 
 
-    def next__guidedrepl(self): 
-        assert len(self.base_seq) > 0
-        return -1 
-
     def inspect_base_seq(self):
 
         self.next__base()
         q = self.seq_summary(self.base_seq,True)  
         self.bs_summary = q 
         return self.bs_summary 
-
-    def init_density_log(self):
-        self.agd_log = AGV2DensityLog() 
-        return
-
-    def seq_summary(self,seq,full_output:bool=False):
-        mm = MultiMetric(seq)
-        smry = mm.summarize(self.ngram_length,False)
-
-        if not full_output:
-            return [smry,None] 
-
-        mm.load_mc_map()
-        mcm = mm.modcomplex_map 
-        return [smry,mcm]
 
     def reload_mcm(self):
         return -1 
@@ -241,21 +230,19 @@ class AGV2GuidedGen:
             self.next__base()
             self.log_seq(self.base_seq)
 
-    def factor_kcomplexity(self,seq):
-        qmcm = sorted(list(self.bs_summary[1].keys()))
-        return factorseq_to_uwpdcov_map(self.base_seq,qmcm)
-    
     def next__guidedrepl(self): 
         q = self.base_seq 
 
         self.next__base() 
+
+    #------------------------------- sequence summarization 
 
     def classify_seq(self): 
         # classify value 
         qscore = self.quality_score_for_sequence(self.base_seq) 
 
         rv = None
-        if self.agd_log.refvar == "cov": # in {"cov","uwpd"}:
+        if self.agd_log.refvar == "cov": 
             rv = (0.,1.)
         elif self.agd_log.refvar == "uwpd":
             rv = (min(self.base_seq),max(self.base_seq))
@@ -263,7 +250,7 @@ class AGV2GuidedGen:
             rv = (0.,self.agd_log.refvar)
 
         l = len(self.base_seq)
-        self.agd_log.classify_value(qscore,l,rv)
+        return self.agd_log.classify_value(qscore,l,rv)
 
     def quality_score_for_sequence(self,seq):
         qs = self.seq_summary(seq,False)
@@ -277,6 +264,23 @@ class AGV2GuidedGen:
         qsx = qs[1] 
         qx = qsx[self.agd_log.ref_var]
         return qx[0] 
+
+    #------------------------------- log sequence into memory 
+
+    def seq_summary(self,seq,full_output:bool=False):
+        mm = MultiMetric(seq)
+        smry = mm.summarize(self.ngram_length,False)
+
+        if not full_output:
+            return [smry,None] 
+
+        mm.load_mc_map()
+        mcm = mm.modcomplex_map 
+        return [smry,mcm]
+
+    def factor_kcomplexity(self,seq):
+        qmcm = sorted(list(self.bs_summary[1].keys()))
+        return factorseq_to_uwpdcov_map(self.base_seq,qmcm)
 
     def log_seq(self,seq): 
         summry = self.seq_summary(seq,False)[0] 
