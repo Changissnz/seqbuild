@@ -23,6 +23,7 @@ class SeqUWPDPermuter(AGV2SeqQualPermuter):
         super().__init__(sequence,uwpd_delta,super_range,prg)
         self.l2 = None 
         self.preproc() 
+        self.null_ctr = 0 
         return
 
     def preproc(self):
@@ -32,9 +33,9 @@ class SeqUWPDPermuter(AGV2SeqQualPermuter):
 
         self.l2 = deepcopy(self.l)
 
-    def apply(self): 
+    def apply(self,null_limit=10): 
 
-        while self.change_balance > 0.: 
+        while self.change_balance > 0. and self.null_ctr < null_limit: 
             self.__next__()
         return self.l2 
 
@@ -61,6 +62,9 @@ class SeqUWPDPermuter(AGV2SeqQualPermuter):
         if type(adj_l) != type(None): 
             self.l2 = adj_l 
             self.change_balance -= abs(x1) 
+            self.null_ctr = 0
+        else: 
+            self.null_ctr += 1
         return 
 
     def max_distance_at_index(self,i):
@@ -154,7 +158,14 @@ class SeqCoveragePermuter(AGV2SeqQualPermuter):
             self.apply_one_pos_delta(p)
 
     def apply_one_pos_delta(self,v):
-        q0_,q1_ = self.pos_delta(v)
+
+        q = self.pos_delta(v)
+
+        # case: cannot apply delta
+        if type(q) in {np.float64,np.float32,float}: 
+            return 
+
+        q0_,q1_ = q 
         q0,q1 = q0_ 
         q2,q3 = q1_ 
 
@@ -177,7 +188,8 @@ class SeqCoveragePermuter(AGV2SeqQualPermuter):
         q = self.choose_pos_delta(changean) 
 
         # case: failure
-        if type(q) == float: 
+        if type(q) in {np.float64,np.float32,float}: 
+            return q 
             assert False
 
         n0,n1,ri = q 
@@ -203,8 +215,11 @@ class SeqCoveragePermuter(AGV2SeqQualPermuter):
         return rx,(nx,nx1)
 
     def choose_pos_delta(self,changean):
+        if len(self.crs) == 0:
+            return 1.0 
+
         qrs = qualifying_ranges_for_coverage_expansion(self.rs,self.crs,changean,\
-            output_type="index")           
+            output_type="index")        
         
         # return the maximum 
         if len(qrs) == 0:
@@ -247,20 +262,13 @@ class SeqCoveragePermuter(AGV2SeqQualPermuter):
 
     #-------------------------------------------------------------
     
-    def change_sequence(self): 
-        l2 = set(np.flatten(self.rs))
+    def change_sequence(self):
+        lx = len(self.l)
 
-        lvec = deepcopy(self.l)
-
-        ivec = vector_to_noncontiguous_range_indices(lvec,self.rs)
-        
         seq = []
-        for (i,v) in enumerate(ivec): 
-            if v != -1: 
-                seq.append(lvec[i]) 
-            else:
-                v2 = self.one_value_in_noncontiguous_complement()
-                seq.append(v2) 
+        for _ in range(lx):
+            v2 = self.one_value_in_noncontiguous_complement() 
+            seq.append(v2) 
         return np.array(seq) 
 
     def one_value_in_noncontiguous_complement(self):
