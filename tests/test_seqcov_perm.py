@@ -67,6 +67,22 @@ class SeqCoveragePermuterMethods(unittest.TestCase):
 
         assert cov11 + 4.0 == cov10 
 
+class SeqUWPDPermuterMethods(unittest.TestCase):
+
+    def test__SeqUWPDPermuter__apply__case1(self):
+        
+        prg = prg__LCG(45,31,455,45677)
+        sequence = np.array([prg() for _ in range(10)])
+        uwpd_delta = 0.3 
+        sup = SeqUWPDPermuter(sequence,uwpd_delta,[0,45677],prg)
+
+        q = sup.apply() 
+        qsol = np.array([ 2606,  3819,  2389, 37475, 9594, 39636, 42909, 42252,
+            20459, 13280]) 
+
+        assert np.all(np.round(q) == qsol)
+
+
 if __name__ == '__main__':
     unittest.main()
 

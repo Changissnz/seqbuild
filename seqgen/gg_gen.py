@@ -1,4 +1,5 @@
 from desi.multi_metric import * 
+from desi.seqcov_perm import * 
 
 def mod_uwpd_of_sequence(S,m):
     assert m != 0 
@@ -171,6 +172,8 @@ class AGV2GuidedGen:
 
         self.init_density_log() 
         self.inspect_base_seq()
+
+        self.permuter = None 
         return 
 
     #------------------------ setter functions 
@@ -196,6 +199,25 @@ class AGV2GuidedGen:
         assert_nm(tuple(density[1])) 
         self.density = density
         return
+
+    def set_permuter(self): 
+        q = self.agd_log.refvar
+        super_range = [min(self.base_seq),max(max(self.base_seq))]
+
+        if q == "cov": 
+            coverage_delta = (self.aux_prg() % 10000.) / 10000.
+            max_radius = (super_range[1] - super_range[0]) / len(self.base_seq)
+            p = SeqCoveragePermuter(self.base_seq,coverage_delta,max_radius,super_range,self.aux_prg)
+        elif q == "uwpd": 
+            mfpd = max_float_uwpd(len(self.base_seq),super_range)
+            ratio = (self.aux_prg() % 10000.) / 10000. 
+            mfpd = round(mfpd * ratio,5) 
+            p = SeqUWPDPermuter(self.base_seq,mfpd,super_range,self.aux_prg)
+        else: 
+            super_range = [0,q] 
+            mfpd = max_float_uwpd(len(self.base_seq),super_range) 
+            p = SeqUWPDPermuter(self.base_seq,mfpd,super_range,self.aux_prg)
+        self.permuter = p 
 
     def init_density_log(self):
         self.agd_log = AGV2DensityLog() 
@@ -262,7 +284,7 @@ class AGV2GuidedGen:
             return qx
 
         qsx = qs[1] 
-        qx = qsx[self.agd_log.ref_var]
+        qx = qsx[self.agd_log.refvar]
         return qx[0] 
 
     #------------------------------- log sequence into memory 
