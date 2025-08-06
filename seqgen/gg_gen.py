@@ -26,7 +26,27 @@ container to hold
     (coverage,uwpd,%f_i) 
 scores over the course of some j iterations. 
 
-Used to calculate density measures 
+Used to adjust output distribution from <AGV2GuidedGen>. 
+There are 2 ways to use this container: 
+1. `refvar_catvec` and `refvar_catmap`,
+2. `covuwpd_log` and `factormap_log`. 
+
+In the first approach, the method <log_sample_cat> is called 
+to record a quality category for a sample (a vector). Then the 
+method <refvar_frequency_map> can be used to calculate categorical 
+frequencies for the last `previous_iter` iterations. The first 
+approach observes the reference variable, set at `refvar`. The 
+reference variable is one of ('cov','uwpd',modulus:float). 
+
+In the second approach, the method <catfreq_map> is used to 
+calculate the categorical frequencies of any quality 
+('cov','uwpd',modulus:float). The calculation draws information 
+from `covuwpd_log` and `factormap_log`, maps that are updated 
+from calling method<update_one_element>. 
+
+NOTE: 
+The measure of density is not fully implemented. Instead, class 
+essentially serves as frequency counter. 
 """
 class AGV2DensityLog:
 
@@ -34,22 +54,11 @@ class AGV2DensityLog:
         self.cat_sz = None 
         self.reload_cat_sz(cat_sz) 
 
-        self.measures = dict() 
-
-        # density measures 
-            # coverage 
-        self.dmap0 = defaultdict(int) 
-            # uwpd
-        self.dmap1 = defaultdict(int) 
-            # specific factor `refvar`
-        self.dmap2 = defaultdict(int) 
-
         self.covuwpd_log = [] 
         self.factormap_log = defaultdict(list) 
         self.refvar = None
         self.refvar_catvec = []
         self.refvar_catmap = defaultdict(int) # category -> frequency 
-        self.cf_map = defaultdict(int)
         return 
 
     def log_sample_cat(self,sample_cat): 
@@ -142,10 +151,6 @@ class AGV2DensityLog:
         else:
             assert is_number(refvar)
             self.refvar = refvar
-
-        self.dmap0.clear() 
-        self.dmap1.clear() 
-        self.dmap2.clear() 
         return
 
     @staticmethod 
@@ -153,16 +158,25 @@ class AGV2DensityLog:
         assert is_number(v) 
         seqcat_length = 1.0 / dx 
         return int(round(v/seqcat_length,0))
-
-    def density_count(self):
-        return -1 
-
-    def update_density_count(self,v): 
-        return -1 
-
-    def label_sample_vector(self,seq):
-        return -1 
         
+"""
+generator is a wrapper around a base generator `base_prg`. 
+The <AGV2GuidedGen> is a generator that uses a numerical 
+sequence of length `base_output_span` from `base_prg` as 
+a template. Then the generator outputs 'sibling' sequences 
+from this template sequence. These 'sibling' sequences have 
+qualities of coverage,uwpd, and modular uwpd that are prioritized 
+by the algorithm due to low or non-existing frequency (0-frequency 
+is new). In more words, this generator adjusts base sequences 
+from `base_prg` in order for the output sequences to satisfy 
+uniform density distribution of some quality ('cov','uwpd', modular 
+uwpd). 
+
+Generator should be considered as more of a wrapper than a 
+generator in and of itself. The functions of this class are 
+designed specifically to modulate base sequences for the output 
+of alternative base sequences. 
+"""
 class AGV2GuidedGen: 
 
     def __init__(self,base_prg,aux_prg,\
@@ -200,19 +214,11 @@ class AGV2GuidedGen:
     def set_refvar(self,refvar):
         self.agd_log.reload_refvar(refvar) 
 
-
     def set_density(self,density):
-        assert type(density) == np.ndarray
-        if is_vector(density):
-            d_ = np.zeros((2,2),dtype=int) 
-            d_[0],d_[1] = density,density
-            density = d_
-         
-        assert density.shape == (2,2)
-        assert_nm(tuple(density[0])) 
-        assert_nm(tuple(density[1])) 
-        self.density = density
-        return
+        assert type(density) in {int,np.int32,np.int64} 
+        assert density > 0 
+        self.density = density 
+        return 
 
     def set_permuter(self): 
         q = self.agd_log.refvar
@@ -256,9 +262,6 @@ class AGV2GuidedGen:
         self.bs_summary = q 
         return self.bs_summary 
 
-    def reload_mcm(self):
-        return -1 
-
     def unguided_iter(self,num_vectors:int): 
         assert type(num_vectors) in {int,np.int32,np.int64} 
         assert num_vectors > 0 
@@ -281,7 +284,7 @@ class AGV2GuidedGen:
     def highest_scoring_permutation(self,num_attempts=10):
         v = None 
         score = float('inf')
-        fmap = self.agd_log.refvar_frequency_map(self.density[0][1])
+        fmap = self.agd_log.refvar_frequency_map(self.density)
 
         while num_attempts > 0: 
             self.set_permuter() 
@@ -296,8 +299,6 @@ class AGV2GuidedGen:
                 return qs 
             num_attempts -= 1 
         return v 
-
-
 
     #------------------------------- sequence summarization 
 
@@ -317,7 +318,7 @@ class AGV2GuidedGen:
         return self.agd_log.classify_value(qscore,l,rv)
 
     def quality_score_for_sequence(self,seq):
-        qs = self.seq_summary(seq,True) 
+        qs = self.seq_summary(seq,False) 
 
         if self.agd_log.refvar in {"cov","uwpd"}:
             summry = qs[0] 
@@ -325,12 +326,8 @@ class AGV2GuidedGen:
             qx = np.mean(summry[i]) 
             return qx
 
-        qsx = qs[1] 
-        print("QSXX")
-        print(qsx)
+        return self.factor_kcomplexity(seq)[self.agd_log.refvar][0]
 
-        qx = qsx[self.agd_log.refvar]
-        return qx[0] 
 
     #------------------------------- log sequence into memory 
 
@@ -357,7 +354,3 @@ class AGV2GuidedGen:
         uwpd_ = np.mean(summry[1]) 
 
         self.agd_log.update_one_element(cov,uwpd_,fmap)
-
-    def available_for_density(self):
-
-        return -1 

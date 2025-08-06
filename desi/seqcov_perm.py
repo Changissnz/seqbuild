@@ -2,6 +2,14 @@ from mini_dm.ag_ext import *
 from morebs2.numerical_generator import prg_partition_for_float
 from .multi_metric import * 
 
+"""
+super-class for <SeqUWPDPermuter> and <SeqCoveragePermuter>. 
+Class is used to apply changes to a numerical sequence for 
+particular changes in the sequence's qualities (specifically 
+coverage, unidirectional weighted point distance (uwpd), and 
+modular uwpd). The `c_delta` value is the magnitude of change to 
+be applied to `sequence`. 
+"""
 class AGV2SeqQualPermuter:
 
     def __init__(self,sequence,c_delta,super_range,prg): 
@@ -17,6 +25,21 @@ class AGV2SeqQualPermuter:
         self.prg = prg 
         return 
 
+"""
+permuter that changes a base `sequence` according to the wanted 
+change in unidirectional weighted point distance, `uwpd_delta`. 
+The `uwpd_delta` value is a ratio (in [0.,1.]). 
+
+The `super_range` is an ordered 2-tuple, and all values from `sequence` 
+should be contained in it. This 2-tuple is used to calculate maximum 
+possible uwpd. 
+
+NOTE: 
+If `modulus` is not set to `None`, instead a float f_i, then class instance 
+is used to permute the `sequence` by its modular form, `sequence` % f_i. 
+This implies the class serves dual purposes of permuting sequences by 
+their absolute or modular unidirectional weighted point distance. 
+"""
 class SeqUWPDPermuter(AGV2SeqQualPermuter):
 
     def __init__(self,sequence,uwpd_delta,super_range,prg,modulus=None): 
@@ -45,6 +68,9 @@ class SeqUWPDPermuter(AGV2SeqQualPermuter):
             cvec.append(q * self.modulus + mod_vec[i])
         return np.array(cvec) 
 
+    """
+    main method 
+    """
     def apply(self,null_limit=10): 
         while self.change_balance > 0. and self.null_ctr < null_limit: 
             self.__next__()
@@ -92,17 +118,18 @@ class SeqUWPDPermuter(AGV2SeqQualPermuter):
     def max_by_index(self):
         return -1 
 
+"""
+permuter that changes a base `sequence` according to the wanted 
+change in coverage, `coverage_delta` (ratio in [0.,1.]). The 
+variables `max_radius` and `super_range` are used to help with 
+calculation of coverage. 
+"""
 class SeqCoveragePermuter(AGV2SeqQualPermuter): 
 
     def __init__(self,sequence,coverage_delta,max_radius,super_range,prg): 
         super().__init__(sequence,coverage_delta,super_range,prg)
 
-        #self.l = sequence 
-        #self.coverage_delta = coverage_delta 
         self.mradius = max_radius 
-        #self.srange = super_range 
-        #self.prg = prg  
-
         self.cov_typeabs,self.cov_typeabs_ = None,None
 
         self.ocov_typeabs = None 
