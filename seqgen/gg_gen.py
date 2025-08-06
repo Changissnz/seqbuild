@@ -65,6 +65,9 @@ class AGV2DensityLog:
         self.refvar_catvec.append(sample_cat) 
         self.refvar_catmap[sample_cat] += 1 
     
+    """
+    main method #1.
+    """
     def refvar_frequency_map(self,previous_iter:int): 
         assert type(previous_iter) in {int,np.int32,np.int64} 
         assert previous_iter > 0 
@@ -75,6 +78,8 @@ class AGV2DensityLog:
         return fmap 
 
     """
+    main method #2. 
+
     calculates a map with 
     key: category 
     value: frequency of category. 
@@ -275,14 +280,13 @@ class AGV2GuidedGen:
             q = self.base_seq 
             self.next__base() 
 
-        qs = self.highest_scoring_permutation(num_attempts)
-        cl = self.classify_seq(qs) 
+        qs,cl = self.highest_scoring_permutation(num_attempts)
 
         self.agd_log.log_sample_cat(cl)
         return qs 
 
     def highest_scoring_permutation(self,num_attempts=10):
-        v = None 
+        v,cl = None,None 
         score = float('inf')
         fmap = self.agd_log.refvar_frequency_map(self.density)
 
@@ -296,9 +300,9 @@ class AGV2GuidedGen:
                     v = qs 
                     score = fmap[cl] 
             else:
-                return qs 
-            num_attempts -= 1 
-        return v 
+                return qs,cl 
+            num_attempts -= 1         
+        return v,cl 
 
     #------------------------------- sequence summarization 
 
