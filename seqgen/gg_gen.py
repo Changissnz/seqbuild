@@ -47,9 +47,23 @@ class AGV2DensityLog:
         self.covuwpd_log = [] 
         self.factormap_log = defaultdict(list) 
         self.refvar = None
-
+        self.refvar_catvec = []
+        self.refvar_catmap = defaultdict(int) # category -> frequency 
         self.cf_map = defaultdict(int)
         return 
+
+    def log_sample_cat(self,sample_cat): 
+        self.refvar_catvec.append(sample_cat) 
+        self.refvar_catmap[sample_cat] += 1 
+    
+    def refvar_frequency_map(self,previous_iter:int): 
+        assert type(previous_iter) in {int,np.int32,np.int64} 
+        assert previous_iter > 0 
+        fmap = defaultdict(int)
+
+        for x in self.refvar_catvec[-previous_iter:]:
+            fmap[x] += 1 
+        return fmap 
 
     """
     calculates a map with 
@@ -103,7 +117,7 @@ class AGV2DensityLog:
             max_value = max_float_uwpd(l,rv)
             v0 = std_classify_one_value(vx,max_value/self.cat_sz,0.0)
         else: 
-            max_value = max_float_uwpd(l,self.refvar)
+            max_value = max_float_uwpd(l,[0,self.refvar])
             v0 = std_classify_one_value(vx,max_value/self.cat_sz,0.0)
         return v0 
 
@@ -253,30 +267,57 @@ class AGV2GuidedGen:
             self.next__base()
             self.log_seq(self.base_seq)
 
-    def next__guidedrepl(self): 
-        q = self.base_seq 
+    def next__guidedrepl(self,update_base_seq:bool=True,num_attempts:int=10):
+        if update_base_seq:  
+            q = self.base_seq 
+            self.next__base() 
 
-        self.next__base() 
+        qs = self.highest_scoring_permutation(num_attempts)
+        cl = self.classify_seq(qs) 
+
+        self.agd_log.log_sample_cat(cl)
+        return qs 
+
+    def highest_scoring_permutation(self,num_attempts=10):
+        v = None 
+        score = float('inf')
+        fmap = self.agd_log.refvar_frequency_map(self.density[0][1])
+
+        while num_attempts > 0: 
+            self.set_permuter() 
+            qs = self.permuter.apply()
+            cl = self.classify_seq(qs) 
+
+            if cl in fmap:
+                if fmap[cl] < score: 
+                    v = qs 
+                    score = fmap[cl] 
+            else:
+                return qs 
+            num_attempts -= 1 
+        return v 
+
+
 
     #------------------------------- sequence summarization 
 
-    def classify_seq(self): 
+    def classify_seq(self,seq): 
         # classify value 
-        qscore = self.quality_score_for_sequence(self.base_seq) 
+        qscore = self.quality_score_for_sequence(seq) 
 
         rv = None
         if self.agd_log.refvar == "cov": 
             rv = (0.,1.)
         elif self.agd_log.refvar == "uwpd":
-            rv = (min(self.base_seq),max(self.base_seq))
+            rv = (min(seq),max(seq))
         else: 
             rv = (0.,self.agd_log.refvar)
 
-        l = len(self.base_seq)
+        l = len(seq)
         return self.agd_log.classify_value(qscore,l,rv)
 
     def quality_score_for_sequence(self,seq):
-        qs = self.seq_summary(seq,False)
+        qs = self.seq_summary(seq,True) 
 
         if self.agd_log.refvar in {"cov","uwpd"}:
             summry = qs[0] 
@@ -285,6 +326,9 @@ class AGV2GuidedGen:
             return qx
 
         qsx = qs[1] 
+        print("QSXX")
+        print(qsx)
+
         qx = qsx[self.agd_log.refvar]
         return qx[0] 
 
@@ -312,8 +356,7 @@ class AGV2GuidedGen:
         cov = np.mean(summry[0])
         uwpd_ = np.mean(summry[1]) 
 
-        self.agd_log.update_covuwpd(cov,uwpd_) 
-        self.agd_log.update_factormap(fmap)
+        self.agd_log.update_one_element(cov,uwpd_,fmap)
 
     def available_for_density(self):
 
