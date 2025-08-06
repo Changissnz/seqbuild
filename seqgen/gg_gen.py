@@ -216,8 +216,8 @@ class AGV2GuidedGen:
             p = SeqUWPDPermuter(np.array(self.base_seq),ratio,super_range,self.aux_prg)
         else: 
             super_range = [0,q] 
-            mfpd = max_float_uwpd(len(self.base_seq),super_range) 
-            p = SeqUWPDPermuter(np.array(self.base_seq),mfpd,super_range,self.aux_prg)
+            ratio = (self.aux_prg() % 10000.) / 10000. 
+            p = SeqUWPDPermuter(np.array(self.base_seq),ratio,super_range,self.aux_prg,q)
         self.permuter = p 
 
     def init_density_log(self):

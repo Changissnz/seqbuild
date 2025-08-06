@@ -19,9 +19,11 @@ class AGV2SeqQualPermuter:
 
 class SeqUWPDPermuter(AGV2SeqQualPermuter):
 
-    def __init__(self,sequence,uwpd_delta,super_range,prg): 
+    def __init__(self,sequence,uwpd_delta,super_range,prg,modulus=None): 
         super().__init__(sequence,uwpd_delta,super_range,prg)
+        self.modulus = modulus 
         self.l2 = None 
+        self.l_ = None 
         self.preproc() 
         self.null_ctr = 0 
         return
@@ -30,14 +32,26 @@ class SeqUWPDPermuter(AGV2SeqQualPermuter):
         # get max uwpd
         mxx = max_float_uwpd(len(self.l),self.srange)
         self.change_balance = mxx * self.c_delta
-
+        
+        self.l_ = deepcopy(self.l)         
+        if type(self.modulus) != type(None):
+            self.l = [l_ % self.modulus for l_ in self.l]   
         self.l2 = deepcopy(self.l)
 
-    def apply(self,null_limit=10): 
+    def modular_vec_to_closest_vec(self,mod_vec):
+        cvec = []
+        for (i,l_) in enumerate(self.l_): 
+            q = l_ // self.modulus
+            cvec.append(q * self.modulus + mod_vec[i])
+        return np.array(cvec) 
 
+    def apply(self,null_limit=10): 
         while self.change_balance > 0. and self.null_ctr < null_limit: 
             self.__next__()
-        return self.l2 
+
+        if type(self.modulus) == type(None): 
+            return self.l2 
+        return self.modular_vec_to_closest_vec(self.l2)
 
     def __next__(self):
         # choose an index

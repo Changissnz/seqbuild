@@ -32,7 +32,7 @@ def summarize_matrix(m):
 #---------------- to metrics such as coverage and u.w.p.d. 
 
 def trinary_vec_for_element(S,i):
-    dv = to_trinary_relation_v2(S,S[i],True,False) 
+    dv = to_trinary_relation_v2(np.array(S),S[i],True,False) 
     return dv 
 
 """
