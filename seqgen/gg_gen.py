@@ -185,7 +185,8 @@ of alternative base sequences.
 class AGV2GuidedGen: 
 
     def __init__(self,base_prg,aux_prg,\
-        base_output_span,density_measure,ngram_length=None):
+        base_output_span,density_measure,ngram_length=None,\
+        is_context_fed:bool=False):
 
         self.base_prg = base_prg 
         self.aux_prg = aux_prg 
@@ -201,6 +202,8 @@ class AGV2GuidedGen:
         self.set_density(density_measure) 
 
         self.ngram_length = ngram_length
+        self.is_context_fed = is_context_fed
+
         self.output_mode = "base" 
 
         self.init_density_log() 
@@ -225,24 +228,30 @@ class AGV2GuidedGen:
         self.density = density 
         return 
 
-    def set_permuter(self): 
+    def set_permuter(self,epsilon=None): 
+        if type(epsilon) != type(None):
+            assert type(epsilon) in {float,np.float64,np.float32}
+
         q = self.agd_log.refvar
         super_range = [min(self.base_seq),max(self.base_seq)]
 
-        if q == "cov": 
-            coverage_delta = (self.aux_prg() % 10000.) / 10000.
+        if type(epsilon) == type(None):
+            delta = (self.aux_prg() % 10000.) / 10000.
+        else: 
+            delta = epsilon 
+
+        if q == "cov":
             max_radius = (super_range[1] - super_range[0]) / len(self.base_seq) 
-            p = SeqCoveragePermuter(np.array(self.base_seq),coverage_delta,max_radius / 100,super_range,self.aux_prg)
+            p = SeqCoveragePermuter(np.array(self.base_seq),delta,max_radius / 100,super_range,self.aux_prg)
             p.set_partition(9)
         elif q == "uwpd": 
             mfpd = max_float_uwpd(len(self.base_seq),super_range)
-            ratio = (self.aux_prg() % 10000.) / 10000. 
-            mfpd = round(mfpd * ratio,5) 
-            p = SeqUWPDPermuter(np.array(self.base_seq),ratio,super_range,self.aux_prg)
+            mfpd = round(mfpd * delta,5) 
+
+            p = SeqUWPDPermuter(np.array(self.base_seq),delta,super_range,self.aux_prg)
         else: 
             super_range = [0,q] 
-            ratio = (self.aux_prg() % 10000.) / 10000. 
-            p = SeqUWPDPermuter(np.array(self.base_seq),ratio,super_range,self.aux_prg,q)
+            p = SeqUWPDPermuter(np.array(self.base_seq),delta,super_range,self.aux_prg,q)
         self.permuter = p 
 
     def init_density_log(self):
@@ -280,8 +289,10 @@ class AGV2GuidedGen:
             q = self.base_seq 
             self.next__base() 
 
-        qs,cl = self.highest_scoring_permutation(num_attempts)
-
+        if not self.is_context_fed: 
+            qs,cl = self.highest_scoring_permutation(num_attempts)
+        else: 
+            qs,cl = self.context_fed_permutation() 
         self.agd_log.log_sample_cat(cl)
         return qs 
 
@@ -303,6 +314,39 @@ class AGV2GuidedGen:
                 return qs,cl 
             num_attempts -= 1         
         return v,cl 
+
+    def context_fed_permutation(self): 
+        # choose a category 
+        fmap = self.agd_log.refvar_frequency_map(self.density)
+
+        csize = self.agd_log.cat_sz
+        qx = set([_ for _ in range(csize)]) - set(fmap.keys())
+
+        # case: all categories exist 
+        if len(qx) == 0:
+            return self.highest_scoring_permutation(num_attempts=10) 
+
+        # case: choose a category 
+        qx = sorted(qx) 
+        i = int(self.base_prg()) % len(qx) 
+        cat = qx[i] 
+
+            # convert it to percentage 
+        s0 = 1 / csize * cat
+        s1 = s0 + 1 / csize 
+        s0 = (s0 + s1) / 2.0 
+
+        bstat = int(self.aux_prg()) % 2 
+        if bstat: 
+            s0 = s0 * -1 
+
+        self.set_permuter(epsilon=s0)
+        qs = self.permuter.apply()
+        cl = self.classify_seq(qs)
+
+        q = uwpd(np.array(qs),pairwise_op=lambda x1,x2: np.abs(x2 - x1),\
+            accum_op=lambda x1,x2: x1 + x2)
+        return qs,cl 
 
     #------------------------------- sequence summarization 
 

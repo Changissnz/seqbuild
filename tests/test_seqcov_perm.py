@@ -67,10 +67,27 @@ class SeqCoveragePermuterMethods(unittest.TestCase):
 
         assert cov11 + 4.0 == cov10 
 
+    def test__SeqCoveragePermuter__apply__case2(self): 
+        prg = prg__LCG(45,12,-31,300) 
+        sequence = np.array([prg() for _ in range(10)])
+        coverage_delta = -0.15
+        max_radius = 1.0
+        super_range = [0,300] 
+
+        scp = SeqCoveragePermuter(sequence,coverage_delta,max_radius,super_range,prg)
+        scp.set_partition(7) 
+        qs = scp.apply()
+
+        cov0 = coverage_of_sequence(sequence,super_range,0.5)
+        cov1 = coverage_of_sequence(qs,super_range,0.5)
+
+        assert round(cov0 - 1 / 30,5) == 0. 
+        assert cov1 == 0.01 
+
 class SeqUWPDPermuterMethods(unittest.TestCase):
 
     def test__SeqUWPDPermuter__apply__case1(self):
-        
+
         prg = prg__LCG(45,31,455,45677)
         sequence = np.array([prg() for _ in range(10)])
         uwpd_delta = 0.3 

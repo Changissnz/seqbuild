@@ -35,14 +35,8 @@ class AGV2GuidedGenMethods(unittest.TestCase):
             #print(agg.base_seq)
 
     def test__AGV2GuidedGen__set_permuter__case1(self):
-        base_prg = prg__LCG(677,251,734,41242)
-        aux_prg = prg__LCG(78,63,27,10000) 
-        base_output_span = 10 
-        density_measure = np.array(((5,30),(2,1)))
-        density_measure = 30 
 
-        agg = AGV2GuidedGen(base_prg,aux_prg,base_output_span,density_measure,\
-                ngram_length=7)#4)
+        agg = AGV2GuidedGen__sample_z()
         agg.set_refvar("cov")
 
         qvec = []

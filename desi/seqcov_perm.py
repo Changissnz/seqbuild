@@ -72,7 +72,14 @@ class SeqUWPDPermuter(AGV2SeqQualPermuter):
     main method 
     """
     def apply(self,null_limit=10): 
-        while self.change_balance > 0. and self.null_ctr < null_limit: 
+        if self.change_balance > 0.:
+            def fx():
+                return self.change_balance > 0.
+        else: 
+            def fx(): 
+                return self.change_balance < 0. 
+
+        while fx() and self.null_ctr < null_limit: 
             self.__next__()
 
         if type(self.modulus) == type(None): 
@@ -93,15 +100,14 @@ class SeqUWPDPermuter(AGV2SeqQualPermuter):
         s1_ = [x1,10**-4]
         x1 = s1_[x1i] 
 
-        x2 = int(self.prg()) % 2
-        if x2 == 0: x2 = -1  
-
+        x2 = -1 if self.c_delta < 0 else 1 
         adj_l = adjust_for_uwpd_change(self.l2,ix,x1*x2,rv=self.srange,\
             d_priority=1,recurse=True) 
 
+        q = self.change_balance
         if type(adj_l) != type(None): 
             self.l2 = adj_l 
-            self.change_balance -= abs(x1) 
+            self.change_balance -= (x1 * x2)  
             self.null_ctr = 0
         else: 
             self.null_ctr += 1
@@ -197,6 +203,7 @@ class SeqCoveragePermuter(AGV2SeqQualPermuter):
     def apply_pos_delta(self): 
         for p in self.prt: 
             self.apply_one_pos_delta(p)
+            self.format_ranges()
 
     def apply_one_pos_delta(self,v):
 
@@ -308,15 +315,41 @@ class SeqCoveragePermuter(AGV2SeqQualPermuter):
 
         seq = []
         for _ in range(lx):
-            v2 = self.one_value_in_noncontiguous_complement() 
+            v2 = self.one_value_in_noncontiguous_range_sequence(False)  
             seq.append(v2) 
         return np.array(seq) 
 
-    def one_value_in_noncontiguous_complement(self):
-        i = int(self.prg()) % len(self.crs) 
-        crange = self.crs[i] 
-        return modulo_in_range(self.prg(),crange)
+    def one_value_in_noncontiguous_range_sequence(self,is_complement:bool=False):
+        qx = self.crs if is_complement else self.rs 
+
+        lx = [_ for _ in range(len(qx))]
+        while len(lx) > 0: 
+            i = int(self.prg()) % len(lx) 
+            i = lx.pop(i) 
+
+            crange = qx[i] 
+            if crange[1] - crange[0] == 0: continue 
+            return modulo_in_range(self.prg(),crange)
+        
+        return None 
     
+    def format_ranges(self): 
+        self.rs = to_noncontiguous_ranges(self.rs,is_sorted=True)
+        self.crs = to_noncontiguous_ranges(self.crs,is_sorted=True)
+
+        def filter_0range(rseq): 
+            rs = [] 
+            for rs_ in rseq: 
+                if rs_[1] - rs_[0] == 0: 
+                    continue
+                else: 
+                    rs.append(rs_) 
+            return rs 
+        
+        self.rs = filter_0range(self.rs) 
+        self.crs = filter_0range(self.crs)
+
+
     """
     main method 
     """
@@ -326,12 +359,15 @@ class SeqCoveragePermuter(AGV2SeqQualPermuter):
         else: 
             fx = self.apply_neg_delta
         fx()
+
+        self.format_ranges() 
+
         return self.change_sequence()
 
     def apply_neg_delta(self): 
         for (i,p) in enumerate(self.prt): 
             self.apply_one_neg_delta(p,i) 
-
+            self.format_ranges()
 
     def apply_one_neg_delta_(self,ncrange,ncrange_comp,v):
         # get orientation
@@ -351,7 +387,6 @@ class SeqCoveragePermuter(AGV2SeqQualPermuter):
 
 
     def default_random_shrink_(self,dx=2.0):
-
         ri = int(self.prg()) % len(self.rs) 
         rx = deepcopy(self.rs[ri] )
         d = (rx[1] - rx[0]) / dx
@@ -359,13 +394,11 @@ class SeqCoveragePermuter(AGV2SeqQualPermuter):
         rx2[1] = rx2[0] + d 
 
         d2 = rx[1] - rx2[1] 
-
         neib = neighbors_of_ncrange(self.rs,self.crs,ri)[1] 
-
         self.rs[ri] = rx2
 
         if type(neib) != type(None):
-            ix = self.where_is(tuple(neib)) 
+            ix = self.where_is(tuple(neib),False) 
             self.crs[ix] = np.array([rx2[1],self.crs[ix][1]]) 
         return ri,d2 
 
