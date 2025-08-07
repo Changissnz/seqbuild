@@ -344,8 +344,6 @@ class AGV2GuidedGen:
         qs = self.permuter.apply()
         cl = self.classify_seq(qs)
 
-        q = uwpd(np.array(qs),pairwise_op=lambda x1,x2: np.abs(x2 - x1),\
-            accum_op=lambda x1,x2: x1 + x2)
         return qs,cl 
 
     #------------------------------- sequence summarization 

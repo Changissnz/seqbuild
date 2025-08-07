@@ -71,7 +71,7 @@ class SeqUWPDPermuter(AGV2SeqQualPermuter):
     """
     main method 
     """
-    def apply(self,null_limit=10): 
+    def apply(self,null_limit=10,num_attempts=1000): 
         if self.change_balance > 0.:
             def fx():
                 return self.change_balance > 0.
@@ -79,8 +79,11 @@ class SeqUWPDPermuter(AGV2SeqQualPermuter):
             def fx(): 
                 return self.change_balance < 0. 
 
-        while fx() and self.null_ctr < null_limit: 
+        while fx() and self.null_ctr < null_limit and \
+            num_attempts > 0: 
+
             self.__next__()
+            num_attempts -= 1 
 
         if type(self.modulus) == type(None): 
             return self.l2 

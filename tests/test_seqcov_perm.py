@@ -55,7 +55,6 @@ class SeqCoveragePermuterMethods(unittest.TestCase):
             [13.5, 16.5],\
             [17.5, 20. ]]) 
 
-        changean = 1.6 
         coverage_delta2 = coverage_delta * -1 
         scp2 = SeqCoveragePermuter(sequence,coverage_delta2,max_radius,super_range,prg)
         scp2.set_partition()
