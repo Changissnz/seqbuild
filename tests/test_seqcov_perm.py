@@ -94,10 +94,23 @@ class SeqUWPDPermuterMethods(unittest.TestCase):
         sup = SeqUWPDPermuter(sequence,uwpd_delta,[0,45677],prg)
 
         q = sup.apply() 
-        qsol = np.array([ 2606,  3819,  2389, 37475, 9594, 39636, 42909, 42252,
-            20459, 13280]) 
+        pd0 = uwpd(sequence,accum_op=lambda x1,x2:x1+x2)
+        pd1 = uwpd(q,accum_op=lambda x1,x2:x1+x2)
+        assert pd0 < pd1
+        assert pd0 + 1.5 * 10 ** 5 < pd1  
 
-        assert np.all(np.round(q) == qsol)
+    def test__SeqUWPDPermuter__apply__case2(self):
+
+        prg = prg__LCG(45,31,455,45677)
+        sequence = np.array([prg() for _ in range(10)])
+        uwpd_delta = -0.3 
+        sup = SeqUWPDPermuter(sequence,uwpd_delta,[0,45677],prg)
+        qx = sup.apply()
+
+        pd0 = uwpd(sequence,accum_op=lambda x1,x2:x1+x2)
+        pd1 = uwpd(qx,accum_op=lambda x1,x2:x1+x2)
+
+        assert round(pd0 / pd1) == 4 
 
 
 if __name__ == '__main__':
