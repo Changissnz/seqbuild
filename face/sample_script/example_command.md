@@ -14,5 +14,5 @@ set V = run G for `200` iter.
 set M = make multimetric with V. 
 
 set X = run M with ngram=5.
-set F = open file with `foldername/filename`. 
+set F = open file `foldername/filename`. 
 write X to F. 
