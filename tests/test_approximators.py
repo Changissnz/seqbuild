@@ -81,7 +81,5 @@ class ApproximatorsMethods(unittest.TestCase):
             qr2 |= {x}
         assert len(qr2) == 46 
 
-
-
 if __name__ == '__main__':
     unittest.main()
