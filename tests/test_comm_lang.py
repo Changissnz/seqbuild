@@ -34,5 +34,16 @@ class CommLangMethods(unittest.TestCase):
         assert type(fi) == io.BufferedWriter 
         fi.close()
 
+    def test__CommLangParser__process_command__case1(self): 
+        clp = CommLangParser("face/sample_script/commond_one.txt") 
+
+        clp.load_next_command()
+        #'set G = make lcg with 400,532,31,4577.'
+        q = clp.process_command()
+        assert q[0] == "G" 
+        assert type(q[1]) in {MethodType,FunctionType}
+
+        clp.close() 
+
 if __name__ == '__main__':
     unittest.main()

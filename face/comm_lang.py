@@ -18,6 +18,10 @@ class CommLangParser:
         self.commond = None 
         self.vartable = dict() 
 
+    def close(self): 
+        self.file_obj.close() 
+        del self 
+
     def load_next_lines(self,num_lines:int):
         assert type(num_lines) == int and num_lines > 0 
         return -1 
@@ -69,7 +73,7 @@ class CommLangParser:
         n = splitstr_cmd[1] 
         assert splitstr_cmd[2] == "=" 
 
-        self.vartable[n] = self.MRO_proc(splitstr_cmd[3:]) 
+        self.vartable[n] = self.MROW_proc(splitstr_cmd[3:]) 
         return n, self.vartable[n]
 
     """

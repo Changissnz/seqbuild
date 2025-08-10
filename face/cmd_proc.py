@@ -134,7 +134,6 @@ def OPEN_proc(splitstr_cmd):
 
     # check for directory name
     dirPath = os.path.dirname(splitstr_cmd[2])
-    print("DIRPATH [{}]".format(dirPath))
 
     if not os.path.isdir(dirPath) and dirPath != "": 
         os.mkdir(dirPath)
