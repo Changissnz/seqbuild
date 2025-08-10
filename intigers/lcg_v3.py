@@ -127,6 +127,8 @@ def modrange_for_congruence(pv,av,modrange):
 
 #--------------------------------------------------------------------- 
 
+DEFAULT_LCGV3_AUTO_TRINARYDELTA_RANGE = [3,14] 
+
 class LCGV3(LCGV2): 
 
     def __init__(self,start,m,a,n0,n1,sc_size:int,preproc_gd:bool=False,\
@@ -136,6 +138,18 @@ class LCGV3(LCGV2):
         self.tvi = None 
         self.r_ = [self.r[0],self.r[1]]
         self.prg = prg
+
+        # variables for use with class feature 
+        # `auto trinary-vector delta`. 
+        self.auto_trinarydelta = False 
+        self.gen_type = None 
+        self.trinary_length = None 
+        self.delta_one = None
+        self.delta_two = None
+        self.is_delta2_mutable = None 
+        self.delta_counter = 0 
+        self.delta_counter2 = 0 
+
 
     def __next__(self):
         did_fire = self.fired
@@ -157,7 +171,16 @@ class LCGV3(LCGV2):
                 self.r = [int(mr[0]),int(mr[1])]
                 q = s_ * self.m + self.a
                 q = modulo_in_range(q,self.r) 
-            self.tvi = (self.tvi + 1) % len(self.tv) 
+
+            self.tvi = self.tvi + 1 
+
+            # case: auto-delta for trinary vector feature of this class 
+            if self.tvi == len(self.tv): 
+                if self.auto_trinarydelta:
+                    self.delta_counter += 1 
+                    self.auto_td__update_trinary_vec() 
+            
+            self.tvi = self.tvi % len(self.tv) 
             self.s = q 
         return q 
 
@@ -190,6 +213,20 @@ class LCGV3(LCGV2):
         self.tvi = 0 
         return
 
+    #-------------------------------- methods to automatically update trinary vector 
+
+    def auto_td__update_trinary_vec(self): 
+        if self.delta_counter2 >= self.delta_two: 
+            if self.is_delta2_mutable: 
+                l = modulo_in_range(int(self.prg()),DEFAULT_LCGV3_AUTO_TRINARYDELTA_RANGE)
+                self.static_autoset(self.gen_type,l,self.is_delta2_mutable)
+            self.delta_counter2 = 0
+
+        if self.delta_counter >= self.delta_one: 
+            self.autoset_tv(self.gen_type,self.trinary_length,ext_prg=self.prg)
+            self.delta_counter2 += 1
+            self.delta_counter = 0 
+
     def autoset_tv(self,gen_type,l,ext_prg=None):
         assert gen_type in {1,2}
 
@@ -213,6 +250,21 @@ class LCGV3(LCGV2):
             tv = TrinaryVec.one_instance__v2(l,fm,qx)
         self.set_tv(tv)
 
+    # NOTE: requires non-null `prg`. 
+    """
+    sets variables to static values for `auto_trinarydelta` mode. 
+    """ 
+    def static_autoset(self,gen_type,l,is_delta2_mutable:bool=False):
+        self.auto_trinarydelta = True 
+
+        self.gen_type = gen_type 
+        self.trinary_length = l 
+
+        self.delta_one = modulo_in_range(int(self.prg()),DEFAULT_LCGV3_AUTO_TRINARYDELTA_RANGE) 
+        self.delta_two = modulo_in_range(int(self.prg()),DEFAULT_LCGV3_AUTO_TRINARYDELTA_RANGE) 
+        self.is_delta2_mutable = is_delta2_mutable 
+        self.delta_counter = 0 
+    
     def set_prg(self,prg):
         assert type(prg) in {FunctionType,MethodType}
         self.prg = prg 
