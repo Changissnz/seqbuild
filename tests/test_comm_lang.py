@@ -11,8 +11,9 @@ class CommLangMethods(unittest.TestCase):
     def test__MAKE_proc__case1(self):
         cmd = "make lcg with 400,532,31,4577"
         splitstr_cmd = cmd.split(" ")
+        var_map = dict() 
 
-        prg = MAKE_proc(splitstr_cmd)
+        prg = MAKE_proc(splitstr_cmd,var_map)
 
         lx = []
 

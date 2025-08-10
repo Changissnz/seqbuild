@@ -8,31 +8,81 @@ class CommLangParser:
 
     def __init__(self,filepath:str):
         self.fp = filepath
+        self.file_obj = open(self.fp,"r") 
+
+        self.file_obj.seek(0,os.SEEK_END) 
+        self.file_end = self.file_obj.tell()
+        self.file_obj.seek(0)  
+
         self.cmdlines = []
+        self.commond = None 
         self.vartable = dict() 
 
-    def load_next_lines(self): 
+    def load_next_lines(self,num_lines:int):
+        assert type(num_lines) == int and num_lines > 0 
         return -1 
 
+    def load_next_command(self):
+        comm = "" 
+        stat = True 
+
+        while stat: 
+            if self.file_obj.tell() != self.file_end:
+                line = self.file_obj.readline()
+            else: 
+                stat = False 
+                continue 
+
+            line = line.strip() 
+            comm += line 
+
+            # case: end of command
+            if line[-1] == ".": 
+                stat = False 
+
+        self.cmdlines.append(comm)
+        return comm 
+
+    # NOTE: does not check for correctness of input 
     def load_cmd_lines(self,cmdlines):
-        return -1 
+        self.cmdlines.extend(cmdlines)
+        return
+
+    def process_command(self): 
+        if len(self.cmdlines) == 0: 
+            print("NO COMMANDS IN QUEUE")
+            return 
+
+        c = self.cmdlines.pop(0)
+        c = c.split(" ")
+        self.commond = c 
+        return self.process_command_()
+
+    def process_command_(self):
+
+        if self.commond[0] == "set": 
+            return self.SET_proc(self.commond) 
+        return self.MRO_proc(self.commond) 
 
     def SET_proc(self,splitstr_cmd):
         assert splitstr_cmd[0] == "set" 
         n = splitstr_cmd[1] 
         assert splitstr_cmd[2] == "=" 
 
-        # make, run , open
-
-        # case 
-        if splitstr_cmd[3] == "make":
-            self.vartable[n] = MAKE_proc(splitstr_cmd[3:])
-        elif splitstr_cmd[3] == "run": 
-            self.vartable[n] = RUN_proc(splitstr_cmd[3:],self.vartable) 
-        elif splitstr_cmd[3] == "open": 
-            self.vartable[n] = OPEN_proc(splitstr_cmd[3:])
-            return
-        else: 
-            assert False 
-
+        self.vartable[n] = self.MRO_proc(splitstr_cmd[3:]) 
         return n, self.vartable[n]
+
+    """
+    method for handling `make`,`run`,`open`,`write` processes. 
+    """
+    def MROW_proc(self,splitstr_cmd): 
+
+        if splitstr_cmd[0] == "make":
+            return MAKE_proc(splitstr_cmd,self.vartable) 
+        elif splitstr_cmd[0] == "run": 
+            return RUN_proc(splitstr_cmd,self.vartable)
+        elif splitstr_cmd[0] == "open": 
+            return OPEN_proc(splitstr_cmd)
+        elif splitstr_cmd[0] == "write":
+            return WRITE_proc(splitstr_cmd,self.vartable)
+        assert False 

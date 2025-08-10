@@ -1,0 +1,9 @@
+set G = make lcg with 
+`(s,m,a,m0)`. 
+
+run G for 100 iter. 
+set V = run G for `200` iter. 
+
+set M = make multimetric with V. 
+
+set X = run M with 5.

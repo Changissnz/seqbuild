@@ -14,7 +14,7 @@ LANG_KEYTERMS = ["make","run","with","set","for","iter","write","to",\
             "open"]  
 
 # TODO: incomplete 
-def MAIN_object_method(q):
+def MAIN_method_for_object(q):
 
     if type(q) in {MethodType,FunctionType}:
         def f():
@@ -23,10 +23,21 @@ def MAIN_object_method(q):
 
     if type(q) in {LCGV2,LCGV3}:
         return q.__next__ 
+
+    if type(q) == MultiMetric: 
+        
+        def f(ngram): 
+            ngram_ = int(ngram) 
+            assert ngram_ > 0 
+            qx = q.summarize(ngram_,condense_ngram_output=True)
+            q.load_mc_map()
+            return qx 
+        return f 
+
     return -1 
 
 # TODO: incomplete 
-def MAKE_proc(splitstr_cmd): 
+def MAKE_proc(splitstr_cmd,var_map): 
     assert splitstr_cmd[0] == "make"
 
     if splitstr_cmd[1] == "lcg":
@@ -37,11 +48,52 @@ def MAKE_proc(splitstr_cmd):
 
         parameters = tuple([float(p) for p in parameters])
         return prg__LCG(*parameters) 
+
+    if splitstr_cmd[1] == "mdr": 
+        assert splitstr_cmd[2] == "with" 
+        assert splitstr_cmd[3] in var_map 
+        lx = var_map[splitstr_cmd[3]] 
+        assert is_vector(lx) or type(lx) == list 
+        mdx = ModuloDecomp(lx)
+        return ModuloDecompRepr(mdx,reconstruct_type=1)
+
+    if splitstr_cmd[1] == "lcgv2":
+        assert splitstr_cmd[2] == "with" 
+
+        parameters = splitstr_cmd[3] 
+        parameters = parameters.split(",")
+        
+        assert len(parameters) == 5 or len(parameters) == 7
+
+        if len(parameters) == 5:
+            sc_size = 50 
+            preproc_gd = False
+        else: 
+            sc_size = parameters.pop(5) 
+            preproc_gd = parameters.pop(5) 
+
+            sc_size = int(sc_size) 
+            assert sc_size > 0 
+            
+            preproc_gd = bool(int(preproc_gd)) 
+        
+        parameters = [float(p) for p in parameters] 
+
+        return LCGV2(parameters[0],parameters[1],parameters[2],\
+            parameters[3],parameters[4],sc_size,preproc_gd=preproc_gd)
+
+    if splitstr_cmd[1] == "multimetric": 
+        assert splitstr_cmd[2] == "with" 
+        assert splitstr_cmd[3] in var_map
+        lx = var_map[splitstr_cmd[3]] 
+        return MultiMetric(lx)
+
     return None
 
 """
 run object 
 run object for INTEGER iter 
+run object with PARAMETERS 
 """
 def RUN_proc(splitstr_cmd,var_map): 
     assert splitstr_cmd[0] == "run"
@@ -50,13 +102,18 @@ def RUN_proc(splitstr_cmd,var_map):
     # get the object from the variable name     
     var_obj = var_map[splitstr_cmd[1]] 
 
-    f = MAIN_object_method(var_obj) 
+    f = MAIN_method_for_object(var_obj) 
 
     if len(splitstr_cmd) < 3:
         return f()
 
     lx = []
 
+    # case: keyword `with`
+    if splitstr_cmd[2] == "with":
+        return f(splitstr_cmd[3]) 
+
+    # case: keyword `for`,`iter`. 
     assert splitstr_cmd[2] == "for" 
 
     iterations = int(splitstr_cmd[3]) 
