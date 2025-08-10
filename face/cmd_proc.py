@@ -5,6 +5,8 @@ the seqbuild program's main functional features.
 """
 
 from seqgen.gg_gen import * 
+from intigers.lcg_v3 import * 
+
 import io 
 
 BASE_PRNG = ["lcg","lcgv2","lcgv3","mdr","idforest","optri",\

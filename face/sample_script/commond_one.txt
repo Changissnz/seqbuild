@@ -1,6 +1,6 @@
 set G = make lcg with 400,532,31,4577.
 run G for 100 iter. 
-set V = run G for `200` iter. 
+set V = run G for 200 iter. 
 
 set M = make multimetric with V. 
 

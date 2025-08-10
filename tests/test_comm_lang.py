@@ -45,5 +45,41 @@ class CommLangMethods(unittest.TestCase):
 
         clp.close() 
 
+    def test__CommLangParser__process_command__case2(self):
+
+        clp = CommLangParser("face/sample_script/commond_one.txt") 
+
+        clp.load_next_command()
+        #'set G = make lcg with 400,532,31,4577.'
+        q = clp.process_command()
+        assert q[0] == "G" 
+        assert type(q[1]) in {MethodType,FunctionType}
+
+        clp.load_next_command() 
+        q2 = clp.process_command() 
+
+        clp.load_next_command() 
+        q3 = clp.process_command() 
+
+        assert "G" in clp.vartable
+        assert "V" in clp.vartable
+
+        clp.load_next_command() 
+        q3 = clp.process_command() 
+
+        clp.load_next_command() 
+        q4 = clp.process_command() 
+
+        q4sol0 = np.array([0.77917 , 0.34337 , 0.31333]) 
+        assert np.all(np.round(q4[1][0] - q4sol0,5) == 0) 
+
+        q4sol1 = (137, 153)
+        assert q4sol1 == q4[1][1] 
+
+        q4sol2 = np.float64(0.705)
+        assert q4sol2 == q4[1][2] 
+
+        clp.close() 
+
 if __name__ == '__main__':
     unittest.main()
