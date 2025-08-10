@@ -24,5 +24,14 @@ class CommLangMethods(unittest.TestCase):
             2534.0, 2481.0, 1747.0, 304.0, 1564.0, \
             3642.0, 1504.0])
 
+    def test__OPEN_proc__case1(self):
+
+        fp = "face/sample_script/commondeth.txt"
+        cmd2 = "open file {}".format(fp)
+        splitstr_cmd2 = cmd2.split(" ")
+        fi = OPEN_proc(splitstr_cmd2)
+        assert type(fi) == io.BufferedWriter 
+        fi.close()
+
 if __name__ == '__main__':
     unittest.main()

@@ -1,5 +1,11 @@
 
+"""
+code in this file mainly consists of wrapper functions around 
+the seqbuild program's main functional features. 
+"""
+
 from seqgen.gg_gen import * 
+import io 
 
 BASE_PRNG = ["lcg","lcgv2","lcgv3","mdr","idforest","optri",\
              "rch"]
@@ -33,6 +39,10 @@ def MAKE_proc(splitstr_cmd):
         return prg__LCG(*parameters) 
     return None
 
+"""
+run object 
+run object for INTEGER iter 
+"""
 def RUN_proc(splitstr_cmd,var_map): 
     assert splitstr_cmd[0] == "run"
     assert splitstr_cmd[1] in var_map 
@@ -57,16 +67,40 @@ def RUN_proc(splitstr_cmd,var_map):
         lx.append(f())
     return lx 
 
+"""
+open file FILENAME.txt 
+open new file FILENAME.txt 
+"""
 def OPEN_proc(splitstr_cmd):
     assert splitstr_cmd[0] == "open" 
     assert splitstr_cmd[1] == "file" 
 
     # check for directory name
     dirPath = os.path.dirname(splitstr_cmd[2])
-    if not os.path.isdir(dirPath): 
+    print("DIRPATH [{}]".format(dirPath))
+
+    if not os.path.isdir(dirPath) and dirPath != "": 
         os.mkdir(dirPath)
 
     if not os.path.exists(splitstr_cmd[2]): 
-        open(splitstr_cmd[2],"w")
+        q = open(splitstr_cmd[2],"wb")
+        q.close() 
 
-    return open(splitstr_cmd[2],"a")
+    return open(splitstr_cmd[2],"ab")
+
+"""
+write object to file_object 
+"""
+def WRITE_proc(splitstr_cmd,var_map): 
+    assert splitstr_cmd[0] == "write" 
+    assert splitstr_cmd[1] in var_map
+    var_obj = var_map[splitstr_cmd[1]] 
+    assert splitstr_cmd[2] == "to" 
+    
+    assert splitstr_cmd[3] in var_map 
+    fi_obj = var_map[splitstr_cmd[3]]
+    assert isinstance(fi_obj,io.BufferedWriter) 
+    #isinstance(fi_obj,io.TextIOWrapper)
+    
+    pickle.dump(var_obj,fi_obj)
+    fi_obj.close()
