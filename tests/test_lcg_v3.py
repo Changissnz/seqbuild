@@ -172,5 +172,37 @@ class LCGV3Methods(unittest.TestCase):
         sv = stdop_vec(lx,to_trinary_relation,cast_type=np.int32)
         assert lg2.tv == sv 
 
+    def test__LCGV3__next__case2(self): 
+
+        start = 515 
+        m = 311 
+        a = -422 
+        l0 = -299 
+        l1 = 478 
+        sc_size = 100 
+        preproc_gd = False 
+        prg = prg__LCG(17,59,-43,900) 
+
+        super_range = [-300,500]
+        g3 = LCGV3(start,m,a,l0,l1,sc_size,preproc_gd,prg,\
+                super_range) 
+
+        gen_type = 2 
+        l = 7 
+        is_delta2_mutable = True 
+        g3.static_autoset(gen_type,l,is_delta2_mutable)
+
+        qs = [] 
+        cx = 0 
+
+        stat = True 
+        while stat: 
+            q = next(g3) 
+            qs.append(q) 
+            cx += bool(g3.stat__new_trinary) 
+            stat = not g3.stat__new_trinary 
+            
+        assert len(qs) == 65 
+
 if __name__ == '__main__':
     unittest.main()
