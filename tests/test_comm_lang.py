@@ -81,5 +81,46 @@ class CommLangMethods(unittest.TestCase):
 
         clp.close() 
 
+    def test__CommLangParser__process_command__case3(self):
+
+        clp = CommLangParser("face/sample_script/commond_two.txt") 
+
+        clp.load_next_command()
+        q = clp.process_command()
+        assert q[0] == "G" 
+        assert type(q[1]) in {MethodType,FunctionType}
+
+        clp.load_next_command() 
+        q2 = clp.process_command() 
+
+        clp.load_next_command() 
+        q3 = clp.process_command() 
+
+        assert "G" in clp.vartable
+        assert "V" in clp.vartable
+
+        clp.load_next_command() 
+        q3 = clp.process_command() 
+
+        clp.load_next_command() 
+        q4 = clp.process_command() 
+
+        q3sol = [np.int32(300), np.int32(1495), \
+            np.int32(8876), np.int32(882), np.int32(1707), np.int32(303), \
+            np.int32(731), np.int32(1006), np.int32(8029), np.int32(3321), \
+            np.int32(9825), np.int32(35), np.int32(14), np.int32(10), np.int32(6), \
+            np.int32(-198), np.int32(20), np.int32(-495), np.int32(680), np.int32(486)]
+        q4sol = [np.int32(47), np.int32(-23), np.int32(-232), np.int32(1128), \
+            np.int32(2199), np.int32(269), np.int32(629), np.int32(700), np.int32(5581), \
+            np.int32(2473), np.int32(7281), np.int32(292), np.int32(271), np.int32(267), \
+            np.int32(263), np.int32(59), np.int32(277), np.int32(-238), np.int32(92), \
+            np.int32(-102)]
+
+        assert q3[1] == q3sol 
+        assert q4[1] == q4sol 
+
+        clp.close() 
+
+
 if __name__ == '__main__':
     unittest.main()

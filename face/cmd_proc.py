@@ -34,6 +34,12 @@ def MAIN_method_for_object(q):
             qx = q.summarize(ngram_,condense_ngram_output=True)
             q.load_mc_map()
             return qx 
+        return f
+
+    if type(q) == ModuloDecompRepr:
+        def f(first):
+            q.reset_first(int(first))
+            return q.reconstruct() 
         return f 
 
     return -1 
@@ -55,8 +61,9 @@ def MAKE_proc(splitstr_cmd,var_map):
         assert splitstr_cmd[2] == "with" 
         assert splitstr_cmd[3] in var_map 
         lx = var_map[splitstr_cmd[3]] 
-        assert is_vector(lx) or type(lx) == list 
-        mdx = ModuloDecomp(lx)
+        mdx = ModuloDecomp(IntSeq(lx)) 
+        mdx.merge(False)
+        
         return ModuloDecompRepr(mdx,reconstruct_type=1)
 
     if splitstr_cmd[1] == "lcgv2":
