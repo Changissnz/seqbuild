@@ -175,6 +175,25 @@ class LCGV3(LCGV2):
 
         self.stat__new_trinary = False 
 
+    """
+    method is reserved for only automatic trinary-vector 
+    mode. Repeatedly calls `__next__` method, collecting 
+    those output values into a list container B, until 
+    tinary-vector is updated (in proportion to 
+    `trinary_length * delta_one`). Outputs the sequence B, 
+    called a batch, of output values. 
+    """
+    def next_batch__auto_td(self): 
+        assert self.auto_trinarydelta
+
+        bx = []
+        stat = True 
+        while stat: 
+            q = next(self) 
+            bx.append(q)
+            stat = not self.stat__new_trinary 
+
+        return bx 
 
     def __next__(self):
         self.stat__new_trinary = False 
@@ -201,7 +220,7 @@ class LCGV3(LCGV2):
                 return modulo_in_range(q,self.super_range)  
 
             if type(mr) != type(None): 
-                self.r = [int(mr[0]),int(mr[1])]
+                self.r = sorted([int(mr[0]),int(mr[1])])
                 q = s_ * self.m + self.a
                 q = modulo_in_range(q,self.r) 
 

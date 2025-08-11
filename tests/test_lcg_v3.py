@@ -1,6 +1,27 @@
 from intigers.lcg_v3 import * 
 import unittest
 
+def LCGV3_sample_k_(prg):
+    start = 515 
+    m = 311 
+    a = -422 
+    l0 = -299 
+    l1 = 478 
+    sc_size = 100 
+    preproc_gd = False 
+    super_range = [-300,500]
+    return LCGV3(start,m,a,l0,l1,\
+        sc_size,preproc_gd,prg,\
+        super_range) 
+
+def LCGV3_sample_k(): 
+    prg = prg__LCG(17,59,-43,900) 
+    return LCGV3_sample_k_(prg) 
+
+def LCGV3_sample_q(): 
+    prg = prg__LCG(76,599,-433,900) 
+    return LCGV3_sample_k_(prg) 
+
 ### lone file test 
 """
 python -m tests.test_lcg_v3 
@@ -174,19 +195,7 @@ class LCGV3Methods(unittest.TestCase):
 
     def test__LCGV3__next__case2(self): 
 
-        start = 515 
-        m = 311 
-        a = -422 
-        l0 = -299 
-        l1 = 478 
-        sc_size = 100 
-        preproc_gd = False 
-        prg = prg__LCG(17,59,-43,900) 
-
-        super_range = [-300,500]
-        g3 = LCGV3(start,m,a,l0,l1,sc_size,preproc_gd,prg,\
-                super_range) 
-
+        g3 = LCGV3_sample_k() 
         gen_type = 2 
         l = 7 
         is_delta2_mutable = True 
@@ -203,6 +212,29 @@ class LCGV3Methods(unittest.TestCase):
             stat = not g3.stat__new_trinary 
 
         assert len(qs) == 58, "got {}".format(len(qs))
+
+    """
+    ensures that LCGV3 changes its trinary vector at the 
+    appropriate rate. 
+    """
+    def test__LCGV3__next_batch__auto_td__case1(self): 
+        g3 = LCGV3_sample_q() 
+        gen_type = 2 
+        l = 7 
+        is_delta2_mutable = True 
+        g3.static_autoset(gen_type,l,is_delta2_mutable)
+
+        d0,d1 = g3.delta_one,g3.delta_two
+
+        bx0 = g3.next_batch__auto_td()
+        bx1 = g3.next_batch__auto_td()
+        bx2 = g3.next_batch__auto_td()
+        bx3 = g3.next_batch__auto_td()
+        bx4 = g3.next_batch__auto_td()
+
+        d0_,d1_ = g3.delta_one,g3.delta_two
+
+        assert (d0,d1) == (7,4) and (d0_,d1_) == (4,7)
 
 if __name__ == '__main__':
     unittest.main()
