@@ -201,8 +201,8 @@ class LCGV3Methods(unittest.TestCase):
             qs.append(q) 
             cx += bool(g3.stat__new_trinary) 
             stat = not g3.stat__new_trinary 
-            
-        assert len(qs) == 65 
+
+        assert len(qs) == 58, "got {}".format(len(qs))
 
 if __name__ == '__main__':
     unittest.main()

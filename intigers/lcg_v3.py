@@ -146,7 +146,7 @@ def modrange_for_congruence(pv,av,modrange):
 
 #--------------------------------------------------------------------- 
 
-DEFAULT_LCGV3_AUTO_TRINARYDELTA_RANGE = [3,14] 
+DEFAULT_LCGV3_AUTO_TRINARYDELTA_RANGE = [3,9] 
 
 class LCGV3(LCGV2): 
 
@@ -161,6 +161,7 @@ class LCGV3(LCGV2):
         self.r_ = [self.r[0],self.r[1]]
         self.prg = prg
         self.super_range = super_range
+
         # variables for use with class feature 
         # `auto trinary-vector delta`. 
         self.auto_trinarydelta = False 
