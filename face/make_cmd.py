@@ -2,7 +2,7 @@ from seqgen.gg_gen import *
 from intigers.lcg_v3 import * 
 
 BASE_PRNG = ["lcg","lcgv2","lcgv3","mdr","idforest","optri",\
-             "rch"]
+             "rch","qval"] 
 
 def MAKE_lcgvx(splitstr_cmd,var_map): 
     assert splitstr_cmd[0] == "make" 
@@ -113,5 +113,32 @@ def MAKE_proc(splitstr_cmd,var_map):
         assert splitstr_cmd[3] in var_map
         lx = var_map[splitstr_cmd[3]] 
         return MultiMetric(lx)
+
+    if splitstr_cmd[1] == "qval":
+        assert splitstr_cmd[2] == "with" 
+
+        parameters = splitstr_cmd[3].split(",")
+
+        assert parameters[0] in var_map 
+        V = var_map[parameters[0]] 
+
+        assert parameters[1] in var_map 
+        index_selector = var_map[parameters[1]] 
+
+        assert parameters[2] in var_map 
+        length_outputter = var_map[parameters[2]] 
+
+        assert parameters[3] in var_map 
+        range_outputter = var_map[parameters[3]] 
+
+        try: 
+            adj_type = int(parameters[4])
+        except: 
+            raise ValueError("invalid adjustment type {}".format(parameters[4])) 
+
+        assert adj_type in {1,2} 
+
+        return QValueOutputter(V,index_selector,length_outputter,\
+            range_outputter,adj_type) 
 
     return None

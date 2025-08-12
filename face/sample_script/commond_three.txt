@@ -1,7 +1,5 @@
-# instantiate 4 LCGV3s with the same parameters but different modes 
+# instantiate 5 LCGV3s with the same parameters but different modes 
 # collect 100 elements from each of the generators for comparison. 
-
-#set G = make lcgv3 with 100,200,300,-1000,1000.
 set G = make lcgv3 with 99,23,-133,-1000,1000.
 
 set P = make lcg with 56,-17,71,818. 
