@@ -1,12 +1,35 @@
 from .seq_struct import * 
-from morebs2.numerical_generator import prg_choose_n
+from morebs2.numerical_generator import prg_choose_n,modulo_in_range
+from morebs2.matrix_methods import is_valid_range
+from .extraneous import round_to_trinary_vector
+from types import MethodType,FunctionType
+
 
 class TrinaryVec(IntSeq):
 
     def __init__(self,l):
         assert set(l).issubset({0,1,-1})
         super().__init__(l)
-        
+    
+    @staticmethod
+    def omit_value(tv,target_value,prg):
+        assert type(tv) == TrinaryVec 
+        assert target_value in {-1,0,1} 
+        assert type(prg) in {MethodType,FunctionType} 
+
+        lx = []
+
+        repset = {-1,0,1} - {target_value}
+        repset = sorted(repset) 
+        for l_ in tv.l:
+            if l_ == target_value: 
+                i = int(prg()) % 2 
+                r = repset[i]
+                lx.append(r)
+            else: 
+                lx.append(l_) 
+        return TrinaryVec(lx) 
+
     # TODO: test these two methods
     @staticmethod
     def one_instance__v1(base_value,length,change_ratio,prg): 
@@ -50,6 +73,15 @@ class TrinaryVec(IntSeq):
             vec[q2] += k
 
         return TrinaryVec(vec)
+
+    @staticmethod
+    def one_instance__v3(l,prg,super_range): 
+        assert is_valid_range(super_range,False,False) 
+
+        lx = [modulo_in_range(prg(),super_range) for \
+            _ in range(l)]
+        V = round_to_trinary_vector(lx,is_distance_roundtype=False)
+        return TrinaryVec(V) 
 
     """
     calculates rightward contiguous range for l[i]. 

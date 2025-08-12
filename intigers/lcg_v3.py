@@ -1,7 +1,5 @@
 from .lcg_v2 import * 
 from .tvec import * 
-from morebs2.numerical_generator import modulo_in_range
-
 """
 """
 def is_value_below_modulo_range_length(v,mr):
@@ -147,11 +145,48 @@ def modrange_for_congruence(pv,av,modrange):
 #--------------------------------------------------------------------- 
 
 DEFAULT_LCGV3_AUTO_TRINARYDELTA_RANGE = [3,9] 
+#DEFAULT_LCGV3_RMOD_RANGE = [2,19] 
 
+"""
+class is extension of <LCGV2>, a data structure programmed to be able to recognize 
+sub-cycles in its input-output map. In addition to this capability in awareness, 
+<LCGV3> can `fit` its output sequence according to a trinary vector, set at 
+`tv`. The trinary vector V_t denotes the contiguous pairwise relations for the output 
+sequence S. If V_t is of length l, then S is of length (l + 1). There are modes to 
+the usage of this class. Broadly, there are two modes: `trinary-guided` and `reflective 
+modification`. 
+
+In the basic use case, the method `autoset_tv` sets a trinary vector to `tv` by generative 
+scheme type 1 or 2. Then the <LCGV3> will output values that satisfy `tv`. When the end of 
+`tv` is reached, algorithm re-iterates back at index 0. And algorithm continues doing this 
+unless set with another trinary vector for guidance. 
+
+In trinary-guided mode, <LCGV3> automatically changes its trinary vector `tv` at pre-set 
+points in its generation of values. Using two positive integers `delta_one` and `delta_two`, 
+<LCGV3> additionally uses a counter to keep track of the number of values produced that were 
+fitted over the trinary vector. 
+
+Trinary-guided mode allows <LCGV3> to produce output values that are varyingly different 
+than its parent class <LCGV2> even when the two have the same parameter values (where that 
+applies). 
+
+In reflective modification mode, <LCGV3> applies changes to its pre-output values at the 
+same rate specified by `delta_one` and `delta_two`. However, the changes take place via a 
+different methodology, described now. It first "shadows" over `trinary_length` 
+number of output values from its base LCG. It then calculates a trinary relation vector 
+V_t for the vector of these output values. It applies changes to V_t using its `prg`. The 
+resulting vector is V_t', set to the class variable `tv`. The <LCGV3> outputs values 
+according to this new vector `tv`. 
+
+In some more brief terms, <LCGV3> uses its capability, having an awareness of certain 
+trinary relation patterns from its base LCG, to apply changes to its pre-output values to 
+be of different quality in trinary relations than what the base LCG produces.
+"""
 class LCGV3(LCGV2): 
 
     def __init__(self,start,m,a,n0,n1,sc_size:int,preproc_gd:bool=False,\
-        prg=None,super_range=None):
+        prg=None,super_range=None,exclude_zero__auto_td:bool=False,\
+        is_rmod:bool=False):
         super().__init__(start,m,a,n0,n1,sc_size,preproc_gd)
         if type(super_range) != type(None): 
             assert is_valid_range(super_range)
@@ -172,8 +207,16 @@ class LCGV3(LCGV2):
         self.is_delta2_mutable = None 
         self.delta_counter = 0 
         self.delta_counter2 = 0 
+            # reserved used for auto trinary delta feature 
+        self.exclude_zero__auto_td = exclude_zero__auto_td
+
+        # variables for use with class feature 
+        # `reflective mod`. 
+        self.is_rmod = is_rmod
 
         self.stat__new_trinary = False 
+
+    #------------------------------ main methods, __next__ methods for output values 
 
     """
     method is reserved for only automatic trinary-vector 
@@ -231,6 +274,10 @@ class LCGV3(LCGV2):
                 if self.auto_trinarydelta:
                     self.delta_counter += 1 
                     self.auto_td__update_trinary_vec() 
+
+                if self.is_rmod: 
+                    self.delta_counter += 1
+                    self.reflective_mod() 
             
             self.tvi = self.tvi % len(self.tv) 
             self.s = q 
@@ -239,6 +286,52 @@ class LCGV3(LCGV2):
             q = modulo_in_range(q,self.super_range)
 
         return q 
+
+    #-------------------------------------- auxiliary methods used for 
+    #-------------------------------------- `reflective modification, a technique 
+    #-------------------------------------- used to alter output values. 
+
+    """
+    sets a new trinary vector for trinary-guided mode. The 
+    new trinary vector is a modification of a trinary pattern 
+    for the output sequence from the superclass of this instance. 
+    The function is fittingly called `reflective modification` 
+    because it takes an actual trinary pattern from its original 
+    output values, modifies the pattern, and produces values to 
+    fit the new trinary vector pattern.  
+    """
+    def reflective_mod(self): 
+
+        # get the next sequence of values. 
+        # sequence is to be used as reference 
+        # for generator output values. 
+        rx = self.trinary_length + 1
+        qs = [] 
+
+        for _ in range(rx): 
+            q = super().__next__()
+            qs.append(q)
+        qs = np.array(qs) 
+
+        # convert sequence to trinary relation (to reference 0). 
+        dvq = diffvec(qs,cast_type=np.float32)
+        rx = to_trinary_relation_v2(dvq,None,zero_feature=True,abs_feature=False)
+
+        # modify the trinary relation 
+        DEFAULT_RMOD_SRANGE = (-5000,5000.) 
+        tv2 = TrinaryVec.one_instance__v3(len(rx),self.prg,DEFAULT_RMOD_SRANGE) 
+
+        rx3 = rx + tv2.l 
+        rx3 = [modulo_in_range(rx3_,(-1,1)) for rx3_ in rx3] 
+        rx3 = np.array(rx3,dtype=int) 
+        tv = TrinaryVec(rx3) 
+
+        # set as new trinary vector 
+        self.set_tv(tv)
+        return 
+
+    #-------------------------------------- auxiliary methods used for 
+    #-------------------------------------- cases in trinary-guided mode 
 
     def adjust_modulo_range(self,reference,new_value,sign_change,prg2):
         # case: sign already satisfied
@@ -310,6 +403,10 @@ class LCGV3(LCGV2):
                 zero_div0(k1,s),zero_div0(k2,s)
             fm = {-1:k0,0:k1,1:k2}
             tv = TrinaryVec.one_instance__v2(l,fm,qx)
+
+        if self.exclude_zero__auto_td: 
+            tv = TrinaryVec.omit_value(tv,0,self.prg) 
+
         self.set_tv(tv)
         self.stat__new_trinary = True 
 

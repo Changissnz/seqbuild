@@ -236,5 +236,34 @@ class LCGV3Methods(unittest.TestCase):
 
         assert (d0,d1) == (7,4) and (d0_,d1_) == (4,7)
 
+    """
+    compares two <LCGV3>s that are identical in parameters 
+    except for one of them has `reflective modification` 
+    mode set to True. 
+    """
+    def test__LCGV3__next__case3(self): 
+        g3 = LCGV3_sample_q()
+
+        g4 = LCGV3_sample_q() 
+        g4.is_rmod = True 
+
+        gen_type = 2 
+        l = 7 
+        is_delta2_mutable = True 
+
+        g3.static_autoset(gen_type,l,is_delta2_mutable)
+        g4.static_autoset(gen_type,l,is_delta2_mutable)
+
+        eqcount = 0 
+        for _ in range(200): 
+            g3out = next(g3) 
+            g4out = next(g4) 
+            eqcount += bool(g3out==g4out)
+            #print("a: {} b: {}".format(g3out,g4out))  
+
+        assert eqcount == 9,"got {}".format(eqcount)
+
+
+
 if __name__ == '__main__':
     unittest.main()

@@ -136,6 +136,17 @@ class CycleDescriptor:
     def is_continuous(self):
         return type(self.d["sub-cycle"]) == type(None)
 
+"""
+an extension of the standard linear congruential generator (LCG). 
+In addition to outputting values by the same mechanism as the original 
+LCG, the <LCGV2> is able to discover sub-cycles in its input-output 
+map. Algorithm is able to discover sub-cycles in the LCG by treating 
+the LCG output values in the manner of nodes for a connected graph. 
+Algorithm is based on graph decomposition. For instantiation of this 
+class, if variable `preproc_gd` is set to True, class instance conducts 
+a structural search for sub-cycles via graph decomposition algorithms 
+(see method `gd_preproc`).
+"""
 class LCGV2:
 
     def __init__(self,start,m,a,n0,n1,sc_size:int,preproc_gd:bool=False):
@@ -165,6 +176,9 @@ class LCGV2:
         if preproc_gd: 
             self.gd_preproc() 
 
+    """
+    main method 
+    """
     def __next__(self):
         if not self.fired:
             self.fired = not self.fired
@@ -247,6 +261,9 @@ class LCGV2:
         self.s,self.dir,self.cycled = q,d,c
         return ct 
 
+    """
+    main method #2 
+    """
     def gd_preproc(self):
         self.io_map()
         self.io_map_partition()
