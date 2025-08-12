@@ -59,8 +59,12 @@ def MAKE_lcgvx(splitstr_cmd,var_map):
 
         assert parameters[5] in var_map 
         prg = var_map[parameters[5]]
-        super_range = (float(parameters[6]),float(parameters[7])) 
-        assert is_valid_range(super_range,False,False) 
+        
+        try: 
+            super_range = (float(parameters[6]),float(parameters[7])) 
+            assert is_valid_range(super_range,False,False) 
+        except: 
+            super_range = None 
 
         # case: trinary guided
         if len(parameters) == 8: 
