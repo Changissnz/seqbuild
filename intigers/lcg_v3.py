@@ -207,7 +207,7 @@ class LCGV3(LCGV2):
         self.is_delta2_mutable = None 
         self.delta_counter = 0 
         self.delta_counter2 = 0 
-            # reserved used for auto trinary delta feature 
+            # reserved used for auto trinary delta,rmod feature 
         self.exclude_zero__auto_td = exclude_zero__auto_td
 
         # variables for use with class feature 
@@ -327,7 +327,11 @@ class LCGV3(LCGV2):
         tv = TrinaryVec(rx3) 
 
         # set as new trinary vector 
+        if self.exclude_zero__auto_td: 
+            tv = TrinaryVec.omit_value(tv,0,self.prg) 
+
         self.set_tv(tv)
+        self.stat__new_trinary = True
         return 
 
     #-------------------------------------- auxiliary methods used for 
