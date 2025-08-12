@@ -152,6 +152,37 @@ class CommLangMethods(unittest.TestCase):
 
         clp.close() 
 
+    def test__CommLangParser__process_file__case2(self): 
+        clp = CommLangParser("face/sample_script/commond_four.txt") 
+        clp.process_file()
+
+        R = clp.vartable['R']
+        for r in R: 
+            assert is_valid_range(r,False,False) 
+
+        R2 = clp.vartable['R2']
+        R2sol = np.array([0, 3, 8, 5]) 
+        R2sol2 = np.array([1, 1, 5, 9]) 
+        assert np.all(R2[-2] == R2sol)
+        assert np.all(R2[-1] == R2sol2) 
+        for r in R2: 
+            assert len(r) == 4 
+
+        R3 = clp.vartable['R3']
+        R3sol = np.array([67843., 18047.,  4907., 81609., 32115., 62765.])
+        assert np.all(R3[0] == R3sol) 
+        for r in R3: 
+            assert len(r) == 6 
+
+        R4 = clp.vartable['R4']
+        R4sol = np.array([-1,  0, -1,  0,  0, -1,  0])
+        R4sol2 = np.array([ 0, -1, -1,  1, -1, -1,  1])
+        assert np.all(R4[0] == R4sol)
+        assert np.all(R4[1] == R4sol2)
+        for r in R4: 
+            assert len(r) == 7 
+
+        clp.close() 
 
 if __name__ == '__main__':
     unittest.main()

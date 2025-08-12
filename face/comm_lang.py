@@ -81,25 +81,27 @@ class CommLangParser:
 
         if self.commond[0] == "set": 
             return self.SET_proc(self.commond) 
-        return self.MROW_proc(self.commond) 
+        return self.MRCOW_proc(self.commond) 
 
     def SET_proc(self,splitstr_cmd):
         assert splitstr_cmd[0] == "set" 
         n = splitstr_cmd[1] 
         assert splitstr_cmd[2] == "=" 
 
-        self.vartable[n] = self.MROW_proc(splitstr_cmd[3:]) 
+        self.vartable[n] = self.MRCOW_proc(splitstr_cmd[3:]) 
         return n, self.vartable[n]
-
+    
     """
-    method for handling `make`,`run`,`open`,`write` processes. 
+    method for handling `make`,`run`,`convert`,`open`,`write` processes. 
     """
-    def MROW_proc(self,splitstr_cmd): 
+    def MRCOW_proc(self,splitstr_cmd): 
 
         if splitstr_cmd[0] == "make":
             return MAKE_proc(splitstr_cmd,self.vartable) 
         elif splitstr_cmd[0] == "run": 
             return RUN_proc(splitstr_cmd,self.vartable)
+        elif splitstr_cmd[0] == "convert": 
+            return CONVERT_proc(splitstr_cmd,self.vartable)
         elif splitstr_cmd[0] == "open": 
             return OPEN_proc(splitstr_cmd)
         elif splitstr_cmd[0] == "write":

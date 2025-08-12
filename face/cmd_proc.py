@@ -10,7 +10,7 @@ import io
 LANG_KEYTERMS = ["make","run","with","set","for","iter","write","to",\
             "open","convert"]   
 
-CONVERT_TYPES = ["range","ndim","nvec","tvec"]
+GENFORM_CONVERT_TYPES = ["range","ndim","nvec","tvec"]
 
 # TODO: incomplete 
 def MAIN_method_for_object(q):
@@ -114,7 +114,7 @@ def CONVERT_proc(splitstr_cmd,var_map):
         struct = MAIN_method_for_object(struct)
     
     assert splitstr_cmd[2] == "to"
-    assert splitstr_cmd[3] in CONVERT_TYPES
+    assert splitstr_cmd[3] in GENFORM_CONVERT_TYPES,"GOT \n{}".format(splitstr_cmd)
 
     if splitstr_cmd[3] == "range":
         return prg__single_to_range_outputter(struct) 
@@ -132,7 +132,10 @@ def CONVERT_proc(splitstr_cmd,var_map):
     if splitstr_cmd[3] == "nvec": 
         return prg__single_to_nvec(struct,l) 
 
-    return prg__single_to_trinary_vector(struct,l)
+    def struct_():
+        return int(round(struct())) 
+
+    return prg__single_to_trinary_vector(struct_,l)
 
 """
 write object to file_object 

@@ -1,19 +1,12 @@
+
+
 set G = make lcg with 856,145,731,90091. 
-set V = run G for 13 iter. 
+set GR = convert G to range.
+set GND = convert G to ndim with 5,6,9,10.
+set GNV = convert G to nvec with 6.
+set GTV = convert G to tvec with 7.
 
-intseq0 = IntSeq([1,0,1,0,10,0,1,0,10,1,0])
-intseq = IntSeq([4567,234,15564,1134,51,78,95547,46892,1416,747345223])
-
-outi,lx,rxi = fraction__sample_LCGs(len(intseq)) 
-qvo = QValueOutputter(intseq,outi,lx,rxi,1) 
-qvo2 = QValueOutputter(intseq0,outi,lx,rxi,1)
-
-def prg__single_to_range_outputter(lcg):
-def prg__single_to_ndim_index_outputter(lcg,dim):
-def prg__single_to_nvec(prg,n):
-def prg__single_to_trinary_vector(prg,n):
-
-convert G to range
-convert G to ndim with 5,6,9,10 
-convert G to nvec with 6 
-convert G to tvec with 7
+set R = run GR for 10 iter. 
+set R2 = run GND for 10 iter. 
+set R3 = run GNV for 10 iter. 
+set R4 = run GTV for 10 iter. 
