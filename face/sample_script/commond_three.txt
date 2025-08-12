@@ -1,0 +1,18 @@
+# instantiate 4 LCGV3s with the same parameters but different modes 
+# collect 100 elements from each of the generators for comparison. 
+
+set G = make lcgv3 with 100,200,300,-1000,1000.
+
+set P = make lcg with 56,-17,71,818. 
+set G2 = make lcgv3 with 100,200,300,-1000,1000,P,-500,500. 
+
+set P2 = make lcg with 56,-17,71,818. 
+set G3 = make lcgv3 with 100,200,300,-1000,1000,P,-500,500,0. 
+
+set P3 = make lcg with 56,-17,71,818. 
+set G4 = make lcgv3 with 100,200,300,-1000,1000,P,-500,500,1,1. 
+
+set V = run G for 100 iter. 
+set V2 = run G2 for 100 iter. 
+set V3 = run G3 for 100 iter. 
+set V4 = run G4 for 100 iter. 

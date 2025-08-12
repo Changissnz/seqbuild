@@ -237,8 +237,8 @@ class LCGV3Methods(unittest.TestCase):
         assert (d0,d1) == (7,4) and (d0_,d1_) == (4,7)
 
     """
-    compares two <LCGV3>s that are identical in parameters 
-    except for one of them has `reflective modification` 
+    compares two <LCGV3>s that are identical in parameters, 
+    except for one of them with `reflective modification` 
     mode set to True. 
     """
     def test__LCGV3__next__case3(self): 

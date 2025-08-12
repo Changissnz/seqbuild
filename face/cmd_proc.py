@@ -4,13 +4,8 @@ code in this file mainly consists of wrapper functions around
 the seqbuild program's main functional features. 
 """
 
-from seqgen.gg_gen import * 
-from intigers.lcg_v3 import * 
-
+from .make_cmd import * 
 import io 
-
-BASE_PRNG = ["lcg","lcgv2","lcgv3","mdr","idforest","optri",\
-             "rch"]
 
 LANG_KEYTERMS = ["make","run","with","set","for","iter","write","to",\
             "open"]  
@@ -43,61 +38,6 @@ def MAIN_method_for_object(q):
         return f 
 
     return -1 
-
-# TODO: incomplete 
-def MAKE_proc(splitstr_cmd,var_map): 
-    assert splitstr_cmd[0] == "make"
-
-    if splitstr_cmd[1] == "lcg":
-        assert splitstr_cmd[2] == "with" 
-        parameters = splitstr_cmd[3] 
-        parameters = parameters.split(",")
-        assert len(parameters) == 4 
-
-        parameters = tuple([float(p) for p in parameters])
-        return prg__LCG(*parameters) 
-
-    if splitstr_cmd[1] == "mdr": 
-        assert splitstr_cmd[2] == "with" 
-        assert splitstr_cmd[3] in var_map 
-        lx = var_map[splitstr_cmd[3]] 
-        mdx = ModuloDecomp(IntSeq(lx)) 
-        mdx.merge(False)
-        
-        return ModuloDecompRepr(mdx,reconstruct_type=1)
-
-    if splitstr_cmd[1] == "lcgv2":
-        assert splitstr_cmd[2] == "with" 
-
-        parameters = splitstr_cmd[3] 
-        parameters = parameters.split(",")
-        
-        assert len(parameters) == 5 or len(parameters) == 7
-
-        if len(parameters) == 5:
-            sc_size = 50 
-            preproc_gd = False
-        else: 
-            sc_size = parameters.pop(5) 
-            preproc_gd = parameters.pop(5) 
-
-            sc_size = int(sc_size) 
-            assert sc_size > 0 
-            
-            preproc_gd = bool(int(preproc_gd)) 
-        
-        parameters = [float(p) for p in parameters] 
-
-        return LCGV2(parameters[0],parameters[1],parameters[2],\
-            parameters[3],parameters[4],sc_size,preproc_gd=preproc_gd)
-
-    if splitstr_cmd[1] == "multimetric": 
-        assert splitstr_cmd[2] == "with" 
-        assert splitstr_cmd[3] in var_map
-        lx = var_map[splitstr_cmd[3]] 
-        return MultiMetric(lx)
-
-    return None
 
 """
 run object 

@@ -41,6 +41,10 @@ class CommLangParser:
             if len(line) == 0: 
                 continue 
 
+            # case: line is just a comment 
+            if line[0] == "#":
+                continue 
+
             comm += line 
 
             # case: end of command
