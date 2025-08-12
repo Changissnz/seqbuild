@@ -55,15 +55,15 @@ def MAKE_lcgvx(splitstr_cmd,var_map):
         if len(parameters) == 5: 
             g3 = LCGV3(px[0],px[1],px[2],px[3],px[4],0,False,None,None,\
                 False,False) 
+            return g3 
+
+        assert parameters[5] in var_map 
+        prg = var_map[parameters[5]]
+        super_range = (float(parameters[6]),float(parameters[7])) 
+        assert is_valid_range(super_range,False,False) 
 
         # case: trinary guided
-        elif len(parameters) == 8: 
-            assert parameters[5] in var_map 
-
-            prg = var_map[parameters[5]]
-            super_range = (float(parameters[6]),float(parameters[7])) 
-            assert is_valid_range(super_range,False,False) 
-
+        if len(parameters) == 8: 
             exclude_zero__auto_td = True
             is_rmod = False 
 
@@ -72,12 +72,6 @@ def MAKE_lcgvx(splitstr_cmd,var_map):
 
         # case: trinary guided w/ option to exclude 0 from trinary vector guides. 
         elif len(parameters) == 9: 
-            assert parameters[5] in var_map 
-
-            prg = var_map[parameters[5]]
-            super_range = (float(parameters[6]),float(parameters[7])) 
-            assert is_valid_range(super_range,False,False) 
-
             exclude_zero__auto_td = bool(parameters[8])
             is_rmod = False 
 
@@ -87,12 +81,6 @@ def MAKE_lcgvx(splitstr_cmd,var_map):
         # case: trinary guided w/ option to exclude 0 from trinary vector guides, 
         # option to use `reflective modification` output mode 
         else: 
-            assert parameters[5] in var_map 
-
-            prg = var_map[parameters[5]]
-            super_range = (float(parameters[6]),float(parameters[7])) 
-            assert is_valid_range(super_range,False,False) 
-
             exclude_zero__auto_td = bool(int(parameters[8]))
             is_rmod = bool(int(parameters[9]))
             g3 = LCGV3(px[0],px[1],px[2],px[3],px[4],0,False,prg,super_range,\
