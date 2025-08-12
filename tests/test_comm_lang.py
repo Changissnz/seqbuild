@@ -121,6 +121,33 @@ class CommLangMethods(unittest.TestCase):
 
         clp.close() 
 
+    def test__CommLangParser__process_file__case1(self): 
+
+        clp = CommLangParser("face/sample_script/commond_three.txt") 
+        clp.process_file()
+
+        assert "V" in clp.vartable
+        assert "V2" in clp.vartable
+        assert "V3" in clp.vartable
+        assert "V4" in clp.vartable
+
+        V = np.array(clp.vartable["V"])
+        V2 = np.array(clp.vartable["V2"])
+        V3 = np.array(clp.vartable["V3"])
+        V4 = np.array(clp.vartable["V4"])
+
+        ix = np.where(V == V2)[0] 
+        ix2 = np.where(V == V3)[0] 
+        ix3 = np.where(V == V4)[0] 
+        ix4 = np.where(V2 == V3)[0]  
+        ix5 = np.where(V2 == V4)[0]  
+        ix6 = np.where(V3 == V4)[0]  
+
+        assert len(ix) == 0 and len(ix2) == 0 and len(ix3) == 0 
+        assert len(ix4) == 1000 and len(ix5) == 1000 and len(ix6) == 1000 
+
+        clp.close() 
+
 
 if __name__ == '__main__':
     unittest.main()

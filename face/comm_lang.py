@@ -22,9 +22,15 @@ class CommLangParser:
         self.file_obj.close() 
         del self 
 
-    def load_next_lines(self,num_lines:int):
-        assert type(num_lines) == int and num_lines > 0 
-        return -1 
+    def process_file(self): 
+        stat = True
+
+        while stat: 
+            self.load_next_command()
+            self.process_command() 
+            stat = self.file_obj.tell() != self.file_end 
+
+        return
 
     def load_next_command(self):
         comm = "" 
@@ -68,7 +74,7 @@ class CommLangParser:
         c = self.cmdlines.pop(0)
         c = c.split(" ")
         c = [c_.strip() for c_ in c]
-        self.commond = c 
+        self.commond = [c_ for c_ in c if len(c_) > 0]
         return self.process_command_()
 
     def process_command_(self):

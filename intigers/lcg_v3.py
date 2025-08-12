@@ -189,7 +189,8 @@ class LCGV3(LCGV2):
         is_rmod:bool=False):
         super().__init__(start,m,a,n0,n1,sc_size,preproc_gd)
         if type(super_range) != type(None): 
-            assert is_valid_range(super_range)
+            assert is_valid_range(super_range,False,False) or \
+                is_valid_range(super_range,True,False)
 
         self.tv = None
         self.tvi = None 

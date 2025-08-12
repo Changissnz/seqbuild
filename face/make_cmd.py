@@ -48,7 +48,7 @@ def MAKE_lcgvx(splitstr_cmd,var_map):
         parameters = splitstr_cmd[3] 
         parameters = parameters.split(",")
 
-        assert len(parameters) in {5,8,9,10} 
+        assert len(parameters) in {5,8,9,10},"parameters len {}: {}".format(len(parameters),parameters)
         px = [float(p) for p in parameters[:5]] 
 
         # case: basic case, functionally identically to standard LCG 
@@ -87,7 +87,6 @@ def MAKE_lcgvx(splitstr_cmd,var_map):
         # case: trinary guided w/ option to exclude 0 from trinary vector guides, 
         # option to use `reflective modification` output mode 
         else: 
-
             assert parameters[5] in var_map 
 
             prg = var_map[parameters[5]]
@@ -96,14 +95,11 @@ def MAKE_lcgvx(splitstr_cmd,var_map):
 
             exclude_zero__auto_td = bool(int(parameters[8]))
             is_rmod = bool(int(parameters[9]))
-
             g3 = LCGV3(px[0],px[1],px[2],px[3],px[4],0,False,prg,super_range,\
                 exclude_zero__auto_td,is_rmod)
 
         return g3 
     assert False 
-
-
 
 # TODO: incomplete 
 def MAKE_proc(splitstr_cmd,var_map): 
@@ -119,7 +115,7 @@ def MAKE_proc(splitstr_cmd,var_map):
         mdx = ModuloDecomp(IntSeq(lx)) 
         mdx.merge(False)
         return ModuloDecompRepr(mdx,reconstruct_type=1)
-        
+
     if splitstr_cmd[1] == "multimetric": 
         assert splitstr_cmd[2] == "with" 
         assert splitstr_cmd[3] in var_map
