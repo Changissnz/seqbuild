@@ -1,4 +1,5 @@
 from seqgen.gg_gen import * 
+from desi.fraction import * 
 from intigers.lcg_v3 import * 
 
 BASE_PRNG = ["lcg","lcgv2","lcgv3","mdr","idforest","optri",\
@@ -126,7 +127,10 @@ def MAKE_proc(splitstr_cmd,var_map):
         index_selector = var_map[parameters[1]] 
 
         assert parameters[2] in var_map 
-        length_outputter = var_map[parameters[2]] 
+
+        def length_outputter(): 
+            q = var_map[parameters[2]] 
+            return int(round(q()))
 
         assert parameters[3] in var_map 
         range_outputter = var_map[parameters[3]] 
@@ -138,7 +142,7 @@ def MAKE_proc(splitstr_cmd,var_map):
 
         assert adj_type in {1,2} 
 
-        return QValueOutputter(V,index_selector,length_outputter,\
+        return QValueOutputter(IntSeq(V),index_selector,length_outputter,\
             range_outputter,adj_type) 
 
     return None

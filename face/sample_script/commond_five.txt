@@ -1,0 +1,9 @@
+set G = make lcg with 788,54,-919,8787. 
+set GND = convert G to ndim with 11,11. 
+
+set LOut = make lcg with 13,16,71,190. 
+set ROut0 = make lcg with 39,69,-97,71098. 
+set ROut = convert ROut0 to range. 
+
+set V = run G for 11 iter. 
+set Q = make qval with V,GND,LOut,ROut,2. 

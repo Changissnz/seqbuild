@@ -184,5 +184,21 @@ class CommLangMethods(unittest.TestCase):
 
         clp.close() 
 
+    def test__CommLangParser__process_file__case3(self): 
+        clp = CommLangParser("face/sample_script/commond_five.txt") 
+        clp.process_file()
+
+        q = clp.vartable["Q"]
+
+        qsol = [429,39797,8817,19535,65501] 
+
+        qs = []
+        for _ in range(5): 
+            qs.append(int(round(next(q)))) 
+
+        assert qs == qsol 
+
+        clp.close()
+
 if __name__ == '__main__':
     unittest.main()
