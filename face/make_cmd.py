@@ -1,9 +1,10 @@
 from seqgen.gg_gen import * 
+from seqgen.mdr_gen import * 
 from desi.fraction import * 
 from intigers.lcg_v3 import * 
 
-BASE_PRNG = ["lcg","lcgv2","lcgv3","mdr","idforest","optri",\
-             "rch","qval"] 
+BASE_PRNG = ["lcg","lcgv2","lcgv3","mdr","mdrv2",\
+        "mdrgen","idforest","optri","rch","qval"] 
 
 def MAKE_lcgvx(splitstr_cmd,var_map): 
     assert splitstr_cmd[0] == "make" 
@@ -94,13 +95,7 @@ def MAKE_lcgvx(splitstr_cmd,var_map):
         return g3 
     assert False 
 
-# TODO: incomplete 
-def MAKE_proc(splitstr_cmd,var_map): 
-    assert splitstr_cmd[0] == "make"
-
-    if "lcg" in splitstr_cmd[1]: 
-        return MAKE_lcgvx(splitstr_cmd,var_map)
-
+def MAKE_mdrvx(splitstr_cmd,var_map): 
     if splitstr_cmd[1] == "mdr": 
         assert splitstr_cmd[2] == "with" 
         assert splitstr_cmd[3] in var_map 
@@ -108,6 +103,60 @@ def MAKE_proc(splitstr_cmd,var_map):
         mdx = ModuloDecomp(IntSeq(lx)) 
         mdx.merge(False)
         return ModuloDecompRepr(mdx,reconstruct_type=1)
+    
+    if splitstr_cmd[1] == "mdrv2": 
+        assert splitstr_cmd[2] == "with" 
+        assert splitstr_cmd[3] in var_map 
+
+        exclude_neg = False 
+
+        if len(splitstr_cmd) == 5:
+            i = bool(int(splitstr_cmd))
+            exclude_neg = i 
+        
+        lx = var_map[splitstr_cmd[3]]
+        mdx = ModuloDecompV2(IntSeq(lx),exclude_neg) 
+        return ModuloDecompRepr(mdx,reconstruct_type=2) 
+
+    if splitstr_cmd[1] == "mdrgen": 
+        assert splitstr_cmd[2] == "with"
+
+        parameters = splitstr_cmd[3] 
+        parameters = parameters.split(",")
+        assert parameters[0] in var_map 
+        mdr = var_map[parameters[0]] 
+        assert type(mdr) == ModuloDecompRepr 
+
+        assert parameters[1] in var_map
+        prg = var_map[parameters[1]] 
+        assert type(prg) in {MethodType,FunctionType} 
+
+        assert len(parameters[2:]) == 7 
+
+        exclude_neg = bool(int(parameters[2])) 
+        gentype = int(parameters[3]) 
+        assert gentype in {1,2} 
+        gt2_rcswitch = bool(int(parameters[4])) 
+        gt2_sel1 = bool(int(parameters[5])) 
+        gt2_sel2 = bool(int(parameters[6]))
+        gt2_sel3 = bool(int(parameters[7])) 
+        gt2_seed_in_output = bool(int(parameters[8]))
+
+        return MDRGen(mdr,prg,exclude_neg,gentype,\
+        gt2_rcswitch,gt2_sel1,gt2_sel2,\
+        gt2_sel3,gt2_seed_in_output)
+
+    assert False 
+
+# TODO: incomplete 
+def MAKE_proc(splitstr_cmd,var_map): 
+    assert splitstr_cmd[0] == "make"
+
+    if "lcg" in splitstr_cmd[1]: 
+        return MAKE_lcgvx(splitstr_cmd,var_map)
+
+    if "mdr" in splitstr_cmd[1]: 
+        return MAKE_mdrvx(splitstr_cmd,var_map) 
 
     if splitstr_cmd[1] == "multimetric": 
         assert splitstr_cmd[2] == "with" 
