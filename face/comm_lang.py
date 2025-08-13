@@ -78,7 +78,9 @@ class CommLangParser:
         return self.process_command_()
 
     def process_command_(self):
-
+        if len(self.commond) == 0: 
+            return 
+            
         if self.commond[0] == "set": 
             return self.SET_proc(self.commond) 
         return self.MRCOW_proc(self.commond) 

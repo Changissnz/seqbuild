@@ -106,15 +106,18 @@ def MAKE_mdrvx(splitstr_cmd,var_map):
     
     if splitstr_cmd[1] == "mdrv2": 
         assert splitstr_cmd[2] == "with" 
-        assert splitstr_cmd[3] in var_map 
+
+        parameters = splitstr_cmd[3] 
+        parameters = parameters.split(",")
+        assert parameters[0] in var_map 
 
         exclude_neg = False 
 
-        if len(splitstr_cmd) == 5:
-            i = bool(int(splitstr_cmd))
+        if len(parameters) == 2:
+            i = bool(int(parameters[1]))
             exclude_neg = i 
         
-        lx = var_map[splitstr_cmd[3]]
+        lx = var_map[parameters[0]]
         mdx = ModuloDecompV2(IntSeq(lx),exclude_neg) 
         return ModuloDecompRepr(mdx,reconstruct_type=2) 
 

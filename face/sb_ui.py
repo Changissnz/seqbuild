@@ -10,7 +10,7 @@ class Application(tk.Frame):
 
     def createWidgets(self):
         self.quitButton = tk.Button(self, text='Quit',
-            command=self.destroy) 
+            command=self.destroy)
         self.quitButton.grid()
 
         # Create a Text widget to display the content

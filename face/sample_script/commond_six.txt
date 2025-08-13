@@ -1,0 +1,15 @@
+set G = make lcgv2 with 67,-43,87,-189,798. 
+set V = run G for 20 iter. 
+set M = make mdrv2 with V,0. 
+set M2 = make mdrv2 with V,1.  
+
+set MV1 = run M with 113. 
+set MV2 = run M2 with 113. 
+
+set MV11 = run M with -719. 
+set MV12 = run M2 with -719. 
+
+set MV21 = run M with -16. 
+set MV22 = run M2 with -16. 
+
+

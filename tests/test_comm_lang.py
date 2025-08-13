@@ -45,6 +45,9 @@ class CommLangMethods(unittest.TestCase):
 
         clp.close() 
 
+    """
+    tests for `lcg` and `multimetric` commands. 
+    """
     def test__CommLangParser__process_command__case2(self):
 
         clp = CommLangParser("face/sample_script/commond_one.txt") 
@@ -81,6 +84,9 @@ class CommLangMethods(unittest.TestCase):
 
         clp.close() 
 
+    """
+    tests for `lcg` and `mdr` commands. 
+    """
     def test__CommLangParser__process_command__case3(self):
 
         clp = CommLangParser("face/sample_script/commond_two.txt") 
@@ -121,6 +127,9 @@ class CommLangMethods(unittest.TestCase):
 
         clp.close() 
 
+    """
+    tests for `lcgv3` command. 
+    """
     def test__CommLangParser__process_file__case1(self): 
 
         clp = CommLangParser("face/sample_script/commond_three.txt") 
@@ -152,6 +161,9 @@ class CommLangMethods(unittest.TestCase):
 
         clp.close() 
 
+    """
+    tests for keyterm `convert`
+    """
     def test__CommLangParser__process_file__case2(self): 
         clp = CommLangParser("face/sample_script/commond_four.txt") 
         clp.process_file()
@@ -184,6 +196,9 @@ class CommLangMethods(unittest.TestCase):
 
         clp.close() 
 
+    """
+    tests for `qval` command. 
+    """
     def test__CommLangParser__process_file__case3(self): 
         clp = CommLangParser("face/sample_script/commond_five.txt") 
         clp.process_file()
@@ -197,8 +212,26 @@ class CommLangMethods(unittest.TestCase):
             qs.append(int(round(next(q)))) 
 
         assert qs == qsol 
-
         clp.close()
+
+    """
+    tests for `lcgv2` and `mdrv2` commands. 
+    """
+    def test__CommLangParser__process_file__case4(self): 
+        clp = CommLangParser("face/sample_script/commond_six.txt") 
+        clp.process_file()
+
+        mv1 = clp.vartable['MV1']
+        mv2 = clp.vartable['MV2']
+        assert mv1 == mv2
+
+        mv11 = clp.vartable['MV11']
+        mv12 = clp.vartable['MV12']
+        assert mv11 == mv12
+
+        mv21 = clp.vartable['MV21']
+        mv22 = clp.vartable['MV22']
+        assert mv21 == mv22
 
 if __name__ == '__main__':
     unittest.main()
