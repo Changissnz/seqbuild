@@ -111,7 +111,7 @@ def MAKE_lcgvx(splitstr_cmd,var_map):
 
         # case: trinary guided w/ option to exclude 0 from trinary vector guides. 
         elif len(parameters) == 9: 
-            exclude_zero__auto_td = bool(parameters[8])
+            exclude_zero__auto_td = bool(int(parameters[8]))
             is_rmod = False 
 
             g3 = LCGV3(px[0],px[1],px[2],px[3],px[4],0,False,prg,super_range,\
@@ -199,6 +199,35 @@ def MAKE_proc(splitstr_cmd,var_map):
 
     if "mdr" in splitstr_cmd[1]: 
         return MAKE_mdrvx(splitstr_cmd,var_map) 
+
+    if splitstr_cmd[1] == "optri":
+        '''
+        int seed,prg,gen type, add noise,base sequence (for m)
+        '''
+        assert splitstr_cmd[2] == "with" 
+        
+        parameters = splitstr_cmd[3].split(",") 
+        assert len(parameters) >= 6 
+
+        int_seed = int(round(parameters[0])) 
+
+        assert parameters[1] in var_map 
+        prg = var_map[parameters[1]] 
+
+        if type(prg) not in {MethodType,FunctionType}: 
+            prg = MAIN_method_for_object(prg) 
+        
+        gen_type = int(parameters[2]) 
+        assert gen_type in {1,2} 
+
+        add_noise = bool(int(parameters[3]))
+        base_sequence = parameters[4:] 
+        base_sequence = [int(b) for b in base]
+        base_sequence = IntSeq(base_sequence) 
+        M = base_sequence.difftri(cast_type=np.int32)
+
+        return OpTriGen(int_seed,M,prg,gen_type,forward_func=add,\
+            backward_func=sub,add_noise=add_noise) 
 
     if splitstr_cmd[1] == "multimetric": 
         assert splitstr_cmd[2] == "with" 
