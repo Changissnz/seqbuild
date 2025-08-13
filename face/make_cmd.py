@@ -6,6 +6,39 @@ from intigers.lcg_v3 import *
 BASE_PRNG = ["lcg","lcgv2","lcgv3","mdr","mdrv2",\
         "mdrgen","idforest","optri","rch","qval"] 
 
+
+# TODO: incomplete 
+def MAIN_method_for_object(q):
+
+    if type(q) in {MethodType,FunctionType}:
+        def f():
+            return q() 
+        return f 
+
+    if type(q) in {LCGV2,LCGV3}:
+        return q.__next__ 
+
+    if type(q) == MultiMetric: 
+        
+        def f(ngram): 
+            ngram_ = int(ngram) 
+            assert ngram_ > 0 
+            qx = q.summarize(ngram_,condense_ngram_output=True)
+            q.load_mc_map()
+            return qx 
+        return f
+
+    if type(q) == ModuloDecompRepr:
+        def f(first):
+            q.reset_first(int(first))
+            return q.reconstruct() 
+        return f 
+
+    if type(q) == MDRGen: 
+        return q.__next__ 
+
+    return -1 
+
 def MAKE_lcgvx(splitstr_cmd,var_map): 
     assert splitstr_cmd[0] == "make" 
     assert "lcg" in splitstr_cmd[1] 
@@ -131,8 +164,9 @@ def MAKE_mdrvx(splitstr_cmd,var_map):
         assert type(mdr) == ModuloDecompRepr 
 
         assert parameters[1] in var_map
-        prg = var_map[parameters[1]] 
-        assert type(prg) in {MethodType,FunctionType} 
+        prg = var_map[parameters[1]]
+        if type(prg) not in {MethodType,FunctionType}: 
+            prg = MAIN_method_for_object(prg) 
 
         assert len(parameters[2:]) == 7 
 

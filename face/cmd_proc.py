@@ -12,35 +12,6 @@ LANG_KEYTERMS = ["make","run","with","set","for","iter","write","to",\
 
 GENFORM_CONVERT_TYPES = ["range","ndim","nvec","tvec"]
 
-# TODO: incomplete 
-def MAIN_method_for_object(q):
-
-    if type(q) in {MethodType,FunctionType}:
-        def f():
-            return q() 
-        return f 
-
-    if type(q) in {LCGV2,LCGV3}:
-        return q.__next__ 
-
-    if type(q) == MultiMetric: 
-        
-        def f(ngram): 
-            ngram_ = int(ngram) 
-            assert ngram_ > 0 
-            qx = q.summarize(ngram_,condense_ngram_output=True)
-            q.load_mc_map()
-            return qx 
-        return f
-
-    if type(q) == ModuloDecompRepr:
-        def f(first):
-            q.reset_first(int(first))
-            return q.reconstruct() 
-        return f 
-
-    return -1 
-
 """
 run object 
 run object for INTEGER iter 

@@ -233,5 +233,22 @@ class CommLangMethods(unittest.TestCase):
         mv22 = clp.vartable['MV22']
         assert mv21 == mv22
 
+        clp.close()
+
+    """
+    tests for `mdrgen` command. 
+    """
+    def test__CommLangParser__process_file__case5(self): 
+        clp = CommLangParser("face/sample_script/commond_seven.txt") 
+        clp.process_file()
+
+        V2 = clp.vartable['V2']
+
+        V2sol = [67,7110,6701,5968,2217,5630]
+        assert len(V2) == 150 
+        assert V2[:6] == V2sol
+
+        clp.close() 
+
 if __name__ == '__main__':
     unittest.main()
