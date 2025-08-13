@@ -168,16 +168,21 @@ def MAKE_mdrvx(splitstr_cmd,var_map):
         if type(prg) not in {MethodType,FunctionType}: 
             prg = MAIN_method_for_object(prg) 
 
-        assert len(parameters[2:]) == 7 
-
+        lp = len(parameters[2:])
+        assert lp in {2,7} 
         exclude_neg = bool(int(parameters[2])) 
         gentype = int(parameters[3]) 
         assert gentype in {1,2} 
-        gt2_rcswitch = bool(int(parameters[4])) 
-        gt2_sel1 = bool(int(parameters[5])) 
-        gt2_sel2 = bool(int(parameters[6]))
-        gt2_sel3 = bool(int(parameters[7])) 
-        gt2_seed_in_output = bool(int(parameters[8]))
+
+        gt2_rcswitch,gt2_sel1 = True,True
+        gt2_sel2,gt2_sel3 = True,True
+        gt2_seed_in_output = False  
+        if lp == 7: 
+            gt2_rcswitch = bool(int(parameters[4])) 
+            gt2_sel1 = bool(int(parameters[5])) 
+            gt2_sel2 = bool(int(parameters[6]))
+            gt2_sel3 = bool(int(parameters[7])) 
+            gt2_seed_in_output = bool(int(parameters[8]))
 
         return MDRGen(mdr,prg,exclude_neg,gentype,\
         gt2_rcswitch,gt2_sel1,gt2_sel2,\

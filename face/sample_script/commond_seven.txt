@@ -4,3 +4,6 @@ set M = make mdrv2 with V,0.
 
 set M2 = make mdrgen with M,G,0,1,1,1,1,1,1.
 set V2 = run M2 for 150 iter. 
+
+set M3 = make mdrgen with M,G,0,1.
+set V3 = run M3 for 150 iter. 

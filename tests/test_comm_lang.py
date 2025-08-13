@@ -248,6 +248,11 @@ class CommLangMethods(unittest.TestCase):
         assert len(V2) == 150 
         assert V2[:6] == V2sol
 
+        V3 = clp.vartable['V3']
+        V3sol = [6388,683457,744880,744147,740396]
+
+        assert V3[:5] == V3sol 
+
         clp.close() 
 
 if __name__ == '__main__':
