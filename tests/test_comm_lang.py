@@ -255,5 +255,27 @@ class CommLangMethods(unittest.TestCase):
 
         clp.close() 
 
+    """
+    tests for `optri` command. 
+    """
+    def test__CommLangParser__process_file__case6(self): 
+
+        clp = CommLangParser("face/sample_script/commond_eight.txt") 
+        clp.process_file()
+
+        OT = clp.vartable['OT']
+        V2 = clp.vartable['V2']
+        V3 = clp.vartable['V3']
+        V4 = clp.vartable['V4']
+
+        X2 = clp.vartable['X2']
+        X3 = clp.vartable['X3']
+        X4 = clp.vartable['X4']
+
+        assert not np.any(np.round(np.abs(X2[0] - X3[0]),5) == 0.)  
+        assert not np.any(np.round(np.abs(X2[0] - X4[0]),5) == 0.)  
+        assert not np.any(np.round(np.abs(X3[0] - X4[0]),5) == 0.)  
+
+
 if __name__ == '__main__':
     unittest.main()

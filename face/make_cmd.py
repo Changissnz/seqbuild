@@ -1,5 +1,6 @@
 from seqgen.gg_gen import * 
 from seqgen.mdr_gen import * 
+from seqgen.optri_gen import * 
 from desi.fraction import * 
 from intigers.lcg_v3 import * 
 
@@ -24,7 +25,10 @@ def MAIN_method_for_object(q):
             ngram_ = int(ngram) 
             assert ngram_ > 0 
             qx = q.summarize(ngram_,condense_ngram_output=True)
-            q.load_mc_map()
+            
+            try: q.load_mc_map()
+            except: print("excessively large numbers --> cannot load MC map")
+
             return qx 
         return f
 
@@ -35,6 +39,9 @@ def MAIN_method_for_object(q):
         return f 
 
     if type(q) == MDRGen: 
+        return q.__next__ 
+
+    if type(q) == OpTriGen: 
         return q.__next__ 
 
     return -1 
@@ -207,9 +214,9 @@ def MAKE_proc(splitstr_cmd,var_map):
         assert splitstr_cmd[2] == "with" 
         
         parameters = splitstr_cmd[3].split(",") 
-        assert len(parameters) >= 6 
+        assert len(parameters) == 5 
 
-        int_seed = int(round(parameters[0])) 
+        int_seed = int(parameters[0])
 
         assert parameters[1] in var_map 
         prg = var_map[parameters[1]] 
@@ -217,16 +224,20 @@ def MAKE_proc(splitstr_cmd,var_map):
         if type(prg) not in {MethodType,FunctionType}: 
             prg = MAIN_method_for_object(prg) 
         
+        def prg_(): return int(round(prg())) 
+        
         gen_type = int(parameters[2]) 
         assert gen_type in {1,2} 
 
         add_noise = bool(int(parameters[3]))
-        base_sequence = parameters[4:] 
-        base_sequence = [int(b) for b in base]
+
+        assert parameters[4] in var_map
+        base_sequence = var_map[parameters[4]]
+        assert type(base_sequence) == list and len(base_sequence) >= 2 
         base_sequence = IntSeq(base_sequence) 
         M = base_sequence.difftri(cast_type=np.int32)
 
-        return OpTriGen(int_seed,M,prg,gen_type,forward_func=add,\
+        return OpTriGen(int_seed,M,prg_,gen_type,forward_func=add,\
             backward_func=sub,add_noise=add_noise) 
 
     if splitstr_cmd[1] == "multimetric": 
