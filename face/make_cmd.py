@@ -2,10 +2,12 @@ from seqgen.gg_gen import *
 from seqgen.mdr_gen import * 
 from seqgen.optri_gen import * 
 from desi.fraction import * 
+from desi.differentials import * 
 from intigers.lcg_v3 import * 
 
 BASE_PRNG = ["lcg","lcgv2","lcgv3","mdr","mdrv2",\
-        "mdrgen","idforest","optri","rch","qval"] 
+        "mdrgen","idforest","optri","rch","qval",\
+        "pid"]  
 
 
 # TODO: incomplete 
@@ -42,6 +44,9 @@ def MAIN_method_for_object(q):
         return q.__next__ 
 
     if type(q) == OpTriGen: 
+        return q.__next__ 
+
+    if type(q) == PIDValueOutputter: 
         return q.__next__ 
 
     return -1 
@@ -131,8 +136,7 @@ def MAKE_lcgvx(splitstr_cmd,var_map):
             is_rmod = bool(int(parameters[9]))
             g3 = LCGV3(px[0],px[1],px[2],px[3],px[4],0,False,prg,super_range,\
                 exclude_zero__auto_td,is_rmod)
-
-        return g3 
+        return g3     
     assert False 
 
 def MAKE_mdrvx(splitstr_cmd,var_map): 
@@ -172,8 +176,7 @@ def MAKE_mdrvx(splitstr_cmd,var_map):
 
         assert parameters[1] in var_map
         prg = var_map[parameters[1]]
-        if type(prg) not in {MethodType,FunctionType}: 
-            prg = MAIN_method_for_object(prg) 
+        prg = MAIN_method_for_object(prg) 
 
         lp = len(parameters[2:])
         assert lp in {2,7} 
@@ -220,9 +223,7 @@ def MAKE_proc(splitstr_cmd,var_map):
 
         assert parameters[1] in var_map 
         prg = var_map[parameters[1]] 
-
-        if type(prg) not in {MethodType,FunctionType}: 
-            prg = MAIN_method_for_object(prg) 
+        prg = MAIN_method_for_object(prg) 
         
         def prg_(): return int(round(prg())) 
         
@@ -275,5 +276,33 @@ def MAKE_proc(splitstr_cmd,var_map):
 
         return QValueOutputter(IntSeq(V),index_selector,length_outputter,\
             range_outputter,adj_type) 
+
+    if splitstr_cmd[1] == "pid":
+        assert splitstr_cmd[2] == "with" 
+
+        parameters = splitstr_cmd[3].split(",")
+        assert parameters[0] in var_map 
+        prg = var_map[parameters[0]] 
+        prg = MAIN_method_for_object(prg) 
+    
+        assert parameters[1] in var_map 
+        f_out = var_map[parameters[1]] 
+        f_out = MAIN_method_for_object(f_out) 
+        def f_out_(): return int(round(f_out()))
+
+        assert parameters[2] in var_map 
+        l_out = var_map[parameters[2]] 
+        l_out = MAIN_method_for_object(l_out) 
+        def l_out_(): return int(round(l_out()))
+
+        assert parameters[3] in var_map 
+        r_out = var_map[parameters[3]] 
+        r_out = MAIN_method_for_object(r_out)
+
+        adjustment_type = int(parameters[4]) 
+        assert adjustment_type in {1,2} 
+
+        return PIDValueOutputter(prg,f_out_,\
+            l_out_,r_out,adjustment_type)
 
     return None

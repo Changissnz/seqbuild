@@ -276,6 +276,18 @@ class CommLangMethods(unittest.TestCase):
         assert not np.any(np.round(np.abs(X2[0] - X4[0]),5) == 0.)  
         assert not np.any(np.round(np.abs(X3[0] - X4[0]),5) == 0.)  
 
+        clp.close() 
+
+    def test__CommLangParser__process_file__case7(self): 
+        clp = CommLangParser("face/sample_script/commond_nine.txt") 
+        clp.process_file()
+        V = clp.vartable['V']
+
+        qm = np.mean(V)
+        assert qm == 49712.56 
+
+        clp.close() 
+
 
 if __name__ == '__main__':
     unittest.main()

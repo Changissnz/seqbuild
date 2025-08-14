@@ -1,0 +1,10 @@
+set G = make lcg with 67,-18,99,9007. 
+set FO = make lcg with 39,-14,67000,66666. 
+
+set LO = make lcg with 93,14,67,87878. 
+set R = make lcg with 94,18,53,78787.  
+set RO = convert R to range. 
+
+set G2 = convert G to nvec with 2. 
+set PD = make pid with G2,FO,LO,RO,1. 
+set V = run PD for 200 iter. 
