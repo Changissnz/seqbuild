@@ -22,6 +22,8 @@ specified by a FOSS license.
 *That said, the free market has never been that free with research and*
 *emerging technologies.*
 
+Copyright 2025 Richard Pham 
+
 ### Update: 8/14/25
 
 Development is halfway done. The `seqbuild` project now has an interface. 
@@ -37,5 +39,3 @@ Here is my developer note that pops up every time the `main.py` file
 is run. 
 
 ![Local Image](2025-08-14__developer_note.png) 
-
-Copyright 2025 Richard Pham 
