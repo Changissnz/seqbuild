@@ -38,4 +38,7 @@ Here are the steps to using it.
 Here is my developer note that pops up every time the `main.py` file 
 is run. 
 
-![Local Image](2025-08-14__developer_note.png) 
+![Local Image](2025-08-14__developer_note.png)  
+
+I have planned for 1 full week of additional development, starting today. 
+This will be AGILE end sprint for beta version of this product. 
