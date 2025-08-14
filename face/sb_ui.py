@@ -101,6 +101,7 @@ class SBApplication(tk.Frame):
         self.clp = CommLangParser(None) 
         self.reset_to_baseview()
 
-app = SBApplication()
-app.master.title('SeQbUiLd WiNdOw')  
-app.mainloop()
+def run_sb_app(): 
+    app = SBApplication()
+    app.master.title('SeQbUiLd WiNdOw')  
+    app.mainloop()

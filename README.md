@@ -22,4 +22,20 @@ specified by a FOSS license.
 *That said, the free market has never been that free with research and*
 *emerging technologies.*
 
+### Update: 8/14/25
+
+Development is halfway done. The `seqbuild` project now has an interface. 
+Here are the steps to using it. 
+- go into a terminal prompt and enter in these commands: 
+```
+> git clone https://www.github.com/changissnz/seqbuild.git 
+> cd seqbuild 
+> python3 main.py 
+```
+
+Here is my developer note that pops up every time the `main.py` file 
+is run. 
+
+![Local Image](2025-08-14__developer_note.png) 
+
 Copyright 2025 Richard Pham 
