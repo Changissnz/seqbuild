@@ -1,5 +1,5 @@
 import tkinter as tk
-from tkinter import filedialog
+from tkinter import filedialog,font
 from .comm_lang import * 
 
 """
@@ -21,7 +21,8 @@ class Application(tk.Frame):
         self.quitButton.grid()
 
         # Create a Text widget to display the content
-        self.text_widget = tk.Text(self, wrap="word", width=80, height=15)
+        bold_font = font.Font(family="Arial", size=12, weight="bold")
+        self.text_widget = tk.Text(self, wrap="word", font=bold_font,bg="red",fg="white",width=80, height=15)
         self.text_widget.grid()
 
         # Create a button to open the file
