@@ -162,7 +162,7 @@ class CommLangMethods(unittest.TestCase):
         clp.close() 
 
     """
-    tests for keyterm `convert`
+    tests for keyword `convert`
     """
     def test__CommLangParser__process_file__case2(self): 
         clp = CommLangParser("face/sample_script/commond_four.txt") 
@@ -278,6 +278,9 @@ class CommLangMethods(unittest.TestCase):
 
         clp.close() 
 
+    """
+    tests for `pid` command. 
+    """
     def test__CommLangParser__process_file__case7(self): 
         clp = CommLangParser("face/sample_script/commond_nine.txt") 
         clp.process_file()
@@ -285,9 +288,21 @@ class CommLangMethods(unittest.TestCase):
 
         qm = np.mean(V)
         assert qm == 49712.56 
-
         clp.close() 
 
+    """
+    tests for `write` keyword. 
+    """
+    def test__CommLangParser__process_file__case8(self): 
+        clp = CommLangParser("face/sample_script/commond_ten.txt") 
+        clp.process_file()
+
+        p1 = "command_the_fourth.txt" 
+        p2 = "command_the_force.txt"
+        assert os.path.exists(p1)
+        assert os.path.exists(p2)
+
+        clp.close() 
 
 if __name__ == '__main__':
     unittest.main()

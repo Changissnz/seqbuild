@@ -5,7 +5,9 @@ the seqbuild program's main functional features.
 """
 
 from .make_cmd import * 
+from morebs2.matrix_methods import cr 
 import io 
+import pickle 
 
 LANG_KEYTERMS = ["make","run","with","set","for","iter","write","to",\
             "open","convert"]   
@@ -47,8 +49,9 @@ def RUN_proc(splitstr_cmd,var_map):
     return lx 
 
 """
-open file FILENAME.txt 
-open new file FILENAME.txt 
+open file <FILENAME.txt>
+open file <FILENAME.txt> for seq 
+open file <FILENAME.txt> for obj
 """
 def OPEN_proc(splitstr_cmd):
     assert splitstr_cmd[0] == "open" 
@@ -57,14 +60,27 @@ def OPEN_proc(splitstr_cmd):
     # check for directory name
     dirPath = os.path.dirname(splitstr_cmd[2])
 
+    write_modes = ["wb","ab"]
+
+    if len(splitstr_cmd) != 3: 
+        assert len(splitstr_cmd) == 5
+        assert splitstr_cmd[3] == "for" 
+        assert splitstr_cmd[4] in {"seq","obj"} 
+        
+        if splitstr_cmd[4] == "seq": 
+            write_modes = ["w","a"]
+
     if not os.path.isdir(dirPath) and dirPath != "": 
         os.mkdir(dirPath)
 
     if not os.path.exists(splitstr_cmd[2]): 
-        q = open(splitstr_cmd[2],"wb")
+        q = open(splitstr_cmd[2],write_modes[0])
         q.close() 
 
-    return open(splitstr_cmd[2],"ab")
+    return open(splitstr_cmd[2],write_modes[1]) 
+
+def LOAD_proc(splitstr_cmd,var_map): 
+    return -1 
 
 """
 convert GENERATOR to type_x ?with arg1,...,argN?.
@@ -108,6 +124,23 @@ def CONVERT_proc(splitstr_cmd,var_map):
 
     return prg__single_to_trinary_vector(struct_,l)
 
+
+def WRITE_seq(fi_obj,vector_length,seq,rounding_depth=0):
+    s = ""
+    
+    if rounding_depth == 0: 
+        castFunc = int 
+    else: 
+        assert rounding_depth > 0 and type(rounding_depth) == int 
+        castFunc = round(float(x),rounding_depth)
+
+    while len(seq) > 0:
+        q = seq[:vector_length] 
+        seq = seq[vector_length:] 
+        s = vector_to_string(q,castFunc)
+        fi_obj.write(s + "\n") 
+    fi_obj.flush() 
+
 """
 write object to file_object 
 """
@@ -119,8 +152,14 @@ def WRITE_proc(splitstr_cmd,var_map):
     
     assert splitstr_cmd[3] in var_map 
     fi_obj = var_map[splitstr_cmd[3]]
-    assert isinstance(fi_obj,io.BufferedWriter) 
-    #isinstance(fi_obj,io.TextIOWrapper)
+
+    is_seq = type(var_obj) == list 
+    assert isinstance(fi_obj,io.TextIOWrapper) if is_seq \
+        else isinstance(fi_obj,io.BufferedWriter) 
     
-    pickle.dump(var_obj,fi_obj)
+    if is_seq: 
+        WRITE_seq(fi_obj,10,var_obj,rounding_depth=0)
+    else: 
+        pickle.dump(var_obj,fi_obj)
+        
     fi_obj.close()

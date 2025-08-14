@@ -1,0 +1,7 @@
+set G = make lcg with 36,66,711,977. 
+set F = open file command_the_fourth.txt. 
+write G to F. 
+
+set F2 = open file command_the_force.txt for seq. 
+set V = run G for 20 iter. 
+write V to F2. 
