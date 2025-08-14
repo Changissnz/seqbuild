@@ -6,6 +6,8 @@ the seqbuild program's main functional features.
 
 from .make_cmd import * 
 from morebs2.matrix_methods import cr 
+from mini_dm.nsfr import * 
+
 import io 
 import pickle 
 
@@ -80,8 +82,7 @@ def OPEN_proc(splitstr_cmd):
     return open(splitstr_cmd[2],write_modes[1]) 
 
 """
-load <file_object> into seq. 
-load <file_object> into obj. 
+load <file_object>.
 """
 def LOAD_proc(splitstr_cmd,var_map):
 
@@ -92,8 +93,8 @@ def LOAD_proc(splitstr_cmd,var_map):
 
     # case: sequence 
     if type(fi_obj) == io.TextIOWrapper:
-        assert False 
-
+        return NSFileReader(fi_obj)
+    
     # case: object 
     assert type(fi_obj) == io.BufferedWriter 
     return pickle.load(fi_obj)
