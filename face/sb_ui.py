@@ -1,6 +1,10 @@
 import tkinter as tk
 from tkinter import filedialog
 
+"""
+the main Tkinter application class for seqbuild user 
+interface (SB UI). 
+"""
 class Application(tk.Frame):
 
     def __init__(self, master=None):

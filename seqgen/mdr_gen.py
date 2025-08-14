@@ -76,6 +76,8 @@ class MDRGen:
     #--------------- methods for generator type 2 -----------------# 
     
     """
+    generator type #2 uses the seed-cycle variable `gentype2_seedcycle` 
+    to generate sequences into the map `seed2seq`. 
     """
     def next_gentype2(self): 
 
