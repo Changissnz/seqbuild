@@ -8,15 +8,34 @@ class CommLangParser:
 
     def __init__(self,filepath:str):
         self.fp = filepath
-        self.file_obj = open(self.fp,"r") 
-
-        self.file_obj.seek(0,os.SEEK_END) 
-        self.file_end = self.file_obj.tell()
-        self.file_obj.seek(0)  
+        self.file_obj,self.file_end = None,None
+        self.preproc_file() 
 
         self.cmdlines = []
         self.commond = None 
         self.vartable = dict() 
+
+    def __str__(self):
+        dx = ""
+        for k,v in self.vartable.items(): 
+            s = str(k) 
+            v = type(v) 
+            s = s + "\t" + str(v)
+            dx += s + "\n" 
+        return dx 
+
+    def preproc_file(self): 
+        if type(self.fp) == type(None): 
+            return 
+
+        self.file_obj = open(self.fp,"r") 
+        self.file_obj.seek(0,os.SEEK_END) 
+        self.file_end = self.file_obj.tell()
+        self.file_obj.seek(0)  
+
+    def reload_file(self,filepath:str): 
+        self.fp = filepath 
+        self.preproc_file() 
 
     def close(self): 
         self.file_obj.close() 
@@ -31,6 +50,13 @@ class CommLangParser:
             stat = self.file_obj.tell() != self.file_end 
 
         return
+
+    """
+    used to process all remaining commands from `cmdline` cache. 
+    """
+    def process_cmdlines(self): 
+        while len(self.cmdlines) > 0: 
+            self.process_command()
 
     def load_next_command(self):
         comm = "" 
@@ -73,7 +99,7 @@ class CommLangParser:
 
         c = self.cmdlines.pop(0)
         c = c.split(" ")
-        c = [c_.strip() for c_ in c]
+        c = [c_.strip(".") for c_ in c]
         self.commond = [c_ for c_ in c if len(c_) > 0]
         return self.process_command_()
 
