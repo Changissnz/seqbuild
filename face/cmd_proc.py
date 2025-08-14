@@ -60,7 +60,7 @@ def OPEN_proc(splitstr_cmd):
     # check for directory name
     dirPath = os.path.dirname(splitstr_cmd[2])
 
-    write_modes = ["wb","ab"]
+    write_modes = ["wb","wb"] # "wa"
 
     if len(splitstr_cmd) != 3: 
         assert len(splitstr_cmd) == 5
@@ -68,7 +68,7 @@ def OPEN_proc(splitstr_cmd):
         assert splitstr_cmd[4] in {"seq","obj"} 
         
         if splitstr_cmd[4] == "seq": 
-            write_modes = ["w","a"]
+            write_modes = ["w","w"] # "a" 
 
     if not os.path.isdir(dirPath) and dirPath != "": 
         os.mkdir(dirPath)
@@ -79,8 +79,24 @@ def OPEN_proc(splitstr_cmd):
 
     return open(splitstr_cmd[2],write_modes[1]) 
 
-def LOAD_proc(splitstr_cmd,var_map): 
-    return -1 
+"""
+load <file_object> into seq. 
+load <file_object> into obj. 
+"""
+def LOAD_proc(splitstr_cmd,var_map):
+
+    assert splitstr_cmd[0] == "load"
+    assert splitstr_cmd[1] in var_map
+
+    fi_obj = var_map[splitstr_cmd[1]]  
+
+    # case: sequence 
+    if type(fi_obj) == io.TextIOWrapper:
+        assert False 
+
+    # case: object 
+    assert type(fi_obj) == io.BufferedWriter 
+    return pickle.load(fi_obj)
 
 """
 convert GENERATOR to type_x ?with arg1,...,argN?.
@@ -90,9 +106,9 @@ convert G to ndim with 5,6,9,10
 convert G to nvec with 6 
 convert G to tvec with 7
 """ 
-def CONVERT_proc(splitstr_cmd,var_map): 
-    assert splitstr_cmd[0] == "convert"
+def CONVERT_proc(splitstr_cmd,var_map):
 
+    assert splitstr_cmd[0] == "convert"
     assert splitstr_cmd[1] in var_map
 
     struct = var_map[splitstr_cmd[1]] 
@@ -161,5 +177,4 @@ def WRITE_proc(splitstr_cmd,var_map):
         WRITE_seq(fi_obj,10,var_obj,rounding_depth=0)
     else: 
         pickle.dump(var_obj,fi_obj)
-        
     fi_obj.close()
