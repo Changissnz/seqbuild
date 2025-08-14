@@ -178,4 +178,4 @@ def WRITE_proc(splitstr_cmd,var_map):
         WRITE_seq(fi_obj,10,var_obj,rounding_depth=0)
     else: 
         pickle.dump(var_obj,fi_obj)
-    fi_obj.close()
+    fi_obj.close()    

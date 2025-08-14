@@ -12,6 +12,8 @@ class CommLangParser:
         self.preproc_file() 
 
         self.cmdlines = []
+        self.show_commands = [] 
+
         self.commond = None 
         self.vartable = dict() 
 
@@ -97,8 +99,14 @@ class CommLangParser:
             print("NO COMMANDS IN QUEUE")
             return 
 
-        c = self.cmdlines.pop(0)
-        c = c.split(" ")
+        c_ = self.cmdlines.pop(0)
+        c = c_.split(" ")
+
+        # case: `show` command, do nothing 
+        if c[0] == "show": 
+            self.show_commands.append(c_) 
+            return 
+
         c = [c_.strip(".") for c_ in c]
         self.commond = [c_ for c_ in c if len(c_) > 0]
         return self.process_command_()
