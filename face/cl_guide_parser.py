@@ -2,6 +2,81 @@ import os
 
 COMM_LANG_GUIDE_FILE = "face/sample_script/commlang_guide.md"
 
+def stringize_CLGuideParser_keywords(clgp): 
+    term_map = {0:"Primary",1:"Secondary",2:"Tertiary"}
+    s = "\t\t[+] Keywords\n\n"  
+
+    for i in range(3): 
+        kx = clgp.keywords[i]
+        s += "\t{}\n".format(term_map[i])
+
+        if i != 2:
+            kx_ = sorted(kx)  
+            kx_ = ["* " + kx__ for kx__ in kx_] 
+            s += "\n".join(kx_) 
+            s += "\n"
+        else: 
+            kx_ = sorted(kx.keys()) 
+            
+            while len(kx_) > 0: 
+                kx2 = kx_.pop(0) 
+                s += "+ " + kx2 + "\n" 
+
+                v2 = kx[kx2] 
+                v2 = ["*\t" + v2_ for v2_ in v2]
+                s += "\n".join(v2) 
+                s += "\n\n"
+        
+        s += "\n"
+    return s 
+
+def stringize_CLGuideParser_structures(clgp): 
+    assert type(clgp) == CLGuideParser 
+    s = "\t\t[+] Structures\n\n" 
+
+    for k,v in clgp.structures.items():
+        s_ = "* " + k 
+        s_ += "\n\t\tinit:\n"
+
+        k2 = len(v['init'])
+        for i in range(k2):
+            s_ += "\n".join(v['init'][i])
+            s_ += "\n\n" 
+
+        k2 = len(v['run'])
+        if k2 == 0: 
+            s += s_ + "\n"
+            s += "\n-/-/-/-----------------/-/-/-\n"
+            continue 
+
+
+        s_ += "\n"
+        s_ += "\n\t\trun:\n"
+        for i in range(k2): 
+            s_ += "\n".join(v['run'][i])
+            s_ += "\n"
+
+        s += s_ 
+        s += "\n-/-/-/-----------------/-/-/-\n"
+    
+    return s 
+
+def stringize_CLGuideParser_command_forms(clgp): 
+
+    assert type(clgp) == CLGuideParser 
+    s = "\t\t[+] Command Forms\n\n" 
+
+    for k,v in clgp.command_forms.items():
+        command = k 
+        usage,description = v[0],v[1]
+
+        s += "* " + command + "\n" 
+        s += "\t- usage\n" + usage + "\n"
+        s += "\t- description\n" + description + "\n"
+        s += "\n-/-/-/-----------------/-/-/-\n"
+        s += "\n"
+    return s 
+
 class CLGuideParser:
 
     def __init__(self): 
@@ -18,12 +93,26 @@ class CLGuideParser:
         self.command_forms = dict() # command -> usage 
 
         self.current_line = None 
+
+        self.has_processed = False 
         return 
 
+    def __str__(self):
+        assert self.has_processed
+
+        s1 = stringize_CLGuideParser_keywords(self) 
+        s2 = stringize_CLGuideParser_structures(self) 
+        s3 = stringize_CLGuideParser_command_forms(self) 
+        return s1 + "\n" + s2 + "\n" + s3 
+
+    """
+    main method 
+    """
     def process(self): 
         self.process_structures() 
         self.process_keywords() 
-        self.process_command_forms() 
+        self.process_command_forms()
+        self.has_processed = True  
         return
 
     def process_structures(self): 
@@ -206,16 +295,6 @@ class CLGuideParser:
             kw,u,d = c 
             self.command_forms[kw] = (u,d) 
         
-
-        '''
-[+] write  
-[-] usage  
-```
-write <object> to <file_object>.  
-``` 
-[-] description  
-writes an object loaded in program memory to a file object. 
-        '''
     def next_command_form(self):
         halt_line = "## Interface Layout" 
         line = self.search_for_line("[+]",halt_line=halt_line,is_prefix_search=True)

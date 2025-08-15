@@ -1,6 +1,8 @@
 import tkinter as tk
 from tkinter import filedialog,font
 from .comm_lang import * 
+from .cl_guide_parser import * 
+
 
 """
 the main Tkinter application class for seqbuild user 
@@ -12,44 +14,86 @@ class SBApplication(tk.Frame):
         tk.Frame.__init__(self, master)
 
         self.clp = CommLangParser(None) 
+        self.clgp = CLGuideParser() 
+        self.clgp.process() 
+
         self.grid()
-        self.createWidgets()
+        self.create_widgets()
 
-    def createWidgets(self):
-        self.quitButton = tk.Button(self, text='Quit',
-            command=self.destroy)
-        self.quitButton.grid()
+        # bool 
+        self.is_helpwindow = False 
 
-        # Create a Text widget to display the content
+    def create_widgets(self):
+        self.init_primary_window_detils() 
+        self.set_primary_window_details()
+        self.text_widget3 = None 
+
+    def init_primary_window_detils(self):
+        
         bold_font = font.Font(family="Arial", size=12, weight="bold")
-        self.text_widget = tk.Text(self, wrap="word", font=bold_font,bg="red",fg="white",width=80, height=15)
-        self.text_widget.grid()
 
-        # Create a button to open the file
         self.open_button = tk.Button(self, text="OpEn CMD FiLe", command=self.open_file__UI)
-        self.open_button.grid(row=0,column=0)
-
+        self.text_widget = tk.Text(self, wrap="word", font=bold_font,bg="red",fg="white",width=80, height=15)
         self.baseview_button = tk.Button(self,text="bASe ViEw",command=self.reset_to_baseview)
-        self.baseview_button.grid(row=0,column=10)
-
 
         # Create a button to clear the SHOW window. 
         def tw_del(): 
             return self.text_widget.delete(1.0, tk.END)
         self.clear_button = tk.Button(self,text="CLeAr ScReeN",command=tw_del)
-        self.clear_button.grid(row=14,column=0) 
 
         self.fullreset_button = tk.Button(self,text="fuLL REseT",command=self.fullreset_clp)
-        self.fullreset_button.grid(row=14,column=10)
+        self.send_button = tk.Button(self, text="SeND cMd", command=self.send_cmd__UI)
+        self.help_button = tk.Button(self, text="heLP", command=self.switch_HELP_display)
 
-        # Create another Text widget to write info. 
         self.text_widget2 = tk.Text(self, wrap="word", width=80, height=15)
+
+    def set_primary_window_details(self): 
+
+        self.open_button.grid(row=0,column=0)
+
+        # Create a Text widget to display the content
+        self.text_widget.grid()
+        self.baseview_button.grid(row=0,column=10)
+        self.clear_button.grid(row=14,column=0) 
+        self.fullreset_button.grid(row=14,column=10)
         self.text_widget2.grid()
 
         # Create a button to send written commands 
-        self.send_button = tk.Button(self, text="SeND cMd", command=self.send_cmd__UI)
         self.send_button.grid()
 
+        # Create a help button for user-friendliness  
+        self.help_button.grid(row=24,column=10)
+
+    def switch_HELP_display(self): 
+        if self.is_helpwindow:
+            self.text_widget3.grid_forget() 
+            self.goback_button.grid_forget()
+            self.set_primary_window_details()
+            self.is_helpwindow = not self.is_helpwindow
+            return
+
+        # hide all the primary display's buttons
+        self.text_widget.grid_forget() 
+        self.text_widget2.grid_forget() 
+
+        self.open_button.grid_forget() 
+        self.baseview_button.grid_forget() 
+        self.clear_button.grid_forget() 
+        self.fullreset_button.grid_forget() 
+        self.send_button.grid_forget() 
+        self.help_button.grid_forget() 
+
+        self.is_helpwindow = not self.is_helpwindow
+
+        # open up text widget 3 
+        if type(self.text_widget3) == type(None): 
+            self.init_help_display()
+
+        self.text_widget3.grid() 
+        self.goback_button.grid(row=30,column=0)
+        self.reload_entire_help_display()
+
+        return
 
     def open_file__UI(self): 
         file_path = filedialog.askopenfilename(
@@ -100,6 +144,18 @@ class SBApplication(tk.Frame):
     def fullreset_clp(self): 
         self.clp = CommLangParser(None) 
         self.reset_to_baseview()
+
+    def init_help_display(self): 
+        bold_font = font.Font(family="Arial", size=12, weight="bold")
+        self.text_widget3 = tk.Text(self, wrap="word", font=bold_font,bg="purple",\
+            fg="yellow",width=86, height=31.5) 
+
+        self.goback_button = tk.Button(self, text="GO bacK", command=self.switch_HELP_display)
+
+    def reload_entire_help_display(self): 
+        s = str(self.clgp) 
+        self.text_widget3.insert(tk.END,s)
+        return
 
 def run_sb_app(): 
     app = SBApplication()
