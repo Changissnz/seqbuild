@@ -19,33 +19,36 @@ as well as their instantiation parameters in Comm Lang.
 
 [o] lcg 
 - instantiation:  
-    * (int|float,int|float,int|float,int|float)  
+
+    1. (int|float,int|float,int|float,int|float)  
     * (start value,multiple,additive,modulus)  
 
 [o] lcgv2 
 - instantiation: 
-    * (int|float,int|float,int|float,int|float,int|float)  
+
+    1. (int|float,int|float,int|float,int|float,int|float)  
     * (start value,multiple,additive,start modulus,end modulus)  
 
-    * (int|float,int|float,int|float,int|float,int|float,int,bool)  
+    2. (int|float,int|float,int|float,int|float,int|float,int,bool)  
     * (start value,multiple,additive,start modulus,end modulus,memory vector size,graph decomposition)  
 
 [o] lcgv3 
 - instantiation: 
-    * (int|float,int|float,int|float,int|float,int|float)  
+
+    1. (int|float,int|float,int|float,int|float,int|float)  
     * (start value,multiple,additive,start modulus,end modulus)  
 
-    * (int|float,int|float,int|float,int|float,int|float,function,
+    2. (int|float,int|float,int|float,int|float,int|float,function,
       int|float,int|float)  
     * (start value,multiple,additive,start modulus,end modulus,
         inputless generator,super-range start,super-range end)   
 
-    * (int|float,int|float,int|float,int|float,int|float,function,
+    3. (int|float,int|float,int|float,int|float,int|float,function,
       int|float,int|float,bool)  
     * (start value,multiple,additive,start modulus,end modulus,
         inputless generator,super-range start,super-range end,exclude zero trinary)  
 
-    * (int|float,int|float,int|float,int|float,int|float,function,
+    4. (int|float,int|float,int|float,int|float,int|float,function,
       int|float,int|float,bool,bool)  
     * (start value,multiple,additive,start modulus,end modulus,
         inputless generator,super-range start,super-range end,
@@ -54,25 +57,25 @@ as well as their instantiation parameters in Comm Lang.
 [o] mdr 
 - instantiation:  
 
-    * (list)  
+    1. (list)  
     * numerical sequence  
 
 [o] mdrv2 
 - instantiation:  
 
-    * (list)  
+    1. (list)  
     * numerical sequence  
 
-    * (list,bool)  
+    2. (list,bool)  
     * numerical sequence, exclude negative multiples  
 
 [o] mdrgen 
 - instantiation:  
 
-    * (mdr|mdrv2,function,bool,1|2)  
+    1. (mdr|mdrv2,function,bool,1|2)  
     * (reference `ModuloDecompRepr`,inputless generator,generative type)  
 
-    * (mdr|mdrv2,function,bool,1|2,bool,bool,bool,bool,bool)  
+    2. (mdr|mdrv2,function,bool,1|2,bool,bool,bool,bool,bool)  
     * (reference `ModuloDecompRepr`,inputless generator,generative type,
         row-column switch,selector switch 1,selector switch 2, selector switch 3, 
         input seed in output)  
@@ -80,13 +83,13 @@ as well as their instantiation parameters in Comm Lang.
 [o] optri  
 - instantiation: 
 
-    * (int,function,1|2,bool,list)  
+    1. (int,function,1|2,bool,list)  
     * (integer seed,inputless generator,generative type,add noise,base sequence)  
 
 [o] qval  
 - instantiation:  
 
-    * (list,function,function,function,1|2)  
+    1. (list,function,function,function,1|2)  
     * (base sequence,inputless generator,inputless generator,
         inputless generator,adjustment type)  
     * (!,index selector,length outputter,range outputter,!)
@@ -94,7 +97,7 @@ as well as their instantiation parameters in Comm Lang.
 [o] pid  
 - instantiation:  
 
-    * (function,function,function,1|2)  
+    1. (function,function,function,1|2)  
     * (inputless generator,inputless generator,inputless generator,
         adjustment type)  
     * (base generator,frequency generator,length generator,range generator,!)  
