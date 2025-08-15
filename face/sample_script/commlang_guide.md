@@ -203,7 +203,7 @@ writes an object loaded in program memory to a file object.
 -----------------------------------------------------------------
 
 [+] convert  
-[-] usage 
+[-] usage  
 ```
 convert <generator> to range.  
 convert <generator> to ndim with <positive_integer_sequence>.  
