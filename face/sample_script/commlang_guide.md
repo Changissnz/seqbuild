@@ -29,7 +29,6 @@ as well as their instantiation parameters in Comm Lang.
     1. (int|float,int|float,int|float,int|float,int|float)  
     * (start value,multiple,additive,start modulus,end modulus)  
 
-
     2. (int|float,int|float,int|float,int|float,int|float,int,bool)  
     * (start value,multiple,additive,start modulus,end modulus,memory vector size,graph decomposition)  
 
@@ -39,18 +38,15 @@ as well as their instantiation parameters in Comm Lang.
     1. (int|float,int|float,int|float,int|float,int|float)   
     * (start value,multiple,additive,start modulus,end modulus)     
 
-
     2. (int|float,int|float,int|float,int|float,int|float,function,
       int|float,int|float)  
     * (start value,multiple,additive,start modulus,end modulus,
         inputless generator,super-range start,super-range end)   
 
-
     3. (int|float,int|float,int|float,int|float,int|float,function,
       int|float,int|float,bool)  
     * (start value,multiple,additive,start modulus,end modulus,
         inputless generator,super-range start,super-range end,exclude zero trinary)  
-
 
     4. (int|float,int|float,int|float,int|float,int|float,function,
       int|float,int|float,bool,bool)  
@@ -71,7 +67,6 @@ as well as their instantiation parameters in Comm Lang.
     1. (list)  
     * numerical sequence  
 
-
     2. (list,bool)  
     * numerical sequence, exclude negative multiples  
 
@@ -80,7 +75,6 @@ as well as their instantiation parameters in Comm Lang.
 
     1. (mdr|mdrv2,function,bool,1|2)  
     * (reference `ModuloDecompRepr`,inputless generator,generative type)  
-
 
     2. (mdr|mdrv2,function,bool,1|2,bool,bool,bool,bool,bool)  
     * (reference `ModuloDecompRepr`,inputless generator,generative type,
@@ -122,7 +116,7 @@ as well as their instantiation parameters in Comm Lang.
     1. (integer)  
     * (positive integer specifying n-gram)  
 
-    
+
 ## Keywords 
 
 - Primary  
@@ -141,14 +135,14 @@ as well as their instantiation parameters in Comm Lang.
 
 - Tertiary  
     [-] associated with `open`:  
-        [-] file  
-        [-] seq  
-        [-] obj  
+        * file  
+        * seq  
+        * obj  
     [-] associated with `convert`:  
-        [-] range  
-        [-] ndim  
-        [-] nvec  
-        [-] tvec  
+        * range  
+        * ndim  
+        * nvec  
+        * tvec  
 
 ## Command Forms 
 
@@ -160,6 +154,7 @@ make <structure> with <input1,input2,...,inputJ>.
 [-] description  
 instantiates a structure.  
 
+-----------------------------------------------------------------
 
 [+] run  
 [-] usage   
@@ -171,6 +166,7 @@ run <structure> for <positive integer> iter.
 [-] description  
 calls the structure's main output function. 
 
+-----------------------------------------------------------------
 
 [+] set 
 [-] usage
@@ -180,6 +176,7 @@ set <variable name> = <command statement that produces object>.
 [-] description  
 loads an object into parser map of variables.  
 
+-----------------------------------------------------------------
 
 [+] open  
 [-] usage  
@@ -193,6 +190,7 @@ loads a file into a program object. By default, opens file in
 bytes mode to store objects. Specifying `for seq` opens file in 
 regular string mode and `for obj` opens file in bytes mode.  
 
+-----------------------------------------------------------------
 
 [+] write  
 [-] usage  
@@ -202,6 +200,8 @@ write <object> to <file_object>.
 [-] description  
 writes an object loaded in program memory to a file object. 
 
+-----------------------------------------------------------------
+
 [+] convert  
 [-] usage 
 ```
@@ -210,6 +210,8 @@ convert G to ndim with <positive_integer_sequence>.
 convert G to nvec with <positive_integer>.  
 convert G to tvec with <positive_integer>.  
 ```
+
+-----------------------------------------------------------------
 
 ## Typical Commands 
 
