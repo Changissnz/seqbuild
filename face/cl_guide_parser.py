@@ -142,16 +142,136 @@ class CLGuideParser:
 
         return struct_name,instant_dict,run_dict 
 
+    def process_keywords(self): 
+        self.go_to_section("keywords")
+
+        def process_s12(sx):
+            while self.file_obj.tell() != self.file_end:  
+                line = self.file_obj.readline() 
+                line = line.strip()
+                if len(line) == 0: break
+                keyword = line[3:].strip() 
+                sx |= {keyword} 
+
+        def process_s3(dx): 
+            keyword = None 
+            while self.file_obj.tell() != self.file_end:  
+                line = self.file_obj.readline() 
+                line = line.strip()
+                if len(line) == 0: break
+
+                if line[:3] == "[-]": 
+                    i1 = line.index("`") 
+                    sline = line[i1+1:] 
+                    i2 = sline.index("`") 
+                    keyword = sline[:i2] 
+                    dx[keyword] = [] 
+                elif line[0] == "*": 
+                    kw2 = line[1:].strip() 
+                    dx[keyword].append(kw2)
+                else: 
+                    assert False 
+
+        # process primary,secondary,tertiary in 
+        # that order 
+        headlines = ["- Primary","- Secondary","- Tertiary"] 
+
+        primary,secondary = set(),set() 
+        tertiary = dict()
+
+        self.search_for_line(headlines[0])
+        process_s12(primary) 
+
+        self.search_for_line(headlines[1]) 
+        process_s12(secondary) 
+
+        self.search_for_line(headlines[2]) 
+        process_s3(tertiary) 
+
+        self.keywords[0] = primary 
+        self.keywords[1] = secondary
+        self.keywords[2] = tertiary
+        return primary,secondary,tertiary
+    
+    def process_command_forms(self): 
+        self.go_to_section("command forms") 
+
+        stat = True 
+
+        while stat: 
+            c = self.next_command_form()
+            stat = not type(c) == type(None) 
+            if not stat: continue 
+
+            kw,u,d = c 
+            self.command_forms[kw] = (u,d) 
+        
+
+        '''
+[+] write  
+[-] usage  
+```
+write <object> to <file_object>.  
+``` 
+[-] description  
+writes an object loaded in program memory to a file object. 
+        '''
+    def next_command_form(self):
+        halt_line = "## Interface Layout" 
+        line = self.search_for_line("[+]",halt_line=halt_line,is_prefix_search=True)
+
+        if type(line) == type(None): 
+            return None 
+
+        keyword = line[3:].strip() 
+
+        # get usage
+        usage_ = self.search_for_line("[-] usage",halt_line=halt_line,is_prefix_search=True) 
+        usage = "" 
+        c = 0 
+        while True: 
+            if c == 2: 
+                break 
+
+            line = self.file_obj.readline().strip() 
+            if line == "```": 
+                c += 1 
+                continue
+            usage += line + "\n" 
+
+        # get description
+        self.search_for_line("[-] description",halt_line=halt_line,is_prefix_search=True) 
+        description = "" 
+        while True: 
+            line = self.file_obj.readline().strip()
+            if len(line) == 0: continue 
+            if line[0] == "-": break 
+            description += line + "\n" 
+        return keyword,usage,description 
+            
     def go_to_section(self,section): 
         assert section in {"structures","keywords","command forms"} 
-        section_str = "## " + section[0].upper() + section[1:]
+        if section == "command forms": section = "command Forms" 
 
+        section_str = "## " + section[0].upper() + section[1:]
+        self.search_for_line(section_str,None,False)
+
+    def search_for_line(self,line_,halt_line=None,is_prefix_search:bool=False):
         while self.file_obj.tell() != self.file_end:  
             line = self.file_obj.readline() 
             line = line.strip()
 
-            if line == section_str: 
-                break
+            if is_prefix_search: 
+                if line[:len(line_)] == line_: 
+                    return line 
+
+            if line == line_: 
+                return line 
+
+            if line == halt_line: 
+                return None 
+
+        return None 
 
     def close(self): 
         self.file_obj.close() 
