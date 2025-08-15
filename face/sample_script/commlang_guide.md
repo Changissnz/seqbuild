@@ -38,18 +38,66 @@ as well as their instantiation parameters in Comm Lang.
     * (int|float,int|float,int|float,int|float,int|float,function,
       int|float,int|float)  
     * (start value,multiple,additive,start modulus,end modulus,
-        inputless function,super-range start,super-range end)   
+        inputless generator,super-range start,super-range end)   
 
     * (int|float,int|float,int|float,int|float,int|float,function,
       int|float,int|float,bool)  
     * (start value,multiple,additive,start modulus,end modulus,
-        inputless function,super-range start,super-range end,exclude zero trinary)  
+        inputless generator,super-range start,super-range end,exclude zero trinary)  
 
     * (int|float,int|float,int|float,int|float,int|float,function,
       int|float,int|float,bool,bool)  
     * (start value,multiple,additive,start modulus,end modulus,
-        inputless function,super-range start,super-range end,
+        inputless generator,super-range start,super-range end,
         exclude zero trinary mode, reflective modification mode)  
+
+[o] mdr 
+- instantiation:  
+
+    * (list)  
+    * numerical sequence  
+
+[o] mdrv2 
+- instantiation:  
+
+    * (list)  
+    * numerical sequence  
+
+    * (list,bool)  
+    * numerical sequence, exclude negative multiples  
+
+[o] mdrgen 
+- instantiation:  
+
+    * (mdr|mdrv2,function,bool,1|2)  
+    * (reference `ModuloDecompRepr`,inputless generator,generative type)  
+
+    * (mdr|mdrv2,function,bool,1|2,bool,bool,bool,bool,bool)  
+    * (reference `ModuloDecompRepr`,inputless generator,generative type,
+        row-column switch,selector switch 1,selector switch 2, selector switch 3, 
+        input seed in output)  
+
+[o] optri  
+- instantiation: 
+
+    * (int,function,1|2,bool,list)  
+    * (integer seed,inputless generator,generative type,add noise,base sequence)  
+
+[o] qval  
+- instantiation:  
+
+    * (list,function,function,function,1|2)  
+    * (base sequence,inputless generator,inputless generator,
+        inputless generator,adjustment type)  
+    * (!,index selector,length outputter,range outputter,!)
+
+[o] pid  
+- instantiation:  
+
+    * (function,function,function,1|2)  
+    * (inputless generator,inputless generator,inputless generator,
+        adjustment type)  
+    * (base generator,frequency generator,length generator,range generator,!)  
 
 ## Keywords 
 
@@ -65,6 +113,8 @@ as well as their instantiation parameters in Comm Lang.
     [-] for 
     [-] iter
     [-] to
+
+## Command Forms 
 
 ## Typical Commands 
 

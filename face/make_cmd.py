@@ -211,9 +211,6 @@ def MAKE_proc(splitstr_cmd,var_map):
         return MAKE_mdrvx(splitstr_cmd,var_map) 
 
     if splitstr_cmd[1] == "optri":
-        '''
-        int seed,prg,gen type, add noise,base sequence (for m)
-        '''
         assert splitstr_cmd[2] == "with" 
         
         parameters = splitstr_cmd[3].split(",") 
