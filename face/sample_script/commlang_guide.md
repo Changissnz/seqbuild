@@ -205,14 +205,70 @@ writes an object loaded in program memory to a file object.
 [+] convert  
 [-] usage 
 ```
-convert G to range.  
-convert G to ndim with <positive_integer_sequence>.  
-convert G to nvec with <positive_integer>.  
-convert G to tvec with <positive_integer>.  
+convert <generator> to range.  
+convert <generator> to ndim with <positive_integer_sequence>.  
+convert <generator> to nvec with <positive_integer>.  
+convert <generator> to tvec with <positive_integer>.  
 ```
+[-] description 
+converts an inputless generator function that outputs single integer 
+or float values into a generator that outputs a different type. 
+Available types are `range` (outputs pairs of ordered numbers), 
+`ndim` (outputs integer vectors of lengths equal to that of the positive 
+integer sequence), `nvec` (outputs numerical vectors of length equal to 
+the positive integer), and `tvec` (outputs specifically trinary vectors 
+of length equal to the positive integer). Such conversions are usually 
+to help instantiate a structure. For example, the `pid` generator 
+requires a range generator as its primary argument. 
 
 -----------------------------------------------------------------
 
-## Typical Commands 
+[+] show  
+[-] usage  
+```
+show <object>.  
+```
+[-] description  
+A special command reserved exclusively for realtime command use. A 
+realtime command is made and executed in the `seqbuild` interface. The 
+`show` command lets users view the object of their query. 
 
-## Auxiliary Commands 
+-------------------------------------------------------------------
+
+## Interface Layout 
+
+![Local Image](seqbuild_base_screen.png)  
+
+The interface consists of a primary window that is a dual-screen. The 
+red half is the SHOW window and the white half is the QUERY window. 
+Users can enter in Comm Lang commands into the QUERY window, in addition 
+to processing Comm Lang command files by first opening them up with the 
+`OpEn CMD FiLe` button. The QUERY window is meant to be a supplementary 
+commandline-like interface for additional work on top of processing 
+entire Comm Lang command files. For example, users can view variable 
+values using the QUERY window. In the QUERY window, users enter in their 
+wanted Comm Lang commands (by the correct syntax, of course) before 
+pressing the `SeND cMd`. 
+
+In this next example, user opens up Comm Lang command file `commond_nine.txt`.  
+
+![Local Image](seqbuild_load_c9.png)  
+
+The next image displays the user's SHOW window, now with a list of variable 
+names and their types parsed from `commond_nine.txt` and processed by `seqbuild`.   
+
+![Local Image](seqbuild_realtime_command.png)  
+
+In the QUERY, there is the command `show V`.  
+
+![Local Image](seqbuild_show_numbers.png) 
+
+To go back to the default SHOW window, the one with the list of variable names 
+and types from all files and realtime commands processed thus far, press the 
+`bASe ViEw` button.  
+
+If the `fuLL REseT` button is pressed, program deletes all variables and information 
+processed by the Comm Lang parser during the session.  
+
+![Local Image](seqbuild_base_screen.png)  
+
