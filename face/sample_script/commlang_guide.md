@@ -29,30 +29,35 @@ as well as their instantiation parameters in Comm Lang.
     1. (int|float,int|float,int|float,int|float,int|float)  
     * (start value,multiple,additive,start modulus,end modulus)  
 
+
     2. (int|float,int|float,int|float,int|float,int|float,int,bool)  
     * (start value,multiple,additive,start modulus,end modulus,memory vector size,graph decomposition)  
 
 [o] lcgv3 
 - instantiation: 
 
-    1. (int|float,int|float,int|float,int|float,int|float)  
-    * (start value,multiple,additive,start modulus,end modulus)  
+    1. (int|float,int|float,int|float,int|float,int|float)   
+    * (start value,multiple,additive,start modulus,end modulus)     
+
 
     2. (int|float,int|float,int|float,int|float,int|float,function,
       int|float,int|float)  
     * (start value,multiple,additive,start modulus,end modulus,
         inputless generator,super-range start,super-range end)   
 
+
     3. (int|float,int|float,int|float,int|float,int|float,function,
       int|float,int|float,bool)  
     * (start value,multiple,additive,start modulus,end modulus,
         inputless generator,super-range start,super-range end,exclude zero trinary)  
+
 
     4. (int|float,int|float,int|float,int|float,int|float,function,
       int|float,int|float,bool,bool)  
     * (start value,multiple,additive,start modulus,end modulus,
         inputless generator,super-range start,super-range end,
         exclude zero trinary mode, reflective modification mode)  
+
 
 [o] mdr 
 - instantiation:  
@@ -66,6 +71,7 @@ as well as their instantiation parameters in Comm Lang.
     1. (list)  
     * numerical sequence  
 
+
     2. (list,bool)  
     * numerical sequence, exclude negative multiples  
 
@@ -74,6 +80,7 @@ as well as their instantiation parameters in Comm Lang.
 
     1. (mdr|mdrv2,function,bool,1|2)  
     * (reference `ModuloDecompRepr`,inputless generator,generative type)  
+
 
     2. (mdr|mdrv2,function,bool,1|2,bool,bool,bool,bool,bool)  
     * (reference `ModuloDecompRepr`,inputless generator,generative type,
