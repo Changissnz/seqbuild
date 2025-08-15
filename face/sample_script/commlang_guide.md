@@ -100,8 +100,7 @@ as well as their instantiation parameters in Comm Lang.
 - instantiation:  
 
     1. (function,function,function,1|2)  
-    * (inputless generator,inputless generator,inputless generator,
-        adjustment type)  
+    * (inputless generator,inputless generator,inputless generator,adjustment type)  
     * (base generator,frequency generator,length generator,range generator,!)  
 
 [o] multimetric  
