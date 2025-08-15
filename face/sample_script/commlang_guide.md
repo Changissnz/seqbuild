@@ -248,7 +248,7 @@ commandline-like interface for additional work on top of processing
 entire Comm Lang command files. For example, users can view variable 
 values using the QUERY window. In the QUERY window, users enter in their 
 wanted Comm Lang commands (by the correct syntax, of course) before 
-pressing the `SeND cMd`. 
+pressing the `SeND cMd` button. 
 
 In this next example, user opens up Comm Lang command file `commond_nine.txt`.  
 
