@@ -59,16 +59,16 @@ as well as their instantiation parameters in Comm Lang.
 - instantiation:  
 
     1. (list)  
-    * numerical sequence  
+    * (numerical sequence)  
 
 [o] mdrv2 
 - instantiation:  
 
     1. (list)  
-    * numerical sequence  
+    * (numerical sequence)  
 
     2. (list,bool)  
-    * numerical sequence, exclude negative multiples  
+    * (numerical sequence, exclude negative multiples)  
 
 [o] mdrgen 
 - instantiation:  

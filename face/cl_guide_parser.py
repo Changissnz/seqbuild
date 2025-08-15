@@ -37,47 +37,90 @@ class CLGuideParser:
             n0,n1,n2 = q 
             self.structures[n0] = dict() 
             self.structures[n0]["init"] = n1 
-            self.structures[n1]["run"] = n2 
+            self.structures[n0]["run"] = n2 
 
+    """
+    """
     def next_structure(self): 
-
-        def full_parse_line(d,qline_): 
-            while qline_[-1] != ")": 
-                line = self.file_obj.read_line().strip() 
+        
+        def full_parse_line(d,qline_,index): 
+            
+            stat = True
+            if len(qline_) > 0: 
+                stat = qline_[-1] != ")"
+            
+            while stat: 
+                line = self.file_obj.readline().strip() 
                 qline_ = line 
-                d[c][0] += qline_
 
-        def parse_section(d):
+                if len(qline_) == 0: continue 
+                d[index][-1] += qline_
+                stat = qline_[-1] != ")" 
 
+        def parse_section(d,s=0):
+            c = 0 
             while True: 
                 position = self.file_obj.tell() 
 
-                line = self.file_obj.read_line().strip()
+                line = self.file_obj.readline().strip()
                 if len(line) == 0: 
                     continue
+
+                # case: start of section `instantiation`
+                if line == "- instantiation:": 
+                    continue 
+
+                # case: start of section `run` 
+                if line == "- `run with` parameter:": 
+                    # end of `instantiation`
+                    if s == 0: 
+                        self.file_obj.seek(position) 
+                        break 
+
+                    continue 
 
                 # case: end of structure 
                 if line[:3] == "[o]": 
                     self.file_obj.seek(position)
                     break 
 
+                # case: end of structure 
+                if line[:2] == "##": 
+                    self.file_obj.seek(position) 
+                    break 
+
+                # case: part of instantiation description
                 if line[0] == "*":
                     qline = line.strip("*")
                     qline = qline.strip() 
                     d[c].append(qline)
-                    full_parse_line(d) 
+                    full_parse_line(d,qline,c)
+                    c += 1 
+
+                    position = self.file_obj.tell() 
+                    line = self.file_obj.readline().strip() 
+                    
+                    
+                    if len(line) == 0: 
+                        continue 
+
+                    if line[0] == "*": 
+                        c -= 1 
+                        self.file_obj.seek(position) 
+                # case: start of instantiation description 
                 else: 
                     qline = line[2:].strip()
                     d[c] = [qline]
-                    full_parse_line(d) 
-                    c += 1 
+                    full_parse_line(d,qline,c) 
+                    
         
         # get the starting line of the next structure 
         line = ""
         stat = False
         while self.file_obj.tell() != self.file_end:  
             position = self.file_obj.tell() 
-            line = self.file_obj.read_line() 
+            line = self.file_obj.readline().strip()
+
             if line[:3] == "[o]": 
                 stat = True
                 break 
@@ -94,8 +137,9 @@ class CLGuideParser:
 
         instant_dict = dict()
         run_dict = dict() 
-        parse_section(instant_dict)
-        parse_section(run_dict) 
+        parse_section(instant_dict,0)
+        parse_section(run_dict,1) 
+
         return struct_name,instant_dict,run_dict 
 
     def go_to_section(self,section): 
@@ -103,8 +147,12 @@ class CLGuideParser:
         section_str = "## " + section[0].upper() + section[1:]
 
         while self.file_obj.tell() != self.file_end:  
-            line = self.file_obj.read_line() 
+            line = self.file_obj.readline() 
             line = line.strip()
 
             if line == section_str: 
                 break
+
+    def close(self): 
+        self.file_obj.close() 
+        del self 
