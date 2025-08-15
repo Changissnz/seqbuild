@@ -102,6 +102,7 @@ as well as their instantiation parameters in Comm Lang.
     * (!,index selector,length outputter,range outputter,!)
 
 [o] pid  
+
 - instantiation:  
 
     1. (function,function,function,1|2)  
@@ -109,22 +110,106 @@ as well as their instantiation parameters in Comm Lang.
         adjustment type)  
     * (base generator,frequency generator,length generator,range generator,!)  
 
+[o] multimetric  
+
+- instantiation:  
+
+    1. (list)  
+    * (base sequence)  
+
+- `run with` parameter:  
+
+    1. (integer)  
+    * (positive integer specifying n-gram)  
+
+    
 ## Keywords 
 
-- Primary 
-    [-] make 
-    [-] run 
-    [-] set 
-    [-] write 
-    [-] open 
-    [-] convert 
-- Secondary 
-    [-] with
-    [-] for 
-    [-] iter
-    [-] to
+- Primary  
+    [-] make  
+    [-] run  
+    [-] set  
+    [-] write  
+    [-] open  
+    [-] convert  
+
+- Secondary  
+    [-] with  
+    [-] for  
+    [-] iter  
+    [-] to  
+
+- Tertiary  
+    [-] associated with `open`:  
+        [-] file  
+        [-] seq  
+        [-] obj  
+    [-] associated with `convert`:  
+        [-] range  
+        [-] ndim  
+        [-] nvec  
+        [-] tvec  
 
 ## Command Forms 
+
+[+] make  
+[-] usage  
+```
+make <structure> with <input1,input2,...,inputJ>. 
+```
+[-] description  
+instantiates a structure.  
+
+
+[+] run  
+[-] usage   
+```
+run <structure>.  
+run <structure> with <input1,...,inputJ>.  
+run <structure> for <positive integer> iter.  
+```
+[-] description  
+calls the structure's main output function. 
+
+
+[+] set 
+[-] usage
+```
+set <variable name> = <command statement that produces object>. 
+```
+[-] description  
+loads an object into parser map of variables.  
+
+
+[+] open  
+[-] usage  
+```
+open file <filepath>.  
+open file <filepath> for seq.  
+open file <filepath> for obj.   
+```
+[-] description  
+loads a file into a program object. By default, opens file in 
+bytes mode to store objects. Specifying `for seq` opens file in 
+regular string mode and `for obj` opens file in bytes mode.  
+
+
+[+] write  
+[-] usage  
+```
+write <object> to <file_object>.  
+``` 
+[-] description  
+writes an object loaded in program memory to a file object. 
+
+[+] convert  
+[-] usage 
+```
+convert G to range.  
+convert G to ndim with <positive_integer_sequence>.  
+convert G to nvec with <positive_integer>.  
+convert G to tvec with <positive_integer>.  
+```
 
 ## Typical Commands 
 
