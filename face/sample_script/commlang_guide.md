@@ -168,8 +168,8 @@ calls the structure's main output function.
 
 -----------------------------------------------------------------
 
-[+] set 
-[-] usage
+[+] set  
+[-] usage  
 ```
 set <variable name> = <command statement that produces object>. 
 ```
@@ -210,7 +210,7 @@ convert <generator> to ndim with <positive_integer_sequence>.
 convert <generator> to nvec with <positive_integer>.  
 convert <generator> to tvec with <positive_integer>.  
 ```
-[-] description 
+[-] description  
 converts an inputless generator function that outputs single integer 
 or float values into a generator that outputs a different type. 
 Available types are `range` (outputs pairs of ordered numbers), 
