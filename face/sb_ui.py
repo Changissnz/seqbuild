@@ -53,9 +53,9 @@ class SBApplication(tk.Frame):
 
         # Create a Text widget to display the content
         self.text_widget.grid()
-        self.baseview_button.grid(row=0,column=10)
+        self.baseview_button.grid(row=14,column=10)
         self.clear_button.grid(row=14,column=0) 
-        self.fullreset_button.grid(row=14,column=10)
+        self.fullreset_button.grid(row=0,column=10)
         self.text_widget2.grid()
 
         # Create a button to send written commands 
@@ -103,6 +103,7 @@ class SBApplication(tk.Frame):
             self.clp.reload_file(file_path) 
             self.clp.process_file()
             self.reset_to_baseview() 
+            self.load_ERROR()
             return
 
     def reset_to_baseview(self): 
@@ -120,6 +121,7 @@ class SBApplication(tk.Frame):
         self.reset_to_baseview()
         self.process_SHOW_cmd() 
         self.process_HELP_cmd() 
+        self.load_ERROR()
         return cmd 
 
     def process_SHOW_cmd(self): 
@@ -159,6 +161,21 @@ class SBApplication(tk.Frame):
         self.switch_HELP_display()
         self.text_widget3.delete(1.0, tk.END)
         self.text_widget3.insert(tk.END,s) 
+
+    def load_ERROR(self):
+        if len(self.clp.cmd_errors) == 0: 
+            return 
+
+        S = "\t\tERRORS FOUND. FAILED TO PROCESS.\n\n"
+
+        for l in self.clp.cmd_errors: 
+            S += l + "\n" 
+        S += "-/-/-/-----------------/-/-/-"  
+
+        self.text_widget.delete(1.0, tk.END)
+        self.text_widget.insert(tk.END,S) 
+
+        self.clp.cmd_errors.clear() 
 
     def fullreset_clp(self): 
         self.clp = CommLangParser(None) 

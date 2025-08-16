@@ -9,21 +9,28 @@ class CommLangParser:
     def __init__(self,filepath:str):
         self.fp = filepath
         self.file_obj,self.file_end = None,None
+        self.line_index = 0 
         self.preproc_file() 
 
         self.cmdlines = []
         self.show_commands = [] 
         self.help_commands = [] 
 
+        self.cmd_errors = []
+
         self.commond = None 
         self.vartable = dict() 
 
     def __str__(self):
+
+        def map_str(s): 
+            if s != "method": return s 
+            return "generator" 
+
         dx = ""
         for k,v in self.vartable.items(): 
             s = str(k) 
-            v = type(v) 
-            s = s + "\t" + str(v)
+            s = s + "\t" + map_str(parse_object_to_str(v))
             dx += s + "\n" 
         return dx 
 
@@ -35,6 +42,8 @@ class CommLangParser:
         self.file_obj.seek(0,os.SEEK_END) 
         self.file_end = self.file_obj.tell()
         self.file_obj.seek(0)  
+        self.line_index = 0 
+        self.cmd_errors = [] 
 
     def reload_file(self,filepath:str): 
         self.fp = filepath 
@@ -68,6 +77,7 @@ class CommLangParser:
         while stat: 
             if self.file_obj.tell() != self.file_end:
                 line = self.file_obj.readline()
+                self.line_index += 1 
             else: 
                 stat = False 
                 continue 
@@ -128,6 +138,7 @@ class CommLangParser:
     def SET_proc(self,splitstr_cmd):
         assert splitstr_cmd[0] == "set" 
         n = splitstr_cmd[1] 
+        assert n not in LANG_KEYTERMS 
         assert splitstr_cmd[2] == "=" 
 
         self.vartable[n] = self.MRCOW_proc(splitstr_cmd[3:]) 
@@ -138,14 +149,25 @@ class CommLangParser:
     """
     def MRCOW_proc(self,splitstr_cmd): 
 
-        if splitstr_cmd[0] == "make":
-            return MAKE_proc(splitstr_cmd,self.vartable) 
-        elif splitstr_cmd[0] == "run": 
-            return RUN_proc(splitstr_cmd,self.vartable)
-        elif splitstr_cmd[0] == "convert": 
-            return CONVERT_proc(splitstr_cmd,self.vartable)
-        elif splitstr_cmd[0] == "open": 
-            return OPEN_proc(splitstr_cmd)
-        elif splitstr_cmd[0] == "write":
-            return WRITE_proc(splitstr_cmd,self.vartable)
-        assert False
+        try: 
+            if splitstr_cmd[0] == "make":
+                return MAKE_proc(splitstr_cmd,self.vartable) 
+            elif splitstr_cmd[0] == "run": 
+                return RUN_proc(splitstr_cmd,self.vartable)
+            elif splitstr_cmd[0] == "convert": 
+                return CONVERT_proc(splitstr_cmd,self.vartable)
+            elif splitstr_cmd[0] == "open": 
+                return OPEN_proc(splitstr_cmd)
+            elif splitstr_cmd[0] == "write":
+                return WRITE_proc(splitstr_cmd,self.vartable)
+        except: 
+            pass 
+
+        print("erroneous command")
+        self.log_error(splitstr_cmd) 
+        return None 
+
+    def log_error(self,splitstr_cmd):
+        q = ' '.join(splitstr_cmd)
+        s = '[file line:' + str(self.line_index) + ']' + q 
+        self.cmd_errors.append(s) 

@@ -1,0 +1,7 @@
+This is an erroneous command file. 
+Not command. 
+These first 5 lines are not commands. 
+Not a command. 
+and more bull. 
+
+set G = V. 

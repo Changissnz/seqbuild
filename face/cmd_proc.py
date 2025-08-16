@@ -12,9 +12,27 @@ import io
 import pickle 
 
 LANG_KEYTERMS = ["make","run","with","set","for","iter","write","to",\
-            "open","convert"]   
+            "open","convert","show","help","file","seq","obj"]   
 
 GENFORM_CONVERT_TYPES = ["range","ndim","nvec","tvec"]
+
+
+def parse_object_to_str(O): 
+    s = str(type(O)) 
+
+    i0 = s.index("'") 
+    s = s[i0+1:] 
+
+    i1 = s.index("'") 
+    s = s[:i1] 
+
+
+    stat = "." in s 
+    while stat: 
+        i0 = s.index(".") 
+        s = s[i0+1:] 
+        stat = "." in s
+    return s 
 
 """
 run object 
