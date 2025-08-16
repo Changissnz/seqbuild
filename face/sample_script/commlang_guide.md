@@ -269,7 +269,7 @@ names and their types parsed from `commond_nine.txt` and processed by `seqbuild`
 
 ![Local Image](seqbuild_realtime_command.png)  
 
-In the QUERY, there is the command `show V`.  
+In the QUERY window, there is the command `show V`.  
 
 ![Local Image](seqbuild_show_numbers.png) 
 
