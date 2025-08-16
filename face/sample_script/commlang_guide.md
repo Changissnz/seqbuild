@@ -20,7 +20,7 @@ are related to `seqbuild` components and capabilities.
 
 Comm Lang is similar to the Python programming language in regards 
 to punctuation in syntax. <ins>End every command with a period. Do not 
-separate comma-separated paramter values, used for instantiating a 
+separate comma-separated parameter values, used for instantiating a 
 structure, with spaces.</ins> The language is also similar to SQL. Whereas 
 SQL is a database query language, Comm Lang is a numerical generator language. 
 
