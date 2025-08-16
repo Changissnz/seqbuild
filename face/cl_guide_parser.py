@@ -103,7 +103,8 @@ class CLGuideParser:
         s1 = stringize_CLGuideParser_keywords(self) 
         s2 = stringize_CLGuideParser_structures(self) 
         s3 = stringize_CLGuideParser_command_forms(self) 
-        return s1 + "\n" + s2 + "\n" + s3 
+        return s1 + "_" * 75 + "\n\n" \
+            + s2 + "_" * 75 + "\n\n" + s3 
 
     """
     main method 
@@ -333,7 +334,7 @@ class CLGuideParser:
         if section == "command forms": section = "command Forms" 
 
         section_str = "## " + section[0].upper() + section[1:]
-        self.search_for_line(section_str,None,False)
+        self.search_for_line(section_str,None,True) 
 
     def search_for_line(self,line_,halt_line=None,is_prefix_search:bool=False):
         while self.file_obj.tell() != self.file_end:  
