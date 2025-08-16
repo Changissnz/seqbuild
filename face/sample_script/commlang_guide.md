@@ -288,3 +288,14 @@ processed by the Comm Lang parser during the session.
 
 ![Local Image](seqbuild_base_screen.png)  
 
+If user does not recall Comm Lang syntax, they can press the `heLP` button.  
+
+![Local Image](seqbuild_help_screen.png)  
+
+If user wants to know syntax and description for a keyword or structure, user 
+can type `help keyword` in the QUERY window.  
+
+![Local Image](seqbuild_help_cmd.png)  
+
+![Local Image](seqbuild_help_make.png)  
+
