@@ -30,51 +30,65 @@ def stringize_CLGuideParser_keywords(clgp):
         s += "\n"
     return s 
 
+def stringize_one_CLGuideParser_structure(clgp,struct_name):
+    if struct_name not in clgp.structures: 
+        return None 
+
+    s_ = "* " + struct_name 
+    s_ += "\n\t\tinit:\n"
+
+    v = clgp.structures[struct_name]
+
+    k2 = len(v['init'])
+    for i in range(k2):
+        s_ += "\n".join(v['init'][i])
+        s_ += "\n\n" 
+
+    k2 = len(v['run'])
+    if k2 == 0: 
+        s_ += "\n"
+        s_ += "\n-/-/-/-----------------/-/-/-\n"
+        return s_  
+
+
+    s_ += "\n"
+    s_ += "\n\t\trun:\n"
+    for i in range(k2): 
+        s_ += "\n".join(v['run'][i])
+        s_ += "\n"
+    s_ += "\n"
+    return s_ 
+
 def stringize_CLGuideParser_structures(clgp): 
     assert type(clgp) == CLGuideParser 
     s = "\t\t[+] Structures\n\n" 
-
-    for k,v in clgp.structures.items():
-        s_ = "* " + k 
-        s_ += "\n\t\tinit:\n"
-
-        k2 = len(v['init'])
-        for i in range(k2):
-            s_ += "\n".join(v['init'][i])
-            s_ += "\n\n" 
-
-        k2 = len(v['run'])
-        if k2 == 0: 
-            s += s_ + "\n"
-            s += "\n-/-/-/-----------------/-/-/-\n"
-            continue 
-
-
-        s_ += "\n"
-        s_ += "\n\t\trun:\n"
-        for i in range(k2): 
-            s_ += "\n".join(v['run'][i])
-            s_ += "\n"
-
+    for k in clgp.structures.keys():        
+        s_ = stringize_one_CLGuideParser_structure(clgp,k)
         s += s_ 
-        s += "\n-/-/-/-----------------/-/-/-\n"
-    
     return s 
 
+def stringize_one_CLGuideParser_command_form(clgp,command_name): 
+    if command_name not in clgp.command_forms: 
+        return None
+    
+    v = clgp.command_forms[command_name] 
+    usage,description = v[0],v[1] 
+
+    s = "* " + command_name + "\n" 
+    s += "\t- usage\n" + usage + "\n"
+    s += "\t- description\n" + description + "\n"
+    s += "\n-/-/-/-----------------/-/-/-\n"
+    s += "\n"
+    return s 
+    
 def stringize_CLGuideParser_command_forms(clgp): 
 
     assert type(clgp) == CLGuideParser 
     s = "\t\t[+] Command Forms\n\n" 
 
-    for k,v in clgp.command_forms.items():
-        command = k 
-        usage,description = v[0],v[1]
+    for k in clgp.command_forms.keys():
+        s += stringize_one_CLGuideParser_command_form(clgp,k)
 
-        s += "* " + command + "\n" 
-        s += "\t- usage\n" + usage + "\n"
-        s += "\t- description\n" + description + "\n"
-        s += "\n-/-/-/-----------------/-/-/-\n"
-        s += "\n"
     return s 
 
 class CLGuideParser:
@@ -96,6 +110,38 @@ class CLGuideParser:
 
         self.has_processed = False 
         return 
+
+    def about(self,term):
+        ktype_dict = {0:"primary ", 1:"secondary ",2:"tertiary ",-1:"not a "} 
+        ktype = self.keyword_type(term) 
+        s0 = ktype_dict[ktype] + " keyword\n" 
+
+        s = "" 
+        if term in self.structures: 
+            s0 += "\t* structure\n"
+            s = stringize_one_CLGuideParser_structure(self,term) 
+        elif term in self.command_forms:
+            s0 += "\t* command\n"
+            s = stringize_one_CLGuideParser_command_form(self,term)
+            
+        if type(s) == type(None): 
+            s = "" 
+        return s0 + "\n-/-/-/-----------------/-/-/-\n" + s
+ 
+    def keyword_type(self,term):
+        if term in self.keywords[0]:
+            return 0 
+        
+        if term in self.keywords[1]: 
+            return 1 
+
+        q = self.keywords[2] 
+        x = [] 
+        for v_ in q.values(): 
+            x.extend(list(v_)) 
+        if term in x: return 2  
+
+        return -1 
 
     def __str__(self):
         assert self.has_processed

@@ -13,6 +13,7 @@ class CommLangParser:
 
         self.cmdlines = []
         self.show_commands = [] 
+        self.help_commands = [] 
 
         self.commond = None 
         self.vartable = dict() 
@@ -107,6 +108,11 @@ class CommLangParser:
             self.show_commands.append(c_) 
             return 
 
+        # case: `help` command, do nothing 
+        if c[0] == "help":
+            self.help_commands.append(c_) 
+            return 
+
         c = [c_.strip(".") for c_ in c]
         self.commond = [c_ for c_ in c if len(c_) > 0]
         return self.process_command_()
@@ -142,4 +148,4 @@ class CommLangParser:
             return OPEN_proc(splitstr_cmd)
         elif splitstr_cmd[0] == "write":
             return WRITE_proc(splitstr_cmd,self.vartable)
-        assert False 
+        assert False

@@ -119,6 +119,7 @@ class SBApplication(tk.Frame):
 
         self.reset_to_baseview()
         self.process_SHOW_cmd() 
+        self.process_HELP_cmd() 
         return cmd 
 
     def process_SHOW_cmd(self): 
@@ -140,8 +141,24 @@ class SBApplication(tk.Frame):
 
             x = self.clp.vartable[q[1]]
             if type(x) == list: x = np.array(x) 
-            
+
             self.text_widget.insert(tk.END, "SHOW {}\n{}\n".format(q[1],str(x)))
+
+    def process_HELP_cmd(self):
+        if len(self.clp.help_commands) == 0:
+            return 
+
+        q = self.clp.help_commands.pop(-1) 
+        self.clp.help_commands.clear() 
+        q = q.strip(".") 
+        q = q.split(" ") 
+        assert q[0] == "help" 
+        assert len(q) == 2 
+
+        s = self.clgp.about(q[1]) 
+        self.switch_HELP_display()
+        self.text_widget3.delete(1.0, tk.END)
+        self.text_widget3.insert(tk.END,s) 
 
     def fullreset_clp(self): 
         self.clp = CommLangParser(None) 
