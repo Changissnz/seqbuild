@@ -139,6 +139,8 @@ class SBApplication(tk.Frame):
             assert q[1] in self.clp.vartable 
 
             x = self.clp.vartable[q[1]]
+            if type(x) == list: x = np.array(x) 
+            
             self.text_widget.insert(tk.END, "SHOW {}\n{}\n".format(q[1],str(x)))
 
     def fullreset_clp(self): 

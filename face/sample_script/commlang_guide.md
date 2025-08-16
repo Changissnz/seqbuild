@@ -1,6 +1,14 @@
 # About: Comm Lang 
 
-## Description
+## Table of Contents
+1. [Description](#description)  
+2. [Structures](#structures)  
+3. [Keywords](#keywords)  
+4. [Command Forms](#command_forms)  
+5. [Interface Layout](#interface)  
+
+
+## Description <a name="description"></a>  
 
 Comm Lang (shorthand for "communication language") is a custom 
 language, designed with simplicity in mind, that wraps around 
@@ -10,7 +18,7 @@ keywords is relatively small, much smaller than that of Python
 standard library. And the commands possible to execute via Comm Lang 
 are related to `seqbuild` components and capabilities.
 
-## Structures 
+## Structures <a name="structures"></a>  
 
 Most of the structures are numerical generators. One primary 
 structure that is not a numerical generator, but quite important 
@@ -116,7 +124,8 @@ as well as their instantiation parameters in Comm Lang.
     * (positive integer specifying n-gram)  
 
 
-## Keywords 
+## Keywords <a name="keywords"></a>  
+
 
 - Primary  
     [-] make  
@@ -143,7 +152,8 @@ as well as their instantiation parameters in Comm Lang.
         * nvec  
         * tvec  
 
-## Command Forms 
+## Command Forms <a name="command_forms"></a>  
+
 
 [+] make  
 [-] usage  
@@ -234,7 +244,8 @@ realtime command is made and executed in the `seqbuild` interface. The
 
 -------------------------------------------------------------------
 
-## Interface Layout 
+## Interface Layout <a name="interface"></a>  
+ 
 
 ![Local Image](seqbuild_base_screen.png)  
 
