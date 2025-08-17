@@ -153,6 +153,7 @@ as well as their instantiation parameters in Comm Lang.
     [-] write  
     [-] open  
     [-] convert  
+    [-] merge  
 
 - Secondary  
     [-] with  
