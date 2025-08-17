@@ -172,7 +172,13 @@ as well as their instantiation parameters in Comm Lang.
         * nvec  
         * tvec  
     [-] associated with `set`:  
-        * span          
+        * span     
+    [-] associated with `merge`:  
+        * +  
+        * -  
+        * /  
+        * *  
+
 
 ## Command Forms <a name="command_forms"></a>  
 
