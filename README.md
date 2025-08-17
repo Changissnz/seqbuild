@@ -32,6 +32,7 @@ Here are the steps to using it.
 ```
 > git clone https://www.github.com/changissnz/seqbuild.git 
 > cd seqbuild 
+> pip install -r requirements.txt
 > python3 main.py 
 ```
 
@@ -42,3 +43,4 @@ is run.
 
 I have planned for 1 full week of additional development, starting today. 
 This will be AGILE end sprint for beta version of this product. 
+
