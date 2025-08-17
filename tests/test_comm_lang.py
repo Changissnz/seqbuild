@@ -320,5 +320,23 @@ class CommLangMethods(unittest.TestCase):
 
         clp.close() 
 
+    """
+    tests for processing erroneous file 
+    """
+    def test__CommLangParser__process_file__case10(self): 
+        clp = CommLangParser("face/sample_script/commond_12error.txt") 
+        clp.process_file()
+        clp.close() 
+
+    def test__CommLangParser__process_file__case11(self):
+        clp = CommLangParser("face/sample_script/commond_14.txt") 
+        clp.process_file() 
+
+        for i in range(1,6): 
+            s = "O" + str(i) 
+            assert s in clp.vartable
+        return
+
+
 if __name__ == '__main__':
     unittest.main()

@@ -56,7 +56,8 @@ def stringize_one_CLGuideParser_structure(clgp,struct_name):
     for i in range(k2): 
         s_ += "\n".join(v['run'][i])
         s_ += "\n"
-    s_ += "\n"
+        
+    s_ += "\n-/-/-/-----------------/-/-/-\n"
     return s_ 
 
 def stringize_CLGuideParser_structures(clgp): 

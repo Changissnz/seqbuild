@@ -1,0 +1,5 @@
+set O1 = make op2 with +. 
+set O2 = make op2 with -. 
+set O3 = make op2 with O1,O2,4.55,1.
+set O4 = make op2 with O1,O2,4.55,2. 
+set O5 = make op2 with O1,O2,4.55. 

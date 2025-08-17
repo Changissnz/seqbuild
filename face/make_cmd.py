@@ -4,10 +4,13 @@ from seqgen.optri_gen import *
 from desi.fraction import * 
 from desi.differentials import * 
 from intigers.lcg_v3 import * 
+from intigers.prng_pw_op import *
 
 BASE_PRNG = ["lcg","lcgv2","lcgv3","mdr","mdrv2",\
         "mdrgen","idforest","optri","rch","qval",\
         "pid"]  
+
+ARITHMETIC_OP_STR_MAP = {"+":add,"-":sub,"/":zero_div0,"*":mul} 
 
 
 # TODO: incomplete 
@@ -200,6 +203,37 @@ def MAKE_mdrvx(splitstr_cmd,var_map):
 
     assert False 
 
+def MAKE_op2(splitstr_cmd,var_map): 
+    assert splitstr_cmd[0] == "make"
+    assert splitstr_cmd[1] == "op2" 
+    assert splitstr_cmd[2] == "with" 
+
+    parameters = splitstr_cmd[3].split(",") 
+    assert len(parameters) in {1,3,4}
+
+    if len(parameters) == 1:
+        assert parameters[0] in ARITHMETIC_OP_STR_MAP 
+        return ARITHMETIC_OP_STR_MAP[parameters[0]] 
+
+    if parameters[0] in ARITHMETIC_OP_STR_MAP:
+        op1 = ARITHMETIC_OP_STR_MAP[parameters[0]] 
+    else: 
+        assert parameters[0] in var_map,"wrongo"
+        op1 = ARITHMETIC_OP_STR_MAP[parameters[0]] 
+
+    if parameters[1] in ARITHMETIC_OP_STR_MAP:
+        op2 = ARITHMETIC_OP_STR_MAP[parameters[1]] 
+    else: 
+        assert parameters[1] in var_map,"wrongo #2"
+        op2 = ARITHMETIC_OP_STR_MAP[parameters[1]] 
+
+    weight = float(parameters[2]) 
+    order = 0 
+    if len(parameters) == 4: 
+        order = int(parameters[3]) 
+        assert order in {0,1,2} 
+    return one_weighted_pairwise_operator(op1,op2,weight,order)
+    
 # TODO: incomplete 
 def MAKE_proc(splitstr_cmd,var_map): 
     assert splitstr_cmd[0] == "make"
@@ -301,5 +335,8 @@ def MAKE_proc(splitstr_cmd,var_map):
 
         return PIDValueOutputter(prg,f_out_,\
             l_out_,r_out,adjustment_type)
+
+    if splitstr_cmd[1] == "op2": 
+        return MAKE_op2(splitstr_cmd,var_map) 
 
     return None

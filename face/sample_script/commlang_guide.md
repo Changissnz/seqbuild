@@ -129,6 +129,19 @@ as well as their instantiation parameters in Comm Lang.
     1. (integer)  
     * (positive integer specifying n-gram)  
 
+[o] op2   
+
+- instantiation:  
+
+    1. (`+|-|*|/`)  
+    * (primary pairwise arithmetic operator)  
+
+    2. (`+|-|*|/|custom`,`+|-|*|/|custom`,float)  
+    * (pairwise operator,pairwise operator,weight)  
+
+    3. (`+|-|*|/|custom`,`+|-|*|/|custom`,float,0|1|2)  
+    * (pairwise operator,pairwise operator,weight,operator order)  
+
 
 ## Keywords <a name="keywords"></a>  
 
