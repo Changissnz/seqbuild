@@ -330,7 +330,7 @@ If user does not recall Comm Lang syntax, they can press the `heLP` button.
 ![Local Image](seqbuild_help_screen.png)  
 
 If user wants to know syntax and description for a keyword or structure, user 
-can type `help keyword` in the QUERY window.  
+can type `help term` in the QUERY window.  
 
 ![Local Image](seqbuild_help_cmd.png)  
 

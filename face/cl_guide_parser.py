@@ -1,6 +1,25 @@
 import os 
 
-COMM_LANG_GUIDE_FILE = "face/sample_script/commlang_guide.md"
+BASE_COMM_LANG_FOLDER = "face/sample_script/"
+COMM_LANG_GUIDE_FILE = BASE_COMM_LANG_FOLDER + "commlang_guide.md"
+
+SAMPLE_USE_FILE_MAP = {"multimetric": BASE_COMM_LANG_FOLDER + "commond_one.txt",\
+    "lcg":BASE_COMM_LANG_FOLDER + "commond_one.txt",\
+    "mdr":BASE_COMM_LANG_FOLDER + "commond_two.txt",\
+    "lcgv3":BASE_COMM_LANG_FOLDER + "commond_three.txt",\
+    "convert":BASE_COMM_LANG_FOLDER + "commond_four.txt",\
+    "qval":BASE_COMM_LANG_FOLDER + "commond_five.txt",\
+    "lcgv2":BASE_COMM_LANG_FOLDER + "commond_six.txt",\
+    "mdrv2":BASE_COMM_LANG_FOLDER + "commond_six.txt",\
+    "mdrgen":BASE_COMM_LANG_FOLDER + "commond_seven.txt",\
+    "optri":BASE_COMM_LANG_FOLDER + "commond_eight.txt",\
+    "pid":BASE_COMM_LANG_FOLDER + "commond_nine.txt",\
+    "open":BASE_COMM_LANG_FOLDER + "commond_ten.txt",\
+    "write":BASE_COMM_LANG_FOLDER + "commond_ten.txt",\
+    "span":BASE_COMM_LANG_FOLDER + "commond_13.txt",\
+    "make":BASE_COMM_LANG_FOLDER + "commond_14.txt",\
+    "merge":BASE_COMM_LANG_FOLDER + "commond_15.txt",\
+    }
 
 def stringize_CLGuideParser_keywords(clgp): 
     term_map = {0:"Primary",1:"Secondary",2:"Tertiary"}
@@ -56,7 +75,7 @@ def stringize_one_CLGuideParser_structure(clgp,struct_name):
     for i in range(k2): 
         s_ += "\n".join(v['run'][i])
         s_ += "\n"
-        
+
     s_ += "\n-/-/-/-----------------/-/-/-\n"
     return s_ 
 
@@ -127,7 +146,16 @@ class CLGuideParser:
             
         if type(s) == type(None): 
             s = "" 
-        return s0 + "\n-/-/-/-----------------/-/-/-\n" + s
+        s = s0 + "\n-/-/-/-----------------/-/-/-\n" + s
+
+        if term in SAMPLE_USE_FILE_MAP: 
+            fi_obj2 = open(SAMPLE_USE_FILE_MAP[term],"r") 
+            lines = fi_obj2.readlines() 
+            s = s + "\n\t\tsample use\n---------------\n"
+            s += '\n'.join(lines)
+            fi_obj2.close() 
+        
+        return s 
  
     def keyword_type(self,term):
         if term in self.keywords[0]:
