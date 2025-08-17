@@ -132,17 +132,51 @@ class CommLangParser:
             return 
             
         if self.commond[0] == "set": 
-            return self.SET_proc(self.commond) 
+            try: 
+                q = self.SET_proc(self.commond) 
+                return q 
+            except: 
+                self.log_error(self.commond) 
+                return 
+
         return self.MRCOW_proc(self.commond) 
 
     def SET_proc(self,splitstr_cmd):
         assert splitstr_cmd[0] == "set" 
         n = splitstr_cmd[1] 
         assert n not in LANG_KEYTERMS 
-        assert splitstr_cmd[2] == "=" 
+        assert splitstr_cmd[2] in {"=","span"}  
 
-        self.vartable[n] = self.MRCOW_proc(splitstr_cmd[3:]) 
-        return n, self.vartable[n]
+        # case: primary use case of SET 
+        if splitstr_cmd[2] == "=": 
+            self.vartable[n] = self.MRCOW_proc(splitstr_cmd[3:]) 
+            return n, self.vartable[n] 
+        
+        # case: secondary use case of SET 
+        assert n in self.vartable 
+        gen = self.vartable[n] 
+
+        assert splitstr_cmd[3] == "to"  
+
+        rx = splitstr_cmd[4].strip(".").split(",")
+        assert len(rx) == 2
+
+        f0 = float(rx[0]) if ("." in rx[0] \
+            or "E" in rx[0]) else int(rx[0]) 
+        f1 = float(rx[1]) if ("." in rx[1] \
+            or "E" in rx[1]) else int(rx[1])
+
+        if type(f0) == float or type(f1) == float: 
+            f0,f1 = float(f0),float(f1) 
+
+        try:
+            x = wrap_ranged_modulo_over_generator(gen,(f0,f1))  
+            self.vartable[n] = x 
+        except: 
+            print("cannot set span for non-generator.") 
+            self.log_error(splitstr_cmd) 
+        return 
+
     
     """
     method for handling `make`,`run`,`convert`,`open`,`write` processes. 

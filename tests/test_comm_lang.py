@@ -304,5 +304,21 @@ class CommLangMethods(unittest.TestCase):
 
         clp.close() 
 
+    """
+    tests for command 
+        `set <generator> for <start range,end range>.`. 
+    """
+    def test__CommLangParser__process_file__case9(self): 
+        clp = CommLangParser("face/sample_script/commond_13.txt") 
+        clp.process_file()
+        V = np.array(clp.vartable['V'])
+        V2 = np.array(clp.vartable['V2'])
+        assert not np.any(V==V2)
+
+        for v in V2: 
+            assert v >= -200. and v < 6000.01
+
+        clp.close() 
+
 if __name__ == '__main__':
     unittest.main()

@@ -3,6 +3,7 @@ from morebs2.matrix_methods import is_vector,is_number,is_valid_range
 from morebs2.measures import zero_div 
 from morebs2.numerical_generator import modulo_in_range,\
     prg__LCG,euclidean_point_distance,prg_seqsort
+from types import MethodType,FunctionType
 from math import ceil
 
 zero_div0 = lambda num,denum: zero_div(num,denum,0)
@@ -360,6 +361,18 @@ def prg__single_to_trinary_vector(prg,n):
 
     return f 
 
+"""
+produces a new generator function prg' from 
+prg. Every i'th value output v from prg' is 
+equal to 
+    `modulo_in_range(v,r)`.
+"""
+def wrap_ranged_modulo_over_generator(prg,r): 
+    assert type(prg) in {MethodType,FunctionType} 
+    assert is_valid_range(r,True,False) or is_valid_range(r,False,False) 
+    def f():
+        return modulo_in_range(prg(),r) 
+    return f 
 
 #------------------------------- operations related to euclid's distance
 

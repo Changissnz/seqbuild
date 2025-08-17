@@ -157,6 +157,8 @@ as well as their instantiation parameters in Comm Lang.
         * ndim  
         * nvec  
         * tvec  
+    [-] associated with `set`:  
+        * span          
 
 ## Command Forms <a name="command_forms"></a>  
 
@@ -186,10 +188,13 @@ calls the structure's main output function.
 [+] set  
 [-] usage  
 ```
-set <variable name> = <command statement that produces object>. 
+set <variable name> = <command statement that produces object>.  
+set <generator> span for <start range,end range>.  
 ```
 [-] description  
-loads an object into parser map of variables.  
+in the primary use case, command loads an object into parser map of 
+variables. In the secondary use case, command sets output of generator 
+into ranged modulo. 
 
 -----------------------------------------------------------------
 
@@ -228,7 +233,7 @@ convert <generator> to tvec with <positive_integer>.
 [-] description  
 converts an inputless generator function that outputs single integer 
 or float values into a generator that outputs a different type. 
-Available types are `range` (outputs pairs of ordered numbers), 
+Available types are `range` (outputs ordered pairs of numbers), 
 `ndim` (outputs integer vectors of lengths equal to that of the positive 
 integer sequence), `nvec` (outputs numerical vectors of length equal to 
 the positive integer), and `tvec` (outputs specifically trinary vectors 

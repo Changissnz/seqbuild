@@ -43,4 +43,3 @@ is run.
 
 I have planned for 1 full week of additional development, starting today. 
 This will be AGILE end sprint for beta version of this product. 
-

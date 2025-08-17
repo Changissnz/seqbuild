@@ -1,0 +1,4 @@
+set G = make lcg with 856,145,731,90091. 
+set V = run G for 10 iter.
+set G span to -200.,6000.01.
+set V2 = run G for 10 iter.

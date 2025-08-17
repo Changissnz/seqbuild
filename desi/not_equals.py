@@ -1,6 +1,5 @@
 from intigers.extraneous import * 
 from morebs2.fit_2n2 import * 
-from types import MethodType,FunctionType
 from math import ceil,floor 
 
 DEFAULT_ADDITIVE = 10 ** -6 
