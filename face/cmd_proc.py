@@ -11,11 +11,11 @@ from mini_dm.nsfr import *
 import io 
 import pickle 
 
-LANG_KEYTERMS = ["make","run","with","set","for","iter","write","to",\
-            "open","convert","show","help","file","seq","obj"]   
+LANG_KEYTERMS = ["make","run","with","set","for","iter","write",\
+        "merge","to","open","convert","show","help","file","seq",\
+        "obj"]   
 
 GENFORM_CONVERT_TYPES = ["range","ndim","nvec","tvec"]
-
 
 def parse_object_to_str(O): 
     s = str(type(O)) 
@@ -197,3 +197,40 @@ def WRITE_proc(splitstr_cmd,var_map):
     else: 
         pickle.dump(var_obj,fi_obj)
     fi_obj.close()    
+
+def MERGE_proc(splitstr_cmd,var_map):
+
+    assert splitstr_cmd[0] == "merge"
+    
+    generators = splitstr_cmd[1].split(",") 
+    assert len(generators) >= 2 
+    for (i,g) in enumerate(generators): 
+        assert g in var_map 
+        generators[i] = var_map[g] 
+    
+    assert splitstr_cmd[2] == "with" 
+
+    operators = splitstr_cmd[3].split(",") 
+    assert len(operators) == len(generators) - 1 
+    ops = []
+    for o in operators: 
+        stat0 = o in ARITHMETIC_OP_STR_MAP
+        stat1 = o in var_map 
+        assert stat0 or stat1 
+
+        if stat0: 
+            ops.append(ARITHMETIC_OP_STR_MAP[o]) 
+        else: 
+            ops.append(var_map[o]) 
+    
+    def amalgamaschwann(): 
+        i = 1 
+        q = generators[0]() 
+        while i < len(generators): 
+            q2 = generators[i]() 
+            op = ops[i-1]
+            q = op(q,q2) 
+            i += 1 
+        return q 
+    
+    return amalgamaschwann

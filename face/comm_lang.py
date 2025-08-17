@@ -193,7 +193,9 @@ class CommLangParser:
             elif splitstr_cmd[0] == "open": 
                 return OPEN_proc(splitstr_cmd)
             elif splitstr_cmd[0] == "write":
-                return WRITE_proc(splitstr_cmd,self.vartable)
+                return WRITE_proc(splitstr_cmd,self.vartable) 
+            elif splitstr_cmd[0] == "merge": 
+                return MERGE_proc(splitstr_cmd,self.vartable) 
         except: 
             pass 
 

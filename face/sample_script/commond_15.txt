@@ -1,0 +1,4 @@
+set G = make lcg with 3,4,10,1666.
+set G2 = make lcg with 13,-41,56,50000. 
+
+set G3 = merge G,G2 with +. 
