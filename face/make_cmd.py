@@ -212,20 +212,20 @@ def MAKE_op2(splitstr_cmd,var_map):
     assert len(parameters) in {1,3,4}
 
     if len(parameters) == 1:
-        assert parameters[0] in ARITHMETIC_OP_STR_MAP 
+        assert parameters[0] in ARITHMETIC_OP_STR_MAP,"NOO." 
         return ARITHMETIC_OP_STR_MAP[parameters[0]] 
 
     if parameters[0] in ARITHMETIC_OP_STR_MAP:
         op1 = ARITHMETIC_OP_STR_MAP[parameters[0]] 
     else: 
         assert parameters[0] in var_map,"wrongo"
-        op1 = ARITHMETIC_OP_STR_MAP[parameters[0]] 
+        op1 = var_map[parameters[0]] 
 
     if parameters[1] in ARITHMETIC_OP_STR_MAP:
         op2 = ARITHMETIC_OP_STR_MAP[parameters[1]] 
     else: 
         assert parameters[1] in var_map,"wrongo #2"
-        op2 = ARITHMETIC_OP_STR_MAP[parameters[1]] 
+        op2 = var_map[parameters[1]] 
 
     weight = float(parameters[2]) 
     order = 0 

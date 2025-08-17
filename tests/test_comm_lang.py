@@ -335,6 +335,7 @@ class CommLangMethods(unittest.TestCase):
         for i in range(1,6): 
             s = "O" + str(i) 
             assert s in clp.vartable
+        clp.close() 
         return
 
 
