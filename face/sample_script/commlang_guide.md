@@ -236,9 +236,12 @@ regular string mode and `for obj` opens file in bytes mode.
 [-] usage  
 ```
 write <object> to <file_object>.  
+write <generator> for <positive integer> iter to <file_object>.  
 ``` 
 [-] description  
-writes an object loaded in program memory to a file object. 
+writes an object loaded in program memory to a file. In the secondary  
+use case, writes the streaming output (in real-time) from `generator` to  
+the file for the specified number of iterations. 
 
 -----------------------------------------------------------------
 

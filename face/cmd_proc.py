@@ -177,25 +177,47 @@ def WRITE_seq(fi_obj,vector_length,seq,rounding_depth=0):
     fi_obj.flush() 
 
 """
-write object to file_object 
+write <object> to <file_object>.
+write <object> for <positive integer> iter to <file_object>. 
 """
 def WRITE_proc(splitstr_cmd,var_map): 
     assert splitstr_cmd[0] == "write" 
     assert splitstr_cmd[1] in var_map
     var_obj = var_map[splitstr_cmd[1]] 
-    assert splitstr_cmd[2] == "to" 
-    
-    assert splitstr_cmd[3] in var_map 
-    fi_obj = var_map[splitstr_cmd[3]]
 
-    is_seq = type(var_obj) == list 
-    assert isinstance(fi_obj,io.TextIOWrapper) if is_seq \
-        else isinstance(fi_obj,io.BufferedWriter) 
+    assert splitstr_cmd[2] in {"to","for"}  
     
-    if is_seq: 
-        WRITE_seq(fi_obj,10,var_obj,rounding_depth=0)
+    if splitstr_cmd[2] == "to": 
+        assert splitstr_cmd[3] in var_map 
+        fi_obj = var_map[splitstr_cmd[3]]
+
+        is_seq = type(var_obj) == list 
+        assert isinstance(fi_obj,io.TextIOWrapper) if is_seq \
+            else isinstance(fi_obj,io.BufferedWriter) 
+    
+        if is_seq: 
+            WRITE_seq(fi_obj,10,var_obj,rounding_depth=0)
+        else: 
+            pickle.dump(var_obj,fi_obj)
     else: 
-        pickle.dump(var_obj,fi_obj)
+        num_iter = int(splitstr_cmd[3]) 
+        print("NUM ITER: ",num_iter)
+        assert num_iter > 0 
+
+        assert splitstr_cmd[4] == "iter" 
+        assert splitstr_cmd[5] == "to" 
+        assert splitstr_cmd[6] in var_map 
+
+        fi_obj = var_map[splitstr_cmd[6]] 
+
+        while num_iter > 0: 
+            elements_per_line = min([10,num_iter]) 
+            nx = [str(var_obj()) for _ in range(elements_per_line)]
+            nx = ','.join(nx) 
+            fi_obj.write(nx+"\n")
+            num_iter -= elements_per_line
+
+    fi_obj.flush() 
     fi_obj.close()    
 
 def MERGE_proc(splitstr_cmd,var_map):
