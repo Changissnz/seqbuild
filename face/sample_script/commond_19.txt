@@ -1,0 +1,6 @@
+set F = open file ../dummy/t1.txt for seq. 
+set G = make lcg with 45,67,78,100. 
+write G for 14 iter to F. 
+
+set F2 = open file ../dummy2/t2.txt for seq. 
+write G for 28 iter to F2. 

@@ -134,7 +134,7 @@ class CommLangParser:
             self.cmdlines = rx 
             return 
 
-        c = [c_.strip(".") for c_ in c]
+        c[-1].rstrip() 
         self.commond = [c_ for c_ in c if len(c_) > 0]
         return self.process_command_()
 
