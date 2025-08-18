@@ -154,6 +154,7 @@ as well as their instantiation parameters in Comm Lang.
     [-] open  
     [-] convert  
     [-] merge  
+    [-] load  
 
 - Secondary  
     [-] with  
@@ -276,6 +277,18 @@ Produces a new generator `G_(j+1)` out of a list of `j` generators,
 `j` at least 2. Every output value of `G_(j+1)` is  
     `G_1 op_1 G_2 op_2 ... G_(j-1) op_(j-1) G_j.`  
 
+-------------------------------------------------------------------  
+
+[+] load  
+[-] usage  
+```  
+load <path for Comm Lang file>.  
+```  
+[-] description  
+Loads command content from the specific Comm Lang file into  
+parser queue. Parser processes these Comm Lang commands and loads  
+the pertaining variables into parser memory and also window view.  
+
 -----------------------------------------------------------------  
 
 [+] show  
@@ -288,7 +301,7 @@ A special command reserved exclusively for realtime command use. A
 realtime command is made and executed in the `seqbuild` interface. The 
 `show` command lets users view the object of their query. 
 
--------------------------------------------------------------------
+-------------------------------------------------------------------  
 
 ## Interface Layout <a name="interface"></a>  
  

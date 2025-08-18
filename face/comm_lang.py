@@ -123,6 +123,17 @@ class CommLangParser:
             self.help_commands.append(c_) 
             return 
 
+        if c[0] == "load": 
+            qs = LOAD_proc(c) 
+            rx = deepcopy(self.cmdlines)
+            self.cmdlines.clear() 
+            while len(qs) > 0:
+                qs_ = qs.pop(-1).strip()
+                self.cmdlines.insert(0,qs_) 
+            self.process_cmdlines()
+            self.cmdlines = rx 
+            return 
+
         c = [c_.strip(".") for c_ in c]
         self.commond = [c_ for c_ in c if len(c_) > 0]
         return self.process_command_()

@@ -19,6 +19,7 @@ SAMPLE_USE_FILE_MAP = {"multimetric": BASE_COMM_LANG_FOLDER + "commond_one.txt",
     "span":BASE_COMM_LANG_FOLDER + "commond_13.txt",\
     "make":BASE_COMM_LANG_FOLDER + "commond_14.txt",\
     "merge":BASE_COMM_LANG_FOLDER + "commond_15.txt",\
+    "load":BASE_COMM_LANG_FOLDER + "commond_16.txt"
     }
 
 def stringize_CLGuideParser_keywords(clgp): 

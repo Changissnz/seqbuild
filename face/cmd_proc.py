@@ -256,3 +256,13 @@ def MERGE_proc(splitstr_cmd,var_map):
         return q 
     
     return amalgamaschwann
+
+def LOAD_proc(splitstr_cmd): 
+    assert splitstr_cmd[0] == "load" 
+    assert len(splitstr_cmd) == 2 
+    assert os.path.exists(splitstr_cmd[1]) 
+
+    fi_obj = open(splitstr_cmd[1],'r') 
+    rx = fi_obj.readlines()
+    fi_obj.close() 
+    return rx 

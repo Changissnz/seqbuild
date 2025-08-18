@@ -1,0 +1,2 @@
+load face/sample_script/commond_15.txt.
+set X = run G for 12 iter. 

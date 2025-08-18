@@ -338,6 +338,22 @@ class CommLangMethods(unittest.TestCase):
         clp.close() 
         return
 
+    def test__CommLangParser__process_file__case12(self):
+        clp = CommLangParser("face/sample_script/commond_16.txt") 
+        clp.process_file() 
+
+        assert "X" in clp.vartable 
+
+        X = clp.vartable['X'] 
+
+        Xsol = [3.,22.,98.,402.,1618.,1484.,\
+            948.,470.,224.,906.,302.,1218.]
+
+        assert X == Xsol
+
+        clp.close() 
+        return  
+
 
 if __name__ == '__main__':
     unittest.main()
