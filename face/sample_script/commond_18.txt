@@ -1,0 +1,4 @@
+set G = make lcg with 1,1,0,2. 
+set V = run G for 25 iter.  
+set M = make multimetric with V. 
+set q = run M with 5. 

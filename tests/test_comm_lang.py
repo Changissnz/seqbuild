@@ -354,6 +354,14 @@ class CommLangMethods(unittest.TestCase):
         clp.close() 
         return  
 
+    def test__CommLangParser__process_file__case13(self): 
+        clp = CommLangParser("face/sample_script/commond_18.txt") 
+        clp.process_file()
+
+        q = clp.vartable['q'] 
+        assert q[2] == 0 
+
+        clp.close() 
 
 if __name__ == '__main__':
     unittest.main()
