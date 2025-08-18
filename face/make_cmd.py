@@ -52,6 +52,9 @@ def MAIN_method_for_object(q):
     if type(q) == PIDValueOutputter: 
         return q.__next__ 
 
+    if type(q) == QValueOutputter:
+        return q.__next__ 
+
     return -1 
 
 def MAKE_lcgvx(splitstr_cmd,var_map): 

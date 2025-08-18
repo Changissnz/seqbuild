@@ -1,0 +1,3 @@
+load face/sample_script/commond_five.txt. 
+set F2 = open file face/sample_script/dummy_obj.txt for seq. 
+write Q for 12 iter to F2.  

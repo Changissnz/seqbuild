@@ -201,14 +201,14 @@ def WRITE_proc(splitstr_cmd,var_map):
             pickle.dump(var_obj,fi_obj)
     else: 
         num_iter = int(splitstr_cmd[3]) 
-        print("NUM ITER: ",num_iter)
         assert num_iter > 0 
 
         assert splitstr_cmd[4] == "iter" 
         assert splitstr_cmd[5] == "to" 
         assert splitstr_cmd[6] in var_map 
 
-        fi_obj = var_map[splitstr_cmd[6]] 
+        var_obj = MAIN_method_for_object(var_obj) 
+        fi_obj = var_map[splitstr_cmd[6]]
 
         while num_iter > 0: 
             elements_per_line = min([10,num_iter]) 
