@@ -101,7 +101,7 @@ class MultiMetric:
     iteration over S.
     """
     def agv2_measures__ngrammer(self,ref_index,length,\
-            l2,set_frange:bool=True): 
+            l2,set_frange:bool=True,external_frange=None): 
         assert l2 <= length, "length,l2 is {}".format((length,l2))
 
         # init the <NGrammer> 
@@ -116,6 +116,10 @@ class MultiMetric:
         if set_frange: 
             fmin,fmax = np.min(self.l),np.max(self.l) 
         
+        if type(external_frange) != type(None):         
+            assert is_valid_range(external_frange,False,False)
+            fmin,fmax = external_frange
+
         start_value = np.min(self.l)
 
         agv2 = APRNGGaugeV2(f,(fmin,fmax),0.5) 
@@ -176,12 +180,154 @@ class MultiMetric:
 
         * every value in [0]-[2] is a float. 
     """
-    def summarize(self,ngram,condense_ngram_output:bool=True):
+    def summarize(self,ngram,condense_ngram_output:bool=True,set_frange:bool=True):
         m1 = self.agv2_measures__ngrammer(0,len(self.l),\
-            ngram,set_frange=True)
+            ngram,set_frange=set_frange)
         if condense_ngram_output:
             m1 = np.mean(m1,axis=0)
             
         m2 = self.diff_measures()
         m3 = self.mcs_kcomplexity()
         return m1,m2,m3
+
+def average_MultiMetric_summaries(R):
+    l = len(R) 
+    if l == 0: return None 
+
+    q = R.pop(0) 
+    N0,N1,N2 = q[0],np.array(q[1]),q[2] 
+    while len(R) > 0: 
+        q = R.pop(0) 
+        n0,n1,n2 = q[0],np.array(q[1]),q[2] 
+        N0 += n0 
+        N1 += n1 
+        N2 += n2 
+    
+    return N0 / l, N1 / l, N2 / l 
+
+def gauge_generator__MultiMetric(prg,num_iter,gauge_depth:int,deg_vec:list,\
+    set_frange:bool=True,condense_ngram_output:bool=True): 
+    assert num_iter >= 5 
+    
+    stat0 = type(gauge_depth) == type(None) 
+    stat1 = type(deg_vec) == type(None) 
+
+    assert stat0 or stat1 and not (stat0 and stat1) 
+
+    if stat1: 
+        base_ngram = 10 
+        if num_iter < base_ngram: 
+            base_ngram = int(round(num_iter/2)) 
+    else: 
+        base_ngram = None 
+
+    index = 0 if stat0 else None 
+
+    def next_ngram(ngram_,index_): 
+        if stat1: 
+            ngram_ += 1 
+            if ngram_ >= num_iter:
+                return None,None
+
+            if ngram_ > base_ngram + gauge_depth: 
+                return None,None 
+
+            return ngram_,None
+
+        if index_ >= len(deg_vec): 
+            return None,None
+        v = deg_vec[index_]
+        index_ += 1 
+        return v,index_
+
+    # collect all elements into list 
+    q = [] 
+    for _ in range(num_iter): 
+        q.append(prg())
+
+    mm = MultiMetric(q)
+    stat = True 
+    
+    ngx = base_ngram 
+    R = [] 
+    while stat: 
+        ngx,index = next_ngram(ngx,index) 
+        stat = not type(ngx) == type(None) 
+        if not stat: continue 
+        A = mm.summarize(ngx,condense_ngram_output=True,set_frange=set_frange)
+        R.append(A) 
+
+    fm = vec_to_frequency_map(np.array(q,dtype=int))
+
+    cmap = None 
+    try: 
+        mm.load_mc_map() 
+        cmap = mm.modcomplex_map
+    except: 
+        pass 
+
+    if condense_ngram_output: 
+        R = average_MultiMetric_summaries(R)
+
+    return R,cmap,fm 
+
+def cmp_generators__MultiMetric(prg,prg2,num_iter,gauge_depth,deg_vec,\
+    set_frange:bool=True): 
+    q0 = gauge_generator__MultiMetric(prg,num_iter,gauge_depth,deg_vec,set_frange)
+    q1 = gauge_generator__MultiMetric(prg2,num_iter,gauge_depth,deg_vec,set_frange)
+
+    def diff_mm_output():
+        x0,x1 = q0[0],q1[0] 
+
+        d0 = list(x0[0]) 
+        d0.extend(x0[1]) 
+        d0.append(x0[2]) 
+        d0 = np.array(d0) 
+
+        d1 = list(x1[0]) 
+        d1.extend(x1[1]) 
+        d1.append(x1[2]) 
+        d1 = np.array(d1) 
+        return d0 - d1 
+
+    def diff_mc_map():
+        x0,x1 = q0[1],q1[1] 
+
+        ks = set(x0.keys()) | set(x1.keys()) 
+
+        diff_map = dict() 
+
+        for k in ks: 
+            stat0 = k in x0 
+            stat1 = k in x1 
+
+            if stat0 and stat1: 
+                d0,d1 = x0[k],x1[k] 
+                diff_map[k] = tuple(np.array(d0)-np.array(d1))
+            elif stat0:
+                diff_map[k] = x0[k] 
+            elif stat1:
+                diff_map[k] = x1[k] 
+
+        return diff_map 
+
+    def diff_fmap(): 
+        x0,x1 = q0[2],q1[2] 
+        
+        l0,l1 = len(x0),len(x1) 
+        dx0 = l0 - l1 
+
+        fx = set(x0.keys()) | set(x1.keys()) 
+
+        dx1 = dict()
+        for fx_ in fx: 
+            c0 = x0[fx_] if fx_ in x0 else 0 
+            c1 = x1[fx_] if fx_ in x1 else 0 
+            dx1[fx_] = abs(c0-c1) 
+
+        return dx1 
+
+    dx0 = diff_mm_output()
+    dx1 = diff_mc_map() 
+    dx2 = diff_fmap() 
+    return dx0,dx1,dx2 
