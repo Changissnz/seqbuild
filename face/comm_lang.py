@@ -15,6 +15,7 @@ class CommLangParser:
         self.cmdlines = []
         self.show_commands = [] 
         self.help_commands = [] 
+        self.extra_commands = [] 
 
         self.cmd_errors = []
 
@@ -112,6 +113,7 @@ class CommLangParser:
 
         c_ = self.cmdlines.pop(0)
         c = c_.split(" ")
+        c[-1] = c[-1].rstrip(".")
 
         # case: `show` command, do nothing 
         if c[0] == "show": 
@@ -134,7 +136,10 @@ class CommLangParser:
             self.cmdlines = rx 
             return 
 
-        c[-1].rstrip() 
+        if c[0] == "qualtest":
+            self.extra_commands.append(c)
+            return 
+
         self.commond = [c_ for c_ in c if len(c_) > 0]
         return self.process_command_()
 

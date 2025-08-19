@@ -266,3 +266,65 @@ def LOAD_proc(splitstr_cmd):
     rx = fi_obj.readlines()
     fi_obj.close() 
     return rx 
+
+def QUALTEST_proc(splitstr_cmd,var_map):
+    assert splitstr_cmd[0] == "qualtest" 
+
+    if "," in splitstr_cmd[1]: 
+        q = splitstr_cmd[1].split(",") 
+        assert len(q) == 2
+        assert q[0] in var_map 
+        assert q[1] in var_map 
+
+        G,G2 = var_map[q[0]],var_map[q[1]]
+        G,G2 = MAIN_method_for_object(G),MAIN_method_for_object(G2)  
+    else:
+        assert splitstr_cmd[1] in var_map
+        G = MAIN_method_for_object(var_map[splitstr_cmd[1]])
+        G2 = None 
+
+    assert type(G) in {MethodType,FunctionType}
+
+    assert splitstr_cmd[2] == "for"  
+
+    num_iter = int(splitstr_cmd[3]) 
+    assert splitstr_cmd[4] == "iter" 
+
+    gauge_depth = 1 
+    deg_vec = None 
+    if len(splitstr_cmd) > 5: 
+        assert splitstr_cmd[5] == "with"
+        assert len(splitstr_cmd) == 7 
+        stat = "," in splitstr_cmd[6] 
+        if stat: 
+            deg_vec  = splitstr_cmd[6].split(",") 
+            deg_vec = [int(d) for d in deg_vec] 
+            gauge_depth = None
+        else: 
+            gauge_depth = int(splitstr_cmd[6])
+            deg_vec = None 
+
+    s = "COV,DIST,ENT,DIFF1,DIFF2,MCS\n"    
+    if type(G2) == type(None): 
+        S = gauge_generator__MultiMetric(G,num_iter,gauge_depth,deg_vec,\
+            set_frange=True,condense_ngram_output=True) 
+        q = list(S[0][0])
+        q.extend(S[0][1])
+        q.append(S[0][2]) 
+        q = np.array(q) 
+        s += str(q) + "\n"
+    else: 
+        S = cmp_generators__MultiMetric(G,G2,num_iter,gauge_depth,deg_vec,\
+            set_frange=True)
+        s += str(S[0]) + "\n"
+
+    # get the top 5 factors 
+    q = [(k,np.mean(v)) for k,v  in S[1].items() if k not in {1,2}]  
+    q = sorted(q,key=lambda x:x[1])[:5] 
+    s += "\nmodular characteristic\n\n"
+    for q_ in q: 
+        s += str(q_[0]) + "\t" + str(np.array(S[1][q_[0]])) + "\n"
+    
+    # get the frequency map 
+    s += "\nnumber of unique elements: " + str(len(S[2])) 
+    return s

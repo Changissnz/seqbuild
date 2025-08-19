@@ -119,6 +119,8 @@ class SBApplication(tk.Frame):
         self.clp.process_cmdlines()
 
         self.reset_to_baseview()
+
+        self.process_QUALTEST_cmd()
         self.process_SHOW_cmd() 
         self.process_HELP_cmd() 
         self.load_ERROR()
@@ -161,6 +163,17 @@ class SBApplication(tk.Frame):
         self.switch_HELP_display()
         self.text_widget3.delete(1.0, tk.END)
         self.text_widget3.insert(tk.END,s) 
+
+    def process_QUALTEST_cmd(self):
+        if len(self.clp.extra_commands) == 0:
+            return 
+
+        q = self.clp.extra_commands.pop(-1) 
+        self.clp.extra_commands.clear() 
+        s = QUALTEST_proc(q,self.clp.vartable)
+
+        self.text_widget.delete(1.0, tk.END)
+        self.text_widget.insert(tk.END, s)  
 
     def load_ERROR(self):
         if len(self.clp.cmd_errors) == 0: 

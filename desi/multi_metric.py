@@ -190,6 +190,11 @@ class MultiMetric:
         m3 = self.mcs_kcomplexity()
         return m1,m2,m3
 
+
+#------------------------------------------------------------------------------------
+
+# below methods are used for interface command QUALTEST. 
+
 def average_MultiMetric_summaries(R):
     l = len(R) 
     if l == 0: return None 
@@ -292,6 +297,8 @@ def cmp_generators__MultiMetric(prg,prg2,num_iter,gauge_depth,deg_vec,\
 
     def diff_mc_map():
         x0,x1 = q0[1],q1[1] 
+        if type(x0) == type(None) or type(x1) == type(None): 
+            return dict() 
 
         ks = set(x0.keys()) | set(x1.keys()) 
 
