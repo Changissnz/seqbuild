@@ -195,6 +195,10 @@ class MultiMetric:
 
 # below methods are used for interface command QUALTEST. 
 
+"""
+method used to average the sequence of output elements 
+from method<gauge_generator__MultiMetric>.
+"""
 def average_MultiMetric_summaries(R):
     l = len(R) 
     if l == 0: return None 
@@ -210,6 +214,20 @@ def average_MultiMetric_summaries(R):
     
     return N0 / l, N1 / l, N2 / l 
 
+"""
+a heavyweight function used to measure output qualities of a 
+pseudo-random number generator `prg`. 
+
+NOTE: function conducts intensive calculations, by way of n-gram 
+iterations. On personal computing systems, the argument `num_iter` 
+normally should not exceed 1000. This rule translates to this method 
+having a size limit for measuring sequences. 
+
+Function outputs the following measures. 
+[0] average or list of measures from method<MultiMetric.summarize>,
+[1] modular characteristic map,
+[2] element frequency map.
+"""
 def gauge_generator__MultiMetric(prg,num_iter,gauge_depth:int,deg_vec:list,\
     set_frange:bool=True,condense_ngram_output:bool=True): 
     assert num_iter >= 5 
@@ -276,6 +294,13 @@ def gauge_generator__MultiMetric(prg,num_iter,gauge_depth:int,deg_vec:list,\
 
     return R,cmap,fm 
 
+"""
+a comparator between generators `prg` and `prg2`. Function is 
+based on function<gauge_generator__MultiMetric>. Calculates 
+the difference 
+
+`gauge_generator__MultiMetric(prg,...) - gauge_generator__MultiMetric(prg2,...)`. 
+"""
 def cmp_generators__MultiMetric(prg,prg2,num_iter,gauge_depth,deg_vec,\
     set_frange:bool=True): 
     q0 = gauge_generator__MultiMetric(prg,num_iter,gauge_depth,deg_vec,set_frange)
@@ -310,7 +335,7 @@ def cmp_generators__MultiMetric(prg,prg2,num_iter,gauge_depth,deg_vec,\
 
             if stat0 and stat1: 
                 d0,d1 = x0[k],x1[k] 
-                diff_map[k] = tuple(np.array(d0)-np.array(d1))
+                diff_map[k] = tuple(np.abs(np.array(d0)-np.array(d1)))
             elif stat0:
                 diff_map[k] = x0[k] 
             elif stat1:

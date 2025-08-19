@@ -312,18 +312,19 @@ def QUALTEST_proc(splitstr_cmd,var_map):
         q.extend(S[0][1])
         q.append(S[0][2]) 
         q = np.array(q) 
-        s += str(q) + "\n"
+        s += str(np.round(q)) + "\n"
     else: 
         S = cmp_generators__MultiMetric(G,G2,num_iter,gauge_depth,deg_vec,\
             set_frange=True)
-        s += str(S[0]) + "\n"
+        s += str(np.round(S[0],5)) + "\n"
 
     # get the top 5 factors 
-    q = [(k,np.mean(v)) for k,v  in S[1].items() if k not in {1,2}]  
-    q = sorted(q,key=lambda x:x[1])[:5] 
-    s += "\nmodular characteristic\n\n"
-    for q_ in q: 
-        s += str(q_[0]) + "\t" + str(np.array(S[1][q_[0]])) + "\n"
+    if type(S[1]) != type(None): 
+        q = [(k,np.mean(v)) for k,v  in S[1].items() if k not in {1,2}]  
+        q = sorted(q,key=lambda x:x[1])[:5] 
+        s += "\nmodular characteristic\n\n"
+        for q_ in q: 
+            s += str(q_[0]) + "\t" + str(np.array(S[1][q_[0]])) + "\n"
     
     # get the frequency map 
     s += "\nnumber of unique elements: " + str(len(S[2])) 

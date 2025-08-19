@@ -170,7 +170,7 @@ class CommLangParser:
         
         # case: secondary use case of SET 
         assert n in self.vartable 
-        gen = self.vartable[n] 
+        gen = MAIN_method_for_object(self.vartable[n])
 
         assert splitstr_cmd[3] == "to"  
 
