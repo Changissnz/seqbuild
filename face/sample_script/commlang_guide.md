@@ -155,6 +155,7 @@ as well as their instantiation parameters in Comm Lang.
     [-] convert  
     [-] merge  
     [-] load  
+    [-] qualtest 
 
 - Secondary  
     [-] with  
@@ -288,6 +289,26 @@ load <path for Comm Lang file>.
 Loads command content from the specific Comm Lang file into  
 parser queue. Parser processes these Comm Lang commands and loads  
 the pertaining variables into parser memory and also window view.  
+
+-------------------------------------------------------------------  
+
+[+] qualtest  
+[-] usage  
+```
+qualtest <generator> for <positive integer> iter.  
+qualtest <generator> for <pos. int.> iter with <positive integer>.  
+qualtest <generator> for <pos. int.> iter with <comma-separated pos. int.>.   
+
+qualtest <generator,generator2> for <positive integer> iter.  
+qualtest <generator,generator2> for <pos. int.> iter with ...   
+```
+[-] description  
+Command is used to test the output quality of numerical generators. In  
+the primary use case, command calculates these measures: coverage,  
+normalized unidirectional weighted point distance, standard categorical  
+entropy, Kolmogorov complexity of 1st-order difference, Kolmogorov complexity  
+of 2nd-order difference, and Kolmogorov complexity of MCS (most common  
+subsequence) difference.  
 
 -----------------------------------------------------------------  
 

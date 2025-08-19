@@ -13,7 +13,7 @@ import pickle
 
 LANG_KEYTERMS = ["make","run","with","set","for","iter","write",\
         "merge","to","open","convert","show","help","file","seq",\
-        "obj"]   
+        "obj","qualtest"]   
 
 GENFORM_CONVERT_TYPES = ["range","ndim","nvec","tvec"]
 
