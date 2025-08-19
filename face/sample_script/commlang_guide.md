@@ -294,21 +294,27 @@ the pertaining variables into parser memory and also window view.
 
 [+] qualtest  
 [-] usage  
-```
+```  
 qualtest <generator> for <positive integer> iter.  
 qualtest <generator> for <pos. int.> iter with <positive integer>.  
 qualtest <generator> for <pos. int.> iter with <comma-separated pos. int.>.   
 
 qualtest <generator,generator2> for <positive integer> iter.  
 qualtest <generator,generator2> for <pos. int.> iter with ...   
-```
+```  
 [-] description  
-Command is used to test the output quality of numerical generators. In  
-the primary use case, command calculates these measures: coverage,  
-normalized unidirectional weighted point distance, standard categorical  
-entropy, Kolmogorov complexity of 1st-order difference, Kolmogorov complexity  
-of 2nd-order difference, and Kolmogorov complexity of MCS (most common  
-subsequence) difference.  
+Command is used to test the output quality of numerical generators. The  
+focus is on the next `x` elements (iterations). In the primary use case,  
+command calculates these measures: coverage,  normalized unidirectional  
+weighted point distance, standard categorical entropy, Kolmogorov complexity  
+of 1st-order difference, Kolmogorov complexity of 2nd-order difference,  
+and Kolmogorov complexity of MCS (most common subsequence) difference.  
+Additionally, command outputs the top five integer factors for the `x`  
+elements and their 1st+2nd order Kolmogorov complexities. Element frequency  
+map is also output.  In the secondary use case, command is used in the  
+manner of a comparative function between two generators. In such cases,  
+command outputs the difference of `qualtest` measures applied to each  
+generator.  
 
 -----------------------------------------------------------------  
 
