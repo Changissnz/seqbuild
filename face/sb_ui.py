@@ -170,7 +170,12 @@ class SBApplication(tk.Frame):
 
         q = self.clp.extra_commands.pop(-1) 
         self.clp.extra_commands.clear() 
-        s = QUALTEST_proc(q,self.clp.vartable)
+
+        if q[0] == "qualtest": 
+            s = QUALTEST_proc(q,self.clp.vartable)
+        elif q[0] == "chaintest": 
+            s_ = CHAINTEST_proc(q,self.clp.vartable)
+            s = CHAINTEST_DESCRIPTOR + "\n\n" + str(s_)
 
         self.text_widget.delete(1.0, tk.END)
         self.text_widget.insert(tk.END, s)  

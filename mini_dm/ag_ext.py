@@ -175,6 +175,8 @@ def adjust_for_uwpd_change(S,i,c,rv=None,d_priority=1,recurse:bool=True):
 
 #----------------------------------- extension of <morebs2.APRNGGauge> 
 
+CHAINTEST_DESCRIPTOR = "mean(min),mean(max)\nvar(min),var(max),\nmean(F_i - F_(i+1)),mean(F_(i+1) - F_i),\nvar(F_i - F_(i+1)),var(F_(i+1) - F_i)"
+
 class APRNGGaugeV2(APRNGGauge):
 
     def __init__(self,aprng,frange,pradius:float):

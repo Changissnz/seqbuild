@@ -329,3 +329,20 @@ def QUALTEST_proc(splitstr_cmd,var_map):
     # get the frequency map 
     s += "\nnumber of unique elements: " + str(len(S[2])) 
     return s
+
+def CHAINTEST_proc(splitstr_cmd,var_map): 
+    assert splitstr_cmd[0] == "chaintest" 
+    assert splitstr_cmd[1] in var_map
+    G = MAIN_method_for_object(var_map[splitstr_cmd[1]]) 
+    assert splitstr_cmd[2] == "with"
+    assert len(splitstr_cmd) == 4 
+    
+    qx = splitstr_cmd[3].split(',')
+    assert len(qx) == 2 
+    num_iter = int(qx[0])
+    chain_length = int(qx[1]) 
+
+    ag2 = APRNGGaugeV2(G,(0.,1.),0.5) 
+    q2 = ag2.chaintest(num_iter,chain_length)
+
+    return q2 

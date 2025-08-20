@@ -155,7 +155,8 @@ as well as their instantiation parameters in Comm Lang.
     [-] convert  
     [-] merge  
     [-] load  
-    [-] qualtest 
+    [-] qualtest  
+    [-] chaintest  
 
 - Secondary  
     [-] with  
@@ -317,7 +318,28 @@ In such cases, command outputs the difference of `qualtest` measures
 applied to each generator.  
 
 WARNING: `qualtest` conducts highly intensive computation. For typical  
-use, set iterations to at most 1000.  
+use, set iterations to at most 1000. 
+
+-----------------------------------------------------------------   
+
+[+] chaintest  
+[-] usage  
+```  
+chaintest <generator> with <number of iterations,chain length>.   
+```  
+[-] description  
+This is a lightweight alternative to the `qualtest` command. The  
+chain test is designed for sparsely informative numerical sequences.  
+This test has a higher threshold for number of iterations. Test  
+calculates comparative values between the contiguous chunks, most  
+of which have number of elements equal to the chain length. Measures  
+of interest are minumum and maximum values. Mean and variance are  
+calculated from the (minumum,maximum) of every chunk. Chain test also  
+observes the changes in factor frequency between each chunk. These changes  
+are, in their primary representation, are maps of (factor,frequency)  
+differences. These maps are reduced to single floats. Mean and variance  
+are finally calculated for these floats. The output from this test is a  
+4 x 2 matrix of the values described.  
 
 -----------------------------------------------------------------  
 
