@@ -309,12 +309,12 @@ command calculates these measures: coverage,  normalized unidirectional
 weighted point distance, standard categorical entropy, Kolmogorov complexity  
 of 1st-order difference, Kolmogorov complexity of 2nd-order difference,  
 and Kolmogorov complexity of MCS (most common subsequence) difference.  
-Additionally, command outputs the top five integer factors for the `x`  
-elements and their 1st+2nd order Kolmogorov complexities. Element frequency  
-map is also output.  In the secondary use case, command is used in the  
-manner of a comparative function between two generators. In such cases,  
-command outputs the difference of `qualtest` measures applied to each  
-generator.  
+Additionally, command outputs the top five integer factors and their  
+associated 1st+2nd order Kolmogorov complexities for the `x` elements.  
+Element frequency map is also output.  In the secondary use case, command  
+is used in the manner of a comparative function between two generators.  
+In such cases, command outputs the difference of `qualtest` measures  
+applied to each generator.  
 
 WARNING: `qualtest` conducts highly intensive computation. For typical  
 use, set iterations to at most 1000.  
