@@ -5,6 +5,7 @@ from .minmax_freq import *
 from .iseq import * 
 from intigers.process_seq import stdop_vec
 from intigers.extraneous import zero_div0,to_trinary_relation_v2
+from intigers.intfactor import * 
 
 #------------------------ auxiliary functions used by <APRNGGaugeV2> for 
 #------------------------ measures such as matching and summarization 
@@ -381,11 +382,73 @@ class APRNGGaugeV2(APRNGGauge):
     def cycle_multvec(self):
         return stdop_vec(self.cycle,zero_div0,cast_type=np.float32)
 
-    @staticmethod
-    def modify_sequence_coverage(seq,new_coverage):
+    """
+    lightweight alternative measurement to the others. 
 
-        return -1 
+    The chain test measures the continuity of qualities 
+    shared from one contiguous chunk to the other. There 
+    are a total of `num_iter` elements, each chunk having 
+    `chain_length` elements (or remainder). 
 
-    @staticmethod
-    def modify_sequence_uwpd_(seq,rv,new_uwpd,prg): 
-        return -1 
+    For chunks C_1,C_2,...C_j, calculates the mean and 
+    variance of these qualities: 
+    - minumum
+    - maximum 
+
+    The factor-frequency difference maps (see <ISFactorSetOps>) 
+    from the chunks C_1,C2,...,C_j are 
+    D_1,...,D_(j-1). 
+
+    And their compressed float forms are 
+    f_1,...,f_j (see method<accum_factor_frequency_map>).
+
+    Output from the test is then a 4 x 2 matrix with values 
+    for: 
+
+    mean(min),mean(max),
+    var(min),var(max),
+    mean(D_i - D_(i+1)),mean(D_(i+1)-D_i),   
+    var(D_i - D_(i+1)),var(D_(i+1)-D_i).
+    """
+    def chaintest(self,num_iter,chain_length):
+        assert type(num_iter) in {int,np.int32,np.int64} 
+        assert type(chain_length) in {int,np.int32,np.int64} 
+
+        assert 2 <= chain_length < num_iter 
+
+        num_chunks = ceil(num_iter / chain_length)
+        tx = [] # get var,mean at end 
+        tx2 = [] 
+        
+        def factor_func(cl):
+            X = np.array([self.aprng() for _ in range(cl)],\
+                dtype=np.int32) 
+            m0,m1 = np.min(X),np.max(X) 
+            tx.append((m0,m1)) 
+            isfso = ISFactorSetOps(X)
+            isfso.factor_count_()
+            return isfso 
+
+        isf = factor_func(chain_length)
+        num_chunks -= 1 
+        for i in range(num_chunks): 
+            l = min([num_iter,chain_length]) 
+            num_iter -= l 
+
+            isf2 = factor_func(l)
+            dx = isf - isf2 
+            dx2 = isf2 - isf 
+
+            n0 = accum_factor_frequency_map(dx)
+            n1 = accum_factor_frequency_map(dx2) 
+            tx2.append((n0,n1)) 
+
+        tx,tx2 = np.array(tx),np.array(tx2)
+
+        minmax_mean = np.mean(tx,axis=0)
+        minmax_var = np.var(tx,axis=0)
+        fdiff_mean = np.mean(tx2,axis=0) 
+        fdiff_var = np.var(tx2,axis=0) 
+
+        return np.array([minmax_mean,\
+            minmax_var,fdiff_mean,fdiff_var])

@@ -165,6 +165,41 @@ class APRNGGaugeV2Methods(unittest.TestCase):
         assert d2[1][0][1] == d2sol10[1] 
         assert np.all(np.round(np.array(d2[1][0][2]) - d2sol10[2]) <= 10 ** -5)
 
+    def test__APRNGGaugeV2__chaintest__case1(self):
+        # case 1 
+        prg = prg__LCG(0,1,1,20)
+        ag2 = APRNGGaugeV2(prg,(0.,1.),0.5) 
+
+        q = ag2.chaintest(600,60)
+        qsol = np.array([\
+            [ 0., 19.],
+            [ 0.,  0.],
+            [ 0.,  0.],
+            [ 0.,  0.]]) 
+        assert np.all(q==qsol) 
+
+        # case 2 
+        prg = prg__LCG(0,1,1,20)
+        ag2 = APRNGGaugeV2(prg,(0.,1.),0.5) 
+        q2 = ag2.chaintest(500,50)
+
+        qsol2 = np.array([\
+            [0.,19.],\
+            [0.,0.],\
+            [88.88889,88.88889],\
+            [6320.98765,6320.98765]])
+        assert np.all(np.round(q2-qsol2,5) == 0) 
+
+        # case 3 
+        prg = prg__n_ary_alternator(-12,38,-12) 
+        ag2 = APRNGGaugeV2(prg,(0.,1.),0.5) 
+        q3 = ag2.chaintest(500,50) 
+        qsol3 = np.array([[-12.,  37.],\
+                [0.,0.],\
+                [0.,0.],\
+                [0.,0.]]) 
+        assert np.all(q3 == qsol3)
+
 class AGExtOtherMethods(unittest.TestCase):
 
     def test__ranged_delta_decomposition__case1(self): 

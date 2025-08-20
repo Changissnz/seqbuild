@@ -40,6 +40,9 @@ def intersection_disjunction__seq_factors(ms):
 
 ###
 
+def accum_factor_frequency_map(ffm): 
+    return np.sum([abs(k*v) for k,v in ffm.items()]) 
+
 """
 set operations of multiples for an integer sequence
 """
@@ -58,6 +61,24 @@ class ISFactorSetOps:
         self.cfd_map = None 
         self.max_cofactor_degree = None 
         self.str_mode_full=str_mode_full
+
+    """
+    outputs the difference 
+    `self.factor_count - isf1.factor_count`. 
+    """
+    def __sub__(self,isf1): 
+        #assert type(isf1) == type(ISFactorSetOps),"got {}".format(type(isf1))
+        assert type(self.factor_count) != type(None) 
+
+        if type(isf1.factor_count) == type(None): 
+            return deepcopy(self.factor_count) 
+        
+        d = dict() 
+        for k,v in self.factor_count.items(): 
+            v2 = 0 if k not in isf1.factor_count else \
+                isf1.factor_count[k] 
+            d[k] = v - v2 
+        return d
 
     """
     For the keys (elements of `iseq`) provided or all elements 
