@@ -316,6 +316,9 @@ manner of a comparative function between two generators. In such cases,
 command outputs the difference of `qualtest` measures applied to each  
 generator.  
 
+WARNING: `qualtest` conducts highly intensive computation. For typical  
+use, set iterations to at most 1000.  
+
 -----------------------------------------------------------------  
 
 [+] show  
