@@ -208,6 +208,7 @@ class SBApplication(tk.Frame):
 
     def reload_entire_help_display(self): 
         s = str(self.clgp) 
+        self.text_widget3.delete(1.0, tk.END)
         self.text_widget3.insert(tk.END,s)
         return
 

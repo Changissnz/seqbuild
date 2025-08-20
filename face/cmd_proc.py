@@ -327,22 +327,40 @@ def QUALTEST_proc(splitstr_cmd,var_map):
             s += str(q_[0]) + "\t" + str(np.array(S[1][q_[0]])) + "\n"
     
     # get the frequency map 
-    s += "\nnumber of unique elements: " + str(len(S[2])) 
+    s += "\nnumber of unique elements: " + str(len(S[2])) + "\n"
+    s += "\ntotal number of elements: " + str(2 * num_iter) + "\n" 
     return s
 
 def CHAINTEST_proc(splitstr_cmd,var_map): 
     assert splitstr_cmd[0] == "chaintest" 
-    assert splitstr_cmd[1] in var_map
-    G = MAIN_method_for_object(var_map[splitstr_cmd[1]]) 
+
+    G2 = None 
+    # case: comparative test
+    if "," in splitstr_cmd[1]: 
+        q = splitstr_cmd[1].split(",") 
+        assert len(q) == 2 
+        assert q[0] in var_map and q[1] in var_map 
+        G = MAIN_method_for_object(var_map[q[0]])
+        G2 = MAIN_method_for_object(var_map[q[1]])
+    # case: lone test 
+    else: 
+        assert splitstr_cmd[1] in var_map
+        G = MAIN_method_for_object(var_map[splitstr_cmd[1]]) 
+
     assert splitstr_cmd[2] == "with"
     assert len(splitstr_cmd) == 4 
-    
+
     qx = splitstr_cmd[3].split(',')
     assert len(qx) == 2 
     num_iter = int(qx[0])
     chain_length = int(qx[1]) 
 
     ag2 = APRNGGaugeV2(G,(0.,1.),0.5) 
-    q2 = ag2.chaintest(num_iter,chain_length)
+    q2 = ag2.chaintest(num_iter,chain_length) 
+
+    if type(G2) != type(None): 
+        ag2 = APRNGGaugeV2(G2,(0.,1.),0.5)  
+        q2_ = ag2.chaintest(num_iter,chain_length)
+        q2 = q2 - q2_ 
 
     return q2 

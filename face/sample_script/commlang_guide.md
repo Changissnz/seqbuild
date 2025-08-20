@@ -326,6 +326,7 @@ use, set iterations to at most 1000.
 [-] usage  
 ```  
 chaintest <generator> with <number of iterations,chain length>.   
+chaintest <generator1,generator2> with <number of iterations,chain length>.   
 ```  
 [-] description  
 This is a lightweight alternative to the `qualtest` command. The  
@@ -339,7 +340,9 @@ observes the changes in factor frequency between each chunk. These changes
 are, in their primary representation, are maps of (factor,frequency)  
 differences. These maps are reduced to single floats. Mean and variance  
 are finally calculated for these floats. The output from this test is a  
-4 x 2 matrix of the values described.  
+4 x 2 matrix of the values described. Similar to `qualtest`, the secondary  
+use case of `chaintest` is a comparative test between two generators, such  
+that the output is the difference between their associated 4 x 2 matrices.  
 
 -----------------------------------------------------------------  
 
