@@ -336,13 +336,14 @@ calculates comparative values between the contiguous chunks, most
 of which have number of elements equal to the chain length. Measures  
 of interest are minumum and maximum values. Mean and variance are  
 calculated from the (minumum,maximum) of every chunk. Chain test also  
-observes the changes in factor frequency between each chunk. These changes  
-are, in their primary representation, are maps of (factor,frequency)  
-differences. These maps are reduced to single floats. Mean and variance  
-are finally calculated for these floats. The output from this test is a  
-4 x 2 matrix of the values described. Similar to `qualtest`, the secondary  
-use case of `chaintest` is a comparative test between two generators, such  
-that the output is the difference between their associated 4 x 2 matrices.  
+observes the changes in factor frequency between every contiguous pair  
+of chunks. These changes are, in their primary representation, maps of  
+(factor,frequency) differences. These maps are reduced to single floats.  
+Mean and variance are finally calculated for these floats. The output from  
+this test is a 4 x 2 matrix of the values described. Similar to `qualtest`,  
+the secondary use case of `chaintest` is a comparative test between two  
+generators, such that the output is the difference between their associated  
+4 x 2 matrices.  
 
 -----------------------------------------------------------------  
 
@@ -352,7 +353,7 @@ that the output is the difference between their associated 4 x 2 matrices.
 show <object>.  
 ```
 [-] description  
-A special command reserved exclusively for realtime command use. A 
+A special command exclusively reserved for realtime command use. A 
 realtime command is made and executed in the `seqbuild` interface. The 
 `show` command lets users view the object of their query. 
 
