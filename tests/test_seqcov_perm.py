@@ -83,6 +83,19 @@ class SeqCoveragePermuterMethods(unittest.TestCase):
         assert round(cov0 - 1 / 30,5) == 0. 
         assert cov1 == 0.01 
 
+    def test__SeqCoveragePermuter__apply_neg_delta__case1(self):
+
+        prg = prg__LCG(5,4,3,30)
+        sequence = np.array([prg() for _ in range(20)] )
+        scp = SeqCoveragePermuter(sequence,-0.2,0.5,(-10.,35.),prg)
+
+        scp.set_partition()
+
+        cov00 = scp.cov_typeabs
+        scp.apply_neg_delta()
+        cov01 = scp.cov_typeabs
+        assert cov00 - 2.0 == cov01 
+
 class SeqUWPDPermuterMethods(unittest.TestCase):
 
     def test__SeqUWPDPermuter__apply__case1(self):

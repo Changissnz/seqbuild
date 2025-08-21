@@ -201,7 +201,20 @@ class SeqCoveragePermuter(AGV2SeqQualPermuter):
         variance = (self.prg() % 10000.) / 10000.
         if variance == 0.0: variance = 0.5 
         num_iter = min([len(self.l) * 4,10**5])
-        self.prt = prg_partition_for_float(abs(q),m,self.prg,variance,n=1000,rounding_depth=8)
+
+        # case: |q| is less than m; have to apply scaling. 
+        q_ = abs(q) 
+        f = 1 
+        if q_ < m: 
+            i = 1 
+            q2_ = q_ 
+            while q2_ < m: 
+                q2_ = q_ * 10 ** i 
+                i += 1
+            f = 10 * (i - 1)
+
+        self.prt = prg_partition_for_float(q_ * f,m,self.prg,variance,n=1000,rounding_depth=8)
+        self.prt = np.array(self.prt) / f 
 
     def apply_pos_delta(self): 
 
@@ -399,6 +412,8 @@ class SeqCoveragePermuter(AGV2SeqQualPermuter):
 
 
     def default_random_shrink_(self,dx=2.0):
+        if len(self.rs) == 0: return None,None 
+
         ri = int(self.prg()) % len(self.rs) 
         rx = deepcopy(self.rs[ri] )
         d = (rx[1] - rx[0]) / dx
@@ -421,6 +436,10 @@ class SeqCoveragePermuter(AGV2SeqQualPermuter):
         # error to the rest
         if len(ri) == 0: 
             ri,ex = self.default_random_shrink_() 
+
+            # case: no available ranges to shrink 
+            if type(ri) == type(None): return 
+
             ox = self.prt[i] - ex 
             self.prt[(i+1)%len(self.prt)] += ex  
             self.update_cov_value()
