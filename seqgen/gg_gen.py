@@ -1,11 +1,17 @@
 from desi.multi_metric import * 
 from desi.seqcov_perm import * 
 
-def mod_uwpd_of_sequence(S,m):
+def uwpd_of_modded_sequence(S,m):
     assert m != 0 
     S_ = np.array([s_ % m for s_ in S]) 
     return uwpd(S_,pairwise_op=lambda x1,x2: np.abs(x2 - x1),\
         accum_op=lambda x1,x2: x1 + x2)
+
+def uwpdcov_of_modded_sequence(S,m): 
+    pdseq = uwpd_of_modded_sequence(S,m)
+    mseq = np.array([s_ % m for s_ in S]) 
+    covseq = coverage_of_sequence(mseq,[0,m],max_radius=0.5)
+    return pdseq,covseq 
 
 """
 map with 
@@ -15,9 +21,7 @@ value : (uwpd of modulated sequence,coverage of modulated sequence)
 def factorseq_to_uwpdcov_map(seq,fseq):
     uwpdcov = dict()
     for m in fseq: 
-        pdseq = mod_uwpd_of_sequence(seq,m)
-        mseq = np.array([s_ % m for s_ in seq]) 
-        covseq = coverage_of_sequence(mseq,[0,m],max_radius=0.5)
+        pdseq,covseq = uwpdcov_of_modded_sequence(seq,m)
         uwpdcov[m] = (pdseq,covseq)
     return uwpdcov
 
@@ -195,6 +199,8 @@ class AGV2GuidedGen:
         self.base_seq = [] 
         self.output_queue = [] 
 
+        self.bseq_min,self.bseq_max = float('inf'),-float('inf') 
+
         self.bs_summary = None 
         self.guided_rep = None        
         self.density = None
@@ -233,7 +239,10 @@ class AGV2GuidedGen:
             assert type(epsilon) in {float,np.float64,np.float32}
 
         q = self.agd_log.refvar
-        super_range = [min(self.base_seq),max(self.base_seq)]
+        super_range = (self.bseq_min,self.bseq_max) 
+
+        if q == "cov": 
+            super_range = (min(self.base_seq),max(self.base_seq))
 
         if type(epsilon) == type(None):
             delta = (self.aux_prg() % 10000.) / 10000.
@@ -267,8 +276,25 @@ class AGV2GuidedGen:
         for _ in range(self.bspan): 
             x = self.base_prg()
             self.base_seq.append(x)
+
+        # adjust the super-range 
+        min0,max0 = min(self.base_seq),max(self.base_seq) 
+        qmin,qmax = self.bseq_min,self.bseq_max 
+        self.bseq_min = min([self.bseq_min,min0]) 
+        self.bseq_max = max([self.bseq_max,max0]) 
+
+        if self.bseq_min != qmin or self.bseq_max != qmax: 
+            diff = self.bseq_max - self.bseq_min 
+            self.bseq_min -= (diff * 0.11) 
+            self.bseq_max += (diff * 0.22) 
+
         return x 
 
+    """
+    produces a new base sequence and outputs summary of it. 
+    Summary consists of <MultiMetric> measures and the modular 
+    characteristic map for it. 
+    """
     def inspect_base_seq(self):
 
         self.next__base()
@@ -372,7 +398,8 @@ class AGV2GuidedGen:
             qx = np.mean(summry[i]) 
             return qx
 
-        return self.factor_kcomplexity(seq)[self.agd_log.refvar][0]
+        return uwpd_of_modded_sequence(seq,self.agd_log.refvar)
+#        return self.factor_kcomplexity(seq)[self.agd_log.refvar][0]
 
 
     #------------------------------- log sequence into memory 

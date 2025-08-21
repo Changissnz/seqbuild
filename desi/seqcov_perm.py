@@ -173,9 +173,9 @@ class SeqCoveragePermuter(AGV2SeqQualPermuter):
         assert type(self.mradius) in {float,np.float32,np.float64}
 
         rs = floatseq_to_rangeseq(S,self.srange,self.mradius)
-        self.rs = np.array(to_noncontiguous_ranges(rs))
+        self.rs = np.round(to_noncontiguous_ranges(rs),7)
         self.vci = vector_to_noncontiguous_range_indices(S,self.rs)
-        self.crs = np.array(complement_of_noncontiguous_ranges(self.rs,self.srange))
+        self.crs = np.round(complement_of_noncontiguous_ranges(self.rs,self.srange),7)
         
         self.update_cov_value() 
         return
@@ -201,10 +201,15 @@ class SeqCoveragePermuter(AGV2SeqQualPermuter):
         variance = (self.prg() % 10000.) / 10000.
         if variance == 0.0: variance = 0.5 
         num_iter = min([len(self.l) * 4,10**5])
-        self.prt = prg_partition_for_float(abs(q),m,self.prg,variance,n=1000,rounding_depth=5)
+        self.prt = prg_partition_for_float(abs(q),m,self.prg,variance,n=1000,rounding_depth=8)
 
     def apply_pos_delta(self): 
+
         for p in self.prt: 
+            if p < 0: 
+                #print("NEG?") 
+                continue 
+
             self.apply_one_pos_delta(p)
             self.format_ranges()
 
@@ -241,20 +246,22 @@ class SeqCoveragePermuter(AGV2SeqQualPermuter):
         # case: failure
         if type(q) in {np.float64,np.float32,float}: 
             return q 
-            assert False
 
+        # range,counter-range,range first 
         n0,n1,ri = q 
         nx = [None,None]
         nx1 = [None,None]
         nxx = [n0,n1] if ri == 0 else [n1,n0] 
         orientation = 0 if nxx[0][1] == nxx[1][0] else 1
 
+        # order is range,counter-range
         if orientation == 0:
             nx[1] = n0[1] + changean
             nx[0] = n0[0]
 
             nx1[0] = n0[1] + changean
             nx1[1] = n1[1]
+        # order is counter-range,range
         else:
             nx[0] = n1[0] - changean
             nx[1] = n1[1] 
@@ -267,11 +274,11 @@ class SeqCoveragePermuter(AGV2SeqQualPermuter):
 
     def choose_pos_delta(self,changean):
         if len(self.crs) == 0:
-            return 1.0 
+            return 1.0  
 
         qrs = qualifying_ranges_for_coverage_expansion(self.rs,self.crs,changean,\
             output_type="index")        
-        
+
         # return the maximum 
         if len(qrs) == 0:
             crs_sum = [crs_[1] - crs_[0] for crs_ in self.crs] 
@@ -338,7 +345,9 @@ class SeqCoveragePermuter(AGV2SeqQualPermuter):
     
     def format_ranges(self): 
         self.rs = to_noncontiguous_ranges(self.rs,is_sorted=True)
-        self.crs = to_noncontiguous_ranges(self.crs,is_sorted=True)
+        self.rs = np.round(self.rs,7)
+        self.crs = to_noncontiguous_ranges(list(self.crs),is_sorted=True)
+        self.crs = np.round(self.crs,7)
 
         def filter_0range(rseq): 
             rs = [] 

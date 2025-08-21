@@ -304,7 +304,8 @@ def QUALTEST_proc(splitstr_cmd,var_map):
             gauge_depth = int(splitstr_cmd[6])
             deg_vec = None 
 
-    s = "COV,DIST,ENT,DIFF1,DIFF2,MCS\n"    
+    s = "COV,DIST,ENT,DIFF1,DIFF2,MCS\n"   
+    m = 1  
     if type(G2) == type(None): 
         S = gauge_generator__MultiMetric(G,num_iter,gauge_depth,deg_vec,\
             set_frange=True,condense_ngram_output=True) 
@@ -318,6 +319,8 @@ def QUALTEST_proc(splitstr_cmd,var_map):
             set_frange=True)
         s += str(np.round(S[0],5)) + "\n"
 
+        m = 2 
+
     # get the top 5 factors 
     if type(S[1]) != type(None): 
         q = [(k,np.mean(v)) for k,v  in S[1].items() if k not in {1,2}]  
@@ -328,7 +331,7 @@ def QUALTEST_proc(splitstr_cmd,var_map):
     
     # get the frequency map 
     s += "\nnumber of unique elements: " + str(len(S[2])) + "\n"
-    s += "\ntotal number of elements: " + str(2 * num_iter) + "\n" 
+    s += "\ntotal number of elements: " + str(m * num_iter) + "\n" 
     return s
 
 def CHAINTEST_proc(splitstr_cmd,var_map): 

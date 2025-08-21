@@ -33,7 +33,7 @@ class SeqCoveragePermuterMethods(unittest.TestCase):
         cov01 = scp.cov_typeabs
 
         assert cov00 == 8.9
-        assert cov01 == 14.9
+        assert round(cov01,5) == 14.9,"got {}".format(cov01) 
 
         rs = np.array([\
         [-10.,-9.5],\
