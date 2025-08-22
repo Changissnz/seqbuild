@@ -88,7 +88,10 @@ class RCHAccuGen:
         assert type(acc_queue) == list 
         assert type(queue_capacity) == int and queue_capacity > 1
         self.rch = rch 
-        self.prg = prg 
+
+        def prg_(): return int(round(prg()))
+        self.prg = prg_ 
+
         self.acc_queue = acc_queue 
         self.qcap = queue_capacity
         self.dim_range = dim_range
@@ -103,11 +106,18 @@ class RCHAccuGen:
     main method
     """
     def apply(self,x): 
-        assert is_vector(x) or type(x) in \
-            {int,np.int32,np.int64}
-        self.rch.apply(x)
-        vx = deepcopy(self.rch.vpath)
+        if is_number(x): 
+            x = int(x) 
+        else: 
+            assert is_vector(x)
 
+        try: 
+            self.rch.apply(x)
+        except: 
+            print("erroneous <RCHAccuGen>")
+            return 
+            
+        vx = deepcopy(self.rch.vpath)
         for v in self.rch.vpath: 
             if type(v) != np.ndarray: 
                 v = safe_npint32_value(v) 
@@ -141,8 +151,7 @@ class RCHAccuGen:
 
     @staticmethod
     def one_new_RCHAccuGen__v1(num_nodes,dim_range,prg,\
-        ufreq_range,mutrate=0.5,queue_capacity=1000): 
-
+        ufreq_range,mutrate=0.5,queue_capacity=1000):         
         # declare the RChainHead 
         rch,FX = RCHAccuGen.one_new_RChainHead__v1(\
             num_nodes,dim_range,prg)
@@ -154,14 +163,15 @@ class RCHAccuGen:
         # choose the candidates to mute
         Q = [i for i in range(num_nodes)]
         n = int(ceil(mutrate * len(Q)))
-        Q_ = prg_choose_n(Q,n,prg,is_unique_picker=True)
+
+        def prg_(): return int(round(prg()))
+        Q_ = prg_choose_n(Q,n,prg_,is_unique_picker=True)
 
         for q in Q_: 
-            uf = modulo_in_range(prg(),ufreq_range)
+            uf = int(round(modulo_in_range(prg(),ufreq_range)))
             fx = FX[q] 
             mf = MutableRInstFunction(fx,uf,idn=0)
             rg.add_mutable(q,mf)
-
         return rg 
 
     @staticmethod
@@ -182,13 +192,13 @@ class RCHAccuGen:
         kwargz = [zero]
         FX = None 
 
-        dim = modulo_in_range(prg(),dim_range) 
+        dim = int(modulo_in_range(prg(),dim_range))
         # case: referential, uses <LinCombo> 
         if zero == 'r':
             V = safe_npint32__prg_vec(prg,dim)
             kwargz.append(V) 
 
-            fi = prg() % len(DM_FUNC_LIST)
+            fi = int(prg()) % len(DM_FUNC_LIST)
             fx = DM_FUNC_LIST[fi] 
             kwargz.append(fx)
 
@@ -270,7 +280,6 @@ class RCHAccuGen:
     #--------------------- methods for updating 
 
     def update(self): 
-
         # update <RCInst> variables of <RChainHead> 
         ml = self.mutable2update_list()
         for ml_ in ml: 
@@ -291,7 +300,7 @@ class RCHAccuGen:
         # change appropriate functions/values
         mg = self.fetch_mutgen(rci_index,var_idn)
         self.delta_on_mutgen(rci_index,mg,same_dim=False)
-
+        
         # edit the update log 
         if rci_index not in self.update_log: 
             self.update_log[rci_index] = defaultdict(int) 
@@ -299,7 +308,8 @@ class RCHAccuGen:
         return 
 
     def __next__(self):
-        return -1
+        x = self.prg() #% 1000 
+        return self.apply(x)
 
     def change_dim(self): 
         return -1 

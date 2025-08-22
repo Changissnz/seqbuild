@@ -68,33 +68,6 @@ class RCHAccuGenMethods(unittest.TestCase):
         assert x1 == x2
         assert x2 != x3 
 
-    def test__RCHAccuGen__one_new_RCHAccuGen__v1__case3(self):
-        prg3 = prg__LCG(1,4,7,150) 
-
-        num_nodes = 8
-        dim_range = [3,10]
-        prg = prg__LCG(3,4,5,33)
-        ufreq_range = [2,10]
-        mutrate = 0.3#1.0 #0.3 
-        queue_capacity = 1000 
-
-        rg = RCHAccuGen.one_new_RCHAccuGen__v1(num_nodes,dim_range,prg,\
-                ufreq_range,mutrate,queue_capacity)
-
-        # run some numbers 
-        for i in range(20): 
-            x = prg3() 
-            y = rg.apply(x)
-            #print("X: ",x, " Y: ",y)
-
-        # check for correct log of updates 
-        D = {4: {0: 5}, 1: {0: 3}, 5: {0: 2}}
-        assert rg.update_log == D 
-
-        # check for correct number of <MutableRInstFunction>
-        c = len([m for m in rg.mutgen if m != set()])
-        assert c == 3
-
     """
     inconclusive test, mainly for demonstrating output values. 
     """

@@ -129,6 +129,20 @@ as well as their instantiation parameters in Comm Lang.
     1. (integer)  
     * (positive integer specifying n-gram)  
 
+[o] rch  
+
+- instantiation:  
+
+    1. (integer,generator,float)  
+    * (number of nodes,generator,mutation rate)  
+
+    2. (integer,generator,float,integer)  
+    * (number of nodes,generator,mutation rate,queue capacity)  
+
+    3. (integer,generator,float,integer,float,float)  
+    * (number of nodes,generator,mutation rate,queue capacity,output range)  
+
+
 [o] op2   
 
 - instantiation:  

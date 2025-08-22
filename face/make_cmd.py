@@ -1,6 +1,7 @@
 from seqgen.gg_gen import * 
 from seqgen.mdr_gen import * 
 from seqgen.optri_gen import * 
+from seqgen.rch_gen import * 
 from desi.fraction import * 
 from desi.differentials import * 
 from intigers.lcg_v3 import * 
@@ -53,6 +54,9 @@ def MAIN_method_for_object(q):
         return q.__next__ 
 
     if type(q) == QValueOutputter:
+        return q.__next__ 
+
+    if type(q) == RCHAccuGen:
         return q.__next__ 
 
     return -1 
@@ -236,7 +240,54 @@ def MAKE_op2(splitstr_cmd,var_map):
         order = int(parameters[3]) 
         assert order in {0,1,2} 
     return one_weighted_pairwise_operator(op1,op2,weight,order)
+
+"""
+int,prg,float
+num nodes,prg,mutation rate  
+
+int,prg,float,int 
+num nodes,prg,mutation rate,queue capacity 
+
+int,prg,float,int,float,float 
+num nodes,prg,mutation rate,queue capacity,output range 
+"""
+def MAKE_rch(splitstr_cmd,var_map):
+    assert splitstr_cmd[0] == "make"
+    assert splitstr_cmd[1] == "rch" 
+    assert splitstr_cmd[2] == "with" 
+
+    q = splitstr_cmd[3].split(",") 
+    l = len(q) 
+    assert l in {3,4,6} 
+
+    num_nodes = int(q[0]) 
     
+    assert q[1] in var_map 
+    prg = var_map[q[1]] 
+    prg = MAIN_method_for_object(prg) 
+    mut_rate = float(q[2]) 
+
+    queue_capacity = 1000 
+    output_range = [-1000,1000]
+    if l >= 4: 
+        queue_capacity = int(q[3]) 
+        assert queue_capacity > 2  
+    
+    if l == 6: 
+        output_range[0] = float(q[4])
+        output_range[1] = float(q[5])
+        assert output_range[1] > output_range[0] 
+
+    output_range = tuple(output_range)
+
+    orange = (3,9)
+    ufreq_range = (2,11) 
+    rch = RCHAccuGen.one_new_RCHAccuGen__v1(num_nodes,orange,prg,\
+        ufreq_range,mut_rate,queue_capacity)
+    rch.output_range = output_range
+    return rch 
+
+
 # TODO: incomplete 
 def MAKE_proc(splitstr_cmd,var_map): 
     assert splitstr_cmd[0] == "make"
@@ -341,5 +392,8 @@ def MAKE_proc(splitstr_cmd,var_map):
 
     if splitstr_cmd[1] == "op2": 
         return MAKE_op2(splitstr_cmd,var_map) 
+
+    if splitstr_cmd[1] == "rch":
+        return MAKE_rch(splitstr_cmd,var_map) 
 
     return None

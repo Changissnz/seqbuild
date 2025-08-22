@@ -1,0 +1,4 @@
+set G = make lcg with 43,155,-322,10000. 
+set Q = make rch with 9,G,0.5.
+set Q2 = make rch with 9,G,0.5,50. 
+set Q3 = make rch with 9,G,0.5,500,-5000.06,50000.2. 
