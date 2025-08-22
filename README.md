@@ -24,6 +24,12 @@ specified by a FOSS license.
 
 Copyright 2025 Richard Pham 
 
+### Update: 8/22/25  
+
+There are still unfinished features in this project. Development will no 
+longer proceed at a regular frequency. Rolling developments, of indefinite 
+time, will be pushed to the project.
+
 ### Update: 8/14/25
 
 Development is halfway done. The `seqbuild` project now has an interface. 
