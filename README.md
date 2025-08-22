@@ -28,7 +28,7 @@ Copyright 2025 Richard Pham
 
 There are still unfinished features in this project. Development will no 
 longer proceed at a regular frequency. Rolling developments, of indefinite 
-time, will be pushed to the project.
+timing, will be pushed to the project.
 
 ### Update: 8/14/25
 
