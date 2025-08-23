@@ -1,7 +1,27 @@
 from .process_seq import * 
 from mini_dm.minmax_freq import * 
-
+from morebs2.numerical_generator import modulo_in_range
 from copy import deepcopy 
+
+
+def modulate_MA_prt(afs_prt,super_range): 
+
+    afs_prt_ = [] 
+
+    for ap in afs_prt: 
+        e0 = ap[0] 
+
+        e1 = ap[1]
+        e1_ = [] 
+
+        for x in e1:
+            x2 = list(x[0]) 
+            x2[0] = modulo_in_range(x2[0],super_range) 
+            x2[1] = modulo_in_range(x2[1],super_range) 
+            x2 = tuple(x2) 
+            e1_.append([x2,x[1]])
+        afs_prt_.append((e0,e1_)) 
+    return afs_prt_ 
 
 """
 runs frequency count of (multiple,additive) pairs on contiguous pairs in 
@@ -411,4 +431,33 @@ class ModuloDecompRepr:
         return qx2 
 
     def shift_afs_prt(self,prg): 
-        return -1 
+        q = int(prg() % len(self.afs_prt)) 
+        self.afs_prt = self.shift_afs_prt_(q) 
+        return
+
+    def noise_to_afs_prt(self,prg,auto_modrange:bool): 
+        xr = [] 
+
+        min_coeff,max_coeff = float('inf'),-float('inf') 
+
+        while len(self.afs_prt) > 0: 
+            q = self.afs_prt.pop(0) 
+
+            e0 = q[0] 
+            e1 = [] 
+            for x in q[1]: 
+                x2 = list(x[0])
+
+                min_coeff = min([min_coeff,x2[0],x2[1]]) 
+                max_coeff = max([max_coeff,x2[0],x2[1]]) 
+
+                x2[0] = x2[0] + prg() 
+                x2[1] = x2[1] + prg() 
+                x[0] = tuple(x2) 
+            xr.append(q)  
+
+        if auto_modrange: 
+            xr = modulate_MA_prt(xr,(min_coeff,max_coeff))
+        self.afs_prt = xr 
+        return
+

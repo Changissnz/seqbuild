@@ -1,5 +1,14 @@
 from intigers.seq_struct import * 
+from morebs2.numerical_generator import prg__LCG
 import unittest
+
+def ModuloDecompRepr_sample_z(): 
+
+    V = IntSeq([45.6,7,13,14.18,191,200,-3,1]) 
+    mdr1 = ModuloDecomp(V) 
+    mdr1.merge(False)
+    M = ModuloDecompRepr(mdr1,1) 
+    return M 
 
 ### lone file test 
 """
@@ -246,7 +255,46 @@ class SeqStructMethods(unittest.TestCase):
         mdr = ModuloDecompRepr(md)
         r = mdr.reconstruct()
         assert r == l 
-        return
+        return  
+
+    def test__ModuloDecompRepr__shift_afs_prt__case1(self): 
+        M = ModuloDecompRepr_sample_z() 
+
+        q = M.reconstruct()
+        q2 = M.reconstruct() 
+
+        M.gleqvec_prt = [2,4,6]
+
+        q3 = M.reconstruct()
+
+        afs_prt0 = M.afs_prt
+        afs_prt1 = M.shift_afs_prt_(2)
+        afs_prt2 = M.shift_afs_prt_(1) 
+
+        sol0 = [((0, 2), [[(1, -38), [1, 1]]]), \
+            ((2, 6), [[(14, -168), [3, 3]], [(14, -5), [4, 4]], [(14, -2474), [5, 5]]]), \
+            ((6, 8), [[(1, 4), [7, 7]]])]
+
+        sol1 = [((0, 2), [[(1, 4), [1, 1]]]), \
+            ((2, 4), [[(1, -38), [3, 3]]]), \
+            ((4, 10), [[(14, -168), [5, 5]], [(14, -5), [6, 6]], [(14, -2474), [7, 7]]])]
+
+        sol2 = [((0, 4), [[(14, -168), [1, 1]], [(14, -5), [2, 2]], [(14, -2474), [3, 3]]]), \
+            ((4, 10), [[(1, 4), [5, 5]]]), ((6, 4), [[(1, -38), [7, 7]]])]
+
+        assert afs_prt0 == sol0 
+        assert afs_prt1 == sol1 
+        assert afs_prt2 == sol2 
+
+    def test__ModuloDecompRepr__noise_to_afs_prt__case1(self): 
+        M = ModuloDecompRepr_sample_z() 
+        prg = prg__LCG(45,-67,18,901) 
+        ap0 = deepcopy(M.afs_prt )
+        M.noise_to_afs_prt(prg,True)
+        ap1 = M.afs_prt 
+
+        assert not ap0 == ap1 
+        assert len(ap0) == len(ap1) 
 
 if __name__ == '__main__':
     unittest.main()
