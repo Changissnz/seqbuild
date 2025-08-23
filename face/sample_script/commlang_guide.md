@@ -142,6 +142,12 @@ as well as their instantiation parameters in Comm Lang.
     3. (integer,generator,float,integer,float,float)  
     * (number of nodes,generator,mutation rate,queue capacity,output range)  
 
+[o] echo  
+
+- instantiation:  
+
+    1. (0|1,string)  
+    * (is periodic?,filepath)  
 
 [o] op2   
 
@@ -171,6 +177,7 @@ as well as their instantiation parameters in Comm Lang.
     [-] load  
     [-] qualtest  
     [-] chaintest  
+    [-] read  
 
 - Secondary  
     [-] with  
@@ -360,6 +367,20 @@ generators, such that the output is the difference between their associated
 4 x 2 matrices.  
 
 -----------------------------------------------------------------  
+
+[+] read  
+[-] usage  
+```  
+read <filepath>.  
+read <filepath> for <positive integer> iter.  
+```  
+[-] description  
+Reads numbers from a file that contains a numerical sequence into memory.  
+If number of iterations is specified, reads that many elements. Otherwise,  
+reads a default of 10^5 elements. 
+
+-----------------------------------------------------------------  
+
 
 [+] show  
 [-] usage  

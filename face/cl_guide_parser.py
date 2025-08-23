@@ -154,7 +154,7 @@ class CLGuideParser:
             fi_obj2 = open(SAMPLE_USE_FILE_MAP[term],"r") 
             lines = fi_obj2.readlines() 
             s = s + "\n\t\tsample use\n---------------\n"
-            s += '\n'.join(lines)
+            s += ''.join(lines)
             fi_obj2.close() 
         
         return s 
