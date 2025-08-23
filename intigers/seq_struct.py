@@ -361,3 +361,54 @@ class ModuloDecompRepr:
     def reset_first(self,f): 
         assert type(f) in {int,np.int32}
         self.first = np.int32(f) 
+
+    def shift_afs_prt_(self,index_shift): 
+        assert type(index_shift) == int  
+        index_shift = index_shift % len(self.afs_prt)
+        qx = deepcopy(self.afs_prt) 
+        qx = qx[index_shift:] + qx[:index_shift] 
+
+        # set the first element index to 0 
+        x = qx.pop(0) 
+        x0 = list(x[0]) 
+        dx = x0[0] 
+        x0[1] -= dx 
+        x0[0] = 0 
+
+        qx1 = x[1]
+        index = None
+        for qx1_ in qx1: 
+            qx1_[1][0] -= dx 
+            qx1_[1][1] -= dx 
+            index = qx1_[1][1] 
+
+        qx2 = [(tuple(x0),qx1)] 
+
+        # adjust the rest 
+        while len(qx) > 0: 
+            x = qx.pop(0) 
+
+            e0 = list(x[0]) 
+            dx = e0[1] - e0[0] 
+            e0[0] = index +1
+            e0[1] += dx 
+
+            e1 = x[1] 
+
+            start_index = e0[0] + 1 
+            e2 = [] 
+            for e1_ in e1: 
+                diff = e1_[1][1] - e1_[1][0]
+
+                xr = list(e1_[1])
+                xr[0] = start_index 
+                xr[1] = start_index + diff 
+                e1_[1] = xr 
+
+                start_index = xr[1] + 1
+                index = xr[1]
+            qx2.append((tuple(e0),e1))
+        return qx2 
+
+    def shift_afs_prt(self,prg): 
+        return -1 
