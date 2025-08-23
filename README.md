@@ -24,6 +24,21 @@ specified by a FOSS license.
 
 Copyright 2025 Richard Pham 
 
+### Brief Description (Current State)  
+
+Primary use is a research tool for pseudo-random number generators (PRNG).  
+Comm Lang is the application programming interface that `seqbuild` uses,  
+and users can express commands to gauge and generate numerical sequences  
+in this language. When user runs `main.py` (the main program), they are 
+accessing a semi-autonomous PRNG system for their personal use. They are  
+responsible for: 
+- initializing generators 
+- gauging generators and numerical sequences
+- tweaking generators and numerical sequences. 
+
+Autonomous capabilities for `seqbuild` to perpetually output values classified 
+as "random", according to certain metrics, have not been implemented. 
+
 ### Update: 8/22/25  
 
 There are still unfinished features in this project. Development will no 
