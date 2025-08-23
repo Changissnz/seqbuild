@@ -1,0 +1,5 @@
+set E = make echo with 0,dummy_file.txt.
+set V2 = run E for 200 iter. 
+
+set E2 = make echo with 1,dummy_file.txt.
+set V3 = run E2 for 200 iter.

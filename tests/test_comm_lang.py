@@ -363,5 +363,22 @@ class CommLangMethods(unittest.TestCase):
 
         clp.close() 
 
+    def test__CommLangParser__process_file__case14(self): 
+        clp = CommLangParser("face/sample_script/commond_21.txt") 
+        clp.process_file()
+
+        v2 = clp.vartable['V2']
+        v3 = clp.vartable['V3']
+        assert None in v2 and None not in v3 
+        clp.close() 
+
+    def test__CommLangParser__process_file__case15(self):
+        clp = CommLangParser("face/sample_script/commond_22.txt")
+        clp.process_file() 
+
+        vsol = [36,156,260,285,958,434,45,750,384,653,821,185]
+        V = clp.vartable['V']
+        assert V == vsol 
+
 if __name__ == '__main__':
     unittest.main()

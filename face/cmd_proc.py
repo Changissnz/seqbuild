@@ -100,24 +100,6 @@ def OPEN_proc(splitstr_cmd):
     return open(splitstr_cmd[2],write_modes[1]) 
 
 """
-load <file_object>.
-"""
-def LOAD_proc(splitstr_cmd,var_map):
-
-    assert splitstr_cmd[0] == "load"
-    assert splitstr_cmd[1] in var_map
-
-    fi_obj = var_map[splitstr_cmd[1]]  
-
-    # case: sequence 
-    if type(fi_obj) == io.TextIOWrapper:
-        return NSFileReader(fi_obj)
-    
-    # case: object 
-    assert type(fi_obj) == io.BufferedWriter 
-    return pickle.load(fi_obj)
-
-"""
 convert GENERATOR to type_x ?with arg1,...,argN?.
 
 convert G to range
@@ -367,3 +349,36 @@ def CHAINTEST_proc(splitstr_cmd,var_map):
         q2 = q2 - q2_ 
 
     return q2 
+
+"""
+reads a file containing a numerical sequence 
+--- 
+
+read <filepath>. 
+read <filepath> for <positive integer> iter.  
+"""
+def READ_proc(splitstr_cmd):
+    assert splitstr_cmd[0] == "read" 
+    assert os.path.exists(splitstr_cmd[1]) 
+
+    l = len(splitstr_cmd) 
+    assert l in {2,5}
+
+    num_iter = 10 ** 5 
+    if l == 5: 
+        assert splitstr_cmd[2] == "for" 
+        assert splitstr_cmd[4] == "iter" 
+        num_iter = int(splitstr_cmd[3])
+        assert num_iter > 0 
+
+    fi_obj = open(splitstr_cmd[1],"r")
+    nsfr = NSFileReader(fi_obj,float,False)
+
+    qs = []
+    for _ in range(num_iter): 
+        q = next(nsfr) 
+        if type(q) == type(None): break 
+
+        qs.append(q) 
+    nsfr.close() 
+    return qs

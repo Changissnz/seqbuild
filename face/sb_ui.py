@@ -2,6 +2,7 @@ import tkinter as tk
 from tkinter import filedialog,font
 from .comm_lang import * 
 from .cl_guide_parser import * 
+import time 
 
 
 """
@@ -174,8 +175,11 @@ class SBApplication(tk.Frame):
         if q[0] == "qualtest": 
             s = QUALTEST_proc(q,self.clp.vartable)
         elif q[0] == "chaintest": 
+            t0 = time.time() 
             s_ = CHAINTEST_proc(q,self.clp.vartable)
-            s = CHAINTEST_DESCRIPTOR + "\n\n" + str(s_)
+            t1 = time.time() 
+            s = CHAINTEST_DESCRIPTOR + "\n\n" + str(s_) + \
+                "\nelapsed time: " + str(t1 - t0) + " seconds."
 
         self.text_widget.delete(1.0, tk.END)
         self.text_widget.insert(tk.END, s)  

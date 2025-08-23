@@ -202,7 +202,6 @@ class CommLangParser:
     method for handling `make`,`run`,`convert`,`open`,`write` processes. 
     """
     def MRCOW_proc(self,splitstr_cmd): 
-
         try: 
             if splitstr_cmd[0] == "make":
                 return MAKE_proc(splitstr_cmd,self.vartable) 
@@ -216,10 +215,11 @@ class CommLangParser:
                 return WRITE_proc(splitstr_cmd,self.vartable) 
             elif splitstr_cmd[0] == "merge": 
                 return MERGE_proc(splitstr_cmd,self.vartable) 
+            elif splitstr_cmd[0] == "read": 
+                return READ_proc(splitstr_cmd)
         except: 
             pass 
 
-        print("erroneous command")
         self.log_error(splitstr_cmd) 
         return None 
 

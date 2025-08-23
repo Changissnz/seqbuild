@@ -14,44 +14,60 @@ and newlines.
 """
 class NSFileReader: 
 
-    def __init__(self,file_obj,castFunc): 
+    def __init__(self,file_obj,cast_func,is_periodic:bool=True): 
         assert type(file_obj) == io.TextIOWrapper
-        
-        self.f_obj = file_obj 
-        self.f_obj.seek(0,os.SEEK_END) 
-        self.f_end = self.f_obj.tell()
-        self.f_obj.seek(0)  
 
-        self.castFunc = castFunc 
+        self.fi_obj = file_obj 
+        self.cast_func = cast_func 
+        self.is_periodic = is_periodic
+        self.is_finished = False 
+        self.set_fileobj()
+
+        self.cast_func = cast_func 
         self.cache = []
 
-        self.fin_stat = False 
-
     def __next__(self):
-        if self.fin_stat: return None 
+        if len(self.cache) > 0: 
+            return self.cache.pop(0)
 
-        if len(self.cache) == 0:
-            self.load_next_sequence() 
-            return self.__next__() 
-        q = self.cache.pop(0)
-        return q 
+        stat = True 
+        while stat: 
+            stat = self.read_one_line()
+            if len(self.cache) > 0: break 
+        
+        if len(self.cache) == 0: 
+            return None 
+        return self.cache.pop(0)
 
-    def load_next_sequence(self):
-        l,stat = self.load_next_line() 
+    def read_one_line(self): 
+        if self.is_finished: 
+            return False 
 
-        if not stat: 
-            self.fin_stat = True
+        if self.fi_obj.tell() == self.fi_end: 
+            self.is_finished = True 
+            self.reload() 
+
+        l = self.fi_obj.readline().strip()
+        if len(l) == 0: 
+            return True 
+
+        V = string_to_vector(l,self.cast_func)
+        self.cache.extend(V) 
+        return True 
+
+    def reload(self):
+        if not self.is_periodic:
             return 
+        self.set_fileobj()
+        self.is_finished = False 
+        return
 
-        svec = string_to_vector(l,self.castFunc) 
-        self.cache.extend(svec) 
-
-    def load_next_line(self):
-        if self.f_obj.tell() != self.f_end:
-            line = self.f_obj.readline()
-            return line,True 
-        return None,False 
+    def set_fileobj(self):
+        self.fi_obj.seek(0,os.SEEK_END) 
+        self.fi_end = self.fi_obj.tell()
+        self.fi_obj.seek(0)
+        return 
 
     def close(self): 
-        self.f_obj.close() 
+        self.fi_obj.close() 
         del self 

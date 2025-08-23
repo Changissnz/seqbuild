@@ -6,10 +6,11 @@ from desi.fraction import *
 from desi.differentials import * 
 from intigers.lcg_v3 import * 
 from intigers.prng_pw_op import *
+from mini_dm.nsfr import * 
 
 BASE_PRNG = ["lcg","lcgv2","lcgv3","mdr","mdrv2",\
         "mdrgen","idforest","optri","rch","qval",\
-        "pid"]  
+        "pid","echo"]  
 
 ARITHMETIC_OP_STR_MAP = {"+":add,"-":sub,"/":zero_div0,"*":mul} 
 
@@ -57,6 +58,9 @@ def MAIN_method_for_object(q):
         return q.__next__ 
 
     if type(q) == RCHAccuGen:
+        return q.__next__ 
+
+    if type(q) == NSFileReader:
         return q.__next__ 
 
     return -1 
@@ -287,6 +291,26 @@ def MAKE_rch(splitstr_cmd,var_map):
     rch.output_range = output_range
     return rch 
 
+def MAKE_echo(splitstr_cmd):
+    assert splitstr_cmd[1] == "echo" 
+    assert splitstr_cmd[2] == "with" 
+
+    is_periodic = False 
+    file_path = None 
+    if "," in splitstr_cmd[3]:
+        qx = splitstr_cmd[3].split(",") 
+        assert len(qx) == 2 
+
+        is_periodic = bool(int(qx[0]))
+        file_path = qx[1] 
+    else: 
+        file_path = splitstr_cmd[3]
+
+    assert os.path.exists(file_path) 
+    fi_obj = open(file_path,'r')
+    nsfr = NSFileReader(fi_obj,float,is_periodic)
+    return nsfr 
+
 
 # TODO: incomplete 
 def MAKE_proc(splitstr_cmd,var_map): 
@@ -395,5 +419,8 @@ def MAKE_proc(splitstr_cmd,var_map):
 
     if splitstr_cmd[1] == "rch":
         return MAKE_rch(splitstr_cmd,var_map) 
+
+    if splitstr_cmd[1] == "echo":
+        return MAKE_echo(splitstr_cmd)
 
     return None
