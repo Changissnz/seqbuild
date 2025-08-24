@@ -3,6 +3,7 @@ from intigers.tvec import *
 from intigers.intfactor import * 
 from mini_dm.iseq import * 
 from intigers.poly_output_fitter_ import * 
+from intigers.extraneous import to_trinary_relation,to_trinary_relation_v2
 
 DEFAULT_SHADOW_FITTERS = {"mdr","mdrv2","tvec","fvec","optri","pofv1","pofv2"}
 
@@ -16,14 +17,15 @@ class QualVec:
         self.vec = vec 
         self.qual = qual 
         self.qual_op = qual_op 
-        self.qvec = None 
+        self.qvec,self.qvec_,self.qvec2 = None,None,None
+        self.qualvec() 
         return 
 
     def qualvec(self): 
         if self.qual == "tvec": 
-            V0 = stdop_vec(self.vec,sub,float)
-            V = to_trinary_relation_v2(V0,None,zero_feature=True,abs_feature=False)
-            self.qvec = TrinaryVec(V) 
+            V0 = stdop_vec(self.vec,sub,np.float32)
+            self.qvec = to_trinary_relation_v2(V0,None,zero_feature=True,abs_feature=False)
+            #self.qvec = TrinaryVec(V) 
         elif self.qual == "fvec":
             isfso = ISFactorSetOps(np.array(self.vec,dtype=int),int_limit=DEFAULT_INT_MAX_THRESHOLD,str_mode_full=True) 
             isfso.factor_count_() 
@@ -43,6 +45,7 @@ class QualVec:
 
         if self.qual == "tvec": 
             self.qvec = round_to_trinary_vector(self.qvec,is_distance_roundtype=True)
+            return self.refit__tvec()
         return
 
     def refit__tvec(self):
