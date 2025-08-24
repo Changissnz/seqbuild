@@ -149,6 +149,13 @@ as well as their instantiation parameters in Comm Lang.
     1. (0|1,string)  
     * (is periodic?,filepath)  
 
+[o] shadow  
+
+- instantiation:  
+
+    1. (generator,mdr|mdrv2|tvec|fvec|optri,string)  
+    * (!,fitter,filepath)  
+
 [o] op2   
 
 - instantiation:  

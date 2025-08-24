@@ -175,7 +175,8 @@ class ShadowGen(NSFileReader):
                 lx = len(self.fitter.afs_prt) 
                 lx = lx ** 2 
                 s = int(round(self.prg() % lx))
-                self.fitter.shift_afs_prt(s) 
+                q = self.fitter.shift_afs_prt_(s) 
+                self.fitter.afs_prt = q 
             # case: add noise to partition 
             else: 
                 self.fitter.noise_to_afs_prt(self.prg,True)

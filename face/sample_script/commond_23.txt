@@ -1,0 +1,4 @@
+set G = make lcg with 654,145,-431,9000.  
+set G span to -120.01,119.9.  
+
+set G2 = make shadow with G,mdr,dummy_file.txt.  

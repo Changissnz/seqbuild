@@ -2,15 +2,16 @@ from seqgen.gg_gen import *
 from seqgen.mdr_gen import * 
 from seqgen.optri_gen import * 
 from seqgen.rch_gen import * 
+from seqgen.shadow_gen import * 
 from desi.fraction import * 
 from desi.differentials import * 
 from intigers.lcg_v3 import * 
 from intigers.prng_pw_op import *
-from mini_dm.nsfr import * 
+#from mini_dm.nsfr import * 
 
 BASE_PRNG = ["lcg","lcgv2","lcgv3","mdr","mdrv2",\
         "mdrgen","idforest","optri","rch","qval",\
-        "pid","echo"]  
+        "pid","echo","shadow"]  
 
 ARITHMETIC_OP_STR_MAP = {"+":add,"-":sub,"/":zero_div0,"*":mul} 
 
@@ -61,6 +62,9 @@ def MAIN_method_for_object(q):
         return q.__next__ 
 
     if type(q) == NSFileReader:
+        return q.__next__ 
+
+    if type(q) == ShadowGen:
         return q.__next__ 
 
     return -1 
@@ -311,6 +315,22 @@ def MAKE_echo(splitstr_cmd):
     nsfr = NSFileReader(fi_obj,float,is_periodic)
     return nsfr 
 
+def MAKE_shadow(splitstr_cmd,var_map):
+    assert splitstr_cmd[1] == "shadow" 
+    assert splitstr_cmd[2] == "with" 
+
+    q = splitstr_cmd[3].split(",")
+    assert len(q) == 3 
+
+    assert q[0] in var_map 
+    prg = var_map[q[0]] 
+    prg = MAIN_method_for_object(prg) 
+    file_path = q[2] 
+    fitting_struct = q[1] 
+    assert os.path.exists(q[2])
+
+    sg = ShadowGen(prg,file_path,fitting_struct)
+    return sg 
 
 # TODO: incomplete 
 def MAKE_proc(splitstr_cmd,var_map): 
@@ -421,6 +441,9 @@ def MAKE_proc(splitstr_cmd,var_map):
         return MAKE_rch(splitstr_cmd,var_map) 
 
     if splitstr_cmd[1] == "echo":
-        return MAKE_echo(splitstr_cmd)
+        return MAKE_echo(splitstr_cmd) 
 
-    return None
+    if splitstr_cmd[1] == "shadow":
+        return MAKE_shadow(splitstr_cmd,var_map)
+
+    raise ValueError("diffektor") 
