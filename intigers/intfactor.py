@@ -230,10 +230,14 @@ class ISFactorSetOps:
         return s 
 
     def all_factors(self): 
-        vs = set() 
-        for v in self.factors.values(): 
-            vs |= set(v) 
-        return vs  
+        return flatten_setseq(self.factors) 
+
+    def factor_map(self): 
+        q = dict() 
+        
+        for (i_,i) in enumerate(self.iseq): 
+            q[i] = self.factors[i_] 
+        return q  
 
     def __str__(self): 
         s = ""

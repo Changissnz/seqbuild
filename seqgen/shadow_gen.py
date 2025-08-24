@@ -3,7 +3,8 @@ from intigers.tvec import *
 from intigers.intfactor import * 
 from mini_dm.iseq import * 
 from intigers.poly_output_fitter_ import * 
-from intigers.extraneous import to_trinary_relation,to_trinary_relation_v2
+from intigers.extraneous import to_trinary_relation,to_trinary_relation_v2,zero_div0
+
 
 DEFAULT_SHADOW_FITTERS = {"mdr","mdrv2","tvec","fvec","optri","pofv1","pofv2"}
 
@@ -32,20 +33,23 @@ class QualVec:
             factors = isfso.all_factors()
             self.qvec = np.array(sorted(factors),dtype=int) if len(factors) != 0 else None 
             self.qvec_ = deepcopy(self.qvec)
-            self.qvec2 = isfso.factors 
+            self.qvec2 = isfso.factor_map() 
         else: 
             self.qvec = stdop_vec(self.vec,self.qual_op,cast_type = float)
         return
 
     def apply_noise(self,prg): 
-        # case: fvec 
 
         for i in range(len(self.qvec)): 
             self.qvec[i] = self.qvec[i] + prg() 
 
+        # case: tvec 
         if self.qual == "tvec": 
             self.qvec = round_to_trinary_vector(self.qvec,is_distance_roundtype=True)
-            return self.refit__tvec()
+            return self.refit__tvec() 
+        # case: fvec 
+        if self.qual == "fvec":
+            return self.refit__fvec() 
         return
 
     def refit__tvec(self):
@@ -69,7 +73,7 @@ class QualVec:
             fs2 = [] 
             mfs = []
             for f in fs: 
-                i = np.where(self.qvec == f)[0] 
+                i = np.where(self.qvec_ == f)[0] 
                 assert len(i) == 1 
                 i = i[0] 
                 f2 = self.qvec_[i] 
