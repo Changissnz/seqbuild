@@ -2,6 +2,7 @@ from intigers.mdr_v2 import *
 from intigers.tvec import * 
 from intigers.intfactor import * 
 from mini_dm.iseq import * 
+from mini_dm.nsfr import * 
 from intigers.poly_output_fitter_ import * 
 from intigers.extraneous import to_trinary_relation,to_trinary_relation_v2,zero_div0
 
@@ -97,21 +98,66 @@ class QualVec:
             v2.append(self.inverted_qual_op(v2[-1],v)) 
         return v2 
 
-class ShadowFitter:
+DEFAULT_SHADOWGEN_BASESEQ_LENGTH_RANGE = [7,91]
 
-    def __init__(self,fitter_idn,prg): 
-        assert fitter_idn in DEFAULT_SHADOW_FITTERS
-        self.fitter_idn = fitter_idn 
-        self.fitter = None 
-        return 
+class ShadowGen(NSFileReader): 
 
-    def apply_delta(self):
-        return 
+    def __init__(self,prg,file_path,fitting_struct,cast_func = cr):
+        assert type(prg) in {MethodType,FunctionType}
+        assert os.path.exists(file_path)
 
-    def refit_sequence(self):
-        return 
+        self.prg = prg 
+        self.file_path = file_path
 
-class ShadowGen: 
+        file_obj = open(self.file_path,'r') 
+        is_periodic = True 
+        self.nsfr = NSFileReader(file_obj,cast_func,is_periodic)
 
-    def __init__(self,fitting_struct):
+        self.queue = [] 
         return
+
+    def __next__(self): 
+        if len(self.queue) == 0: 
+            self.load_next_fitter()
+        return self.queue.pop(0)
+
+    def load_next_fitter(self): 
+        L = int(round(modulo_in_range(self.prg(),DEFAULT_SHADOWGEN_BASESEQ_LENGTH_RANGE)))
+        S = [] 
+        for _ in range(L): 
+            S.append(next(self.nsfr)) 
+        self.fit_sequence(S)
+
+        q = self.mod_sequence()
+        self.queue.extend(q) 
+
+    def fit_sequence(self,S): 
+        if self.fitting_struct[:3] == "mdr": 
+            t = 1 
+            if self.fitting_struct == "mdrv2":  
+                md = ModuloDecompV2(s,False) 
+                t = 2 
+            else: 
+                md = ModuloDecomp(S) 
+                md.merge(False)  
+            self.fitter = ModuloDecompRepr(md,t)
+        else: 
+            self.fitter = QualVec(deepcopy(S),self.fitting_struct,qual_op=sub)
+        return 
+
+    def mod_sequence(self): 
+
+        if type(self.fitter) == ModuloDecompRepr:
+            d = int(round(self.prg() % 2)) 
+
+            # case: shift the partition 
+            if d: 
+                lx = len(self.fitter.afs_prt) 
+                lx = lx ** 2 
+                s = int(round(self.prg() % lx))
+                self.fitter.shift_afs_prt(s) 
+            # case: add noise to partition 
+            else: 
+                self.fitter.noise_to_afs_prt(self.prg,True)
+            return self.fitter.reconstruct() 
+        return self.fitter.apply_noise(self.prg) 
