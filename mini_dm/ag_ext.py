@@ -403,7 +403,7 @@ class APRNGGaugeV2(APRNGGauge):
     D_1,...,D_(j-1). 
 
     And their compressed float forms are 
-    f_1,...,f_j (see method<accum_factor_frequency_map>).
+    f_1,...,f_(j-1) (see method<accum_factor_frequency_map>).
 
     Output from the test is then a 4 x 2 matrix with values 
     for: 
