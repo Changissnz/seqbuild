@@ -6,6 +6,7 @@ from .iseq import *
 from intigers.process_seq import stdop_vec
 from intigers.extraneous import zero_div0,to_trinary_relation_v2
 from intigers.intfactor import * 
+from intigers.poly_output_fitter_ import * 
 
 #------------------------ auxiliary functions used by <APRNGGaugeV2> for 
 #------------------------ measures such as matching and summarization 
@@ -423,8 +424,11 @@ class APRNGGaugeV2(APRNGGauge):
         tx2 = [] 
         
         def factor_func(cl):
-            X = np.array([self.aprng() for _ in range(cl)],\
-                dtype=np.int32) 
+            X = np.array([self.aprng() for _ in range(cl)]) 
+            X = [modulo_in_range(x,[-NPINT32_MAX+1,NPINT32_MAX]) for x in X]
+            X = np.array(X,dtype=np.int32)
+
+
             m0,m1 = np.min(X),np.max(X) 
             tx.append((m0,m1)) 
             isfso = ISFactorSetOps(X)

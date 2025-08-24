@@ -44,14 +44,25 @@ def accum_factor_frequency_map(ffm):
     return np.sum([abs(k*v) for k,v in ffm.items()]) 
 
 """
-set operations of multiples for an integer sequence
+set operations of multiples for an integer sequence.
+
+NOTE: 
+if sequence `l` contains at least 1 number with absolute value that 
+exceeds `int_limit`, then `l` is modded into the range 
+        [-DEFAULT_INT_MAX_THRESHOLD,DEFAULT_INT_MAX_THRESHOLD].
 """
 class ISFactorSetOps: 
 
     def __init__(self,l,int_limit=DEFAULT_INT_MAX_THRESHOLD,str_mode_full:bool=True):  
         assert len(l) >= 2
-        assert abs(min(l)) <= DEFAULT_INT_MAX_THRESHOLD and \
-            abs(max(l)) <= DEFAULT_INT_MAX_THRESHOLD
+
+        min0,max0 = min(l),max(l)
+        stat = abs(min0) <= DEFAULT_INT_MAX_THRESHOLD and abs(max0) <= DEFAULT_INT_MAX_THRESHOLD
+
+        if not stat: 
+            l = [modulo_in_range(l_,[-DEFAULT_INT_MAX_THRESHOLD,DEFAULT_INT_MAX_THRESHOLD]) \
+                for l_ in l] 
+
         self.iseq = IntSeq(l) 
         # element in iseq -> factors 
         self.factors = factors_of_seq(self.iseq) 
