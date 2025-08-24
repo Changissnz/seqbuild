@@ -5,7 +5,7 @@ from mini_dm.iseq import *
 from mini_dm.nsfr import * 
 from intigers.poly_output_fitter_ import * 
 from intigers.extraneous import to_trinary_relation,to_trinary_relation_v2,zero_div0
-
+from morebs2.matrix_methods import cr 
 
 DEFAULT_SHADOW_FITTERS = {"mdr","mdrv2","tvec","fvec","optri","pofv1","pofv2"}
 
@@ -13,7 +13,8 @@ class QualVec:
 
     def __init__(self,vec,qual,qual_op=sub,inverted_qual_op=add):
         assert len(vec) >= 2 
-        assert is_vector(vec)
+        if not is_vector(vec): 
+            vec = np.array(vec) 
         assert qual in {"tvec","fvec","optri"} 
 
         self.vec = vec 
@@ -105,6 +106,7 @@ class ShadowGen(NSFileReader):
     def __init__(self,prg,file_path,fitting_struct,cast_func = cr):
         assert type(prg) in {MethodType,FunctionType}
         assert os.path.exists(file_path)
+        assert fitting_struct in DEFAULT_SHADOW_FITTERS
 
         self.prg = prg 
         self.file_path = file_path
@@ -112,6 +114,8 @@ class ShadowGen(NSFileReader):
         file_obj = open(self.file_path,'r') 
         is_periodic = True 
         self.nsfr = NSFileReader(file_obj,cast_func,is_periodic)
+        self.fitting_struct = fitting_struct 
+        self.fitter = None 
 
         self.queue = [] 
         return
@@ -119,7 +123,23 @@ class ShadowGen(NSFileReader):
     def __next__(self): 
         if len(self.queue) == 0: 
             self.load_next_fitter()
-        return self.queue.pop(0)
+        
+        x = self.queue.pop(0) 
+
+        # ensures no np.nan values are output 
+        stat = np.isnan(x) 
+        while stat: 
+            if len(self.queue) == 0: 
+                stat = False 
+                continue 
+
+            x = self.queue.pop(0) 
+            stat = np.isnan(x) 
+
+        if np.isnan(x): 
+            return self.__next__() 
+
+        return x
 
     def load_next_fitter(self): 
         L = int(round(modulo_in_range(self.prg(),DEFAULT_SHADOWGEN_BASESEQ_LENGTH_RANGE)))
@@ -135,10 +155,10 @@ class ShadowGen(NSFileReader):
         if self.fitting_struct[:3] == "mdr": 
             t = 1 
             if self.fitting_struct == "mdrv2":  
-                md = ModuloDecompV2(s,False) 
+                md = ModuloDecompV2(IntSeq(S),False) 
                 t = 2 
             else: 
-                md = ModuloDecomp(S) 
+                md = ModuloDecomp(IntSeq(S)) 
                 md.merge(False)  
             self.fitter = ModuloDecompRepr(md,t)
         else: 
