@@ -229,6 +229,12 @@ class ISFactorSetOps:
                 s |= {self.iseq[i]} 
         return s 
 
+    def all_factors(self): 
+        vs = set() 
+        for v in self.factors.values(): 
+            vs |= set(v) 
+        return vs  
+
     def __str__(self): 
         s = ""
         for (i,f) in enumerate(self.factors): 
