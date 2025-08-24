@@ -10,7 +10,7 @@ DEFAULT_SHADOW_FITTERS = {"mdr","mdrv2","tvec","fvec","optri","pofv1","pofv2"}
 
 class QualVec: 
 
-    def __init__(self,vec,qual,qual_op=sub):
+    def __init__(self,vec,qual,qual_op=sub,inverted_qual_op=add):
         assert len(vec) >= 2 
         assert is_vector(vec)
         assert qual in {"tvec","fvec","optri"} 
@@ -18,6 +18,7 @@ class QualVec:
         self.vec = vec 
         self.qual = qual 
         self.qual_op = qual_op 
+        self.inverted_qual_op = inverted_qual_op
         self.qvec,self.qvec_,self.qvec2 = None,None,None
         self.qualvec() 
         return 
@@ -50,7 +51,7 @@ class QualVec:
         # case: fvec 
         if self.qual == "fvec":
             return self.refit__fvec() 
-        return
+        return self.refit__optri()
 
     def refit__tvec(self):
         rx = [self.vec[0]]  
@@ -91,7 +92,10 @@ class QualVec:
         return np.array(v2)
 
     def refit__optri(self): 
-        return -1 
+        v2 = [self.vec[0]] 
+        for v in self.qvec: 
+            v2.append(self.inverted_qual_op(v2[-1],v)) 
+        return v2 
 
 class ShadowFitter:
 

@@ -37,7 +37,19 @@ class QualVecMethods(unittest.TestCase):
 
         xx[6] = 4 
         xx_sol[6] = 4 
-        assert np.all(xx == xx_sol)
+        assert np.all(xx == xx_sol) 
+
+    def test__QualVec__apply_noise__case3(self):  
+        vec = np.array([2,6,171,5141,141,41,1,414,17352,13416])
+        qual = "optri"
+        prg = prg__LCG(87,51,-311,40040)
+
+        qv2 = QualVec(deepcopy(vec),qual,qual_op=sub,inverted_qual_op=add) 
+        xx = qv2.apply_noise(prg) 
+
+        err = np.sum(np.abs(np.array(xx) - vec))
+        err_sol = np.float64(536055.0)
+        assert err == err_sol
 
 if __name__ == '__main__':
     unittest.main()
