@@ -37,7 +37,16 @@ responsible for:
 - tweaking generators and numerical sequences.  
 
 Autonomous capabilities for `seqbuild` to perpetually output values classified 
-as "random", according to certain metrics, have not been implemented. 
+as "random", according to certain metrics, have not been implemented. The capabilities  
+of reading generators from and writing generators to files have also not been  
+implemented. This is due to the essential role of the `pickle` library. The  
+`pickle` library does not support the storage of Python objects that are closures  
+or contain closures. A closure in the Python programming language is a function nested  
+inside another function; there are variants with "lambda","method", and "function".  
+The `json` library also does not store objects of or related to closures. Without a  
+convenient methodology for reading generators from and writing generators to files,  
+it is easy to see why these capabilities have not been implemented, however important  
+they are.  
 
 ### Update: 8/22/25  
 
