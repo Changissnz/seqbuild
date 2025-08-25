@@ -423,11 +423,13 @@ class APRNGGaugeV2(APRNGGauge):
         tx = [] # get var,mean at end 
         tx2 = [] 
         
+        mrange = [-NPINT32_MAX+20,NPINT32_MAX-10]
         def factor_func(cl):
             X = np.array([self.aprng() for _ in range(cl)]) 
-            X = [modulo_in_range(x,[-NPINT32_MAX+1,NPINT32_MAX]) for x in X]
-            X = np.array(X,dtype=np.int32)
 
+            # modulate 
+            X = [modulo_in_range(x,mrange) if not mrange[0] <= x <= mrange[1] else x for x in X]
+            X = np.array(X,dtype=np.int32)
 
             m0,m1 = np.min(X),np.max(X) 
             tx.append((m0,m1)) 
