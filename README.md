@@ -51,7 +51,7 @@ they are.
 ### Update: 8/26/25  
 
 The main program now includes an `encrypt` Comm Lang command. In cases where `np.nan`, 
-`np.inf`, and `None` are the ciphertext elements, there is not an easy way to map to the 
+`np.inf`, or `None` is the ciphertext element, there is not an easy way to map to the 
 plaintext character from it. This particular `encrypt` command can be used for 
 one-way encryption.
 
