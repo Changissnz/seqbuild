@@ -48,6 +48,13 @@ convenient methodology for reading generators from and writing generators to fil
 it is easy to see why these capabilities have not been implemented, however important 
 they are. 
 
+### Update: 8/26/25  
+
+The main program now includes an `encrypt` Comm Lang command. In cases where `np.nan`, 
+`np.inf`, and `None` are the ciphertext elements, there is not an easy way to map to the 
+the plaintext character from it. This particular `encrypt` command can be used for 
+one-way encryption.
+
 ### Update: 8/22/25  
 
 There are still unfinished features in this project. Development will no 
