@@ -217,6 +217,9 @@ class CommLangParser:
                 return MERGE_proc(splitstr_cmd,self.vartable) 
             elif splitstr_cmd[0] == "read": 
                 return READ_proc(splitstr_cmd)
+            # WARNING: 
+            elif splitstr_cmd[0] == "encrypt": 
+                return ENCRYPT_proc(splitstr_cmd,self.vartable) 
         except: 
             pass 
 

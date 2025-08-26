@@ -388,6 +388,19 @@ reads a default of 10^5 elements.
 
 -----------------------------------------------------------------  
 
+[+] encrypt  
+[-] usage  
+```  
+encrypt <infile_path> with <outfile_path,generator>.  
+encrypt <str> with <str,!>.  
+```  
+[-] description  
+A command that can perform one-way encryption (not guaranteed) on  
+a text file of ASCII characters. There is no provided decryption  
+function. The plaintext file is not deleted. 
+
+-----------------------------------------------------------------  
+
 
 [+] show  
 [-] usage  

@@ -1,2 +1,3 @@
 set G = make lcg with 87,51,-311,40040. 
 set Q2 = make rch with 9,G,0.5,50. 
+encrypt README.md with main3.py,Q2. 

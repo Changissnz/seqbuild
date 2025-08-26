@@ -7,7 +7,7 @@ from desi.fraction import *
 from desi.differentials import * 
 from intigers.lcg_v3 import * 
 from intigers.prng_pw_op import *
-#from mini_dm.nsfr import * 
+from seqgen.sb_crypt import * 
 
 BASE_PRNG = ["lcg","lcgv2","lcgv3","mdr","mdrv2",\
         "mdrgen","idforest","optri","rch","qval",\

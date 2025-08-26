@@ -382,3 +382,23 @@ def READ_proc(splitstr_cmd):
         qs.append(q) 
     nsfr.close() 
     return qs
+
+"""
+encrypt <filepath> with <outfile,prg>.
+"""
+def ENCRYPT_proc(splitstr_cmd,var_map): 
+    assert splitstr_cmd[0] == "encrypt"
+    assert os.path.exists(splitstr_cmd[1])
+    assert splitstr_cmd[2] == "with" 
+
+    qx = splitstr_cmd[3].split(",") 
+    
+    inf1 = splitstr_cmd[1] 
+    outf1 = qx[0] 
+    assert qx[1] in var_map 
+
+    G = MAIN_method_for_object(var_map[qx[1]]) 
+    sbc = SBCrypt(inf1,outf1,G,0.5) 
+    while not sbc.fin_stat:
+        sbc.encrypt_one_chunk()
+    sbc.close() 

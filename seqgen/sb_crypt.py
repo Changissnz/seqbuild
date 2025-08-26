@@ -1,4 +1,5 @@
 from .rch_gen import * 
+from types import MethodType,FunctionType
 import os 
 
 DEFAULT_CHARACTER_MAP = ord 
