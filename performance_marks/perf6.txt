@@ -1,0 +1,46 @@
+Test Data File (String/URL):
+C:/Users/Rpg4p/seqbuild/performance_marks/f6xx.txt
+
+
+Type of Test                                      	P-Value             	Conclusion
+01. Frequency (Monobit) Test                      	2.6785223425411122e-05	Non-Random
+02. Frequency Test within a Block                 	0.0028213021881574474	Non-Random
+03. Runs Test                                     	0.0                 	Non-Random
+04. Test for the Longest Run of Ones in a Block   	7.17421974714324e-11	Non-Random
+05. Binary Matrix Rank Test                       	-1.0                	Non-Random
+06. Discrete Fourier Transform (Spectral) Test    	0.0008056937900203383	Non-Random
+07. Non-overlapping Template Matching Test        	0.9994513613554487  	Random
+08. Overlapping Template Matching Test            	nan                 	Non-Random
+09. Maurer's "Universal Statistical" Test         	-1.0                	Non-Random
+10. Linear Complexity Test                        	-1.0                	Non-Random
+11. Serial Test:
+													0.0                 	Non-Random
+													0.0                 	Non-Random
+12. Approximate Entropy Test                      	1.0                 	Random
+13. Cumulative Sums Test (Forward)                	3.5655322190334345e-05	Non-Random
+14. Cumulative Sums Test (Backward)               	2.354267819533969e-05	Non-Random
+15. Random Excursions Test:
+				State     	Chi Squared         	P-Value             	Conclusion
+				-4        	0.7059558517284465  	0.9826402055223541  	Random
+				-3        	0.9052              	0.9698440333470613  	Random
+				-2        	5.746913580246914   	0.3316293658786973  	Random
+				-1        	2.0                 	0.8491450360846096  	Random
+				+1        	4.5                 	0.4798834381132997  	Random
+				+2        	5.746913580246914   	0.3316293658786973  	Random
+				+3        	7.125999999999999   	0.21143692844923936 	Random
+				+4        	8.142857142857142   	0.14853624533090573 	Random
+16. Random Excursions Variant Test:
+				State     	COUNTS              	P-Value             	Conclusion
+				-9.0      	4                   	0.8083651559145103  	Random
+				-8.0      	4                   	0.7962534147376392  	Random
+				-7.0      	4                   	0.7815112949987133  	Random
+				-6.0      	4                   	0.763024600552995   	Random
+				-5.0      	3                   	0.6769222390213793  	Random
+				-4.0      	6                   	0.8501067391385259  	Random
+				-3.0      	9                   	0.910979292510634   	Random
+				-2.0      	7                   	0.8852339144732015  	Random
+				-1.0      	6                   	0.6170750774519739  	Random
+				+1.0      	9                   	0.8025873486341526  	Random
+				+2.0      	7                   	0.8852339144732015  	Random
+				+3.0      	4                   	0.6547208460185769  	Random
+				+4.0      	2                   	0.5707503880581739  	Random
