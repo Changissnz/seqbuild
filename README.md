@@ -46,7 +46,16 @@ inside another function; there are variants with "lambda","method", and "functio
 The `json` library also does not store objects of or related to closures. Without a 
 convenient methodology for reading generators from and writing generators to files, 
 it is easy to see why these capabilities have not been implemented, however important 
-they are. 
+they are.  
+
+### Update: 8/27/25  
+
+I have decided to add a new folder, `performance_marks`, that contain files named  
+`fYxx.txt`, along with their corresponding randomness test results `perfY.txt`. The  
+tests are done by an implementation of MNIST Randomness Testing Suite. And this implementation 
+can be found at the link below.  
+
+`https://github.com/stevenang/randomness_testsuite.git`. 
 
 ### Update: 8/26/25  
 

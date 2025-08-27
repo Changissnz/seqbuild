@@ -17,5 +17,5 @@ set O2 = make op2 with *,/,0.4.
 set G8 = merge G7,G5 with O2. 
 set G9 = merge G7,G5,G4,G6,G7 to tree. 
 
-set F = open file f1xx.txt for seq. 
-write G9 for 20 iter to F.
+set F = open file f2xx.txt for seq. 
+write G9 for 2000 iter to F.

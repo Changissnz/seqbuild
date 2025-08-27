@@ -1,0 +1,45 @@
+Test Data File (String/URL):
+C:/Users/Rpg4p/seqbuild/performance_marks/f4xx.txt
+
+
+Type of Test                                      	P-Value             	Conclusion
+01. Frequency (Monobit) Test                      	0.02092133533779403 	Random
+02. Frequency Test within a Block                 	0.11161176829829224 	Random
+03. Runs Test                                     	0.15125067953931054 	Random
+04. Test for the Longest Run of Ones in a Block   	0.15279836842619277 	Random
+05. Binary Matrix Rank Test                       	-1.0                	Non-Random
+06. Discrete Fourier Transform (Spectral) Test    	0.4267767365329881  	Random
+07. Non-overlapping Template Matching Test        	0.9999978530657374  	Random
+08. Overlapping Template Matching Test            	nan                 	Non-Random
+09. Maurer's "Universal Statistical" Test         	-1.0                	Non-Random
+10. Linear Complexity Test                        	-1.0                	Non-Random
+11. Serial Test:
+													0.004013052438218447	Non-Random
+													0.9709660408254038  	Random
+12. Approximate Entropy Test                      	1.0                 	Random
+13. Cumulative Sums Test (Forward)                	0.023079976980447697	Random
+14. Cumulative Sums Test (Backward)               	0.023079976980447697	Random
+15. Random Excursions Test:
+				State     	Chi Squared         	P-Value             	Conclusion
+				-4        	0.8272148509549593  	0.9752651154216654  	Random
+				-3        	0.9487999999999996  	0.9665887981607446  	Random
+				-2        	1.8536155202821867  	0.8690066180215681  	Random
+				-1        	5.0                 	0.41588018699550794 	Random
+				+1        	3.0                 	0.6999858358786277  	Random
+				+2        	3.920634920634921   	0.5608983344105738  	Random
+				+3        	4.314285714285715   	0.5051088693323209  	Random
+				+4        	1.0                 	0.9625657732472964  	Random
+16. Random Excursions Variant Test:
+				State     	COUNTS              	P-Value             	Conclusion
+				-9.0      	4                   	0.8458148386257579  	Random
+				-8.0      	9                   	0.8902300549434974  	Random
+				-7.0      	8                   	0.9409109772278318  	Random
+				-6.0      	3                   	0.7472033251006591  	Random
+				-5.0      	4                   	0.7892680261342813  	Random
+				-4.0      	9                   	0.8398928732712689  	Random
+				-3.0      	13                  	0.47328946538009    	Random
+				-2.0      	12                  	0.4404006981390032  	Random
+				-1.0      	9                   	0.5929800980174267  	Random
+				+1.0      	4                   	0.4226780741706355  	Random
+				+2.0      	3                   	0.5370939784426416  	Random
+				+3.0      	1                   	0.47328946538009    	Random
