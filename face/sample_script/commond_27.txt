@@ -1,0 +1,3 @@
+set G = make lcg with 64,-41,57,400.  
+set F = open file f1xx.txt for seq. 
+write G for 2000 iter to F. 

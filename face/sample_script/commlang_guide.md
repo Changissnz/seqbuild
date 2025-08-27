@@ -301,11 +301,15 @@ requires a range generator as its primary argument.
 [-] usage  
 ```
 merge <generator_1,...,generator_j> with <operator_1,...,operator_(j-1)>.  
+merge <generator_1,...,generator_j> to tree. 
 ```
 [-] description  
 Produces a new generator `G_(j+1)` out of a list of `j` generators,  
 `j` at least 2. Every output value of `G_(j+1)` is  
     `G_1 op_1 G_2 op_2 ... G_(j-1) op_(j-1) G_j.`  
+In the secondary use case, produces a new generator `G_(j+1)`  
+such that  
+`G_(j+1)() = G_i(); i++.`  
 
 -------------------------------------------------------------------  
 

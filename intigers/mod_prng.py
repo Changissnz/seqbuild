@@ -9,7 +9,7 @@ class ModPRNGOutputter:
     def __init__(self,prngs):
         for x in prngs: 
             assert type(x) in {FunctionType,MethodType}
-
+        
         self.prngs = prngs
         self.i = 0
 

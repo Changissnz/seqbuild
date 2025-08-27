@@ -1,0 +1,7 @@
+set G3 = make lcg with 654,145,-431,9000.  
+set G3 span to -120.01,119.9.  
+
+set G4 = make shadow with G3,optri,dummy_file.txt.  
+load face/sample_script/commond_23.txt.
+
+set G4 span to -120000.01,110009.9.  

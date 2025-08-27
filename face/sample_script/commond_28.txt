@@ -1,0 +1,21 @@
+set G_ = make lcg with -41,50,43,5005. 
+set G_ span to -5000.05,5001.05. 
+
+#set G = make lcgv3 with 50.1,4545,11,G_,-50001,50000.05,1,1. 
+set G = make lcgv3 with 99,23,-133,-1000,1000,G_,-500,500.5,1,1. 
+set G2 = make lcgv3 with 99,23,-133,-1000,1000,G_,-500,500,1,1. 
+#set G2 = make lcgv3 with -19,23,-133,-1000,1000,G_,-500,500,1,1. 
+#set G3 = make lcgv3 with 27,-13,-90,-1000,1000,G_,-500,500,1,1. 
+
+set O = make op2 with +,-,0.75. 
+set G4 = merge G_,G_ with +.
+set G5 = merge G4,G_ with O. 
+set G6 = merge G_,G5,G_ with -,O. 
+set G7 = merge G4,G6 with /.
+
+set O2 = make op2 with *,/,0.4. 
+set G8 = merge G7,G5 with O2. 
+set G9 = merge G7,G5,G4,G6,G7 to tree. 
+
+set F = open file f1xx.txt for seq. 
+write G9 for 20 iter to F.

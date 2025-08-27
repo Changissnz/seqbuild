@@ -7,6 +7,7 @@ the seqbuild program's main functional features.
 from .make_cmd import * 
 from morebs2.matrix_methods import cr 
 from mini_dm.nsfr import * 
+from intigers.mod_prng import * 
 
 import io 
 import pickle 
@@ -211,11 +212,22 @@ def MERGE_proc(splitstr_cmd,var_map):
     for (i,g) in enumerate(generators): 
         assert g in var_map 
         generators[i] = var_map[g] 
-    
-    assert splitstr_cmd[2] == "with" 
 
+    assert splitstr_cmd[2] in {"with","to"} 
     operators = splitstr_cmd[3].split(",") 
-    assert len(operators) == len(generators) - 1 
+    len_op = len(operators)
+    assert len_op in {len(generators) - 1,1} 
+
+    if len_op == 1 and splitstr_cmd[3] == "tree":
+
+        prx = ModPRNGOutputter(generators) 
+        def fx(): 
+            fx_ = next(prx) 
+            fx_ = MAIN_method_for_object(fx_)
+            return fx_() 
+        
+        return fx 
+        
     ops = []
     for o in operators: 
         stat0 = o in ARITHMETIC_OP_STR_MAP
