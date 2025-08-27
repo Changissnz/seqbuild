@@ -57,6 +57,8 @@ can be found at the link below.
 
 `https://github.com/stevenang/randomness_testsuite.git`. 
 
+These test results demonstrate the challenge of ?defining the concept? of random. 
+
 ### Update: 8/26/25  
 
 The main program now includes an `encrypt` Comm Lang command. In cases where `np.nan`, 
