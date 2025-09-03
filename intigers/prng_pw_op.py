@@ -2,6 +2,7 @@ from types import MethodType,FunctionType
 from operator import add,sub,mul,mod
 from .extraneous import safe_div 
 from morebs2.numerical_generator import modulo_in_range
+from morebs2.matrix_methods import is_valid_range
 
 DEFAULT_PAIRWISE_OPS = [add,sub,mul,safe_div] 
 

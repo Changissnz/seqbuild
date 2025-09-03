@@ -354,8 +354,7 @@ def MAKE_proc(splitstr_cmd,var_map):
         prg = var_map[parameters[1]] 
         prg = MAIN_method_for_object(prg) 
         
-        def prg_(): return int(round(prg())) 
-        
+        prg_ = prg__single_to_int(prg)
         gen_type = int(parameters[2]) 
         assert gen_type in {1,2} 
 

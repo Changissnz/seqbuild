@@ -361,6 +361,13 @@ def prg__single_to_trinary_vector(prg,n):
 
     return f 
 
+def prg__single_to_int(prg):
+
+    def f(): 
+        return int(round(prg())) 
+
+    return f  
+
 """
 produces a new generator function prg' from 
 prg. Every i'th value output v from prg' is 

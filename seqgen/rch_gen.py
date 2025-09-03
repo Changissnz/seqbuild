@@ -89,8 +89,7 @@ class RCHAccuGen:
         assert type(queue_capacity) == int and queue_capacity > 1
         self.rch = rch 
 
-        def prg_(): return int(round(prg()))
-        self.prg = prg_ 
+        self.prg = prg__single_to_int(prg) 
 
         self.acc_queue = acc_queue 
         self.qcap = queue_capacity
@@ -164,7 +163,7 @@ class RCHAccuGen:
         Q = [i for i in range(num_nodes)]
         n = int(ceil(mutrate * len(Q)))
 
-        def prg_(): return int(round(prg()))
+        prg_ = prg__single_to_int(prg)
         Q_ = prg_choose_n(Q,n,prg_,is_unique_picker=True)
 
         for q in Q_: 

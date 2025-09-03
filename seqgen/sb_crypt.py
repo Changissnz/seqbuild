@@ -60,8 +60,7 @@ class SBCrypt:
 
     def map_charseq(self):
 
-        def prg_(): return int(round(self.prg()))
-
+        prg_ = prg__single_to_int(self.prg)
         num_nodes = 4
         dim_range = [3,5] 
         ufreq_rate = [3,9]
