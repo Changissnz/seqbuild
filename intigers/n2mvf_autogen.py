@@ -248,7 +248,7 @@ class N2MVectorFunctionGen:
 
         # case: ModulatedN2MVectorMap
         op = prg__one_weighted_pairwise_operator(self.prg,\
-            deepcopy(DEFAULT_PAIRWISE_OPS),deepcopy(DEFAULT_PAIRWISE_OPS))
+            deepcopy(DEFAULT_PAIRWISE_OPS),deepcopy(DEFAULT_PAIRWISE_OPS),None)
         return ModulatedN2MVectorMap.one_instance(self.prg,m,op)
 
     """

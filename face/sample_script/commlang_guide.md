@@ -160,13 +160,13 @@ as well as their instantiation parameters in Comm Lang.
 
 - instantiation:  
 
-    1. (`+|-|*|/`)  
+    1. (`+|-|*|/|%`)  
     * (primary pairwise arithmetic operator)  
 
-    2. (`+|-|*|/|custom`,`+|-|*|/|custom`,float)  
+    2. (`+|-|*|/|%|custom`,`+|-|*|/|%|custom`,float)  
     * (pairwise operator,pairwise operator,weight)  
 
-    3. (`+|-|*|/|custom`,`+|-|*|/|custom`,float,0|1|2)  
+    3. (`+|-|*|/|%|custom`,`+|-|*|/|%|custom`,float,0|1|2)  
     * (pairwise operator,pairwise operator,weight,operator order)  
 
 
@@ -209,6 +209,7 @@ as well as their instantiation parameters in Comm Lang.
         * -  
         * /  
         * *  
+        * %  
 
 
 ## Command Forms <a name="command_forms"></a>  

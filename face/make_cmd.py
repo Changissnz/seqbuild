@@ -13,7 +13,7 @@ BASE_PRNG = ["lcg","lcgv2","lcgv3","mdr","mdrv2",\
         "mdrgen","idforest","optri","rch","qval",\
         "pid","echo","shadow"]  
 
-ARITHMETIC_OP_STR_MAP = {"+":add,"-":sub,"/":zero_div0,"*":mul} 
+ARITHMETIC_OP_STR_MAP = {"+":add,"-":sub,"/":zero_div0,"*":mul,"%":mod} 
 
 
 # TODO: incomplete 

@@ -1,6 +1,7 @@
 from types import MethodType,FunctionType
-from operator import add,sub,mul
+from operator import add,sub,mul,mod
 from .extraneous import safe_div 
+from morebs2.numerical_generator import modulo_in_range
 
 DEFAULT_PAIRWISE_OPS = [add,sub,mul,safe_div] 
 
@@ -42,8 +43,14 @@ def one_weighted_pairwise_operator(pairwise_op,weight_op,weight,order=0):
     else:  # order == 2
         return lambda x,x2: weight_op(weight,pairwise_op(x,x2))
     
-def prg__one_weighted_pairwise_operator(prg,base_op_seq,weight_op_seq):
+def prg__one_weighted_pairwise_operator(prg,base_op_seq,weight_op_seq,weight_range=[0.,2.]):
+    assert type(weight_range) in {type(None),tuple}
     weight = prg() 
+
+    if type(weight_range) == tuple: 
+        assert is_valid_range(weight_range,False,False) 
+        weight = modulo_in_range(weight,weight_range)
+
     op1 = int(prg() % len(base_op_seq))
     op2 = int(prg() % len(weight_op_seq))
 
