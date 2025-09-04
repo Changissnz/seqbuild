@@ -147,16 +147,19 @@ class SSIBatch2Net:
 
         i = int(self.prg() % len(qi))
 
+        # choose head 
         head = qi[i] 
         queue = [head]
+        cache = []
         qi_ = sorted(qi_ - {head})
 
         tx = dict()
-        while len(qi_) > 0: 
-            hx = queue.pop(head)
+        while len(qi_) > 0 and len(queue) > 0: 
+            hx = queue.pop(0)
+            cache.append(hx)
 
             # choose neighbors 
-            nn = int(self.prg() % len(qi_)) 
+            nn = int(modulo_in_range(self.prg(),(1,len(qi_) + 1)))
             neighbors = set()
             for _ in range(nn): 
                 i = int(self.prg() % len(qi_)) 
@@ -165,7 +168,7 @@ class SSIBatch2Net:
             tx[hx] = neighbors 
 
             queue.extend(sorted(neighbors))
-            qi_ = [q for q in qi_ if q not in neighbors]
+            qi_ = [q for q in qi_ if (q not in neighbors and q != hx)] 
 
         return head,tx 
     

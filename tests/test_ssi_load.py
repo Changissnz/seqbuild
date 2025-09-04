@@ -46,5 +46,55 @@ class SSIBatchLoader__TypeLCGNetMethods(unittest.TestCase):
         ssibl.instantiate_slist()
         assert len(ssibl.slist) == 7 
 
+class SSIBatch2NetMethods(unittest.TestCase): 
+
+    def test__SSIBatch2Net__make_net__case1(self): 
+        ## 
+        sidn = "optri"
+        param_bounds = None 
+        max_batch_size = 4 
+
+        aux_prg = prg__LCG(13,43,651,4120.0)
+        ssibl = SSIBatchLoader__TypeLCGNet(sidn,param_bounds,max_batch_size,aux_prg)
+
+        ssibl.instantiate_slist()
+
+        ## 
+        sidn = "lcg"
+        param_bounds = np.array([\
+            [-4,5],\
+            [-4,50],\
+            [-4,5],\
+            [-4,6]])
+
+        max_batch_size = 4 
+        aux_prg = prg__LCG(63,3,199,4000.0)
+
+        ssibl2 = SSIBatchLoader__TypeLCGNet(sidn,param_bounds,max_batch_size,aux_prg)
+        ssibl2.instantiate_slist()
+
+        ## 
+        sidn = "mdr"
+        param_bounds = (0,0)
+        max_batch_size = 4
+
+        aux_prg = prg__LCG(13,43,651,4120.0)
+        ssibl3 = SSIBatchLoader__TypeLCGNet(sidn,param_bounds,max_batch_size,aux_prg)
+
+        ssibl3.instantiate_slist()
+        slist = ssibl.slist + ssibl2.slist + ssibl3.slist 
+
+        ssb2n = SSIBatch2Net(slist,5,aux_prg) 
+        ssb2n.make_net()
+
+        all_nodes = set([i for i in range(12)])
+        for k in ssb2n.h2tree_map.keys():
+            T = ssb2n.h2tree_map[k] 
+
+            kx = set(T.keys()) 
+            for v in T.values(): 
+                kx = kx | v 
+            assert kx == all_nodes
+
 if __name__ == '__main__':
     unittest.main()
