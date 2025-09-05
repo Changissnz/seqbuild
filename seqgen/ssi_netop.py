@@ -33,8 +33,7 @@ class SSINetOp:
         lx = len(sls)
         q = max([round(lx/3),5])
         q = int(q)
-
-        ssb2n = SSIBatch2Net(slist,q,prg()) 
+        ssb2n = SSIBatch2Net(sls,q,prg) 
         ssb2n.make_net()
 
         q1 = sls 
