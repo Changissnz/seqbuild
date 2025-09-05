@@ -1,6 +1,7 @@
 from seqgen.rch_gen import * 
 from intigers.idt_proc import * 
 from morebs2.numerical_generator import prg__LCG 
+from morebs2.matrix_methods import is_proper_bounds_vector
 
 import unittest
 
@@ -81,6 +82,15 @@ class ExtraneousMethods(unittest.TestCase):
         d = trinary_vector_invertible_difference(v1,v2,invertible_weight)
         dsol = np.array([0.5, 0, 0, 0.5, 0, 0, 0, 1])
         assert np.all(d == dsol )
+
+    def test__extraneous__prg__single_to_bounds_outputter_case1(self):
+        aux_prg = prg__LCG(13,43,651,4120.0)
+        aux_prg = wrap_ranged_modulo_over_generator(aux_prg,[-2050.0,2050.0])
+        b_out = prg__single_to_bounds_outputter(aux_prg,6) 
+
+        for i in range(5): 
+            bd = b_out()
+            assert is_proper_bounds_vector(bd) 
 
 if __name__ == '__main__':
     unittest.main()

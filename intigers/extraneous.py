@@ -319,14 +319,30 @@ def prg__integer_seq__mult(n,c,r,crange,mrange,prg,\
 
     return qx2,len(qx2) == n
 
-def prg__single_to_range_outputter(lcg):
+def prg__single_to_range_outputter(prg):
     def f(): 
-        q1 = lcg() 
-        q2 = lcg() 
+        q1 = prg() 
+        q2 = prg() 
         if q1 < q2:
             return (q1,q2)
         q2 = (q1 + 1) + q1 - q2 
         return (q1,q2) 
+    return f 
+
+def prg__single_to_bounds_outputter(prg,bound_length): 
+    
+    def f():
+        q = []
+
+        for _ in range(bound_length):
+            r0 = prg() 
+            r1 = prg() 
+
+            rx = sorted([r0,r1]) 
+            if abs(rx[0] - rx[1]) <= 2.0:
+                rx[1] += 2 
+            q.append(rx)
+        return np.array(q)
     return f 
 
 def prg__single_to_ndim_index_outputter(lcg,dim):
