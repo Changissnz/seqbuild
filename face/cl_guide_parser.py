@@ -23,7 +23,8 @@ SAMPLE_USE_FILE_MAP = {"multimetric": BASE_COMM_LANG_FOLDER + "commond_one.txt",
     "rch":BASE_COMM_LANG_FOLDER + "commond_20.txt",\
     "echo":BASE_COMM_LANG_FOLDER + "commond_21.txt",\
     "shadow":BASE_COMM_LANG_FOLDER + "commond_23.txt",\
-    "encrypt":BASE_COMM_LANG_FOLDER+ "commond_25.txt"}  
+    "encrypt":BASE_COMM_LANG_FOLDER + "commond_25.txt",\
+    "iomaps": BASE_COMM_LANG_FOLDER + "commond_29.txt"}   
 
 def stringize_CLGuideParser_keywords(clgp): 
     term_map = {0:"Primary",1:"Secondary",2:"Tertiary"}

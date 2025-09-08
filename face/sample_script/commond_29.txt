@@ -1,0 +1,7 @@
+set G = make lcg with 4,56,7,12. 
+set G2 = make lcg with 4,56,7,-12. 
+set G3 = make lcg with 14,56,-27,120. 
+set G4 = make lcg with 14,56,-27,-120. 
+
+set G5 = make iomaps with G,G2,G3,G4. 
+set V = run G5 with file dummy_file.txt.

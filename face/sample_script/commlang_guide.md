@@ -142,6 +142,13 @@ as well as their instantiation parameters in Comm Lang.
     3. (integer,generator,float,integer,float,float)  
     * (number of nodes,generator,mutation rate,queue capacity,output range)  
 
+[o] iomaps  
+
+- instantiation:  
+
+    1. (G_1,G_2,...,G_j)  
+    * (`j` arbitrary inputless number generators)
+
 [o] echo  
 
 - instantiation:  

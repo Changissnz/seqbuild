@@ -2,6 +2,7 @@ from seqgen.gg_gen import *
 from seqgen.mdr_gen import * 
 from seqgen.optri_gen import * 
 from seqgen.rch_gen import * 
+from seqgen.idt_gen import * 
 from seqgen.shadow_gen import * 
 from desi.fraction import * 
 from desi.differentials import * 
@@ -10,7 +11,7 @@ from intigers.prng_pw_op import *
 from seqgen.sb_crypt import * 
 
 BASE_PRNG = ["lcg","lcgv2","lcgv3","mdr","mdrv2",\
-        "mdrgen","idforest","optri","rch","qval",\
+        "mdrgen","iomaps","idforest","optri","rch","qval",\
         "pid","echo","shadow"]  
 
 ARITHMETIC_OP_STR_MAP = {"+":add,"-":sub,"/":zero_div0,"*":mul,"%":mod} 
@@ -66,6 +67,9 @@ def MAIN_method_for_object(q):
 
     if type(q) == ShadowGen:
         return q.__next__ 
+
+    if type(q) == ModPRNGOutputter: 
+        return q.__next__
 
     return -1 
 
@@ -295,6 +299,26 @@ def MAKE_rch(splitstr_cmd,var_map):
     rch.output_range = output_range
     return rch 
 
+"""
+G_1,G_2,...,G_j
+""" 
+def MAKE_iomaps(splitstr_cmd,var_map): 
+    assert splitstr_cmd[1] == "iomaps" 
+    assert splitstr_cmd[2] == "with" 
+
+    X = splitstr_cmd[3].split(",") 
+    assert len(X) > 0 
+
+    G = [] 
+    for x in X: 
+        assert x in var_map 
+        r = MAIN_method_for_object(var_map[x])
+        rx = lambda x2: r() + x2
+        G.append(rx)  
+
+    mpo = ModPRNGOutputter(G)
+    return mpo
+
 def MAKE_echo(splitstr_cmd):
     assert splitstr_cmd[1] == "echo" 
     assert splitstr_cmd[2] == "with" 
@@ -438,6 +462,9 @@ def MAKE_proc(splitstr_cmd,var_map):
 
     if splitstr_cmd[1] == "rch":
         return MAKE_rch(splitstr_cmd,var_map) 
+
+    if splitstr_cmd[1] == "iomaps":
+        return MAKE_iomaps(splitstr_cmd,var_map)
 
     if splitstr_cmd[1] == "echo":
         return MAKE_echo(splitstr_cmd) 

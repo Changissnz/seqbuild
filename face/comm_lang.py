@@ -165,6 +165,10 @@ class CommLangParser:
         assert splitstr_cmd[0] == "set" 
         n = splitstr_cmd[1] 
         assert n not in LANG_KEYTERMS 
+
+        for s in LANG_SYMBOLS: 
+            assert s not in n
+
         assert splitstr_cmd[2] in {"=","span"}  
 
         # case: primary use case of SET 

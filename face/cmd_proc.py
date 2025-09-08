@@ -14,7 +14,9 @@ import pickle
 
 LANG_KEYTERMS = ["make","run","with","set","for","iter","write",\
         "merge","to","open","convert","show","help","file","seq",\
-        "obj","qualtest"]   
+        "obj","qualtest"]  
+LANG_SYMBOLS = [",",".","<",">","`","'","~","+","-",\
+        "*","/","%","=","(",")","[","]","{","}","\\"]  
 
 GENFORM_CONVERT_TYPES = ["range","ndim","nvec","tvec"]
 
@@ -56,6 +58,25 @@ def RUN_proc(splitstr_cmd,var_map):
 
     # case: keyword `with`
     if splitstr_cmd[2] == "with":
+        # case: iomaps 
+        if splitstr_cmd[3] == "file" and type(var_obj) == ModPRNGOutputter: 
+            file_path = splitstr_cmd[4]
+            assert os.path.exists(file_path) 
+
+            fi_obj = open(file_path,'r')
+            nsfr = NSFileReader(fi_obj,float,False) 
+
+            L = [] 
+            while True: 
+                q = next(nsfr)
+                if type(q) == type(None): 
+                    break 
+
+                f_ = f()
+                o2 = f_(q)
+                L.append(o2)
+            return L 
+
         return f(splitstr_cmd[3]) 
 
     # case: keyword `for`,`iter`. 
