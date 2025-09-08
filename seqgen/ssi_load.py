@@ -11,8 +11,8 @@ SSIBL_PARAMETER_MAP = {'lcg':[float,float,float,float],\
         'mdr':[list,bool],\
         'optri':[list,"op_f","op_b"]}
 
-DEFAULT_SSINET_HOP_RANGE = [4,10] 
-DEFAULT_BASE_QUEUE_ACTIVATION_RANGE = [5,23]   
+DEFAULT_SSINET_HOP_RANGE = (4,10) 
+DEFAULT_BASE_QUEUE_ACTIVATION_RANGE = (5,23)    
 
 def index1_to_index2(i,dim2d):
     x = 0 
@@ -52,6 +52,7 @@ class OpTriGenLite:
 
     def __next__(self):
         qi = index1_to_index2(self.i,self.m.shape)
+        self.i = (self.i + 1) % (self.m.shape[0] * self.m.shape[1]) 
         return self.m[qi[0],qi[1]]
 
 class SSINetNode__TypeLCGNet: 
@@ -112,7 +113,7 @@ class SSIBatchLoader__TypeLCGNet:
     """
     param_bounds := bounds vector (if structure is lcg) | ordered binary range (i.e. 00,01,10,11)
     """
-    def __init__(self,structure_idn,param_bounds,max_batch_size,aux_prg): 
+    def __init__(self,structure_idn,param_bounds,max_batch_size,aux_prg,ssi_hr=DEFAULT_SSINET_HOP_RANGE): 
         assert structure_idn in SSIBL_STRUCTURES
         self.sidn = structure_idn
         self.check_param_bounds(param_bounds)
@@ -123,6 +124,10 @@ class SSIBatchLoader__TypeLCGNet:
 
         assert type(aux_prg) in {MethodType,FunctionType}
         self.aux_prg = aux_prg 
+
+        assert is_valid_range(ssi_hr,True,False)
+        self.ssi_hr = ssi_hr
+
         # list of structures 
         self.slist = [] 
 
@@ -180,7 +185,7 @@ class SSIBatchLoader__TypeLCGNet:
 
         aux_prg_ = prg__single_to_int(self.aux_prg)
         column_order = prg_seqsort([0,1,3,2],aux_prg_)
-        ssihops = [int(modulo_in_range(self.aux_prg(),DEFAULT_SSINET_HOP_RANGE)) for _ in range(4)]
+        ssihops = [int(modulo_in_range(self.aux_prg(),self.ssi_hr)) for _ in range(4)]
 
         for i,r in enumerate(self.param_bounds): 
             if abs(r[1] -r[0]) < 0.05: 

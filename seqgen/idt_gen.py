@@ -63,7 +63,7 @@ class IDecForest:
             if self.verbose: print("new seq: ",S) 
 
             # choose a process type
-            proctype = self.prg() % 4
+            proctype = int(round(self.prg())) % 4
 
             # add output sequence to queue
             q = self.process_seq_at_tree(T,S,proctype)
@@ -210,7 +210,7 @@ class IDecForest:
         if self.verbose: print("proc type: ",proc_type)
         if proc_type == 1:
             # make new sequence 
-            seqtype = self.prg() % 4
+            seqtype = int(round(self.prg() % 3)) 
             intseq = self.one_new_IntSeq(seqtype)
 
             if len(intseq) > len(S):
@@ -311,7 +311,7 @@ class IDecForest:
         D,_,_ = TNode.dfs(T,False,True,True,set_attr=None)
 
         # choose between 25 and 75 percent of the samples from S
-        q = modulo_in_range(self.prg(),[0,1001]) / 1000.0 
+        q = modulo_in_range(self.prg(),[0,1001]) / 1000.0  #?
         n = int(ceil(len(S) / 2.0))  
 
         nodelist = sorted(list(D.keys()))
@@ -349,11 +349,11 @@ class IDecForest:
         mx = int(ceil(l / 2))
         assert mx >= 2
         if mx == 2: mx += 1
-        num_sets = modulo_in_range(prg(),[2,mx])
+        num_sets = int(modulo_in_range(prg(),[2,mx]))
 
         px = prg2 if type(prg2) != type(None) \
             else prg 
-        var = modulo_in_range(prg(),[0,1001])
+        var = modulo_in_range(prg(),[0,1000.])
         var = var / 1000.0
 
         prt = prg_partition_for_sz(l,num_sets,px,var)

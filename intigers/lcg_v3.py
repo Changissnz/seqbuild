@@ -144,7 +144,7 @@ def modrange_for_congruence(pv,av,modrange):
 
 #--------------------------------------------------------------------- 
 
-DEFAULT_LCGV3_AUTO_TRINARYDELTA_RANGE = [3,9] 
+DEFAULT_LCGV3_AUTO_TRINARYDELTA_RANGE = (3,9) 
 #DEFAULT_LCGV3_RMOD_RANGE = [2,19] 
 
 """

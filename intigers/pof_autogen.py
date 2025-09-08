@@ -10,7 +10,7 @@ from .poly_output_fitter_ import *
 from morebs2.numerical_generator import prg__n_ary_alternator
 
 # num of options 
-DEFAULT_NUM_POLYSIBLING_RANGE = [1,10]
+DEFAULT_NUM_POLYSIBLING_RANGE = (1,10)
 
 def safe_power_range_for_base(b,power_range=DEFAULT_POWER_RANGE):
     assert power_range[0] > 0 

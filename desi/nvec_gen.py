@@ -2,7 +2,7 @@ from mini_dm.vs_fit_op import *
 from math import ceil 
 from morebs2.numerical_generator import prg_partition_for_sz__n_rounds
 
-DEFAULT_POINTSET_PARTSIZE_RATIO_RANGE = [0.15,0.23] 
+DEFAULT_POINTSET_PARTSIZE_RATIO_RANGE = (0.15,0.23)
 
 """
 generates points using <AffineDelta> instances, which are in turn 
