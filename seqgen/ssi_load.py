@@ -75,10 +75,16 @@ class SSINetNode__TypeLCGNet:
         # used for `optri`, `mdr` 
         self.base_queue = [] 
         self.base_activated = False 
+        self.struct = None 
         return 
 
     def activate_base(self): 
         self.base_activated = True 
+
+        q = self.activate_mdr()
+        if q == False :
+            q = self.activate_optri()
+        self.struct = q 
         return 
 
     def activate_mdr(self):    
