@@ -1,4 +1,6 @@
 from morebs2.search_space_iterator import * 
+from morebs2.matrix_methods import is_2dmatrix 
+
 from intigers.lcg_v3 import *  
 from intigers.prng_pw_op import * 
 from intigers.extraneous import * 
@@ -10,19 +12,94 @@ SSIBL_PARAMETER_MAP = {'lcg':[float,float,float,float],\
         'optri':[list,"op_f","op_b"]}
 
 DEFAULT_SSINET_HOP_RANGE = [4,10] 
+DEFAULT_BASE_QUEUE_ACTIVATION_RANGE = [5,23]   
+
+def index1_to_index2(i,dim2d):
+    x = 0 
+    i2 = [0,0]
+    while x < i:  
+        x += dim2d[1] 
+
+        if x <= i: 
+            i2[0] += 1  
+    
+    r = i - i2[0] * dim2d[1]
+    i2[1] = r 
+    return i2
+
+class OpTriGenLite: 
+
+    def __init__(self,iseq,forward_func,backward_func):
+        assert type(iseq) == IntSeq 
+        self.ffunc = forward_func
+        self.bfunc = backward_func
+        self.to_matrix(iseq) 
+        self.i = 0 
+        return 
+
+    def to_matrix(self,iseq): 
+        ot1 = iseq.optri(self.bfunc,np.int32) 
+        iseq2 = IntSeq(ot1[0])
+        ot2 = iseq2.optri(self.ffunc,np.int32)
+        ot2 = np.flip(ot2,1)
+        ot2 = np.flip(ot2,0)
+        j = 1
+        for i in range(1,len(ot1)): 
+            x = ot2[i-1][:j] 
+            ot1[i,:j] = x 
+            j += 1  
+        self.m = ot1 
+
+    def __next__(self):
+        qi = index1_to_index2(self.i,self.m.shape)
+        return self.m[qi[0],qi[1]]
 
 class SSINetNode__TypeLCGNet: 
 
-    def __init__(self,structure_idn,prg,op_pair=None):
+    def __init__(self,structure_idn,prg,op_pair=None,exclude_neg=None):
         assert structure_idn in SSIBL_STRUCTURES
         assert type(prg) in {MethodType,FunctionType,type(None)}
         self.sidn = structure_idn
         self.prg = prg 
 
         assert type(op_pair) in {type(None),tuple}
-        self.op_pair = op_pair
-        self.out_queue = [] 
+        if type(op_pair) == tuple: 
+            assert len(op_pair) == 2 
+
+        # used for `mdr` 
+        self.exclude_neg = exclude_neg
+
+        # used for `optri` 
+        self.op_pair = op_pair 
+
+        # used for `optri`, `mdr` 
+        self.base_queue = [] 
+        self.base_activated = False 
         return 
+
+    def activate_base(self): 
+        self.base_activated = True 
+        return 
+
+    def activate_mdr(self):    
+        if "mdr" not in self.sidn: 
+            return False 
+
+        mdr = None
+        if self.sidn == "mdr":
+            m = ModuloDecomp(IntSeq(self.base_queue),\
+                self.exclude_neg)
+            m.merge(False)
+            mdr = ModuloDecompRepr(m,1)
+        else: 
+            m = ModuloDecomp(IntSeq(self.base_queue),\
+                self.exclude_neg)
+            mdr = ModuloDecompRepr(m,2) 
+        return mdr
+
+    def activate_optri(self): 
+        iseq = IntSeq(self.base_queue) 
+        return OpTriGenLite(iseq,self.op_pair[0],self.op_pair[1])
 
 class SSIBatchLoader__TypeLCGNet: 
 
@@ -85,7 +162,8 @@ class SSIBatchLoader__TypeLCGNet:
             return SSINetNode__TypeLCGNet(self.sidn,prg,op_pair=None)
 
         elif self.sidn == "mdr":
-            return SSINetNode__TypeLCGNet(self.sidn,None,op_pair=None)
+            b = int(round(modulo_in_range(self.aux_prg(),[0.,1.])))
+            return SSINetNode__TypeLCGNet(self.sidn,None,op_pair=None,exclude_neg=bool(b))
 
         else:
             o1,o2 = self.one_operator_pair()

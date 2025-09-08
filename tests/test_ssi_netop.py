@@ -13,7 +13,8 @@ class SSINetOpMethods(unittest.TestCase):
 
         num_nodes = 20 
         prg = prg__LCG(56,93,176,901909)
-        sno = SSINetOp.one_instance(num_nodes,prg) 
+        prg2 = prg__LCG(5,3,16,901)
+        sno = SSINetOp.one_instance(num_nodes,prg,prg2)         
         assert True 
 
 if __name__ == '__main__':

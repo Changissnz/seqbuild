@@ -3,17 +3,24 @@ from morebs2.numerical_generator import prg_partition_for_sz__n_rounds
 
 class SSINetOp:
 
-    def __init__(self,struct_list,h2tree_map):
+    def __init__(self,struct_list,h2tree_map,prg):
+        assert len(struct_list) > 3 
+        assert len(h2tree_map) > 0
+        assert type(prg) in {MethodType,FunctionType}
+
         self.struct_list = struct_list
         self.h2tree_map = h2tree_map
+        self.prg = prg 
 
         # storage of values from some source; values can be used for 
         # the structures `mdr`,`mdrv2`,`optri`. 
         self.mainstream_queue = []
+        self.tree_idns = sorted(self.h2tree_map.keys())
+        self.t_index = 0  
         return 
 
     @staticmethod 
-    def one_instance(num_nodes,prg): 
+    def one_instance(num_nodes,prg,prg2): 
         assert num_nodes >= 5 
 
         num_sets = 3 
@@ -38,7 +45,7 @@ class SSINetOp:
 
         q1 = sls 
         q2 = ssb2n.h2tree_map
-        return SSINetOp(q1,q2)
+        return SSINetOp(q1,q2,prg2)
 
     @staticmethod
     def one_instance__slist(sidn,batch_size,prg):

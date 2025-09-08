@@ -6,6 +6,24 @@ import unittest
 python -m tests.test_ssi_load
 """
 ###
+
+class OpTriGenLiteMethods(unittest.TestCase):
+
+    def test__OpTriGenLite__init__case1(self):
+        L = [i for i in range(4,12)] 
+        L = IntSeq(L) 
+
+        otl = OpTriGenLite(L,add,sub)
+        otl_sol = np.array([\
+            [ 1,  1,  1,  1,  1,  1,  1],
+            [64,  0,  0,  0,  0,  0,  0],
+            [32, 32,  0,  0,  0,  0,  0],
+            [16, 16, 16,  0,  0,  0,  0],
+            [ 8,  8,  8,  8,  0,  0,  0],
+            [ 4,  4,  4,  4,  4,  0,  0],
+            [ 2,  2,  2,  2,  2,  2,  0]]) 
+        assert np.all(otl.m == otl_sol) 
+
 class SSIBatchLoader__TypeLCGNetMethods(unittest.TestCase):
 
     def test__SSIBatchLoader__TypeLCGNet__instantiate_slist__case1(self):
