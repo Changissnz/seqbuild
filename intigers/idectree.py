@@ -2,6 +2,7 @@ from .pof_autogen import *
 from .intfactor import * 
 from morebs2.numerical_generator import prg_seqsort_ties,prg_partition_for_sz
 from morebs2.g2tdecomp import TNode 
+from intigers.extraneous import prg__single_to_int
 
 """
 `p` is a partition that does not contain 0. Fixes any 
@@ -316,7 +317,7 @@ class IntSeq2Tree:
         self.l = l 
         self.d = d
         self.verbose=verbose
-        self.prg = prg 
+        self.prg = prg__single_to_int(prg) 
         self.leaf_first = type(l) != type(None) 
         if self.leaf_first: 
             assert type(self.l) == int and self.l > 0

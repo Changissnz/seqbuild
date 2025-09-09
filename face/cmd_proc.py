@@ -85,7 +85,6 @@ def RUN_proc(splitstr_cmd,var_map):
     iterations = int(splitstr_cmd[3]) 
     assert iterations > 0 
     assert splitstr_cmd[4] == "iter" 
-
     for _ in range(iterations):
         lx.append(f())
     return lx 

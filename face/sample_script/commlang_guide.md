@@ -147,7 +147,44 @@ as well as their instantiation parameters in Comm Lang.
 - instantiation:  
 
     1. (G_1,G_2,...,G_j)  
-    * (`j` arbitrary inputless number generators)
+    * (`j` arbitrary inputless number generators)  
+
+[o] idforest  
+
+- instantiation:  
+
+    1. (list,iomaps,integer,integer range,integer,generator,generator2)   
+    * (list,single input functions,cache size,reproduction rate range,maximum number of trees,primary generator,secondary generator)  
+
+    2. (list,iomaps,integer,integer range,integer,generator)     
+    * (list,single input functions,cache size,reproduction rate range,maximum number of trees,primary generator)  
+
+    3. (list,iomaps,integer,integer range,generator,generator2)   
+    * (list,single input functions,cache size,reproduction rate range,primary generator,secondary generator)  
+
+    4. (list,iomaps,integer,integer range,generator)   
+    * (list,single input functions,cache size,reproduction rate range,primary generator)  
+
+    5. (list,iomaps,integer,integer,generator,generator)   
+    * (list,single input functions,cache size,maximum number of trees,primary generator,secondary generator)  
+
+    6. (list,iomaps,integer,integer,generator)   
+    * (list,single input functions,cache size,maximum number of trees,primary generator)  
+
+    6. (list,iomaps,integer,integer,generator)   
+    * (list,single input functions,cache size,maximum number of trees,primary generator)  
+
+    7. (list,iomaps,integer,generator,generator)   
+    * (list,single input functions,cache size,primary generator,secondary generator)  
+
+    8. (list,iomaps,integer,generator)   
+    * (list,single input functions,cache size,primary generator)  
+
+    9. (list,iomaps,generator,generator)   
+    * (list,single input functions,primary generator,secondary generator)  
+
+    10. (list,iomaps,generator)   
+    * (list,single input functions,primary generator)  
 
 [o] echo  
 

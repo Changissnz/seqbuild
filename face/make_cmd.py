@@ -77,6 +77,9 @@ def MAIN_method_for_object(q):
         return q.__next__ 
 
     if type(q) == ModPRNGOutputter: 
+        return q.__next__ 
+
+    if type(q) == IDecForest: 
         return q.__next__
 
     return -1 
@@ -349,16 +352,19 @@ def MAKE_idforest(splitstr_cmd,var_map):
 
     parameters = splitstr_cmd[3].split(",") 
     L = len(parameters)
+    print("L ",L)
+    print("PP ",parameters)
 
     assert L in {8,7,6,5,4,3}
-
     assert parameters[0] in var_map
     V = var_map[parameters[0]] 
-    assert type(V) == list 
 
+    print("V: ",V)
+    assert type(V) == list 
+    print("P1: ",parameters[1])
     assert parameters[1] in var_map
     MO = var_map[parameters[1]] 
-    assert type(MO) == ModPRNGOutputters 
+    assert type(MO) == ModPRNGOutputter 
 
     idf = None 
     cache_size = 100 
@@ -368,9 +374,11 @@ def MAKE_idforest(splitstr_cmd,var_map):
     prg2 = None 
 
     if L == 3: 
+        print("1")
         assert parameters[2] in var_map
         G = var_map[parameters[2]] 
         assert type(G) in {MethodType,FunctionType}  
+        print("2")
     elif L == 4:
         # case
         istat = is_stringized_number(parameters[2])
@@ -451,8 +459,8 @@ def MAKE_idforest(splitstr_cmd,var_map):
 
             prg2 = var_map[parameters[6]] 
             assert type(prg2) in {MethodType,FunctionType}
-
-    idf = IDecForest(V,MO,cache_size,reprod_rate_range,max_trees,G,prg2,False)
+    print("3")
+    idf = IDecForest(IntSeq(V),MO,cache_size,reprod_rate_range,max_trees,G,prg2,False)
     return idf
 
 def MAKE_echo(splitstr_cmd):
@@ -607,5 +615,8 @@ def MAKE_proc(splitstr_cmd,var_map):
 
     if splitstr_cmd[1] == "shadow":
         return MAKE_shadow(splitstr_cmd,var_map)
+
+    if splitstr_cmd[1] == "idforest": 
+        return MAKE_idforest(splitstr_cmd,var_map)
 
     raise ValueError("diffektor") 

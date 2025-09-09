@@ -16,7 +16,7 @@ class IDecForest:
         assert reprod_rate_range[0] < reprod_rate_range[1] 
         assert reprod_rate_range[0] > 0 
         assert type(reprod_rate_range[0]) == type(reprod_rate_range[1])
-        assert type(reprod_rate_range[0]) == int 
+        assert type(reprod_rate_range[0]) == int
         assert tree_cap > 0 and type(tree_cap) == int 
 
         self.ST = []
@@ -39,7 +39,7 @@ class IDecForest:
         self.verbose = verbose 
         self.next_reprod = None 
         self.reprod_ctr = None
-        self.reset_reprod_ctr()
+        self.reset_reprod_ctr() 
 
     """
     main method: test 
@@ -52,14 +52,13 @@ class IDecForest:
                 self.one_tree() 
 
             # choose a tree
-            q = self.prg() % len(self.ST)
+            q = int(round(self.prg())) % len(self.ST)
             T = self.ST[q][1] 
             if self.verbose: print("choose tree")
 
             # choose a sequence to process
-            seqtype = self.prg() % 3
+            seqtype = int(round(self.prg())) % 3
             S = self.one_new_IntSeq(seqtype)
-            
             if self.verbose: print("new seq: ",S) 
 
             # choose a process type
@@ -107,7 +106,7 @@ class IDecForest:
         rnge = [2,ceil(len(I) / 2)] 
         if rnge[0] == rnge[1]: rnge[1] += 1 
 
-        q = modulo_in_range(self.prg(),rnge)
+        q = int(round(modulo_in_range(self.prg(),rnge))) 
         if self.prg() % 2: 
             l = q
         else: 
@@ -136,6 +135,7 @@ class IDecForest:
         # from prg2 OR prg 
         px = self.prg2 if type(self.prg2) != type(None) \
             else self.prg
+        px = prg__single_to_int(px)
 
         q = None 
         if gentype == 0: 
@@ -149,7 +149,7 @@ class IDecForest:
         else: 
             # choose a sequence 
             assert len(self.ST) > 0
-            i = self.prg() % len(self.ST)
+            i = int(round(self.prg())) % len(self.ST)
             S = self.ST[i][0] 
             q = IDecForest.derive_new_IntSeq__type_fm(S,px,self.default_length_range)
             q = IntSeq(intlist_no_dups_no_zero_abs(q.l,px))
@@ -176,7 +176,7 @@ class IDecForest:
         # set number of centers
         ncr = (DEFAULT_FOREST_NEWSEQ_NUMCENTERS[0],\
             min([len(S),DEFAULT_FOREST_NEWSEQ_NUMCENTERS[1]]))
-        c_ = modulo_in_range(prg(),ncr)
+        c_ = modulo_in_range(int(round(prg())),ncr)
 
         # fetch the centers, each a factor
         isfso = ISFactorSetOps(S.l,int_limit=NPINT32_MAX)
@@ -185,7 +185,7 @@ class IDecForest:
 
         cx = []
         while c_ > 0:
-            i = prg() % len(q)
+            i = int(round(prg())) % len(q)
             cx.append(q.pop(i)[0])
             c_ -= 1 
 
