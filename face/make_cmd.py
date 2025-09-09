@@ -352,16 +352,12 @@ def MAKE_idforest(splitstr_cmd,var_map):
 
     parameters = splitstr_cmd[3].split(",") 
     L = len(parameters)
-    print("L ",L)
-    print("PP ",parameters)
 
     assert L in {8,7,6,5,4,3}
     assert parameters[0] in var_map
     V = var_map[parameters[0]] 
 
-    print("V: ",V)
     assert type(V) == list 
-    print("P1: ",parameters[1])
     assert parameters[1] in var_map
     MO = var_map[parameters[1]] 
     assert type(MO) == ModPRNGOutputter 
@@ -374,11 +370,9 @@ def MAKE_idforest(splitstr_cmd,var_map):
     prg2 = None 
 
     if L == 3: 
-        print("1")
         assert parameters[2] in var_map
         G = var_map[parameters[2]] 
         assert type(G) in {MethodType,FunctionType}  
-        print("2")
     elif L == 4:
         # case
         istat = is_stringized_number(parameters[2])
@@ -407,7 +401,6 @@ def MAKE_idforest(splitstr_cmd,var_map):
             G = var_map[parameters[4]] 
             assert type(G) in {MethodType,FunctionType} 
         else: 
-            max_trees = int(parameters[3])
             G = var_map[parameters[3]] 
             assert type(G) in {MethodType,FunctionType} 
 
@@ -434,33 +427,30 @@ def MAKE_idforest(splitstr_cmd,var_map):
 
             prg2 = var_map[parameters[5]] 
             assert type(G) in {MethodType,FunctionType} 
-
     elif L >= 7:
-
         cache_size = int(parameters[2]) 
         r0 = int(parameters[3]) 
         r1 = int(parameters[4]) 
-        assert r0 < r1 
-
+        assert r0 < r1         
         reprod_rate_range = (r0,r1) 
-        istat = is_stringized_number(parameters[5])
 
+        istat = is_stringized_number(parameters[5])
         if istat: 
-            max_trees = is_stringized_number(parameters[5])
+            max_trees = int(parameters[5])
             G = var_map[parameters[6]] 
             assert type(G) in {MethodType,FunctionType} 
 
-            if L == 8:
-                G = var_map[parameters[7]] 
-                assert type(G) in {MethodType,FunctionType} 
+            if L == 8: 
+                prg2 = var_map[parameters[6]] 
+                assert type(prg2) in {MethodType,FunctionType} 
         else: 
             G = var_map[parameters[5]] 
-            assert type(G) in {MethodType,FunctionType}
+            assert type(G) in {MethodType,FunctionType} 
 
             prg2 = var_map[parameters[6]] 
-            assert type(prg2) in {MethodType,FunctionType}
-    print("3")
-    idf = IDecForest(IntSeq(V),MO,cache_size,reprod_rate_range,max_trees,G,prg2,False)
+            assert type(prg2) in {MethodType,FunctionType} 
+
+    idf = IDecForest(IntSeq(V),MO,cache_size,reprod_rate_range,max_trees,G,prg2,False)    
     return idf
 
 def MAKE_echo(splitstr_cmd):

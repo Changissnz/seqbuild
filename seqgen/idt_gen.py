@@ -138,13 +138,14 @@ class IDecForest:
         px = prg__single_to_int(px)
 
         q = None 
-        if gentype == 0: 
+        if gentype == 0:
+ 
             l2 = modulo_in_range(px(),self.default_length_range)
             q = []
             for _ in range(l2):
                 n2 = modulo_in_range(px(),self.default_integer_range)
                 q.append(n2) 
-            q = intlist_no_dups_no_zero_abs(q,px)
+            q = intlist_no_dups_no_zero_abs(q,px) 
             q = IntSeq(q) 
         else: 
             # choose a sequence 
@@ -206,7 +207,6 @@ class IDecForest:
 
     def process_seq_at_tree(self,T,S,proc_type):
         assert proc_type in {0,1,2,3}
-
         if self.verbose: print("proc type: ",proc_type)
         if proc_type == 1:
             # make new sequence 
@@ -312,14 +312,15 @@ class IDecForest:
 
         # choose between 25 and 75 percent of the samples from S
         q = modulo_in_range(self.prg(),[0,1001]) / 1000.0  #?
-        n = int(ceil(len(S) / 2.0))  
+        n = int(ceil(len(S) / 2.0)) 
 
+        px = prg__single_to_int(self.prg) 
         nodelist = sorted(list(D.keys()))
-        intlist = prg_choose_n(list(S.l),n,self.prg,is_unique_picker=True)
-        SD = IDecForest.default_IDecForest_splatdict(nodelist,intlist,self.prg)
+        intlist = prg_choose_n(list(S.l),n,px,is_unique_picker=True)
+        SD = IDecForest.default_IDecForest_splatdict(nodelist,intlist,px)
 
         # splat now 
-        itp = IDTProc(T) 
+        itp = IDTProc(T)
         return itp.splat_process(SD)
 
     #------------------------- default methods for specifying ranges 

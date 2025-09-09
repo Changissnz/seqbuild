@@ -171,9 +171,6 @@ as well as their instantiation parameters in Comm Lang.
     6. (list,iomaps,integer,integer,generator)   
     * (list,single input functions,cache size,maximum number of trees,primary generator)  
 
-    6. (list,iomaps,integer,integer,generator)   
-    * (list,single input functions,cache size,maximum number of trees,primary generator)  
-
     7. (list,iomaps,integer,generator,generator)   
     * (list,single input functions,cache size,primary generator,secondary generator)  
 

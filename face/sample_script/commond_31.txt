@@ -1,0 +1,13 @@
+load face/sample_script/commond_29.txt.
+
+set T7 = make idforest with V,G5,25,7,25,G4. 
+set V8 = run T7 for 101 iter. 
+
+set T9 = make idforest with V,G5,25,7,25,10,G2. 
+set V10 = run T9 for 101 iter. 
+
+set T8 = make idforest with V,G5,5,10,32,G2,G3. 
+set V9 = run T8 for 101 iter. 
+
+set T10 = make idforest with V,G5,25,7,25,13,G2,G3. 
+set V11 = run T10 for 101 iter. 

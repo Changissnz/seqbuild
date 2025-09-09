@@ -5,3 +5,27 @@ set T2 = make idforest with V,G5,G4,G3.
 
 set V2 = run T for 101 iter. 
 set V3 = run T2 for 101 iter. 
+
+set T3 = make idforest with V,G5,13,G4. 
+set V4 = run T3 for 101 iter. 
+
+set T4 = make idforest with V,G5,25,G4,G3. 
+set V5 = run T4 for 101 iter. 
+
+set T5 = make idforest with V,G5,25,7,G4. 
+set V6 = run T5 for 101 iter. 
+
+set T6 = make idforest with V,G5,25,7,G4,G4. 
+set V7 = run T6 for 101 iter. 
+
+set T7 = make idforest with V,G5,25,7,25,G4. 
+set V8 = run T7 for 101 iter. 
+
+set T9 = make idforest with V,G5,25,7,25,10,G2. 
+set V10 = run T9 for 101 iter. 
+
+set T8 = make idforest with V,G5,5,10,32,G2,G3. 
+set V9 = run T8 for 101 iter. 
+
+set T10 = make idforest with V,G5,25,7,25,13,G2,G3. 
+set V11 = run T10 for 101 iter. 
