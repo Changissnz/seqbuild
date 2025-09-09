@@ -16,6 +16,14 @@ BASE_PRNG = ["lcg","lcgv2","lcgv3","mdr","mdrv2",\
 
 ARITHMETIC_OP_STR_MAP = {"+":add,"-":sub,"/":zero_div0,"*":mul,"%":mod} 
 
+def is_stringized_number(n): 
+    istat = False 
+    try: 
+        int(n)
+        istat = True 
+    except: 
+        pass 
+    return istat 
 
 # TODO: incomplete 
 def MAIN_method_for_object(q):
@@ -318,6 +326,134 @@ def MAKE_iomaps(splitstr_cmd,var_map):
 
     mpo = ModPRNGOutputter(G)
     return mpo
+
+"""
+list,ModPRNGOutputter,int,int range,max number of trees,prg,prg2
+list,ModPRNGOutputter,int,int range,max number of trees,prg
+
+list,ModPRNGOutputter,int,int range,prg,prg2
+list,ModPRNGOutputter,int,int range,prg
+
+list,ModPRNGOutputter,int,max number of trees,prg,prg2
+list,ModPRNGOutputter,int,max number of trees,prg
+
+list,ModPRNGOutputter,int,prg,prg2
+list,ModPRNGOutputter,int,prg
+
+list,ModPRNGOutputter,prg,prg2
+list,ModPRNGOutputter,prg
+"""
+def MAKE_idforest(splitstr_cmd,var_map): 
+    assert splitstr_cmd[1] == "idforest" 
+    assert splitstr_cmd[2] == "with" 
+
+    parameters = splitstr_cmd[3].split(",") 
+    L = len(parameters)
+
+    assert L in {8,7,6,5,4,3}
+
+    assert parameters[0] in var_map
+    V = var_map[parameters[0]] 
+    assert type(V) == list 
+
+    assert parameters[1] in var_map
+    MO = var_map[parameters[1]] 
+    assert type(MO) == ModPRNGOutputters 
+
+    idf = None 
+    cache_size = 100 
+    reprod_rate_range = (15,50)         
+    max_trees = 10 
+    G = None  
+    prg2 = None 
+
+    if L == 3: 
+        assert parameters[2] in var_map
+        G = var_map[parameters[2]] 
+        assert type(G) in {MethodType,FunctionType}  
+    elif L == 4:
+        # case
+        istat = is_stringized_number(parameters[2])
+
+        if istat: 
+            cache_size = int(parameters[2]) 
+            assert cache_size >= 2
+
+            G = var_map[parameters[3]] 
+            assert type(G) in {MethodType,FunctionType}
+        # case 
+        else: 
+            G = var_map[parameters[2]] 
+            assert type(G) in {MethodType,FunctionType}  
+
+            assert parameters[3] in var_map
+            prg2 = var_map[parameters[3]] 
+            assert type(prg2) in {MethodType,FunctionType}  
+
+    elif L == 5:
+        cache_size = int(parameters[2]) 
+
+        istat = is_stringized_number(parameters[3]) 
+        if istat: 
+            max_trees = int(parameters[3])
+            G = var_map[parameters[4]] 
+            assert type(G) in {MethodType,FunctionType} 
+        else: 
+            max_trees = int(parameters[3])
+            G = var_map[parameters[3]] 
+            assert type(G) in {MethodType,FunctionType} 
+
+            prg2 = var_map[parameters[4]]
+            assert type(prg2) in {MethodType,FunctionType} 
+    elif L == 6:
+        cache_size = int(parameters[2]) 
+        x = int(parameters[3]) 
+
+        istat = is_stringized_number(parameters[4]) 
+        if istat: 
+            x2 = int(parameters[4]) 
+            reprod_rate_range = (x,x2) 
+            assert reprod_rate_range[0] <= reprod_rate_range[1] 
+
+            G = var_map[parameters[5]] 
+            assert type(G) in {MethodType,FunctionType} 
+        else: 
+            max_trees = x 
+            assert max_trees > 0 
+
+            G = var_map[parameters[4]] 
+            assert type(G) in {MethodType,FunctionType} 
+
+            prg2 = var_map[parameters[5]] 
+            assert type(G) in {MethodType,FunctionType} 
+
+    elif L >= 7:
+
+        cache_size = int(parameters[2]) 
+        r0 = int(parameters[3]) 
+        r1 = int(parameters[4]) 
+        assert r0 < r1 
+
+        reprod_rate_range = (r0,r1) 
+        istat = is_stringized_number(parameters[5])
+
+        if istat: 
+            max_trees = is_stringized_number(parameters[5])
+            G = var_map[parameters[6]] 
+            assert type(G) in {MethodType,FunctionType} 
+
+            if L == 8:
+                G = var_map[parameters[7]] 
+                assert type(G) in {MethodType,FunctionType} 
+        else: 
+            G = var_map[parameters[5]] 
+            assert type(G) in {MethodType,FunctionType}
+
+            prg2 = var_map[parameters[6]] 
+            assert type(prg2) in {MethodType,FunctionType}
+
+    idf = IDecForest(V,MO,cache_size,reprod_rate_range,max_trees,G,prg2,False)
+    return idf
 
 def MAKE_echo(splitstr_cmd):
     assert splitstr_cmd[1] == "echo" 
