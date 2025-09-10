@@ -1,0 +1,12 @@
+set G1 = make lcg with 78,90,31,-9001. 
+set G2 = make lcg with 87,9,13,9002. 
+set G3 = make lcg with 77,96,-45,-900. 
+set G4 = make lcg with 78,90,31,800. 
+
+set G0 = make lcg with 0,0,0,1. 
+
+set G5 = merge G1,G2 with %. 
+set V = run G5 for 13 iter. 
+
+set G6 = merge G1,G0 with %. 
+set V2 = run G6 for 13 iter. 

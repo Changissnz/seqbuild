@@ -261,11 +261,20 @@ def MERGE_proc(splitstr_cmd,var_map):
     
     def amalgamaschwann(): 
         i = 1 
-        q = generators[0]() 
+        g_ = generators[0]
+        g_= MAIN_method_for_object(g_)
+        q = g_()
         while i < len(generators): 
-            q2 = generators[i]() 
+            g_ = generators[i] 
+            g_ = MAIN_method_for_object(g_)
+
+            q2 = g_() 
             op = ops[i-1]
-            q = op(q,q2) 
+            q_ = None 
+            try:
+                q_ = op(q,q2) 
+            except: 
+                q_ = q 
             i += 1 
         return q 
     

@@ -11,3 +11,6 @@ set V9 = run T8 for 101 iter.
 
 set T10 = make idforest with V,G5,25,7,25,13,G2,G3. 
 set V11 = run T10 for 101 iter. 
+
+set TX = merge T8,T9 with +. 
+set VT = run TX for 20 iter. 
