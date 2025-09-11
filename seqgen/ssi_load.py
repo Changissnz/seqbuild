@@ -12,7 +12,8 @@ SSIBL_PARAMETER_MAP = {'lcg':[float,float,float,float],\
         'optri':[list,"op_f","op_b"]}
 
 DEFAULT_SSINET_HOP_RANGE = (4,10) 
-DEFAULT_BASE_QUEUE_ACTIVATION_RANGE = (5,23)    
+DEFAULT_BASE_QUEUE_ACTIVATION_RANGE = (5,24)    
+DEFAULT_SSINETNODE__TYPE_FITTER_NUM_ITER = (0.5,4.1)  
 
 def index1_to_index2(i,dim2d):
     x = 0 
@@ -77,18 +78,37 @@ class SSINetNode__TypeLCGNet:
         self.base_queue = [] 
         self.base_activated = False 
         self.struct = None 
+
+        self.activation_size = None
+        self.termination_length = None 
+
+        self.c = 0 
         return 
 
-    def activate_base(self): 
+    """
+
+    """
+    def set_actsize(self, activation_size): 
+        assert "mdr" in self.sidn or "optri" in self.sidn
+        assert type(activation_size) in {int,np.int32} 
+        assert DEFAULT_BASE_QUEUE_ACTIVATION_RANGE[1] >= \
+            activation_size >= DEFAULT_BASE_QUEUE_ACTIVATION_RANGE[0]
+        self.activation_size = activation_sizes
+        return
+
+    def activate_base(self,aux_prg): 
+        assert type(aux_prg) in {MethodType,FunctionType}
+        #aux_prg = prg__single_to_int(aux_prg)
+
         self.base_activated = True 
 
-        q = self.activate_mdr()
+        q = self.activate_mdr(aux_prg)
         if q == False :
-            q = self.activate_optri()
+            q = self.activate_optri(aux_prg) 
         self.struct = q 
         return 
 
-    def activate_mdr(self):    
+    def activate_mdr(self,aux_prg):    
         if "mdr" not in self.sidn: 
             return False 
 
@@ -102,9 +122,22 @@ class SSINetNode__TypeLCGNet:
             m = ModuloDecomp(IntSeq(self.base_queue),\
                 self.exclude_neg)
             mdr = ModuloDecompRepr(m,2) 
+
+        L = len(self.base_queue)
+        r = modulo_in_range(aux_prg(),\
+            DEFAULT_SSINETNODE__TYPE_FITTER_NUM_ITER) 
+        L_ = int(ceil(L * r)) 
+        self.termination_length = L_ 
         return mdr
 
-    def activate_optri(self): 
+    def activate_optri(self,aux_prg): 
+        L = len(self.base_queue) - 1 
+        L = L ** 2 
+        r = modulo_in_range(aux_prg(),\
+            DEFAULT_SSINETNODE__TYPE_FITTER_NUM_ITER) 
+        L_ = int(ceil(L * r)) 
+        self.termination_length = L_
+
         iseq = IntSeq(self.base_queue) 
         return OpTriGenLite(iseq,self.op_pair[0],self.op_pair[1])
 
