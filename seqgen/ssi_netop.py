@@ -28,7 +28,6 @@ class SSINetOp:
         self.lcg_queue = []
         self.mo_queue = []
 
-
         self.tree_idns = sorted(self.h2tree_map.keys())
         self.t_index = 0
 
@@ -64,37 +63,43 @@ class SSINetOp:
     ##-------------------------------------------------------------------
 
     def __next__(self): 
-        return 
 
-    def distribute_to_connected_trees(self,head): 
-        T = self.h2tree_map[head] 
-        neighbors = self.edges[head]
+        if len(self.mainstream_queue) > 0: 
+            q = self.mainstream_queue.pop(0) 
+            return q 
 
-        if self.lcg_input_only:
-            q = self.lcg_queue
+        exclude_trees = set()
+        while len(self.mainstream_queue) == 0:
+            H = self.choose_tree(exclude_trees)
+            assert type(H) != type(None)
+            
+            self.process_tree(H) 
+            exclude_trees |= {H} 
+        return self.mainstream_queue.pop(0)
 
-        return
+    def choose_tree(self,exclude_trees=set()):
+        TI = [t for t in self.tree_idns if t not in exclude_trees]
+        L = len(TI)
+        if L == 0: return None 
+
+        i = int(round(self.prg())) % L 
+        H = TI[i] 
+        return H 
 
     def process_tree(self,head):
-        assert head in self.h2tree_map 
-        T = self.h2tree_map[head] 
-
-        gd = G2TDecomp(defaultdict(T,set),decomp_nodes=[head],child_capacity=2)
-        gd.decompose()
-
-        is_bfs = int(round(self.prg())) % 2 
-        tn = gd.decompositions[0]
-        
-        # collate keys into ordering 
-        K = TNode.collate_keys(tn,is_bfs=is_bfs,prg=prg__single_to_int(self.prg))
+        K = self.tree_to_keys(head,-1)        
         self.clear_tmpqueue()
 
         # process value for each node 
         for k in K: 
             q = self.process_node(k) 
+            if type(q) != type(None): 
+                self.tmp_queue.append(q) 
 
         # distribute to other trees 
-        return -1 
+        self.distribute_to_connected_trees(head)
+        self.mainstream_queue.extend(self.tmp_queue)
+        return
 
     def process_node(self,index): 
         q = self.struct_list[index] 
@@ -128,11 +133,69 @@ class SSINetOp:
 
         return x 
 
+    #--------- network distribution of output values -----------------------------------
+
+    def distribute_to_connected_trees(self,head): 
+        neighbors = self.edges[head]
+
+        if self.lcg_input_only:
+            q = deepcopy(self.lcg_queue)
+        else: 
+            q = deepcopy(self.tmp_queue)
+
+        prg_ = prg__single_to_int(self.prg) 
+        for n in neighbors: 
+            if self.shuffle_dist: 
+                q = prg_seqsort(q,prg_)
+            self.distribute_seq_to_tree(n,q)
+        return
+
+    def distribute_seq_to_tree(self,head,L): 
+
+        def D(node): 
+            if self.uniform_io_dist:
+                node.update_tmp_queue(deepcopy(L))
+                return 
+            
+            L_ = [] 
+            prg_ = prg__single_to_int()
+            for l in L: 
+                d = prg_() % 2 
+                if d: L_.append(l)
+            node.update_tmp_queue(deepcopy(L_))
+
+        assert head in self.h2tree_map 
+        T = self.h2tree_map[head] 
+
+        K = self.tree_to_keys(head,1)
+        for k in K: 
+            node_ = self.struct_list[k] 
+            D(node_)
+        return 
+
+    def tree_to_keys(self,head,is_bfs): 
+        assert head in self.h2tree_map 
+        assert is_bfs in {-1,0,1}
+
+        T = self.h2tree_map[head] 
+        gd = G2TDecomp(defaultdict(T,set),decomp_nodes=[head],child_capacity=1)
+        gd.decompose()
+
+        if is_bfs == -1: 
+            is_bfs = int(round(self.prg())) % 2 
+        tn = gd.decompositions[0]
+        
+        # collate keys into ordering 
+        K = TNode.collate_keys(tn,is_bfs=is_bfs,prg=prg__single_to_int(self.prg))
+        return K 
+
     def clear_tmpqueue(self): 
         self.tmp_queue.clear()
         self.lcg_queue.clear()
         self.mo_queue.clear()
         return 
+
+    #-------------- instantiation ------------------------------------------------ 
 
     @staticmethod 
     def one_instance(num_nodes,prg,prg2): 

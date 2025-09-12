@@ -169,11 +169,11 @@ class SSINetNode__TypeLCGNet:
         iseq = IntSeq(self.base_queue) 
         return OpTriGenLite(iseq,self.op_pair[0],self.op_pair[1])
 
-    def add_to_queue(self,v):
-        assert is_number(v) 
+    def update_tmp_queue(self,L): 
+        assert type(L) == list
         assert self.sidn != "lcg"
 
-        self.tmp_queue.append(v) 
+        self.tmp_queue.extend(L) 
 
         limit = int(round(self.activation_size * self.tmpcache_ratio)) 
         excess = len(self.tmp_queue) - limit 
