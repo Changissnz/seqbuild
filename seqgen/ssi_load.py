@@ -14,6 +14,7 @@ SSIBL_PARAMETER_MAP = {'lcg':[float,float,float,float],\
 DEFAULT_SSINET_HOP_RANGE = (4,10) 
 DEFAULT_BASE_QUEUE_ACTIVATION_RANGE = (5,24)    
 DEFAULT_SSINETNODE__TYPE_FITTER_NUM_ITER = (0.5,4.1)  
+DEFAULT_SSINETNODE_TMPCACHE_RATIO = 4.9  
 
 def index1_to_index2(i,dim2d):
     x = 0 
@@ -58,18 +59,23 @@ class OpTriGenLite:
 
 class SSINetNode__TypeLCGNet: 
 
-    def __init__(self,structure_idn,prg,op_pair=None,exclude_neg=None):
+    def __init__(self,structure_idn,prg,op_pair=None,exclude_neg=None,\
+        tmpcache_ratio= DEFAULT_SSINETNODE_TMPCACHE_RATIO):
         assert structure_idn in SSIBL_STRUCTURES
         assert type(prg) in {MethodType,FunctionType,type(None)}
         self.sidn = structure_idn
+
+        # used for `lcg` 
         self.prg = prg 
 
         assert type(op_pair) in {type(None),tuple}
         if type(op_pair) == tuple: 
             assert len(op_pair) == 2 
+        assert tmpcache_ratio >= 1.0 
 
         # used for `mdr` 
         self.exclude_neg = exclude_neg
+        self.tmpcache_ratio = tmpcache_ratio
 
         # used for `optri` 
         self.op_pair = op_pair 
@@ -77,13 +83,33 @@ class SSINetNode__TypeLCGNet:
         # used for `optri`, `mdr` 
         self.base_queue = [] 
         self.base_activated = False 
+        self.tmp_queue = [] 
+
         self.struct = None 
+        # use for `mdr` `
+        self.rvalues = [] 
 
         self.activation_size = None
         self.termination_length = None 
 
         self.c = 0 
         return 
+
+    def __next__(self):
+        if self.sidn == "lcg": 
+            return self.prg()
+        
+        if not self.base_activated: 
+            return None 
+
+        if self.sidn in {"mdr","mdrv2"}: 
+            assert len(self.rvalues) > 0 
+            q = self.rvalues.pop(0)
+        else:
+            q = next(self.struct)
+            
+        self.c += 1 
+        return q 
 
     """
 
@@ -93,17 +119,19 @@ class SSINetNode__TypeLCGNet:
         assert type(activation_size) in {int,np.int32} 
         assert DEFAULT_BASE_QUEUE_ACTIVATION_RANGE[1] >= \
             activation_size >= DEFAULT_BASE_QUEUE_ACTIVATION_RANGE[0]
-        self.activation_size = activation_sizes
+        self.activation_size = activation_size
         return
 
     def activate_base(self,aux_prg): 
         assert type(aux_prg) in {MethodType,FunctionType}
-        #aux_prg = prg__single_to_int(aux_prg)
 
         self.base_activated = True 
+        x = self.tmp_queue[:self.activation_size]
+        self.base_queue = x 
+        self.tmp_queue = self.tmp_queue[self.activation_size:]
 
         q = self.activate_mdr(aux_prg)
-        if q == False :
+        if q == False:
             q = self.activate_optri(aux_prg) 
         self.struct = q 
         return 
@@ -140,6 +168,25 @@ class SSINetNode__TypeLCGNet:
 
         iseq = IntSeq(self.base_queue) 
         return OpTriGenLite(iseq,self.op_pair[0],self.op_pair[1])
+
+    def add_to_queue(self,v):
+        assert is_number(v) 
+        assert self.sidn != "lcg"
+
+        self.tmp_queue.append(v) 
+
+        limit = int(round(self.activation_size * self.tmpcache_ratio)) 
+        excess = len(self.tmp_queue) - limit 
+
+        while excess > 0: 
+            self.tmp_queue.pop(0)
+        return
+
+    def load_first(self,v): 
+        assert is_number(v) 
+        self.struct.reset_first(v)
+        self.rvalues = self.struct.reconstruct()
+        return
 
 class SSIBatchLoader__TypeLCGNet: 
 
