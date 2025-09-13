@@ -378,9 +378,12 @@ class ModuloDecompRepr:
             return self.reconstruct_(self.first)
         return self.reconstruct_v2_(self.first) 
 
-    def reset_first(self,f): 
-        assert type(f) in {int,np.int32}
-        self.first = np.int32(f) 
+    def reset_first(self,f,is_int:bool):
+        if is_int: 
+            assert type(f) in {int,np.int32}
+            self.first = np.int32(f) 
+        else:
+            self.first = f
 
     def shift_afs_prt_(self,index_shift): 
         assert type(index_shift) == int  

@@ -64,17 +64,21 @@ def prgen(s1,s2):
         return random.randint(s1,s2) 
     return prgen_
 
+## CAUTION 
 def stdop_vec(l,operation,cast_type=np.int32):
     ##assert operation in {add,sub,mul,truediv,floordiv}
-    assert cast_type in {np.int32,np.float32,float} 
+    #assert cast_type in {np.int32,np.float32,float} 
     assert type(l) == np.ndarray and len(l.shape) == 1
     d = []
     for i in range(1,len(l)):
         try: 
             q = operation(l[i],l[i-1])
         except: 
-            q = np.nan   
-        d.append(q if not np.isinf(q) else np.nan)
+            q = np.nan 
+
+        if np.isnan(q): q = 0 
+        elif np.isinf(q): q = 0 
+        d.append(q)
     return np.array(d,dtype=cast_type)
 
 def diffvec(l,cast_type=np.int32): 

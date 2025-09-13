@@ -16,6 +16,12 @@ DEFAULT_BASE_QUEUE_ACTIVATION_RANGE = (5,24)
 DEFAULT_SSINETNODE__TYPE_FITTER_NUM_ITER = (0.5,4.1)  
 DEFAULT_SSINETNODE_TMPCACHE_RATIO = 4.9  
 
+def npint32__mod__Q(v):
+    r = (-5000,5000) 
+    if v >= r[0] and v <= r[1]: return np.int32(v) 
+    v_ = modulo_in_range(v,r) 
+    return np.int32(v_)
+
 def index1_to_index2(i,dim2d):
     x = 0 
     i2 = [0,0]
@@ -40,9 +46,10 @@ class OpTriGenLite:
         return 
 
     def to_matrix(self,iseq): 
-        ot1 = iseq.optri(self.bfunc,np.int32) 
+        ot1 = iseq.optri(self.bfunc,float) 
         iseq2 = IntSeq(ot1[0])
-        ot2 = iseq2.optri(self.ffunc,np.int32)
+        ot2 = iseq2.optri(self.ffunc,float)
+
         ot2 = np.flip(ot2,1)
         ot2 = np.flip(ot2,0)
         j = 1
@@ -103,8 +110,11 @@ class SSINetNode__TypeLCGNet:
             return None 
 
         if self.sidn in {"mdr","mdrv2"}: 
-            assert len(self.rvalues) > 0 
-            q = self.rvalues.pop(0)
+            if len(self.rvalues) == 0: 
+                q = None  
+                self.c -= 1 
+            else:
+                q = self.rvalues.pop(0)
         else:
             q = next(self.struct)
             
@@ -122,32 +132,36 @@ class SSINetNode__TypeLCGNet:
         self.activation_size = activation_size
         return
 
-    def activate_base(self,aux_prg): 
+    def activate_base(self,aux_prg,verbose=0): 
         assert type(aux_prg) in {MethodType,FunctionType}
-
+        
         self.base_activated = True 
         x = self.tmp_queue[:self.activation_size]
         self.base_queue = x 
         self.tmp_queue = self.tmp_queue[self.activation_size:]
 
-        q = self.activate_mdr(aux_prg)
+        q = self.activate_mdr(aux_prg,verbose)
         if q == False:
-            q = self.activate_optri(aux_prg) 
+            q = self.activate_optri(aux_prg,verbose) 
         self.struct = q 
         return 
 
-    def activate_mdr(self,aux_prg):    
+    def activate_mdr(self,aux_prg,verbose):    
         if "mdr" not in self.sidn: 
             return False 
 
+        BQ = [npint32__mod__Q(b) for b in self.base_queue]
+
         mdr = None
+        if verbose: 
+            print("= activating {} w/ \n{}".format(self.sidn,BQ))
+        
         if self.sidn == "mdr":
-            m = ModuloDecomp(IntSeq(self.base_queue),\
-                self.exclude_neg)
-            m.merge(False)
+            m = ModuloDecomp(IntSeq(BQ))
+            m.merge(bool(self.exclude_neg)) 
             mdr = ModuloDecompRepr(m,1)
         else: 
-            m = ModuloDecomp(IntSeq(self.base_queue),\
+            m = ModuloDecomp(IntSeq(BQ),\
                 self.exclude_neg)
             mdr = ModuloDecompRepr(m,2) 
 
@@ -158,13 +172,16 @@ class SSINetNode__TypeLCGNet:
         self.termination_length = L_ 
         return mdr
 
-    def activate_optri(self,aux_prg): 
+    def activate_optri(self,aux_prg,verbose): 
         L = len(self.base_queue) - 1 
         L = L ** 2 
         r = modulo_in_range(aux_prg(),\
             DEFAULT_SSINETNODE__TYPE_FITTER_NUM_ITER) 
         L_ = int(ceil(L * r)) 
         self.termination_length = L_
+
+        if verbose: 
+            print("= activating {} w/ \n{}".format(self.sidn,self.base_queue))
 
         iseq = IntSeq(self.base_queue) 
         return OpTriGenLite(iseq,self.op_pair[0],self.op_pair[1])
@@ -177,14 +194,14 @@ class SSINetNode__TypeLCGNet:
 
         limit = int(round(self.activation_size * self.tmpcache_ratio)) 
         excess = len(self.tmp_queue) - limit 
-
         while excess > 0: 
             self.tmp_queue.pop(0)
+            excess-= 1
         return
 
     def load_first(self,v): 
         assert is_number(v) 
-        self.struct.reset_first(v)
+        self.struct.reset_first(v,False)
         self.rvalues = self.struct.reconstruct()
         return
 

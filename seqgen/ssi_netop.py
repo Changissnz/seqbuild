@@ -4,11 +4,12 @@ from morebs2.g2tdecomp import *
 
 class SSINetOp:
 
-    def __init__(self,struct_list,h2tree_map,prg,lcg_input_only=-1,uniform_io_dist=1,shuffle_dist=0):
+    def __init__(self,struct_list,h2tree_map,prg,\
+        lcg_input_only=0,uniform_io_dist=1,shuffle_dist=0,verbose:bool=False):
         assert len(struct_list) > 3 
         assert len(h2tree_map) > 0
         assert type(prg) in {MethodType,FunctionType}
-        assert lcg_input_only in {-1,0,1}
+        assert lcg_input_only in {0,1}
         assert uniform_io_dist in {0,1}
         assert shuffle_dist in {0,1}
 
@@ -19,11 +20,13 @@ class SSINetOp:
         self.lcg_input_only = lcg_input_only 
         self.uniform_io_dist = uniform_io_dist 
         self.shuffle_dist = shuffle_dist
-
+        self.verbose = verbose 
+        
         # storage of values from some source; values can be used for 
         # the structures `mdr`,`mdrv2`,`optri`. 
         self.mainstream_queue = []
-        
+        self.prev_output = None 
+
         self.tmp_queue = [] 
         self.lcg_queue = []
         self.mo_queue = []
@@ -32,12 +35,18 @@ class SSINetOp:
         self.t_index = 0
 
         self.prev = None  
+
+        self.preprocess()
         return 
 
     ##-------------------------------------------------------------------
 
+    def preprocess(self): 
+        self.set_tree_conn()
+        self.set_actterm_sizes()
+
     def set_tree_conn(self):
-        ks = sorted(self.h2tree_map.items())
+        ks = sorted(self.h2tree_map.keys())
         cx = combinations(ks,2)
         q = prg__single_to_int(self.prg)
 
@@ -53,11 +62,20 @@ class SSINetOp:
                 self.edges[c[0]]|= {c[1]}
                 self.edges[c[1]]|= {c[0]}
 
-    def set_actsizes(self): 
+    def set_actterm_sizes(self): 
         for q in self.struct_list: 
             if q.sidn == "lcg": 
                 continue 
             q.activation_size = modulo_in_range(int(round(self.prg())),DEFAULT_BASE_QUEUE_ACTIVATION_RANGE) 
+            
+            qx = [self.prg() for _ in range(q.activation_size)]
+            q.update_tmp_queue(qx)
+
+            r = modulo_in_range(self.prg(),\
+                DEFAULT_SSINETNODE__TYPE_FITTER_NUM_ITER) 
+            q.termination_length = int(ceil(q.activation_size * r)) 
+            q.activate_base(self.prg)
+
         return
 
     ##-------------------------------------------------------------------
@@ -66,16 +84,23 @@ class SSINetOp:
 
         if len(self.mainstream_queue) > 0: 
             q = self.mainstream_queue.pop(0) 
+            self.prev_output = q 
             return q 
+
+        if self.verbose: print("processing trees")
 
         exclude_trees = set()
         while len(self.mainstream_queue) == 0:
             H = self.choose_tree(exclude_trees)
+            if self.verbose: print("- tree {}".format(H))
             assert type(H) != type(None)
             
             self.process_tree(H) 
             exclude_trees |= {H} 
-        return self.mainstream_queue.pop(0)
+
+        q = self.mainstream_queue.pop(0)
+        self.prev_output = q 
+        return q 
 
     def choose_tree(self,exclude_trees=set()):
         TI = [t for t in self.tree_idns if t not in exclude_trees]
@@ -95,6 +120,10 @@ class SSINetOp:
             q = self.process_node(k) 
             if type(q) != type(None): 
                 self.tmp_queue.append(q) 
+        if self.verbose: 
+            print("\t+ procvec")
+            print("\t{}".format(self.lcg_queue))
+            print("\t{}".format(self.mo_queue))
 
         # distribute to other trees 
         self.distribute_to_connected_trees(head)
@@ -108,30 +137,44 @@ class SSINetOp:
         if q.sidn == "lcg": 
             x = next(q)
             self.lcg_queue.append(x) 
+            if self.verbose: print("lcg next: ",x)
             return x 
 
         if q.sidn in {"mdr","mdrv2"}: 
             x = next(q) 
+            if type(x) == type(None): 
+                if type(self.prev_output) != type(None): 
+                    q.load_first(self.prev_output)
+                    x = next(q)
+            if self.verbose: print("{} next: {}".format(q.sidn,x))
         else:
             x = next(q)
+            if self.verbose: print("{} next: {}".format(q.sidn,x))
 
         # case: set new activation and termination length 
         if q.c >= q.termination_length:
+            if self.verbose: print("** updating {} @ index={}".format(q.sidn,index))
+
             q.activation_size = modulo_in_range(int(round(self.prg())),DEFAULT_BASE_QUEUE_ACTIVATION_RANGE) 
             q.c = 0 
 
-            q.struct = None
+            #q.struct = None
             q.base_queue.clear()
+            q.base_activated = False
             L = len(q.tmp_queue) 
             if L >= q.activation_size:
-                q.activate_base(self.prg)
-            else: 
-                q.base_activated = False
+                if self.verbose: print("\tbase update")
+                q.activate_base(self.prg,self.verbose)
 
         if type(x) != type(None): 
             self.mo_queue.append(x)
 
         return x 
+
+
+    def init_mo_struct(self): 
+
+        return -1 
 
     #--------- network distribution of output values -----------------------------------
 
@@ -158,7 +201,7 @@ class SSINetOp:
                 return 
             
             L_ = [] 
-            prg_ = prg__single_to_int()
+            prg_ = prg__single_to_int(self.prg)
             for l in L: 
                 d = prg_() % 2 
                 if d: L_.append(l)
@@ -167,9 +210,13 @@ class SSINetOp:
         assert head in self.h2tree_map 
         T = self.h2tree_map[head] 
 
+        if self.verbose: 
+            print("distributing to {}:\n\t{}".format(head,L))
+
         K = self.tree_to_keys(head,1)
         for k in K: 
             node_ = self.struct_list[k] 
+            if node_.sidn == "lcg": continue 
             D(node_)
         return 
 
@@ -178,7 +225,7 @@ class SSINetOp:
         assert is_bfs in {-1,0,1}
 
         T = self.h2tree_map[head] 
-        gd = G2TDecomp(defaultdict(T,set),decomp_nodes=[head],child_capacity=1)
+        gd = G2TDecomp(defaultdict(set,T),decomp_rootnodes=[head],child_capacity=1)
         gd.decompose()
 
         if is_bfs == -1: 
@@ -198,7 +245,7 @@ class SSINetOp:
     #-------------- instantiation ------------------------------------------------ 
 
     @staticmethod 
-    def one_instance(num_nodes,prg,prg2): 
+    def one_instance(num_nodes,prg,prg2,lcg_input_only=0,uniform_io_dist=1,shuffle_dist=0): 
         assert num_nodes >= 5 
 
         num_sets = 3 
@@ -223,7 +270,8 @@ class SSINetOp:
 
         q1 = sls 
         q2 = ssb2n.h2tree_map
-        return SSINetOp(q1,q2,prg2)
+        return SSINetOp(q1,q2,prg2,lcg_input_only=lcg_input_only,\
+            uniform_io_dist=uniform_io_dist,shuffle_dist=shuffle_dist)
 
     @staticmethod
     def one_instance__slist(sidn,batch_size,prg):
