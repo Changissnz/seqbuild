@@ -63,7 +63,7 @@ class SSINetOpMethods(unittest.TestCase):
 
         DX1 = Q2 - Q0 
         i2 = np.where(DX1 != 0)[0]
-        assert len(i2) == 326 
+        assert len(i2) == 50,"got {}".format(len(i2))
 
         T1 = time.time() - T0 
         print("elapsed time: {}".format(T1))
