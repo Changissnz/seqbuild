@@ -183,7 +183,8 @@ class SSINetNode__TypeLCGNet:
         if verbose: 
             print("= activating {} w/ \n{}".format(self.sidn,self.base_queue))
 
-        iseq = IntSeq(self.base_queue) 
+        B = [npint32__mod__Q(b) for b in self.base_queue]
+        iseq = IntSeq(B) 
         return OpTriGenLite(iseq,self.op_pair[0],self.op_pair[1])
 
     def update_tmp_queue(self,L): 
