@@ -9,10 +9,11 @@ from desi.differentials import *
 from intigers.lcg_v3 import * 
 from intigers.prng_pw_op import *
 from seqgen.sb_crypt import * 
+from seqgen.ssi_netop import * 
 
 BASE_PRNG = ["lcg","lcgv2","lcgv3","mdr","mdrv2",\
         "mdrgen","iomaps","idforest","optri","rch","qval",\
-        "pid","echo","shadow"]  
+        "pid","echo","shadow","ssino"]  
 
 ARITHMETIC_OP_STR_MAP = {"+":add,"-":sub,"/":zero_div0,"*":mul,"%":mod} 
 
@@ -80,6 +81,9 @@ def MAIN_method_for_object(q):
         return q.__next__ 
 
     if type(q) == IDecForest: 
+        return q.__next__
+
+    if type(q) == SSINetOp: 
         return q.__next__
 
     return -1 
@@ -490,6 +494,50 @@ def MAKE_shadow(splitstr_cmd,var_map):
     sg = ShadowGen(prg,file_path,fitting_struct)
     return sg 
 
+def MAKE_ssino(splitstr_cmd,var_map):
+    assert splitstr_cmd[1] == "ssino" 
+    assert splitstr_cmd[2] == "with" 
+
+    q = splitstr_cmd[3].split(",")
+    l = len(q)
+    assert l in {3,4,5,6,7}
+    
+    r0 = int(q[0])
+    
+    assert q[1] in var_map 
+    prg = var_map[q[1]]
+    prg = MAIN_method_for_object(prg) 
+
+    assert q[2] in var_map 
+    prg2 = var_map[q[2]] 
+    prg2 = MAIN_method_for_object(prg2) 
+
+    lcg_input_only = 0 
+    uniform_io_dist = 1 
+    shuffle_dist = 0 
+    prg_io_noise = 1 
+
+    if l >= 4: 
+        lcg_input_only = int(q[3])
+        assert lcg_input_only in {0,1}
+
+    if l >= 5: 
+        uniform_io_dist = int(q[4])
+        assert uniform_io_dist in {0,1} 
+
+    if l >= 6: 
+        shuffle_dist = int(q[5])
+        assert shuffle_dist in {0,1} 
+
+    if l >= 7: 
+        prg_io_noise = int(q[6])
+        assert prg_io_noise in {0,1}  
+    
+    sno = SSINetOp.one_instance(r0,prg,prg2,\
+        lcg_input_only,uniform_io_dist,shuffle_dist,prg_io_noise)
+
+    return sno  
+
 # TODO: incomplete 
 def MAKE_proc(splitstr_cmd,var_map): 
     assert splitstr_cmd[0] == "make"
@@ -608,5 +656,8 @@ def MAKE_proc(splitstr_cmd,var_map):
 
     if splitstr_cmd[1] == "idforest": 
         return MAKE_idforest(splitstr_cmd,var_map)
+
+    if splitstr_cmd[1] == "ssino": 
+        return MAKE_ssino(splitstr_cmd,var_map) 
 
     raise ValueError("diffektor") 

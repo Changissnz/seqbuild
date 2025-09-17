@@ -197,6 +197,25 @@ as well as their instantiation parameters in Comm Lang.
     1. (generator,mdr|mdrv2|tvec|fvec|optri,string)  
     * (!,fitter,filepath)  
 
+[o] ssino  
+
+- instantiation: 
+
+    1. (integer,generator,generator,0|1,0|1,0|1,0|1)  
+    * (number of nodes,primary generator,secondary generator,lcg input only,uniform io dist,shuffle dist,prg io noise)   
+
+    2. (integer,generator,generator,0|1,0|1,0|1)  
+    * (number of nodes,primary generator,secondary generator,lcg input only,uniform io dist,shuffle dist)   
+
+    3. (integer,generator,generator,0|1,0|1,0|1,0|1)  
+    * (number of nodes,primary generator,secondary generator,lcg input only,uniform io dist)   
+
+    4. (integer,generator,generator,0|1)  
+    * (number of nodes,primary generator,secondary generator,lcg input only)   
+
+    5. (integer,generator,generator)  
+    * (number of nodes,primary generator,secondary generator)   
+
 [o] op2   
 
 - instantiation:  

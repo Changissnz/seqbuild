@@ -5,13 +5,16 @@ from morebs2.g2tdecomp import *
 class SSINetOp:
 
     def __init__(self,struct_list,h2tree_map,prg,\
-        lcg_input_only=0,uniform_io_dist=1,shuffle_dist=0,verbose:bool=False):
+        lcg_input_only=0,uniform_io_dist=1,shuffle_dist=0,\
+        io_prg=None,verbose:bool=False):
+
         assert len(struct_list) > 3 
         assert len(h2tree_map) > 0
         assert type(prg) in {MethodType,FunctionType}
         assert lcg_input_only in {0,1}
         assert uniform_io_dist in {0,1}
         assert shuffle_dist in {0,1}
+        assert type(io_prg) in {MethodType,FunctionType,type(None)}
 
         self.struct_list = struct_list
         self.h2tree_map = h2tree_map
@@ -20,6 +23,8 @@ class SSINetOp:
         self.lcg_input_only = lcg_input_only 
         self.uniform_io_dist = uniform_io_dist 
         self.shuffle_dist = shuffle_dist
+        self.io_prg = io_prg
+
         self.verbose = verbose 
         
         # storage of values from some source; values can be used for 
@@ -99,7 +104,17 @@ class SSINetOp:
             exclude_trees |= {H} 
 
         q = self.mainstream_queue.pop(0)
+        q = self.apply_noise(q) 
         self.prev_output = q 
+        return q 
+
+    def apply_noise(self,q):
+        if type(self.io_prg) == type(None): 
+            return q 
+
+        b = int(round(self.io_prg())) % 2 
+        if b: 
+            return q + self.io_prg() 
         return q 
 
     def choose_tree(self,exclude_trees=set()):
@@ -172,10 +187,6 @@ class SSINetOp:
         return x 
 
 
-    def init_mo_struct(self): 
-
-        return -1 
-
     #--------- network distribution of output values -----------------------------------
 
     def distribute_to_connected_trees(self,head): 
@@ -196,8 +207,9 @@ class SSINetOp:
     def distribute_seq_to_tree(self,head,L): 
 
         def D(node): 
+            L_ = [self.apply_noise(l) for l in L]
             if self.uniform_io_dist:
-                node.update_tmp_queue(deepcopy(L))
+                node.update_tmp_queue(deepcopy(L_))
                 return 
             
             L_ = [] 
@@ -245,14 +257,14 @@ class SSINetOp:
     #-------------- instantiation ------------------------------------------------ 
 
     @staticmethod 
-    def one_instance(num_nodes,prg,prg2,lcg_input_only=0,uniform_io_dist=1,shuffle_dist=0): 
+    def one_instance(num_nodes,prg,prg2,lcg_input_only=0,uniform_io_dist=1,shuffle_dist=0,\
+        prg_io_noise=0): 
         assert num_nodes >= 5 
-
         num_sets = 3 
         var = 0.25 
         num_rounds = 10 
         prt = prg_partition_for_sz__n_rounds(num_nodes,\
-            num_sets,prg,var,num_rounds)
+            num_sets,prg__single_to_int(prg),var,num_rounds)
         slist = ["lcg","mdr","optri"] 
         
         sls = []
@@ -270,8 +282,9 @@ class SSINetOp:
 
         q1 = sls 
         q2 = ssb2n.h2tree_map
+        io_prg = prg if prg_io_noise else None
         return SSINetOp(q1,q2,prg2,lcg_input_only=lcg_input_only,\
-            uniform_io_dist=uniform_io_dist,shuffle_dist=shuffle_dist)
+            uniform_io_dist=uniform_io_dist,shuffle_dist=shuffle_dist,io_prg=io_prg)
 
     @staticmethod
     def one_instance__slist(sidn,batch_size,prg):

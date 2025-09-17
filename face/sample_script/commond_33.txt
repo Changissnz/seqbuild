@@ -1,0 +1,6 @@
+set G = make lcg with 65,65,65,87878. 
+set G2 = make lcg with 165,675,6,7778. 
+
+set S = make ssino with 10,G,G2. 
+
+set V = run S for 20 iter. 
