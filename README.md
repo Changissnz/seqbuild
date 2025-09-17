@@ -48,6 +48,11 @@ convenient methodology for reading generators from and writing generators to fil
 it is easy to see why these capabilities have not been implemented, however important 
 they are.  
 
+### Update: 9/17/25 
+
+Open development of this project has now terminated. 
+
+
 ### Update: 8/27/25  
 
 I have decided to add a new folder, `performance_marks`, that contain files named  
