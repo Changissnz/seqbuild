@@ -2,7 +2,7 @@
 
 Sequentete...sequentete, my son. 
 
-*Work-in-progress* 
+*Final Open State* 
 
 Project is being developed in conjunction with 
 that of dependency library, `morebs2`. Started out 
