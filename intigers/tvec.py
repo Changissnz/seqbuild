@@ -1,7 +1,7 @@
 from .seq_struct import * 
 from morebs2.numerical_generator import prg_choose_n,modulo_in_range
 from morebs2.matrix_methods import is_valid_range
-from .extraneous import round_to_trinary_vector
+from .extraneous import round_to_trinary_vector,prg__single_to_int
 from types import MethodType,FunctionType
 
 
@@ -61,17 +61,21 @@ class TrinaryVec(IntSeq):
 
         # choose random index to add calibration to 
         if sx != 0:
-            rp = prg() % len(rx) 
+            rp = int(prg()) % len(rx) 
             rx[rp,1] = rx[rp,1] + sx 
 
         Q = [i for i in range(length)]
         vec = np.zeros((length,),dtype=np.int32)
+        prg_ = prg__single_to_int(prg)
 
         for q in rx:
             k,v = q[0],q[1] 
-            q2 = prg_choose_n(Q,v,prg,is_unique_picker=True)
-            vec[q2] += k
+            if v == 0: 
+                print("...strange...")
+                break 
 
+            q2 = prg_choose_n(Q,v,prg_,is_unique_picker=True)
+            vec[q2] += k
         return TrinaryVec(vec)
 
     @staticmethod

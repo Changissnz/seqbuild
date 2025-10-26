@@ -2,8 +2,6 @@
 
 Sequentete...sequentete, my son. 
 
-*Final Open State* 
-
 Project is being developed in conjunction with 
 that of dependency library, `morebs2`. Started out 
 as a research project, and I am starting to wrap 
@@ -48,6 +46,11 @@ convenient methodology for reading generators from and writing generators to fil
 it is easy to see why these capabilities have not been implemented, however important 
 they are.  
 
+### Update: 10/26/25 
+
+Open development of this project has resumed, since I detected some bugs. I'd hate to 
+leave any prospective users with a sub-optimal product. 
+
 ### Update: 9/17/25 
 
 Open development of this project has now terminated. 
@@ -57,7 +60,7 @@ Open development of this project has now terminated.
 
 I have decided to add a new folder, `performance_marks`, that contain files named  
 `fYxx.txt`, along with their corresponding randomness test results `perfY.txt`. The  
-tests are done by an implementation of MNIST Randomness Testing Suite. And this implementation 
+tests are done by an implementation of NIST Randomness Testing Suite. And this implementation 
 can be found at the link below.  
 
 `https://github.com/stevenang/randomness_testsuite.git`. 

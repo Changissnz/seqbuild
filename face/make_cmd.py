@@ -52,7 +52,8 @@ def MAIN_method_for_object(q):
 
     if type(q) == ModuloDecompRepr:
         def f(first):
-            q.reset_first(int(first))
+            q.reset_first(int(first),False)
+            print("resetting")
             return q.reconstruct() 
         return f 
 
@@ -155,7 +156,7 @@ def MAKE_lcgvx(splitstr_cmd,var_map):
             exclude_zero__auto_td = True
             is_rmod = False 
 
-            g3 = LCGV3(px[0],px[1],px[2],px[3],px[4],0,False,prg,super_range,\
+            g3 = LCGV3(px[0],px[1],px[2],px[3],px[4],10,False,prg,super_range,\
                 exclude_zero__auto_td,is_rmod)
 
         # case: trinary guided w/ option to exclude 0 from trinary vector guides. 
@@ -163,7 +164,7 @@ def MAKE_lcgvx(splitstr_cmd,var_map):
             exclude_zero__auto_td = bool(int(parameters[8]))
             is_rmod = False 
 
-            g3 = LCGV3(px[0],px[1],px[2],px[3],px[4],0,False,prg,super_range,\
+            g3 = LCGV3(px[0],px[1],px[2],px[3],px[4],10,False,prg,super_range,\
                 exclude_zero__auto_td,is_rmod)
 
         # case: trinary guided w/ option to exclude 0 from trinary vector guides, 
@@ -171,9 +172,15 @@ def MAKE_lcgvx(splitstr_cmd,var_map):
         else: 
             exclude_zero__auto_td = bool(int(parameters[8]))
             is_rmod = bool(int(parameters[9]))
-            g3 = LCGV3(px[0],px[1],px[2],px[3],px[4],0,False,prg,super_range,\
+            g3 = LCGV3(px[0],px[1],px[2],px[3],px[4],10,False,prg,super_range,\
                 exclude_zero__auto_td,is_rmod)
+
+        m0 = int(prg()) % 2 + 1 
+        m1 = int(prg()) % 26 + 5 
+        m2 = bool(int(prg()) % 2)
+        g3.static_autoset(m0,m1,m2) 
         return g3     
+        
     assert False 
 
 def MAKE_mdrvx(splitstr_cmd,var_map): 
@@ -199,7 +206,7 @@ def MAKE_mdrvx(splitstr_cmd,var_map):
             exclude_neg = i 
         
         lx = var_map[parameters[0]]
-        mdx = ModuloDecompV2(IntSeq(lx),exclude_neg) 
+        mdx = ModuloDecompV2(IntSeq(lx),exclude_neg)
         return ModuloDecompRepr(mdx,reconstruct_type=2) 
 
     if splitstr_cmd[1] == "mdrgen": 

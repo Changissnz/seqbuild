@@ -8,7 +8,7 @@ class ModPRNGOutputter:
 
     def __init__(self,prngs):
         for x in prngs: 
-            assert type(x) in {FunctionType,MethodType}
+            assert type(x) in {FunctionType,MethodType}, "got {},{}".format(x,type(x))
         
         self.prngs = prngs
         self.i = 0

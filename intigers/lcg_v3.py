@@ -1,9 +1,11 @@
 from .lcg_v2 import * 
 from .tvec import * 
+from .extraneous import prg__single_to_int
+
 """
 """
 def is_value_below_modulo_range_length(v,mr):
-    assert is_valid_range(mr,True,False)  
+    assert is_valid_range(mr,True,False) or is_valid_range(mr,False,False)
     return abs(v) <= mr[1] - mr[0]
 
 # NOTE: not the most efficient approach
@@ -14,7 +16,7 @@ does not become an infinite loop.
 """
 def iterative_adjustment_for_direction__modrange(pv,av,sign,modrange,\
     modindex,moddir,set_limit=int):  
-    assert is_valid_range(modrange,True,False) 
+    assert is_valid_range(modrange,True,False) or is_valid_range(modrange,False,False)
 
     # set limits 
     lim = [-float('inf'),float('inf')]
@@ -114,7 +116,7 @@ value `av`, `modulo_in_range(av,M_r) == pv`.
 def modrange_for_congruence(pv,av,modrange):
     assert type(pv) in {int,np.int32,np.int64}
     assert type(av) in {int,np.int32,np.int64}
-    assert is_valid_range(modrange,True,False) 
+    assert is_valid_range(modrange,True,False) or is_valid_range(modrange,False,False)
 
     if not is_value_below_modulo_range_length(av,modrange): 
         if pv >= 0: 
@@ -145,6 +147,8 @@ def modrange_for_congruence(pv,av,modrange):
 #--------------------------------------------------------------------- 
 
 DEFAULT_LCGV3_AUTO_TRINARYDELTA_RANGE = (3,9) 
+DEFAULT_RANGEDMOD_ABSMAX = 10 ** 6 / 2 - 1
+
 #DEFAULT_LCGV3_RMOD_RANGE = [2,19] 
 
 """
@@ -186,7 +190,7 @@ class LCGV3(LCGV2):
 
     def __init__(self,start,m,a,n0,n1,sc_size:int,preproc_gd:bool=False,\
         prg=None,super_range=None,exclude_zero__auto_td:bool=False,\
-        is_rmod:bool=False):
+        is_rmod:bool=False,verbose=False):
         super().__init__(start,m,a,n0,n1,sc_size,preproc_gd)
         if type(super_range) != type(None): 
             assert is_valid_range(super_range,False,False) or \
@@ -216,6 +220,7 @@ class LCGV3(LCGV2):
         self.is_rmod = is_rmod
 
         self.stat__new_trinary = False 
+        self.verbose = verbose 
 
     #------------------------------ main methods, __next__ methods for output values 
 
@@ -245,19 +250,26 @@ class LCGV3(LCGV2):
         s_ = self.s 
         q = super().__next__()
 
+        # used to trim down runtime from exploding values 
+        if q > 0:
+            q = modulo_in_range(q,[0,99990])
+        else: 
+            q = modulo_in_range(q,[-99999,0])
+
         # case: first element, no trinary vec comparison 
         if not did_fire:
             if type(self.super_range) != type(None):
                 return modulo_in_range(q,self.super_range)
             return q
 
+        # resets `r` to a smaller modrange if it exceeds large value 
+        self.reset_big_modrange() 
 
         if type(self.tv) == TrinaryVec: 
             assert type(self.prg) != type(None)
-
             sc = self.tv[self.tvi]
             try: 
-                mr = self.adjust_modulo_range(s_,q,sc,self.prg)
+                mr = self.adjust_modulo_range(s_,q,sc,prg__single_to_int(self.prg))
             except: 
                 print("...strange#2...")
                 self.r = deepcopy(self.super_range)
@@ -275,11 +287,9 @@ class LCGV3(LCGV2):
                 if self.auto_trinarydelta:
                     self.delta_counter += 1 
                     self.auto_td__update_trinary_vec() 
-
                 if self.is_rmod: 
                     self.delta_counter += 1
                     self.reflective_mod() 
-            
             self.tvi = self.tvi % len(self.tv) 
             self.s = q 
 
@@ -302,13 +312,12 @@ class LCGV3(LCGV2):
     fit the new trinary vector pattern.  
     """
     def reflective_mod(self): 
-
+        
         # get the next sequence of values. 
         # sequence is to be used as reference 
-        # for generator output values. 
+        # for generator output values.         
         rx = self.trinary_length + 1
         qs = [] 
-
         for _ in range(rx): 
             q = super().__next__()
             qs.append(q)
@@ -350,6 +359,8 @@ class LCGV3(LCGV2):
             r_ = modrange_for_congruence(reference,actual_value,self.r)
             return r_ 
 
+        ################################################################### 
+        
         stat = is_value_below_modulo_range_length(actual_value,self.r) 
         if stat: 
             wv = reference 
@@ -362,10 +373,16 @@ class LCGV3(LCGV2):
             except: 
                 print("...strange...")
                 self.r = deepcopy(self.super_range)
-                return self.r  
+                return self.r   
 
         return multimodular_number__modulo_range_adjustment(reference,\
             actual_value,sign_change,self.r)
+        
+    def reset_big_modrange(self):
+        if np.max(np.abs(self.r)) > DEFAULT_RANGEDMOD_ABSMAX:
+            self.r = [-int(DEFAULT_RANGEDMOD_ABSMAX / 100000 * 49),\
+                int(DEFAULT_RANGEDMOD_ABSMAX / 100000 * 49)] 
+        return
 
     def set_tv(self,tv):
         assert type(tv) == TrinaryVec
@@ -389,7 +406,6 @@ class LCGV3(LCGV2):
 
     def autoset_tv(self,gen_type,l,ext_prg=None):
         assert gen_type in {1,2}
-
         qx = ext_prg if type(ext_prg) != \
             type(None) else self.__next__ 
 
@@ -411,7 +427,6 @@ class LCGV3(LCGV2):
 
         if self.exclude_zero__auto_td: 
             tv = TrinaryVec.omit_value(tv,0,self.prg) 
-
         self.set_tv(tv)
         self.stat__new_trinary = True 
 

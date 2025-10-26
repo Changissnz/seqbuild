@@ -31,8 +31,8 @@ Decomposes integer sequence into format: ((multiple,additive),index list).
 """
 class AffineFitSearch: 
 
-    def __init__(self,l,exclude_neg:bool,log_revd:bool=False):
-        self.afc = AffineFitCandidates(l)
+    def __init__(self,l,exclude_neg:bool,log_revd:bool=False,max_absmult:int=None):
+        self.afc = AffineFitCandidates(l,exclude_neg,max_absmult)
         self.exclude_neg = exclude_neg
         self.log_revd = log_revd 
         self.d = defaultdict(list) 
@@ -142,9 +142,10 @@ value being less than the i'th value.
 """
 class ModuloDecomp: 
 
-    def __init__(self,l): 
+    def __init__(self,l,max_absmult:int=None): 
         assert type(l) == IntSeq 
         self.l = l 
+        self.max_absmult = max_absmult
         self.gvec = None 
         self.gleqvec_prt = self.gleqvec_partition()
         self.subvec_fit = dict()
@@ -195,7 +196,7 @@ class ModuloDecomp:
         if len(chunk) < 2: 
             return ((prev,now),[])
 
-        afs = AffineFitSearch(chunk,exclude_neg,log_revd=True)
+        afs = AffineFitSearch(chunk,exclude_neg,log_revd=True,max_absmult=self.max_absmult)
         afs.load_all_candidates()
         afs.count()
         q = afs.default_affine_decomp()

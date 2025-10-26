@@ -1,4 +1,4 @@
-set G = make lcg with 67,-18,99,9007. 
+set G = make lcg with 67.5,-18,99,9007. 
 set FO = make lcg with 39,-14,67000,66666. 
 
 set LO = make lcg with 93,14,67,87878. 

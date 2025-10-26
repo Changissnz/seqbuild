@@ -1,0 +1,39 @@
+set GX0 = make lcg with 3,4,6,40. 
+set GX1 = make lcg with 3,14,6,40. 
+set GX2 = make lcg with 3,40,6,40. 
+set GX3 = make lcg with 3,5,1,40. 
+
+set VX0 = run GX0 for 25 iter. 
+set VX1 = run GX1 for 25 iter. 
+set VX2 = run GX2 for 25 iter. 
+set VX3 = run GX3 for 50 iter. 
+
+set ALT = make lcg with 0,1,1,2.
+set ALT2 = make lcg with 1,1,1,2.  
+set ALT3 = make lcg with 7,2,3,76.
+set ALT4 = merge ALT,ALT3 with +.
+
+set G_ALT = make lcgv3 with 3,4,6,0,40,ALT4,0,40,1,1.
+set VX3_ = run G_ALT for 500 iter. 
+
+#########################################
+
+# mod 40 -> shorter cycles 
+set G0 = make lcg with 3,5,1,41. 
+set V0 = run G0 for 25 iter. 
+
+set G1 = make lcg with 3,15,1,41. 
+set V1 = run G1 for 25 iter. 
+
+set G2 = make lcg with 3,25,1,41. 
+set V2 = run G2 for 25 iter. 
+
+set G3 = make lcg with 1,5,1,41. 
+set V3 = run G3 for 25 iter. 
+
+set G4 = make lcg with 1,15,1,41. 
+set V4 = run G4 for 25 iter. 
+
+set G5 = make lcg with 1,25,1,41. 
+set V5 = run G5 for 25 iter. 
+

@@ -76,7 +76,6 @@ def RUN_proc(splitstr_cmd,var_map):
                 o2 = f_(q)
                 L.append(o2)
             return L 
-
         return f(splitstr_cmd[3]) 
 
     # case: keyword `for`,`iter`. 
@@ -239,7 +238,7 @@ def MERGE_proc(splitstr_cmd,var_map):
     assert len_op in {len(generators) - 1,1} 
 
     if len_op == 1 and splitstr_cmd[3] == "tree":
-
+        generators = [MAIN_method_for_object(g) for g in generators]
         prx = ModPRNGOutputter(generators) 
         def fx(): 
             fx_ = next(prx) 

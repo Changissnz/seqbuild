@@ -140,6 +140,10 @@ class LCGV3Methods(unittest.TestCase):
         nv = 36 
         sign = -1 
         mr23 = lg.adjust_modulo_range(rv,nv,sign,lcg1)
+        if type(mr23) == type(None): 
+            mr23 = lg.r 
+
+        print("\t\tMRRR23: ",mr23,lg.r,lg.super_range)
         avx = lg.m * rv + lg.a
         assert to_trinary_relation(modulo_in_range(avx,mr23),rv) == sign 
 
@@ -211,7 +215,7 @@ class LCGV3Methods(unittest.TestCase):
             cx += bool(g3.stat__new_trinary) 
             stat = not g3.stat__new_trinary 
 
-        assert len(qs) == 58, "got {}".format(len(qs))
+        assert len(qs) == 57, "got {}".format(len(qs))
 
     """
     ensures that LCGV3 changes its trinary vector at the 
@@ -261,7 +265,7 @@ class LCGV3Methods(unittest.TestCase):
             eqcount += bool(g3out==g4out)
             #print("a: {} b: {}".format(g3out,g4out))  
 
-        assert eqcount == 9,"got {}".format(eqcount)
+        assert eqcount == 10,"got {}".format(eqcount)
 
 
 

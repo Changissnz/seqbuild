@@ -69,8 +69,8 @@ this deficit of its superclass.
 """
 class ModuloDecompV2(ModuloDecomp):
 
-    def __init__(self,l,exclude_neg:bool=True):
-        super().__init__(l)  
+    def __init__(self,l,exclude_neg:bool=True,max_absmult:int=None):
+        super().__init__(l,max_absmult)  
         self.exclude_neg = exclude_neg 
         self.merge(exclude_neg) 
         self.afs_prt = afs_prt__feedbw2feedfw(self.afs_prt)

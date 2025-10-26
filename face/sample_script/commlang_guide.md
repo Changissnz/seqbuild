@@ -91,7 +91,7 @@ as well as their instantiation parameters in Comm Lang.
     * (reference `ModuloDecompRepr`,inputless generator,generative type)  
 
     2. (mdr|mdrv2,function,bool,1|2,bool,bool,bool,bool,bool)  
-    * (reference `ModuloDecompRepr`,inputless generator,generative type,
+    * (reference `ModuloDecompRepr`,inputless generator,exclude negative, generative type,
         row-column switch,selector switch 1,selector switch 2, selector switch 3, 
         input seed in output)  
 

@@ -20,11 +20,17 @@ If `exclude_neg` set to False, considers the span [-m,m]\\{0}.
 """
 class AffineFitCandidates: 
 
-    def __init__(self,l,exclude_neg:bool=True):
+    def __init__(self,l,exclude_neg:bool=True,max_absmult:int=None):
+        if type(max_absmult) != type(None): 
+            assert max_absmult > 0 and type(max_absmult) in {int,np.int32}
+
         self.l = l 
         self.exclude_neg = exclude_neg
+        self.max_absmult = max_absmult
         self.load()
         self.m = self.max_multiple()
+        if type(self.max_absmult) != type(None): 
+            self.m = min(self.m,self.max_absmult)
         self.i = 1 
 
     def load(self):

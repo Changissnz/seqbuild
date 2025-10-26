@@ -73,7 +73,7 @@ class SBCrypt:
             q,qx = None,None 
             try: 
                 q = self.map_char(c) 
-                qx = rch.apply(q) 
+                qx = self.prg() + q #rch.apply(q) 
             except: 
                 self.invalid_char_stat = True 
             if type(qx) != type(None): 
