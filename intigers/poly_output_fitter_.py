@@ -95,7 +95,7 @@ class PolyOutputFitterVar1:
             else: 
                 self.coeff[-1] = self.rem 
             self.rem -= self.rem 
-            return True 
+            return True
 
         q = ceil(abs(self.rem / (self.x1 ** pwr)))
          

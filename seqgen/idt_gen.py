@@ -114,7 +114,7 @@ class IDecForest:
 
         prgx = self.prg2 if type(self.prg2) != type(None) else self.prg 
         
-        cnvrt = IntSeq2Tree(I,l,d,prgx,verbose=False)
+        cnvrt = IntSeq2Tree(I,l,d,prgx,verbose=False,safe_base=True)
         cnvrt.convert()
 
         # set the `entryf` functions for the new tree 

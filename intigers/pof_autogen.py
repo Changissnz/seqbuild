@@ -8,6 +8,7 @@ Uses basic data structures such as <IntSeq> and <LCG> to aid in these requiremen
 from .seq_struct import * 
 from .poly_output_fitter_ import * 
 from morebs2.numerical_generator import prg__n_ary_alternator
+from .extraneous import prg__single_to_int
 
 # num of options 
 DEFAULT_NUM_POLYSIBLING_RANGE = (1,10)
@@ -30,7 +31,7 @@ def safe_power_range_for_base(b,power_range=DEFAULT_POWER_RANGE):
 class POFV2ConditionAutoGen: 
 
     def __init__(self,prg):
-        self.prg = prg 
+        self.prg = prg__single_to_int(prg) 
         return 
 
     """
@@ -68,7 +69,7 @@ class POFV2ConditionAutoGen:
 
     # NOTE: caution required for large integers. Their exponential
     #       values are not suited for program. 
-    def POFV2_to_POFV1_siblings(self,pofv2,sibling_integers,adjust_excess=False): 
+    def POFV2_to_POFV1_siblings(self,pofv2,sibling_integers,default_sizemod=False,adjust_excess=False): 
 
         for s in sibling_integers: assert type(s) in {int,np.int32,np.int64} 
 
@@ -80,7 +81,7 @@ class POFV2ConditionAutoGen:
             pwrange = safe_power_range_for_base(s)
 
             n = modulo_in_range(self.prg(),pwrange)
-            pofv1 = PolyOutputFitterVar1(n,s,c,self.prg,default_sizemod=False,\
+            pofv1 = PolyOutputFitterVar1(n,s,c,self.prg,default_sizemod=default_sizemod,\
                 adjust_excess=adjust_excess)
             pofv1.solve() 
             q.append(pofv1)

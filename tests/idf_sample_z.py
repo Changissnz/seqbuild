@@ -26,7 +26,7 @@ def IDecForest_sampleZ(L=None,make_first_tree:bool=True,prg1=None):
     #prg2 = None 
     #prg3 = prg__LCG(31,83,311,1500)
 
-    idf = IDecForest(s,mpo,100,[15,50],15,prg1,prg2=None)
+    idf = IDecForest(s,mpo,100,[15,50],15,prg1,prg2=None,verbose=False)
 
     x3,x4,x5 = None,None,None 
     if make_first_tree: 

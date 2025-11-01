@@ -2,7 +2,7 @@ from .pof_autogen import *
 from .intfactor import * 
 from morebs2.numerical_generator import prg_seqsort_ties,prg_partition_for_sz
 from morebs2.g2tdecomp import TNode 
-from intigers.extraneous import prg__single_to_int
+from intigers.extraneous import prg__single_to_int,signed_modulo
 
 """
 `p` is a partition that does not contain 0. Fixes any 
@@ -310,10 +310,23 @@ NOTE: some deficiencies of this splitting algorithm, due to the use of factors
 """
 class IntSeq2Tree: 
 
-    def __init__(self,intseq,l:int,d:int,prg,verbose:bool=False): 
+    def __init__(self,intseq,l:int,d:int,prg,verbose:bool=False,safe_base:bool=False): 
         assert type(intseq) == IntSeq
         assert type(l) == type(None) or type(d) == type(None)
-        self.intseq = intseq 
+        
+        if safe_base: 
+            max_value = DEFAULT_MAXBASE4POW(2)
+            q = [] 
+            for i in intseq.l: 
+                if abs(i) >= max_value: 
+                    q.append(signed_modulo(i,max_value))
+                else: 
+                    q.append(i) 
+
+            self.intseq = IntSeq(q)  
+        else: 
+            self.intseq = intseq 
+
         self.l = l 
         self.d = d
         self.verbose=verbose
@@ -768,7 +781,13 @@ class IntSeq2Tree:
         S2 -= {x1,x2}
 
         # make siblings for the polynomial 
-        pofv1_siblings,solvestat = pofgen.POFV2_to_POFV1_siblings(pofv2,S2,adjust_excess=True) 
+        try: 
+            pofv1_siblings,solvestat = pofgen.POFV2_to_POFV1_siblings(pofv2,S2,\
+                default_sizemod=False,adjust_excess=True)
+        except:
+            pofv1_siblings,solvestat = pofgen.POFV2_to_POFV1_siblings(pofv2,S2,\
+                default_sizemod=True,adjust_excess=True)
+
         if self.verbose: print("poly-split number of siblings: ",len(S2) + 2)
 
         # ensure all siblings solved constant c 

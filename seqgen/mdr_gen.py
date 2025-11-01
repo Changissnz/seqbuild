@@ -1,4 +1,5 @@
 from intigers.seq_struct import * 
+from intigers.extraneous import * 
 
 DEFAULT_MDRGEN_INTSEED_CYCLE_SIZERANGE = [4,12]  
 DEFAULT_MDRGEN_INTSEED_CYCLE_ITERRANGE = [2,6]  
@@ -6,11 +7,6 @@ DEFAULT_MDRGEN_INTSEED_CYCLE_ITERRANGE = [2,6]
 DEFAULT_MDRGEN_ABSMAX = int(666) #int((10 ** 4.1) / 2 ) - 1
 
 DEFAULT_MDRGEN_MAXMULT = 31#100 - 49 
-
-def signed_modulo(n,absmax): 
-    if n < 0: 
-        return n % -absmax 
-    return n % absmax 
 
 class MDRGen: 
 
@@ -29,7 +25,7 @@ class MDRGen:
     """
     def __init__(self,mdr,prgen,exclude_neg:bool,gentype=1,\
         gt2_rcswitch:bool=False,gt2_sel1:bool=False,gt2_sel2:bool=False,\
-        gt2_sel3:bool=True,gt2_seed_in_output:bool=True,preproc=True):
+        gt2_sel3:bool=True,gt2_seed_in_output:bool=True,preproc=True,verbose=False):
 
         assert type(mdr) == ModuloDecompRepr
         assert type(exclude_neg) == bool 
@@ -66,6 +62,8 @@ class MDRGen:
         self.gentype2_isrow_draw = True 
         self.gentype2_rc_index = 0 
 
+        self.new_md_ctr = 0 
+        self.verbose = verbose 
         if preproc:
             self.preproc() 
 
@@ -235,8 +233,13 @@ class MDRGen:
             intsq = IntSeq(r) 
             md = ModuloDecomp(intsq,max_absmult=DEFAULT_MDRGEN_ABSMAX) 
             md.merge(self.exclude_neg)
-            new_mdr = ModuloDecompRepr(md) 
 
+            if self.verbose: 
+                print("made new mdr.")
+                print(md)
+                print("\n\n")
+            new_mdr = ModuloDecompRepr(md) 
+            self.new_md_ctr += 1 
             self.mdr2 = new_mdr 
             i = (i + 1) % len(intseed_cycle) 
         

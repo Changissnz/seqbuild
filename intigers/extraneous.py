@@ -8,6 +8,11 @@ from math import ceil
 
 zero_div0 = lambda num,denum: zero_div(num,denum,0)
 
+def signed_modulo(n,absmax): 
+    if n < 0: 
+        return n % -absmax 
+    return n % absmax 
+
 def to_trinary_relation(v1,v2):
     if type(v2) == type(None):
         v2 = 0 

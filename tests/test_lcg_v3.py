@@ -90,7 +90,7 @@ class LCGV3Methods(unittest.TestCase):
         cv = -12 
         av = 85 
         mrx2_ = unimodular_number__modulo_range_adjustment(wv,cv,av,[50,97])
-        assert modulo_in_range(cv,mrx2_) == 13 
+        assert modulo_in_range(cv,mrx2_) == 13, "got {}".format(modulo_in_range(cv,mrx2_))
 
         # case 4 
         wv = 100 
@@ -143,7 +143,6 @@ class LCGV3Methods(unittest.TestCase):
         if type(mr23) == type(None): 
             mr23 = lg.r 
 
-        print("\t\tMRRR23: ",mr23,lg.r,lg.super_range)
         avx = lg.m * rv + lg.a
         assert to_trinary_relation(modulo_in_range(avx,mr23),rv) == sign 
 
@@ -195,7 +194,7 @@ class LCGV3Methods(unittest.TestCase):
 
         lx = np.array(lx) 
         sv = stdop_vec(lx,to_trinary_relation,cast_type=np.int32)
-        assert lg2.tv == sv 
+        assert lg2.tv == sv, "want {},\ngot {}".format(lg2.tv, sv) 
 
     def test__LCGV3__next__case2(self): 
 

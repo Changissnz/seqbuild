@@ -1,5 +1,6 @@
 from .idf_sample_z import * 
 import unittest
+import time 
 
 ### lone file test 
 """
@@ -71,6 +72,40 @@ class IDecForestMethods(unittest.TestCase):
         print("DISPLAY TEST")
         for _ in range(1000): 
             x = next(idf)
+
+    def test__IDecForest__next__timetest(self): 
+
+        x2 = prg__LCG(23,202,423,901) 
+        L = [x2() for _ in range(30)]
+        idfz1,_ = IDecForest_sampleZ(L=L,make_first_tree=False,prg1=x2)
+
+        t0 = time.time() 
+        for i in range(100000):
+            #print("I: ",i)
+            next(idfz1)
+        t1 = time.time() 
+        tx0 = t1-t0
+        print("idf #1: {} seconds".format(tx0))
+
+        ##
+        x2 = prg__LCG(23,202,423,901) 
+        L = [x2() for _ in range(30)]
+
+        x3 = prg__LCG(234,212,4123,9317) 
+        def x4(): return x2() + x3() 
+        idfz2,_ = IDecForest_sampleZ(L=L,make_first_tree=False,prg1=x4)
+
+        t0 = time.time() 
+        for i in range(100000):
+            #print("I: ",i)
+            next(idfz2)
+        t1 = time.time() 
+        tx1 = t1 - t0 
+        print("idf #2: {} seconds".format(tx1))
+
+        #assert 45 > tx0 
+        #assert 45 > tx1 
+
     
 
 if __name__ == '__main__':
