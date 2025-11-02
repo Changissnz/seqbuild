@@ -20,6 +20,13 @@ class PointInterpolationContainer:
         q = self.lps.output_by_lagrange_basis(x) 
         q2 = self.cdc.fit(x) 
 
+        # BUG: CAUTION! 
+        if type(q) == type(None): 
+            q = self.pts[0,0] 
+        if type(q2) == type(None): 
+            q2 = self.pts[-1,0] 
+
+
         if lps_first: return q - q2 
         return q2 - q 
     

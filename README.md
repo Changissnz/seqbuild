@@ -46,6 +46,10 @@ convenient methodology for reading generators from and writing generators to fil
 it is easy to see why these capabilities have not been implemented, however important 
 they are.  
 
+### Update: 11/2/25 
+
+There is a paper in the folder `info` that discusses `seqbuild` and the topic of randomness. 
+
 ### Update: 10/26/25 
 
 Open development of this project has resumed, since I detected some bugs. I'd hate to 

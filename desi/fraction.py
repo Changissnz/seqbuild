@@ -30,7 +30,14 @@ class GenericIntSeqOp:
             s_ = s_ + self.s[:dx]
             diff = diff - dx
             self.s = self.s[dx:]
-        return self.adjust_integer(np.int64(s_)) 
+        
+        # BUG: CAUTION!!  
+        s1 = 5 
+        try: 
+            s1 = np.int64(s_)
+        except: 
+            pass 
+        return self.adjust_integer(s1) 
 
     def set_next_value(self):
         return -1 
