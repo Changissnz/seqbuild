@@ -57,8 +57,12 @@ class IDecForest:
             if self.verbose: print("choose tree")
 
             # choose a sequence to process
-            seqtype = int(round(self.prg())) % 3
-            S = self.one_new_IntSeq(seqtype)
+            ## [!] CAUTION 
+            seqtype = int(round(self.prg())) % 4
+            if seqtype == 3: 
+                S = self.ST[q][0] 
+            else: 
+                S = self.one_new_IntSeq(seqtype)
             if self.verbose: print("new seq: ",S) 
 
             # choose a process type
