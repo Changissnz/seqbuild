@@ -113,12 +113,18 @@ class CycleDescriptor:
 
     def __init__(self):
         self.d = defaultdict(None)
+        self.full_cycle = None 
 
     def __str__(self):
         s = "closed: " + str(self.d["closed"]) + "\n" 
         s += "sub-cycle heads: " + \
             str(self.d["sub-cycle"]) + "\n"
+        s += "full cycle: " + str(self.full_cycle) + "\n" 
         return s 
+
+    def update_full_cycle(self,fc):
+        self.full_cycle = fc 
+        return
 
     def update(self,k,v): 
         assert k in CYCLE_CATEGORIES
@@ -296,12 +302,16 @@ class LCGV2:
         is_closed = True
         sub_cycle = set()
         for q_ in q:
+            print("travelling: {} of {}".format(q_,q)) 
             p = travel_io_map_till_repeat(self.map_io,q_)
             px = set(p)
+            print("[X]: ",px) 
 
             if px != q: 
                 sub_cycle |= {q_} 
-
+            print("sub-cycle: ")
+            print(sub_cycle)
+            print("-------------------------")
             if not is_closed: continue 
 
             if not px.issubset(q): 
@@ -313,6 +323,7 @@ class LCGV2:
         cd = CycleDescriptor()
         cd.update("closed",is_closed) 
         cd.update("sub-cycle",sub_cycle)
+        cd.update_full_cycle(q) 
         return cd 
 
         
