@@ -479,6 +479,16 @@ realtime command is made and executed in the `seqbuild` interface. The
 
 -------------------------------------------------------------------  
 
+[+] help   
+[-] usage  
+```
+help <Comm Lang command XOR structure>.  
+```
+[-] description  
+A command that shows information on that specific Comm Lang command or structure.  
+
+-------------------------------------------------------------------
+
 ## Interface Layout <a name="interface"></a>  
  
 
