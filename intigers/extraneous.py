@@ -2,7 +2,7 @@ import numpy as np
 from morebs2.matrix_methods import is_vector,is_number,is_valid_range 
 from morebs2.measures import zero_div,to_trinary_relation,to_trinary_relation_v2 
 from morebs2.numerical_generator import modulo_in_range,\
-    prg__LCG,euclidean_point_distance,prg_seqsort
+    prg__LCG,euclidean_point_distance,prg_seqsort,prg__single_to_nvec
 from types import MethodType,FunctionType
 from math import ceil
 
@@ -293,15 +293,6 @@ def prg__single_to_ndim_index_outputter(lcg,dim):
         for i in range(len(dim)): 
             x[i] = int(lcg()) % dim[i] 
         return x 
-    return f 
-
-def prg__single_to_nvec(prg,n):
-
-    def f():
-        q = np.zeros((n,))
-        for i in range(n): 
-            q[i] = prg()
-        return q 
     return f 
 
 def prg__single_to_trinary_vector(prg,n):
