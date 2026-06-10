@@ -8,19 +8,6 @@ as a research project, and I am starting to wrap
 ends to it before the project branches off into 
 development hell terrain. 
 
-And here is this, because and for the 
-kleptos, and because not specifying 
-copyright encourages intellectual 
-property theft (I may assume IP laws 
-are still honored). Remember that all 
-software is proprietary unless otherwise 
-specified by a FOSS license. 
-
-*Sorry that I had to put this poison pill provision into this project.*
-*That said, the free market has never been that free with research and*
-*emerging technologies.*
-
-Copyright 2025 Richard Pham 
 
 ### Brief Description (Current State)  
 
@@ -45,6 +32,9 @@ The `json` library also does not store objects of or related to closures. Withou
 convenient methodology for reading generators from and writing generators to files, 
 it is easy to see why these capabilities have not been implemented, however important 
 they are.  
+
+### Update: 6/10/26
+Project has been open-sourced with MIT license. 
 
 ### Update: 11/2/25 
 

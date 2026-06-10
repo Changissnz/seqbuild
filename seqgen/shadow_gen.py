@@ -16,7 +16,6 @@ class QualVec:
         if not is_vector(vec): 
             vec = np.array(vec) 
         assert qual in {"tvec","fvec","optri"} 
-
         self.vec = vec 
         self.qual = qual 
         self.qual_op = qual_op 
@@ -34,7 +33,9 @@ class QualVec:
             isfso = ISFactorSetOps(np.array(self.vec,dtype=int),int_limit=DEFAULT_INT_MAX_THRESHOLD,str_mode_full=True) 
             isfso.factor_count_() 
             factors = isfso.all_factors()
+            #print("FACTORS: ",factors)
             self.qvec = np.array(sorted(factors),dtype=int) if len(factors) != 0 else None 
+            assert type(self.qvec) != type(None) 
             self.qvec_ = deepcopy(self.qvec)
             self.qvec2 = isfso.factor_map() 
         else: 

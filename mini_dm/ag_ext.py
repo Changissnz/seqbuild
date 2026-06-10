@@ -225,7 +225,7 @@ class APRNGGaugeV2(APRNGGauge):
         >>> RuntimeWarning: overflow encountered
     """
     def measure_cycle(self,max_size,\
-        term_func=lambda l,l2: type(l) == type(None),\
+        term_func=lambda l,l2: type(l2) == type(None),\
         auto_frange:bool=False,auto_prange:bool=False,\
         do_cycle_update:bool=False):
 
@@ -236,7 +236,6 @@ class APRNGGaugeV2(APRNGGauge):
             sz0,sz1 = min(self.cycle),max(self.cycle)
             self.pradius = APRNGGaugeV2.default_pradius(sz0,sz1,len(self.cycle))
             self.pradius = max([self.pradius,10 ** -5])
-
         q = super().measure_cycle(max_size,term_func,auto_frange) 
         return q
 
