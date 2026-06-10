@@ -34,7 +34,7 @@ it is easy to see why these capabilities have not been implemented, however impo
 they are.  
 
 ### Update: 6/10/26
-Project has been open-sourced with MIT license. 
+Project has been open-sourced with MIT license. See [this link](https://pypi.org/project/seqbuild/) for that. 
 
 ### Update: 11/2/25 
 
