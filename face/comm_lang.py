@@ -73,6 +73,7 @@ class CommLangParser:
 
     def reload_file(self,filepath:str): 
         self.fp = filepath 
+        self.finstat = False 
         self.preproc_file() 
 
     def close(self): 
@@ -100,7 +101,6 @@ class CommLangParser:
     def load_next_command(self):
         comm = "" 
         stat = True 
-
         while stat: 
             if self.file_obj.tell() != self.file_end:
                 line = self.file_obj.readline()
@@ -108,7 +108,6 @@ class CommLangParser:
             else: 
                 stat = False 
                 continue 
-
             line = line.strip() 
             if len(line) == 0: 
                 continue 
