@@ -21,6 +21,9 @@ class CommLangParser:
 
         self.commond = None 
         self.vartable = dict() 
+        self.varseq = []
+
+        self.finstat = False  
 
     def __str__(self):
 
@@ -34,6 +37,28 @@ class CommLangParser:
             s = s + "\t" + map_str(parse_object_to_str(v))
             dx += s + "\n" 
         return dx 
+
+    def generator_list(self): 
+        q = [] 
+        for x in self.varseq: 
+            if type(x) in {FunctionType,MethodType}: 
+                q.append(x) 
+        return q 
+    
+    def fetch_g(self,is_last:bool): 
+        assert type(is_last) == bool 
+
+        q = self.generator_list() 
+        if len(q) == 0: return None 
+        
+        index = -1 if is_last else 0 
+        return q[index] 
+    
+    def first_g(self): 
+        return self.fetch_g(False)
+
+    def last_g(self): 
+        return self.fetch_g(True) 
 
     def preproc_file(self): 
         if type(self.fp) == type(None): 
@@ -55,14 +80,15 @@ class CommLangParser:
         del self 
 
     def process_file(self): 
-        stat = True
 
-        while stat: 
+        while not self.finstat: 
             self.load_next_command()
             self.process_command() 
-            stat = self.file_obj.tell() != self.file_end 
-
+            self.check_finstat() 
         return
+
+    def check_finstat(self): 
+        self.finstat = self.file_obj.tell() == self.file_end 
 
     """
     used to process all remaining commands from `cmdline` cache. 
@@ -174,6 +200,7 @@ class CommLangParser:
         # case: primary use case of SET 
         if splitstr_cmd[2] == "=": 
             self.vartable[n] = self.MRCOW_proc(splitstr_cmd[3:]) 
+            self.varseq.append(n)
             return n, self.vartable[n] 
         
         # case: secondary use case of SET 
@@ -196,6 +223,7 @@ class CommLangParser:
         try:
             x = wrap_ranged_modulo_over_generator(gen,(f0,f1))  
             self.vartable[n] = x 
+            self.varseq.append(n) 
         except: 
             print("cannot set span for non-generator.") 
             self.log_error(splitstr_cmd) 
