@@ -12,7 +12,7 @@ development hell terrain.
 ### Brief Description (Current State)  
 
 Primary use is research of pseudo-random number generators (PRNG). 
-Comm Lang is the application programming interface that `seqbuild` uses, 
+`Comm Lang` is the application programming interface that `seqbuild` uses, 
 and users can express commands to gauge and generate numerical sequences 
 in this language. When user runs `main.py` (the main program), they are 
 accessing a semi-autonomous PRNG system for their personal use. They are 
@@ -33,8 +33,17 @@ convenient methodology for reading generators from and writing generators to fil
 it is easy to see why these capabilities have not been implemented, however important 
 they are.  
 
+To start off using this project, 
+```
+> git clone https://www.github.com/changissnz/seqbuild.git 
+> cd seqbuild 
+> pip install -r requirements.txt
+> python3 main.py 
+```
+
 ### Update: 6/10/26
 Project has been open-sourced with MIT license. See [this link](https://pypi.org/project/seqbuild/) for that. 
+Development recommences on an arbitrary and rolling basis. 
 
 ### Update: 11/2/25 
 
