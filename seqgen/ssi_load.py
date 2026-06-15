@@ -64,6 +64,35 @@ class OpTriGenLite:
         self.i = (self.i + 1) % (self.m.shape[0] * self.m.shape[1]) 
         return self.m[qi[0],qi[1]]
 
+"""
+(S)earch (S)pace (I)terator Net Node, Type (L)inear (C)ongruential (G)enerator Net 
+
+A unit node for the PRNG found in file<seqgen.ssi_netop>, which is itself a PRNG. It 
+uses one of four possible structure types: 
+(1) "lcg": linear congruential generator  
+(2) "mdr": modulo decomposition representation 
+(3) "mdrv2": modulo decomposition representation version 2 
+(4) "optri": operation triangle 
+---------------------------------------------------------------------------------------
+
+(1) simply directly outputs the LCG output. 
+    
+    /-/-/-/-/ 
+
+(2),(3), and (4) are activation-based, meaning that on a PRNG-scheduled basis, their 
+data structure `struct` is updated. 
+        NOTE: 
+In SeqBuild functionalities, this updating process is programmatically done by 
+the class<SSINetOp> PRNG. 
+
+The order of class methods to called when `sidn` is one of (2),(3), or (4) is: 
+- method<SSINetNode__TypeLCGNet.set_actsize> 
+- method<SSINetNode__TypeLCGNet.activate_base>
+
+Additionally, if `sidn` is of `mdr`|`mdrv2`, then an additional call to 
+method<SSINetNode__TypeLCGNet.load_first>, in order to calculate the next 
+number sequence from `struct`.
+""" 
 class SSINetNode__TypeLCGNet: 
 
     def __init__(self,structure_idn,prg,op_pair=None,exclude_neg=None,\
@@ -80,26 +109,28 @@ class SSINetNode__TypeLCGNet:
             assert len(op_pair) == 2 
         assert tmpcache_ratio >= 1.0 
 
-        # used for `mdr` 
-        self.exclude_neg = exclude_neg
-        self.tmpcache_ratio = tmpcache_ratio
-
-        # used for `optri` 
-        self.op_pair = op_pair 
-
         # used for `optri`, `mdr` 
         self.base_queue = [] 
         self.base_activated = False 
         self.tmp_queue = [] 
-
-        self.struct = None 
-        # use for `mdr` `
-        self.rvalues = [] 
-
         self.activation_size = None
         self.termination_length = None 
 
+        # used for `mdr` 
+        self.exclude_neg = exclude_neg
+        self.tmpcache_ratio = tmpcache_ratio
+        self.rvalues = [] 
+
+        # used for `optri` 
+        self.op_pair = op_pair 
+
+        self.struct = None 
+
+        # output counter, used in conjunction w/ `termination_length`. 
         self.c = 0 
+
+        # struct update counter 
+        self.uc = 0 
         return 
 
     def __next__(self):
@@ -117,12 +148,12 @@ class SSINetNode__TypeLCGNet:
                 q = self.rvalues.pop(0)
         else:
             q = next(self.struct)
-            
+        
         self.c += 1 
         return q 
 
     """
-
+    sets the `activation_size` class variable, which allows 
     """
     def set_actsize(self, activation_size): 
         assert "mdr" in self.sidn or "optri" in self.sidn
@@ -132,11 +163,16 @@ class SSINetNode__TypeLCGNet:
         self.activation_size = activation_size
         return
 
+    """
+    Updates the queues `tmp_queue` and `base_queue`. 
+    """
     def activate_base(self,aux_prg,verbose=0): 
         assert type(aux_prg) in {MethodType,FunctionType}
-        
+
         self.base_activated = True 
         x = self.tmp_queue[:self.activation_size]
+        #print("base {}, activation {}, tmp {}".format(len(self.base_queue),len(x),len(self.tmp_queue)))
+        #print("TQ: ",self.tmp_queue) 
         self.base_queue = x 
         self.tmp_queue = self.tmp_queue[self.activation_size:]
 
@@ -144,8 +180,14 @@ class SSINetNode__TypeLCGNet:
         if q == False:
             q = self.activate_optri(aux_prg,verbose) 
         self.struct = q 
+
+        self.uc += 1 
         return 
 
+    """
+    instantiates a new <ModuloDecomp> or <ModuloDecompV2> instance, 
+    using a modulated version of the number sequence `base_queue`. 
+    """ 
     def activate_mdr(self,aux_prg,verbose):    
         if "mdr" not in self.sidn: 
             return False 
@@ -154,15 +196,16 @@ class SSINetNode__TypeLCGNet:
 
         mdr = None
         if verbose: 
-            print("= activating {} w/ \n{}".format(self.sidn,BQ))
+            print("= activating {},act={},term={} w/ \n{}".format(self.sidn,self.activation_size,self.termination_length,BQ))
         
         if self.sidn == "mdr":
-            m = ModuloDecomp(IntSeq(BQ))
+            m = ModuloDecomp(IntSeq(BQ),max_absmult=112)
             m.merge(bool(self.exclude_neg)) 
             mdr = ModuloDecompRepr(m,1)
         else: 
-            m = ModuloDecomp(IntSeq(BQ),\
-                self.exclude_neg)
+            m = ModuloDecompV2(IntSeq(BQ),\
+                bool(self.exclude_neg),max_absmult=112) 
+            
             mdr = ModuloDecompRepr(m,2) 
 
         L = len(self.base_queue)
@@ -181,7 +224,8 @@ class SSINetNode__TypeLCGNet:
         self.termination_length = L_
 
         if verbose: 
-            print("= activating {} w/ \n{}".format(self.sidn,self.base_queue))
+            print("= activating {},act={},term={} w/ \n{}".format(self.sidn,self.activation_size,self.termination_length,\
+                self.base_queue))
 
         B = [npint32__mod__Q(b) for b in self.base_queue]
         iseq = IntSeq(B) 
@@ -206,10 +250,27 @@ class SSINetNode__TypeLCGNet:
         self.rvalues = self.struct.reconstruct()
         return
 
+"""
+Outputs a maximum of `max_batch_size` <SSINetNode__TypeLCGNet> instances, each of the 
+same structure type `structure_idn`. See variable<SSIBL_STRUCTURES> for a full view of 
+those structures. 
+
+This is a preliminary <SSINetNode__TypeLCGNet> generator, used by the generator 
+class<SSINetOp>. 
+
+The generation of <SSINetNode__TypeLCGNet> instances that are of structure type `lcg` 
+is via the output from a standard pass of a <SearchSpaceIterator> instance (a 4-dimensional 
+space represented by `param_bounds`), the four dimensions accounting for the four 
+parameter values that form an LCG (initial value, multiple, additive, modulo). 
+
+    NOTE: 
+The PRNG <SSINetOp> gets its name from this generation scheme concerning LCGs. 
+"""
 class SSIBatchLoader__TypeLCGNet: 
 
     """
     param_bounds := bounds vector (if structure is lcg) | ordered binary range (i.e. 00,01,10,11)
+    max_batch_size := int | inf 
     """
     def __init__(self,structure_idn,param_bounds,max_batch_size,aux_prg,ssi_hr=DEFAULT_SSINET_HOP_RANGE): 
         assert structure_idn in SSIBL_STRUCTURES
@@ -239,6 +300,7 @@ class SSIBatchLoader__TypeLCGNet:
             stat0 = is_bounds_vector(param_bounds)
             assert stat0 
             assert np.all(param_bounds[:,1] >= param_bounds[:,0]) 
+            assert len(param_bounds) == 4 
             self.param_bounds = param_bounds
 
         elif "mdr" in self.sidn:
@@ -303,17 +365,27 @@ class SSIBatchLoader__TypeLCGNet:
 
         return q,q1 
 
+"""
+A graph relation generator, used by class<SSINetOp> in its auto-generation method. 
+The relations are between elements of `structure_instances`, each a <SSINetNode__TypeLCGNet>. 
 
+Outputs relations into the map `h2tree_map`, a head-to-tree map. 
+"""
 class SSIBatch2Net:
 
     def __init__(self,structure_instances,num_trees,prg): 
         assert len(structure_instances) > 0 
-        assert type(num_trees) == int 
+        assert type(num_trees) == int and num_trees > 0 
         assert num_trees <= len(structure_instances) 
         assert type(prg) in {MethodType,FunctionType}
 
+        # each element is <SSINetNode__TypeLCGNet> 
         self.si = structure_instances
         self.num_trees = num_trees 
+
+        # `si` index -> Directed Tree 
+        # Directed Tree: source node        -> {target nodeset} 
+        #               `struct_list` index -> {`struct_list` indices}
         self.prg = prg 
         self.h2tree_map = dict()
         return 
