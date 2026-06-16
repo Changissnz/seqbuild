@@ -27,7 +27,7 @@ def fraction__sample_LCGs_2(l):
 
 ### lone file test 
 """
-python -m tests.test_fraction 
+py -m tests.test_fraction 
 """
 ###
 class FractionMethods(unittest.TestCase):

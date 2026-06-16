@@ -4,6 +4,7 @@ from morebs2.measures import zero_div,to_trinary_relation,to_trinary_relation_v2
 from morebs2.numerical_generator import modulo_in_range,\
     prg__LCG,euclidean_point_distance,prg_seqsort,prg__single_to_nvec
 from types import MethodType,FunctionType
+from operator import add,sub,mul,mod
 from math import ceil
 
 zero_div0 = lambda num,denum: zero_div(num,denum,0)
@@ -133,6 +134,9 @@ def safe_npint32__prg_vec(prg,sz):
     for i in range(sz):
         v[i] = safe_npint32_value(prg()) 
     return v 
+
+DEFAULT_PAIRWISE_OPS = [add,sub,mul,safe_div] 
+
 
 #------------------------ operations related to LCM and GCD 
 

@@ -4,7 +4,7 @@ import unittest
 
 ### lone file test 
 """
-python -m tests.test_n2mvf_autogen
+py -m tests.test_n2mvf_autogen
 """
 ###
 class LCPVectorMap__TypeCShiftMethods(unittest.TestCase):

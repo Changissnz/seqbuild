@@ -7,7 +7,7 @@ import unittest
 
 ### lone file test 
 """
-python -m tests.test_extraneous
+py -m tests.test_extraneous
 """
 ###
 class ExtraneousMethods(unittest.TestCase):
