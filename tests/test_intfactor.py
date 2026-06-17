@@ -12,7 +12,7 @@ def check_factor_for_one(ms,f):
 
 ### lone file test 
 """
-python -m tests.test_intfactor
+py -m tests.test_intfactor
 """
 ###
 class IntFactorMethods(unittest.TestCase):

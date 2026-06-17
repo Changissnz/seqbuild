@@ -1,0 +1,3 @@
+set G = make pddelta with 73626781.83651. 
+set X = run G for 15 iter. 
+show X. 

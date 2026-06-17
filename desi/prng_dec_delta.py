@@ -268,11 +268,7 @@ class PRNGDecimalDelta:
                 q = -1 * q
 
         if self.enable_base_delta:
-            self.f = self.f + int(f2) 
-            self.s = float_to_str__type_exclude_EDOT(self.f) 
-            self.cindex = self.cindex % len(self.s) 
-
-
+            self.update_float(int(f2))
 
     #--------------------------------- auxiliary methods for calculating the next float 
 
@@ -304,3 +300,9 @@ class PRNGDecimalDelta:
             self.start() 
             return self.deciding_int() 
 
+    def update_float(self,delta): 
+        assert is_number(delta,DEFAULT_PDD_EXCLUDED_OPERATING_NUMBER_TYPES) 
+
+        self.f = self.f + delta 
+        self.s = float_to_str__type_exclude_EDOT(self.f) 
+        self.cindex = self.cindex % len(self.s)

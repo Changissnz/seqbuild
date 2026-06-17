@@ -126,7 +126,8 @@ def modulated_vecdot(v1,v2,op1,op2):
 class IntSeq:
 
     def __init__(self,l):
-        self.l = l 
+        self.l = l
+        self.index = 0  
         self.load()
 
     #------------------- dunder methods 

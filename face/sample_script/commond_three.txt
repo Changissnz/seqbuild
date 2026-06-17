@@ -1,21 +1,14 @@
 # instantiate 5 LCGV3s with the same parameters but different modes 
-# collect 100 elements from each of the generators for comparison. 
-set G = make lcgv3 with 99,23,-133,-1000,1000.
+# collect 3000 elements from each of the generators for comparison. 
+set G_ = make lcg with 65.44,133.2,-786.5,9134.5.
+set G = make lcgv3 with 99,23,-133,-1000,1000,G_.
+set G2 = make lcgv3 with 99,23,-133,-1000,1000,G_,1. 
+set G3 = make lcgv3 with 99,23,-133,-1000,1000,G_,-2000,2000,1. 
+set G4 = make lcgv3 with 99,23,-133,-1000,1000,G_,-2000,2000,5,9,1. 
+set G5 = make lcgv3 with 99,23,-133,-1000,1000,G_,-2000,2000,5,9,15,23,1. 
 
-set P = make lcg with 56,-17,71,818. 
-set G2 = make lcgv3 with 99,23,-133,-1000,1000,P,-500,500. 
-
-set P2 = make lcg with 56,-17,71,818. 
-set G3 = make lcgv3 with 99,23,-133,-1000,1000,P,-500,500,0. 
-
-set P3 = make lcg with 56,-17,71,818. 
-set G4 = make lcgv3 with 99,23,-133,-1000,1000,P,-500,500,1,1. 
-
-set P4 = make lcg with 56,-17,71,818. 
-set G5 = make lcgv3 with 99,23,-133,-1000,1000,P,None,None,1,1. 
-
-set V = run G for 1000 iter. 
-set V2 = run G2 for 1000 iter. 
-set V3 = run G3 for 1000 iter. 
-set V4 = run G4 for 1000 iter. 
-set V5 = run G5 for 1000 iter. 
+set V = run G for 3000 iter. 
+set V2 = run G2 for 3000 iter. 
+set V3 = run G3 for 3000 iter. 
+set V4 = run G4 for 3000 iter. 
+set V5 = run G5 for 3000 iter. 

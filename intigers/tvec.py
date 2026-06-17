@@ -10,6 +10,12 @@ class TrinaryVec(IntSeq):
     def __init__(self,l):
         assert set(l).issubset({0,1,-1})
         super().__init__(l)
+        self.index = 0 
+
+    def __next__(self):
+        q = super().__next__() 
+        self.index = self.index % len(self.l) 
+        return q 
     
     @staticmethod
     def omit_value(tv,target_value,prg):
@@ -35,25 +41,27 @@ class TrinaryVec(IntSeq):
     def one_instance__v1(base_value,length,change_ratio,prg): 
         assert base_value in {-1,0,1}
         assert change_ratio >= 0.0 and change_ratio <= 1.0 
-
+        
+        prg_ = prg__single_to_int(prg) 
         vec = np.zeros((length,),dtype=np.int32) \
             + base_value 
 
         n = int(ceil(change_ratio * length))
         Q = [i for i in range(length)]
-        ix = prg_choose_n(Q,n,prg,is_unique_picker=True)
+        ix = prg_choose_n(Q,n,prg_,is_unique_picker=True)
 
         L = {-1,0,1} - set([base_value]) 
         L = sorted(L) 
 
         for i in ix:
-            d = L[prg() % 2]
+            d = L[prg_() % 2]
             vec[i] = d 
         return TrinaryVec(vec)
 
     @staticmethod
     def one_instance__v2(length,frequency_map,prg): 
-        assert 1.0 - sum(frequency_map.values()) < 10 ** -5 
+        s = sum(frequency_map.values())
+        assert abs(1.0 - s) < 10 ** -5, "got {}".format(frequency_map)
         assert set(frequency_map.keys()).issubset({-1,0,1})
         rx = [(k,int(round(v * length))) for k,v in frequency_map.items()]
         rx = np.array(rx,dtype=np.int32) 
@@ -67,7 +75,6 @@ class TrinaryVec(IntSeq):
         Q = [i for i in range(length)]
         vec = np.zeros((length,),dtype=np.int32)
         prg_ = prg__single_to_int(prg)
-
         for q in rx:
             k,v = q[0],q[1] 
             if v == 0: 
@@ -81,8 +88,10 @@ class TrinaryVec(IntSeq):
     @staticmethod
     def one_instance__v3(l,prg,super_range): 
         assert is_valid_range(super_range,False,False) 
+        
+        prg_ = prg__single_to_int(prg)
 
-        lx = [modulo_in_range(prg(),super_range) for \
+        lx = [modulo_in_range(prg_(),super_range) for \
             _ in range(l)]
         V = round_to_trinary_vector(lx,is_distance_roundtype=False)
         return TrinaryVec(V) 

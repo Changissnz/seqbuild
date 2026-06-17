@@ -121,6 +121,9 @@ class ShadowGen(NSFileReader):
         self.queue = [] 
         return
 
+    def close(self): 
+        self.nsfr.close()
+
     def __next__(self): 
         if len(self.queue) == 0: 
             self.load_next_fitter()

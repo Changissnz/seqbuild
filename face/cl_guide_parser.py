@@ -25,7 +25,9 @@ SAMPLE_USE_FILE_MAP = {"multimetric": BASE_COMM_LANG_FOLDER + "commond_one.txt",
     "shadow":BASE_COMM_LANG_FOLDER + "commond_23.txt",\
     "encrypt":BASE_COMM_LANG_FOLDER + "commond_25.txt",\
     "iomaps": BASE_COMM_LANG_FOLDER + "commond_29.txt",\
-    "idforest": BASE_COMM_LANG_FOLDER + "commond_30.txt"}   
+    "idforest": BASE_COMM_LANG_FOLDER + "commond_30.txt",\
+    "ssino": BASE_COMM_LANG_FOLDER + "commond_33.txt",\
+    "pddelta": BASE_COMM_LANG_FOLDER + "commond_34.txt"}    
 
 def stringize_CLGuideParser_keywords(clgp): 
     term_map = {0:"Primary",1:"Secondary",2:"Tertiary"}

@@ -152,6 +152,10 @@ Algorithm is based on graph decomposition. For instantiation of this
 class, if variable `preproc_gd` is set to True, class instance conducts 
 a structural search for sub-cycles via graph decomposition algorithms 
 (see method `gd_preproc`).
+
+NOTE: `gd_preproc` only works with integer LCGs. These parameters have to 
+be integers: 
+    - start, m, a, n0, n1 
 """
 class LCGV2:
 
@@ -168,6 +172,7 @@ class LCGV2:
         self.r = [n0,n1]
 
         self.sc_size = sc_size 
+        # log for sign-changes 
         self.log_sc = [] 
 
         self.cycle = []

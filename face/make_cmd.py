@@ -6,6 +6,7 @@ from seqgen.idt_gen import *
 from seqgen.shadow_gen import * 
 from desi.fraction import * 
 from desi.differentials import * 
+from desi.prng_dec_delta import * 
 from intigers.lcg_v3 import * 
 from intigers.prng_pw_op import *
 from seqgen.sb_crypt import * 
@@ -13,7 +14,7 @@ from seqgen.ssi_netop import *
 
 BASE_PRNG = ["lcg","lcgv2","lcgv3","mdr","mdrv2",\
         "mdrgen","iomaps","idforest","optri","rch","qval",\
-        "pid","echo","shadow","ssino"]  
+        "pid","echo","shadow","ssino","pddelta"]   
 
 ARITHMETIC_OP_STR_MAP = {"+":add,"-":sub,"/":zero_div0,"*":mul,"%":mod} 
 
@@ -28,7 +29,6 @@ def is_stringized_number(n):
 
 # TODO: incomplete 
 def MAIN_method_for_object(q):
-
     if type(q) in {MethodType,FunctionType}:
         def f():
             return q() 
@@ -87,6 +87,9 @@ def MAIN_method_for_object(q):
     if type(q) == SSINetOp: 
         return q.__next__
 
+    if type(q) == PRNGDecimalDelta: 
+        return q.__next__ 
+
     return -1 
 
 def MAKE_lcgvx(splitstr_cmd,var_map): 
@@ -133,53 +136,37 @@ def MAKE_lcgvx(splitstr_cmd,var_map):
         parameters = splitstr_cmd[3] 
         parameters = parameters.split(",")
 
-        assert len(parameters) in {5,8,9,10},"parameters len {}: {}".format(len(parameters),parameters)
+        assert len(parameters) in {6,7,9,11,13},"parameters len {}: {}".format(len(parameters),parameters)
+
         px = [float(p) for p in parameters[:5]] 
+        prg = MAIN_method_for_object(var_map[parameters[5]]) 
 
-        # case: basic case, functionally identically to standard LCG 
-        if len(parameters) == 5: 
-            g3 = LCGV3(px[0],px[1],px[2],px[3],px[4],0,False,None,None,\
-                False,False) 
-            return g3 
+        if len(parameters) == 6:
+            g3 = LCGV3(px[0],px[1],px[2],px[3],px[4],prg,super_range=None)
+        elif len(parameters) == 7: 
+            add_noise = bool(parameters[6])
+            g3 = LCGV3(px[0],px[1],px[2],px[3],px[4],prg,super_range=None,add_noise=add_noise)
 
-        assert parameters[5] in var_map 
-        prg = var_map[parameters[5]]
-        
-        try: 
-            super_range = (float(parameters[6]),float(parameters[7])) 
-            assert is_valid_range(super_range,False,False) 
-        except: 
-            super_range = None 
-
-        # case: trinary guided
-        if len(parameters) == 8: 
-            exclude_zero__auto_td = True
-            is_rmod = False 
-
-            g3 = LCGV3(px[0],px[1],px[2],px[3],px[4],10,False,prg,super_range,\
-                exclude_zero__auto_td,is_rmod)
-
-        # case: trinary guided w/ option to exclude 0 from trinary vector guides. 
         elif len(parameters) == 9: 
-            exclude_zero__auto_td = bool(int(parameters[8]))
-            is_rmod = False 
+            r0,r1 = float(parameters[6]),float(parameters[7])
+            add_noise = bool(parameters[8])
+            g3 = LCGV3(px[0],px[1],px[2],px[3],px[4],prg,super_range=(r0,r1),add_noise=add_noise)
 
-            g3 = LCGV3(px[0],px[1],px[2],px[3],px[4],10,False,prg,super_range,\
-                exclude_zero__auto_td,is_rmod)
-
-        # case: trinary guided w/ option to exclude 0 from trinary vector guides, 
-        # option to use `reflective modification` output mode 
+        elif len(parameters) == 11: 
+            r0,r1 = float(parameters[6]),float(parameters[7])
+            ternary_size_range = (int(parameters[8]),int(parameters[9]))
+            add_noise = bool(parameters[10])
+            g3 = LCGV3(px[0],px[1],px[2],px[3],px[4],prg,super_range=(r0,r1),ternary_size_range=ternary_size_range,\
+                add_noise=add_noise)
         else: 
-            exclude_zero__auto_td = bool(int(parameters[8]))
-            is_rmod = bool(int(parameters[9]))
-            g3 = LCGV3(px[0],px[1],px[2],px[3],px[4],10,False,prg,super_range,\
-                exclude_zero__auto_td,is_rmod)
+            r0,r1 = float(parameters[6]),float(parameters[7])
+            ternary_size_range = (int(parameters[8]),int(parameters[9]))
+            ternary_delta_timestamp_range = (int(parameters[8]),int(parameters[9]))
 
-        m0 = int(prg()) % 2 + 1 
-        m1 = int(prg()) % 26 + 5 
-        m2 = bool(int(prg()) % 2)
-        g3.static_autoset(m0,m1,m2) 
-        return g3     
+            add_noise = bool(parameters[12])
+            g3 = LCGV3(px[0],px[1],px[2],px[3],px[4],prg,super_range=(r0,r1),ternary_size_range=ternary_size_range,\
+                ternary_delta_timestamp_range = ternary_delta_timestamp_range,add_noise=add_noise)
+        return g3
         
     assert False 
 
@@ -545,6 +532,13 @@ def MAKE_ssino(splitstr_cmd,var_map):
 
     return sno  
 
+def MAKE_pddelta(splitstr_cmd,var_map): 
+    assert splitstr_cmd[1] == "pddelta" 
+    assert splitstr_cmd[2] == "with" 
+
+    r1 = float(splitstr_cmd[3]) 
+    return PRNGDecimalDelta(r1)  
+
 # TODO: incomplete 
 def MAKE_proc(splitstr_cmd,var_map): 
     assert splitstr_cmd[0] == "make"
@@ -666,5 +660,8 @@ def MAKE_proc(splitstr_cmd,var_map):
 
     if splitstr_cmd[1] == "ssino": 
         return MAKE_ssino(splitstr_cmd,var_map) 
+
+    if splitstr_cmd[1] == "pddelta": 
+        return MAKE_pddelta(splitstr_cmd,var_map) 
 
     raise ValueError("diffektor") 

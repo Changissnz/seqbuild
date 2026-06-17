@@ -49,25 +49,30 @@ as well as their instantiation parameters in Comm Lang.
 [o] lcgv3 
 - instantiation: 
 
-    1. (int|float,int|float,int|float,int|float,int|float)   
-    * (start value,multiple,additive,start modulus,end modulus)     
+    1. (int|float,int|float,int|float,int|float,int|float,function)   
+    * (start value,multiple,additive,start modulus,end modulus,inputless generator)     
 
-    2. (int|float,int|float,int|float,int|float,int|float,function,
-      int|float,int|float)  
+    2. (int|float,int|float,int|float,int|float,int|float,function,bool)  
     * (start value,multiple,additive,start modulus,end modulus,
-        inputless generator,super-range start,super-range end)   
+        inputless generator,add noise)  
 
     3. (int|float,int|float,int|float,int|float,int|float,function,
       int|float,int|float,bool)  
     * (start value,multiple,additive,start modulus,end modulus,
-        inputless generator,super-range start,super-range end,exclude zero trinary)  
+        inputless generator,super-range start,super-range end,add noise)  
 
     4. (int|float,int|float,int|float,int|float,int|float,function,
-      int|float,int|float,bool,bool)  
+      int|float,int|float,int|float,int|float,bool)  
     * (start value,multiple,additive,start modulus,end modulus,
-        inputless generator,super-range start,super-range end,
-        exclude zero trinary mode, reflective modification mode)  
+        inputless generator,super-range start,super-range end,ternary size range start,
+        ternary size range end,add noise)    
 
+    5. (int|float,int|float,int|float,int|float,int|float,function,
+      int|float,int|float,int|float,int|float,int|float,int|float,bool)  
+    * (start value,multiple,additive,start modulus,end modulus,
+        inputless generator,super-range start,super-range end,ternary size range start,
+        ternary size range end,ternary delta timestamp range start, 
+        ternary delta timestamp range end,add noise)   
 
 [o] mdr 
 - instantiation:  
@@ -214,7 +219,14 @@ as well as their instantiation parameters in Comm Lang.
     * (number of nodes,primary generator,secondary generator,lcg input only)   
 
     5. (integer,generator,generator)  
-    * (number of nodes,primary generator,secondary generator)   
+    * (number of nodes,primary generator,secondary generator) 
+
+[o] pddelta  
+
+- instantiation:  
+
+    1. (integer|float) 
+    * (base value used by generator) 
 
 [o] op2   
 

@@ -38,17 +38,45 @@ class CommLangParser:
             dx += s + "\n" 
         return dx 
 
-    def generator_list(self): 
+    """
+    return:
+    - list::object
+    """
+    def object_list(self,object_type,full_list:bool):
+        
+        assert object_type in {"generator","sequence"}
+
+        X = None 
+        if object_type == "generator": 
+            def F(x): 
+                return MAIN_method_for_object(x) != -1 
+
+        else: 
+            def F(x): 
+                return type(x) == list 
+
         q = [] 
         for x in self.varseq: 
-            if type(x) in {FunctionType,MethodType}: 
-                q.append(x) 
+            if F(self.vartable[x]):  
+                if full_list: 
+                    q.append((x,self.vartable[x])) 
+                else: 
+                    q.append(self.vartable[x])
         return q 
+    
+    """
+    fetches the name of the object in Comm Lang program
+    """
+    def object_to_name(self,O): 
+        for k,v in self.vartable.items(): 
+            if v == O: 
+                return k 
+        return None 
     
     def fetch_g(self,is_last:bool): 
         assert type(is_last) == bool 
 
-        q = self.generator_list() 
+        q = self.object_list("generator",False) 
         if len(q) == 0: return None 
         
         index = -1 if is_last else 0 
@@ -78,6 +106,13 @@ class CommLangParser:
 
     def close(self): 
         self.file_obj.close() 
+
+        for k,v in self.vartable.items(): 
+            if type(v) == ShadowGen: 
+                v.close() 
+            elif type(v) == NSFileReader: 
+                v.close() 
+
         del self 
 
     def process_file(self): 
@@ -137,7 +172,7 @@ class CommLangParser:
             return 
 
         c_ = self.cmdlines.pop(0)
-        c = c_.split(" ")
+        c = c_.strip().split(" ")
         c[-1] = c[-1].rstrip(".")
 
         # case: `show` command, do nothing 
@@ -199,7 +234,9 @@ class CommLangParser:
         # case: primary use case of SET 
         if splitstr_cmd[2] == "=": 
             self.vartable[n] = self.MRCOW_proc(splitstr_cmd[3:]) 
-            self.varseq.append(n)
+            
+            if n not in self.varseq: 
+                self.varseq.append(n)
             return n, self.vartable[n] 
         
         # case: secondary use case of SET 
@@ -222,7 +259,8 @@ class CommLangParser:
         try:
             x = wrap_ranged_modulo_over_generator(gen,(f0,f1))  
             self.vartable[n] = x 
-            self.varseq.append(n) 
+
+            if n not in self.varseq: self.varseq.append(n) 
         except: 
             print("cannot set span for non-generator.") 
             self.log_error(splitstr_cmd) 
