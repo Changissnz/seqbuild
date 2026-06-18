@@ -10,6 +10,8 @@ class CommLangParser:
         self.fp = filepath
         self.file_obj,self.file_end = None,None
         self.line_index = 0 
+        
+        self.finstat = False  
         self.preproc_file() 
 
         self.cmdlines = []
@@ -23,7 +25,7 @@ class CommLangParser:
         self.vartable = dict() 
         self.varseq = []
 
-        self.finstat = False  
+        self.invalid_fp = None 
 
     def __str__(self):
 
@@ -92,6 +94,11 @@ class CommLangParser:
         if type(self.fp) == type(None): 
             return 
 
+        self.valid_fp = os.path.isfile(self.fp)
+        if not self.valid_fp: 
+            self.finstat = True 
+            return 
+
         self.file_obj = open(self.fp,"r") 
         self.file_obj.seek(0,os.SEEK_END) 
         self.file_end = self.file_obj.tell()
@@ -116,7 +123,6 @@ class CommLangParser:
         del self 
 
     def process_file(self): 
-
         while not self.finstat: 
             self.load_next_command()
             self.process_command() 

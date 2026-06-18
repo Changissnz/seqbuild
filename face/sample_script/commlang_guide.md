@@ -80,6 +80,9 @@ as well as their instantiation parameters in Comm Lang.
     1. (list)  
     * (numerical sequence)  
 
+    2. (list,positive integer)  
+    * (numerical sequence, max absolute fitting multiple)
+
 [o] mdrv2 
 - instantiation:  
 
@@ -88,6 +91,9 @@ as well as their instantiation parameters in Comm Lang.
 
     2. (list,bool)  
     * (numerical sequence, exclude negative multiples)  
+
+    3. (list,bool,positive integer)  
+    * (numerical sequence, exclude negative multiples,max absolute fitting multiple)
 
 [o] mdrgen 
 - instantiation:  

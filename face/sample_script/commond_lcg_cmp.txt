@@ -13,7 +13,7 @@ set ALT2 = make lcg with 1,1,1,2.
 set ALT3 = make lcg with 7,2,3,76.
 set ALT4 = merge ALT,ALT3 with +.
 
-set G_ALT = make lcgv3 with 3,4,6,0,40,ALT4,0,40,1,1.
+set G_ALT = make lcgv3 with 3,4,6,0,40,ALT4,-40000,40000,1.
 set VX3_ = run G_ALT for 500 iter. 
 
 #########################################

@@ -78,7 +78,7 @@ class TrinaryVec(IntSeq):
         for q in rx:
             k,v = q[0],q[1] 
             if v == 0: 
-                print("...strange...")
+                ##print("...strange...")
                 break 
 
             q2 = prg_choose_n(Q,v,prg_,is_unique_picker=True)

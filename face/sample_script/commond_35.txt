@@ -1,0 +1,16 @@
+set G = make lcgv2 with 617,423,-87,-171051,195899. 
+set V = run G for 50 iter. 
+set M = make mdr with V. 
+set X0 = run M with 300. 
+
+set M2 = make mdr with V,25. 
+set M3 = make mdr with V,32. 
+
+set X3 = run M2 with 300. 
+set X4 = run M3 with 300. 
+
+set M4 = make mdrv2 with V,1,44.
+set M5 = make mdrv2 with V,0,44.
+
+set X5 = run M4 with -300. 
+set X6 = run M5 with -300. 

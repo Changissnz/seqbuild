@@ -171,37 +171,40 @@ def MAKE_lcgvx(splitstr_cmd,var_map):
     assert False 
 
 def MAKE_mdrvx(splitstr_cmd,var_map): 
+    assert splitstr_cmd[2] == "with" 
+    parameters = splitstr_cmd[3] 
+    parameters = parameters.split(",") 
+    assert parameters[0] in var_map 
+
     if splitstr_cmd[1] == "mdr": 
-        assert splitstr_cmd[2] == "with" 
-        assert splitstr_cmd[3] in var_map 
-        lx = var_map[splitstr_cmd[3]] 
-        mdx = ModuloDecomp(IntSeq(lx)) 
+        assert 1 <= len(parameters) <= 2
+        lx = var_map[parameters[0]] 
+        max_absmult = None 
+
+        if len(parameters) == 2: 
+            max_absmult = int(parameters[1]) 
+        mdx = ModuloDecomp(IntSeq(lx),max_absmult)  
         mdx.merge(False)
         return ModuloDecompRepr(mdx,reconstruct_type=1)
-    
-    if splitstr_cmd[1] == "mdrv2": 
-        assert splitstr_cmd[2] == "with" 
 
-        parameters = splitstr_cmd[3] 
-        parameters = parameters.split(",")
-        assert parameters[0] in var_map 
+    if splitstr_cmd[1] == "mdrv2":
+        assert len(parameters) < 4
 
         exclude_neg = False 
+        max_absmult = None 
 
-        if len(parameters) == 2:
+        if len(parameters) >= 2:
             i = bool(int(parameters[1]))
             exclude_neg = i 
         
+        if len(parameters) == 3: 
+            max_absmult = int(parameters[2])     
+        
         lx = var_map[parameters[0]]
-        mdx = ModuloDecompV2(IntSeq(lx),exclude_neg)
+        mdx = ModuloDecompV2(IntSeq(lx),exclude_neg,max_absmult)
         return ModuloDecompRepr(mdx,reconstruct_type=2) 
 
     if splitstr_cmd[1] == "mdrgen": 
-        assert splitstr_cmd[2] == "with"
-
-        parameters = splitstr_cmd[3] 
-        parameters = parameters.split(",")
-        assert parameters[0] in var_map 
         mdr = var_map[parameters[0]] 
         assert type(mdr) == ModuloDecompRepr 
 
