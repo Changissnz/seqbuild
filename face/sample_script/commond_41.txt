@@ -1,0 +1,18 @@
+#set G = make lcgv2 with 67,-143,8711,-1890,7980. 
+#set G2 = make lcgv2 with 67,-143,8711,-1890,7980. 
+
+set G = make lcgv2 with 67,-13,871,0,7980. 
+set G2 = make lcgv2 with 67,-13,871,0,7980. 
+
+
+
+set V_ = run G for 20 iter. 
+
+set M_ = make mdrv2 with V_,0. 
+set M = make mdrgen with M_,G,0,1.
+set V = run M for 150 iter. 
+
+set M0 = make mdrv2 with V_,0. 
+set M2 = make mdrgen with M0,G2,1,1.
+set V2 = run M2 for 150 iter. 
+

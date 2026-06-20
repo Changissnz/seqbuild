@@ -18,7 +18,7 @@ LANG_KEYTERMS = ["make","run","with","set","for","iter","write",\
 LANG_SYMBOLS = [",",".","<",">","`","'","~","+","-",\
         "*","/","%","=","(",")","[","]","{","}","\\"]  
 
-GENFORM_CONVERT_TYPES = ["range","ndim","nvec","tvec"]
+GENFORM_CONVERT_TYPES = ["int","range","ndim","nvec","tvec"]
 
 def parse_object_to_str(O): 
     s = str(type(O)) 
@@ -140,26 +140,29 @@ def CONVERT_proc(splitstr_cmd,var_map):
     assert splitstr_cmd[2] == "to"
     assert splitstr_cmd[3] in GENFORM_CONVERT_TYPES,"GOT \n{}".format(splitstr_cmd)
 
+    if splitstr_cmd[3] == "int":
+        return prg__single_to_int(struct),"int"
+
     if splitstr_cmd[3] == "range":
-        return prg__single_to_range_outputter(struct) 
+        return prg__single_to_range_outputter(struct), splitstr_cmd[3] 
 
     assert splitstr_cmd[4] == "with" 
 
     if splitstr_cmd[3] == "ndim": 
         dim = string_to_vector(splitstr_cmd[5], castFunc = int)
-        return prg__single_to_ndim_index_outputter(struct,dim)
+        return prg__single_to_ndim_index_outputter(struct,dim),splitstr_cmd[3] 
 
     l = string_to_vector(splitstr_cmd[5],castFunc = int) 
     assert len(l) == 1
     l = l[0] 
 
     if splitstr_cmd[3] == "nvec": 
-        return prg__single_to_nvec(struct,l) 
+        return prg__single_to_nvec(struct,l),splitstr_cmd[3] 
 
     def struct_():
         return int(round(struct())) 
 
-    return prg__single_to_trinary_vector(struct_,l)
+    return prg__single_to_trinary_vector(struct_,l),splitstr_cmd[3] 
 
 
 def WRITE_seq(fi_obj,vector_length,seq,rounding_depth=0):

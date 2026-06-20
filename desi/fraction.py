@@ -19,7 +19,6 @@ class GenericIntSeqOp:
     def __next__(self):
         l = modulo_in_range(self.l_out(),[1,18]) 
         assert type(l) in {int,np.int32,np.int64}
-
         s_ = self.s[:l]
         self.s = self.s[l:]
 

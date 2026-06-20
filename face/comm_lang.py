@@ -27,6 +27,11 @@ class CommLangParser:
 
         self.invalid_fp = None 
 
+        # list of (name, type) for generators that 
+        # do not output single real numbers for every call. 
+        # Detected by parser through 
+        self.other_generators = dict()  
+
     def __str__(self):
 
         def map_str(s): 
@@ -65,6 +70,15 @@ class CommLangParser:
                 else: 
                     q.append(self.vartable[x])
         return q 
+
+    """
+    return: 
+    - names of every generator that outputs single real numbers at every call. 
+    """
+    def single_output_generator_list(self): 
+        Q = self.object_list("generator",True) 
+
+        return [q[0] for q in Q if q[0] not in self.other_generators]
     
     """
     fetches the name of the object in Comm Lang program
@@ -192,7 +206,12 @@ class CommLangParser:
             return 
 
         if c[0] == "load": 
-            qs = LOAD_proc(c) 
+            try: 
+                qs = LOAD_proc(c) 
+            except: 
+                self.cmd_errors.append(c) 
+                return 
+
             rx = deepcopy(self.cmdlines)
             self.cmdlines.clear() 
             while len(qs) > 0:
@@ -239,8 +258,14 @@ class CommLangParser:
 
         # case: primary use case of SET 
         if splitstr_cmd[2] == "=": 
-            self.vartable[n] = self.MRCOW_proc(splitstr_cmd[3:]) 
-            
+            if splitstr_cmd[3] == "convert": 
+                self.vartable[n],gentype = self.MRCOW_proc(splitstr_cmd[3:]) 
+                self.other_generators[n] = gentype 
+            else: 
+                self.vartable[n] = self.MRCOW_proc(splitstr_cmd[3:]) 
+                
+                if splitstr_cmd[4] in {"mdr","mdrv2"}: 
+                    self.other_generators[n] = splitstr_cmd[4]                 
             if n not in self.varseq: 
                 self.varseq.append(n)
             return n, self.vartable[n] 

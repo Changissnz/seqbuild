@@ -157,7 +157,7 @@ class SSINetOp:
             r = modulo_in_range(self.prg(),\
                 DEFAULT_SSINETNODE__TYPE_FITTER_NUM_ITER) 
             q.termination_length = int(ceil(q.activation_size * r)) 
-            q.activate_base(self.prg,True)
+            q.activate_base(self.prg,False) 
 
         return
 

@@ -292,7 +292,7 @@ def MAKE_rch(splitstr_cmd,var_map):
     mut_rate = float(q[2]) 
 
     queue_capacity = 1000 
-    output_range = [-1000,1000]
+    output_range = [-10000,10000]
     if l >= 4: 
         queue_capacity = int(q[3]) 
         assert queue_capacity > 2  

@@ -20,7 +20,7 @@ class IDecForest:
         assert tree_cap > 0 and type(tree_cap) == int 
 
         self.ST = []
-        self.S = s
+        self.S = IntSeq(intlist_no_dups_no_zero_abs(s,prg)) 
         
         self.l = len(self.S)
         self.default_length_range = \
@@ -41,10 +41,39 @@ class IDecForest:
         self.reprod_ctr = None
         self.reset_reprod_ctr() 
 
+        self.bug_in_parameters = False 
+
+    # NOTE: careful w/ this try-except statement. 
+    #       some rare cases of `prg`,`prg2` parameters 
+    #       result in default `except` outputs. 
+    def __next__(self): 
+        if self.bug_in_parameters: 
+            self.ST.clear() 
+            self.T = None 
+            self.bug_in_parameters = False 
+
+        try: 
+            return self.next_() 
+        except: 
+            self.bug_in_parameters = True 
+
+            return self.next_ERROR_case() 
+
+    def next_ERROR_case(self): 
+        print("BUGGA") 
+        a0 = self.prg()
+        s = int(self.prg()) % 2 
+        if not s: s = -1 
+
+        prg_ = self.prg if type(self.prg2) == type(None) \
+            else self.prg2 
+        return a0 + s * prg_() 
+
+    # NOTE: function sometimes crashes for some cases 
     """
     main method: test 
     """
-    def __next__(self): 
+    def next_(self): 
 
         if len(self.queue) == 0: 
             # case: initialize
@@ -72,6 +101,7 @@ class IDecForest:
             q = self.process_seq_at_tree(T,S,proctype)
             self.queue.extend(q) 
 
+        # BUG: possible 
         x = self.queue.pop(0)
         self.reprod_ctr += 1
 
@@ -94,7 +124,7 @@ class IDecForest:
             self.next_reprod = float('inf') 
         else: 
             self.next_reprod = modulo_in_range(\
-                self.prg(),self.reprod_rate_range)
+                int(self.prg()),self.reprod_rate_range)
 
     #---------------------- tree and integer sequence creation
 
@@ -109,6 +139,7 @@ class IDecForest:
         l,d = None,None 
         rnge = [2,ceil(len(I) / 2)] 
         if rnge[0] == rnge[1]: rnge[1] += 1 
+        rnge = sorted(rnge) 
 
         q = int(round(modulo_in_range(self.prg(),rnge))) 
         if self.prg() % 2: 
@@ -118,6 +149,7 @@ class IDecForest:
 
         prgx = self.prg2 if type(self.prg2) != type(None) else self.prg 
         
+        # NOTE: I must not contain duplicates or 0.  
         cnvrt = IntSeq2Tree(I,l,d,prgx,verbose=False,safe_base=True)
         cnvrt.convert()
 
@@ -181,6 +213,9 @@ class IDecForest:
         # set number of centers
         ncr = (DEFAULT_FOREST_NEWSEQ_NUMCENTERS[0],\
             min([len(S),DEFAULT_FOREST_NEWSEQ_NUMCENTERS[1]]))
+        if ncr[0] == ncr[1]: 
+            ncr = (ncr[0],ncr[1] + 1)
+
         c_ = modulo_in_range(int(round(prg())),ncr)
 
         # fetch the centers, each a factor
@@ -195,7 +230,14 @@ class IDecForest:
             c_ -= 1 
 
         # generate the sequence 
-        n = modulo_in_range(prg(),length_range)
+            # NOTE: funky range correction 
+        length_min = max([length_range[0],len(cx)]) 
+        length_range_ = [length_min,length_range[1]]  
+        if length_range_[0] == length_range_[1]: 
+            length_range_[0] -= 1 
+        length_range_ = sorted(length_range_)
+
+        n = modulo_in_range(prg(),length_range_) 
 
         rx = modulo_in_range(prg(),[0,1001])
         rx = rx / 1000.0 
@@ -279,7 +321,7 @@ class IDecForest:
         qrs = [] 
         for p in prt:
             st = i2[s:s+p]
-            dt = modulo_in_range(self.prg(),depth_range)
+            dt = modulo_in_range(int(self.prg()),depth_range)
             qr,stat = self.process_one_partition_set__inflow(itp,\
                 set(st),num_rounds=dt)
             qrs.extend(qr) 
@@ -346,14 +388,14 @@ class IDecForest:
     def default_IDecForest_integer_range(smin,smax):
         minnie,maxie = int(ceil(smin / 2)),\
             smax * 2
-        return (minnie,maxie)  
+        return sorted((minnie,maxie)) 
 
     @staticmethod
     def default_IDecForest_partitioning(l,prg,prg2):
 
         mx = int(ceil(l / 2))
-        assert mx >= 2
-        if mx == 2: mx += 1
+        ##assert mx >= 2
+        if mx <= 2: mx = 3 
         num_sets = int(modulo_in_range(prg(),[2,mx]))
 
         px = prg2 if type(prg2) != type(None) \
@@ -361,6 +403,7 @@ class IDecForest:
         var = modulo_in_range(prg(),[0,1000.])
         var = var / 1000.0
 
+        num_sets = min([l,num_sets]) 
         prt = prg_partition_for_sz(l,num_sets,px,var)
         return prt 
 

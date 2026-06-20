@@ -7,11 +7,16 @@ from intigers.extraneous import *
 from morebs2.relevance_functions import RCInst,RChainHead
 from morebs2.numerical_generator import prg_choose_n
 
+def safe_div_v3(num,denum): 
+    try: 
+        return safe_div(num,denum)
+    except: 
+        return num * (1 + 42/43) 
 
 MRIF_VARMAP = {CEPoly:"v",\
     LinCombo:"x"}
 
-DM_FUNC_LIST = [np.dot,mul,safe_div,add,sub]
+DM_FUNC_LIST = [np.dot,mul,safe_div_v3,add,sub]
 
 DEFAULT_RCH_ACCUGEN_RANGE = [-0000,1000]
 
@@ -89,7 +94,13 @@ class RCHAccuGen:
         assert type(queue_capacity) == int and queue_capacity > 1
         self.rch = rch 
 
-        self.prg = prg__single_to_int(prg) 
+        
+        prg = prg__single_to_int(prg) 
+
+        def f(): 
+            return abs(prg())
+
+        self.prg = f
 
         self.acc_queue = acc_queue 
         self.qcap = queue_capacity
@@ -114,8 +125,7 @@ class RCHAccuGen:
             self.rch.apply(x)
         except: 
             print("erroneous <RCHAccuGen>")
-            return 
-            
+            return self.prg() 
         vx = deepcopy(self.rch.vpath)
         for v in self.rch.vpath: 
             if type(v) != np.ndarray: 

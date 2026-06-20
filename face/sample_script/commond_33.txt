@@ -2,5 +2,18 @@ set G = make lcg with 65,65,65,87878.
 set G2 = make lcg with 165,675,6,7778. 
 
 set S = make ssino with 10,G,G2. 
-
 set V = run S for 20 iter. 
+
+set S2 = make ssino with 10,G,G2,1. 
+set V2 = run S2 for 20 iter. 
+
+set S2 = make ssino with 10,G,G2,0,1.  
+set V2 = run S2 for 20 iter. 
+
+set S3 = make ssino with 10,G,G2,1,0,1. 
+set V3 = run S3 for 20 iter. 
+
+set S4 = make ssino with 10,G,G2,1,1,0,1. 
+set V4 = run S4 for 20 iter. 
+
+

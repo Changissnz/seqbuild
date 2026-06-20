@@ -170,7 +170,7 @@ def prg__integer_sets__mult(n,c,r,crange,mrange,prg,\
     assert type(c) in {int,list} 
 
     lc = c if type(c) == int else len(c) 
-    assert n >= lc and lc > 0
+    assert n >= lc and lc > 0, "got n {}, c {}, lc {}".format(n,c,lc) 
     assert r >= 0.0 and r <= 1.0 
 
     if type(c) == int:

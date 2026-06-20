@@ -10,7 +10,7 @@
 
 ## Description <a name="description"></a>  
 
-Comm Lang (shorthand for "communication language") is a custom 
+Comm Lang (shorthand for "command language") is a custom 
 language, designed with simplicity in mind, that wraps around 
 the code infrastructure of `seqbuild` library. Users of `seqbuild` 
 interface can use Comm Lang to write command scripts. Its set of 
@@ -99,7 +99,7 @@ as well as their instantiation parameters in Comm Lang.
 - instantiation:  
 
     1. (mdr|mdrv2,function,bool,1|2)  
-    * (reference `ModuloDecompRepr`,inputless generator,generative type)  
+    * (reference `ModuloDecompRepr`,inputless generator, exclude negative, generative type)  
 
     2. (mdr|mdrv2,function,bool,1|2,bool,bool,bool,bool,bool)  
     * (reference `ModuloDecompRepr`,inputless generator,exclude negative, generative type,
@@ -124,8 +124,8 @@ as well as their instantiation parameters in Comm Lang.
 
 - instantiation:  
 
-    1. (function,function,function,1|2)  
-    * (inputless generator,inputless generator,inputless generator,adjustment type)  
+    1. (function,function,function,function,1|2)  
+    * (inputless generator,inputless generator,inputless generator,inputless generator,adjustment type)  
     * (base generator,frequency generator,length generator,range generator,!)  
 
 [o] multimetric  
@@ -358,6 +358,7 @@ the file for the specified number of iterations.
 [+] convert  
 [-] usage  
 ```
+convert <generator> to int.  
 convert <generator> to range.  
 convert <generator> to ndim with <positive_integer_sequence>.  
 convert <generator> to nvec with <positive_integer>.  

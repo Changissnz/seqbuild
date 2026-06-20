@@ -16,6 +16,7 @@ SAMPLE_USE_FILE_MAP = {"multimetric": BASE_COMM_LANG_FOLDER + "commond_one.txt",
     "pid":BASE_COMM_LANG_FOLDER + "commond_nine.txt",\
     "open":BASE_COMM_LANG_FOLDER + "commond_ten.txt",\
     "write":BASE_COMM_LANG_FOLDER + "commond_ten.txt",\
+    "set":BASE_COMM_LANG_FOLDER + "commond_13.txt",\
     "span":BASE_COMM_LANG_FOLDER + "commond_13.txt",\
     "make":BASE_COMM_LANG_FOLDER + "commond_14.txt",\
     "merge":BASE_COMM_LANG_FOLDER + "commond_15.txt",\
@@ -282,7 +283,8 @@ class CLGuideParser:
                         self.file_obj.seek(position) 
                 # case: start of instantiation description 
                 else: 
-                    qline = line[2:].strip()
+                    x = line.index(" ")
+                    qline = line[x:].strip()
                     d[c] = [qline]
                     full_parse_line(d,qline,c) 
                     

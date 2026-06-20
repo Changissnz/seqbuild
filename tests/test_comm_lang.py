@@ -189,13 +189,12 @@ class CommLangMethods(unittest.TestCase):
 
         q = clp.vartable["Q"]
 
-        qsol = [429,39797,8817,19535,65501] 
-
+        qsol =  [429, 39797, 8817, 19535, 65501]
         qs = []
         for _ in range(5): 
             qs.append(int(round(next(q)))) 
 
-        assert qs == qsol 
+        assert qs == qsol,"got {}".format(qs) 
         clp.close()
 
     """
@@ -377,6 +376,24 @@ class CommLangMethods(unittest.TestCase):
         assert X_ == ["G","G2"] 
         assert len(X) == len(X2) == 2 
         assert clp.varseq == ['G', 'G2', 'Q'] 
+
+        clp.close() 
+
+    """
+    checks parser for the correct logging of generators that do not 
+    output single real numbers at every call. 
+    """
+    def test__CommLangParser___checkother_generators_variable__case1(self): 
+        clp = CommLangParser("face/sample_script/commond_four.txt")
+        clp.process_file() 
+
+        assert clp.other_generators == {'GR': 'range', \
+            'GND': 'ndim', 'GNV': 'nvec', 'GTV': 'tvec'}
+
+        g_names = clp.single_output_generator_list() 
+
+        assert not set(clp.other_generators.keys()).intersection(set(g_names)) 
+
 
         clp.close() 
 

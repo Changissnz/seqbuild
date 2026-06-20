@@ -41,6 +41,11 @@ To start off using this project,
 > python3 main.py 
 ```
 
+### Update: 06/19/26 
+
+There are a significant number of Comm Lang file bugs that `CommLangParser` will not 
+catch. Parser is not fully developed for error-logging. 
+
 ### Update: 6/10/26
 Project has been open-sourced with MIT license. See [this link](https://pypi.org/project/seqbuild/) for that. 
 Development recommences on an arbitrary and rolling basis. 

@@ -95,14 +95,13 @@ def integer_derivation__type_PWO(I,op,current_index,ref_index=None,skip_counts=0
     return round(op(first,second)),current_index,ref_index 
 
 #--------------------------------------------------------------------------
-
 # NOTE: this is a custom safe division function that defaults to 1 + 42/43 when 
 #       Python cannot handle the float division of num / denum. 
 def safe_div_v2(num,denum): 
     try: 
         return safe_div(num,denum)
     except: 
-        return 1 + 42/43 
+        return 1 + 42/43
 
 # +,-,/,* and weighted custom 
 DEFAULT_PDD_PAIRWISE_OPS = [add,sub,mul,safe_div_v2,"w.c."] 

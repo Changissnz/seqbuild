@@ -64,7 +64,11 @@ class POFV2ConditionAutoGen:
         prg = self.prg if not deepcopy_prng else deepcopy(self.prg)
         pofv = PolyOutputFitterVar2(pwr,n0,n1,coeff,prng=self.prg,\
             default_sizemod=False,order_pair=order_pair)
-        pofv.solve() 
+
+        if pofv.stat: 
+            pofv.solve() 
+        else: 
+            print("[!] not solvable [!]")
         return pofv
 
     # NOTE: caution required for large integers. Their exponential
