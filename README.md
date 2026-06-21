@@ -51,8 +51,8 @@ There are a significant number of Comm Lang file bugs that `CommLangParser` will
 catch. Parser is not fully developed for error-logging. 
 
 ### Update: 6/10/26
-Project has been open-sourced with MIT license. See [this link](https://pypi.org/project/seqbuild/) for that. 
-Development recommences on an arbitrary and rolling basis. 
+Project has been open-sourced with MIT license. See [this link](https://pypi.org/project/seqbuild/) 
+for that. Development recommences on an arbitrary and rolling basis. 
 
 ### Update: 11/2/25 
 

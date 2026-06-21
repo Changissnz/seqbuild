@@ -7,7 +7,7 @@ import unittest
 
 ### lone file test 
 """
-python -m tests.test_idectree 
+py -m tests.test_idectree 
 """
 ###
 class IDecTreeMethods(unittest.TestCase):

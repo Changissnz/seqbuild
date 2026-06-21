@@ -128,9 +128,11 @@ def safe_div(V1,V2):
         y = value_at_index(i,False) 
         q.append(zero_div0(x,y)) 
     return q 
-    
+
+# NOTE: revised to be for uint32 
 def safe_npint32_value(v):
-    r = (np.iinfo(np.int32).min,np.iinfo(np.int32).max)
+    ##r = (np.iinfo(np.int32).min,np.iinfo(np.int32).max)
+    r = (0,np.iinfo(np.int32).max)
     if v >= r[0] and v <= r[1]: return np.int32(v) 
     v_ = modulo_in_range(v,r) 
     return np.int32(v_)

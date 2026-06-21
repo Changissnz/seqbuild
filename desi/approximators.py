@@ -1,6 +1,7 @@
 from .not_equals import * 
 from .fraction import * 
 from morebs2.poly_interpolation import * 
+from morebs2.numerical_generator import prg__constant
 
 DEFAULT_FIT22_PARTITION_SIZE_RANGE = (5,103) 
 
@@ -142,6 +143,9 @@ class LPSValueOutputter(GenericIntSeqOp):
         self.adder = (self.p1 - self.p0) / self.adder_end 
         self.adder_i = 0   
 
+    """
+
+    """
     @staticmethod 
     def new_pointset(px,l_out):
 
@@ -154,9 +158,23 @@ class LPSValueOutputter(GenericIntSeqOp):
             assert type(x) in {list,tuple} or is_vector(x) 
             assert len(x) == 2 
             M.append(x) 
-        M = np.array(M) 
+
+        # NOTE: this is additional code. Guarantees matrix 
+        #       contains only unique numbers. 
+        M = np.round(np.array(M),5) 
+        q = np.array(M.flatten()  * 10 ** 5,dtype=int) 
+
+        x = prg__constant(2.5)
+        q = intlist_no_dups_no_zero_abs__maintain_size(q,x,False) 
+        q = np.round(np.array(q) / (10 ** 5),5) 
+        M = q.reshape((num_points,2)) 
 
         submat_type = l_out() % 4 
         t = DEFAULT_SUBMAT_TYPES[submat_type]
+
+        I = np.argsort(M[:,1])
+        M = M[I] 
+        
+        # NOTE: first method may yield crashes (equal values retained)
         return not_equals__matrix_whole(M,l_out,t)
 

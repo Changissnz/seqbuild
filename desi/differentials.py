@@ -61,7 +61,7 @@ class PIDValueOutputter(GenericIntSeqOp):
 
         if type(self.pic) == type(None) or self.adder_i > self.adder_end:
             self.pts = LPSValueOutputter.new_pointset(self.px,self.l_out)
-            fvec = [self.f_out() % 2 for  _ in range(len(self.pts) - 1)] 
+            fvec = [int(self.f_out()) % 2 for  _ in range(len(self.pts) - 1)] 
             self.pic = PointInterpolationContainer(self.pts,fvec) 
 
             self.adder_end = modulo_in_range(self.f_out(),\

@@ -355,7 +355,7 @@ class SSIBatchLoader__TypeLCGNet:
             columnOrder=column_order, SSIHop = ssihops,cycleOn = False, cycleIs = 0)
 
     def one_operator_pair(self):
-        base_ops = DEFAULT_PAIRWISE_OPS + [mod]
+        base_ops = DEFAULT_PAIRWISE_OPS + [safe_mod] 
 
         q = prg__one_weighted_pairwise_operator(self.aux_prg,base_ops,\
             base_ops,weight_range=(-2.222,2.555))

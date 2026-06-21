@@ -5,7 +5,7 @@ import unittest
 
 ### lone file test 
 """
-python -m tests.test_approximators 
+py -m tests.test_approximators 
 """
 ###
 class ApproximatorsMethods(unittest.TestCase):
@@ -55,7 +55,7 @@ class ApproximatorsMethods(unittest.TestCase):
             cx.append(q)
             qx |= {q}
 
-        assert len(qx) == 326 
+        assert len(qx) == 341, "got {}".format(len(qx))
 
 #-----------------------------------
 

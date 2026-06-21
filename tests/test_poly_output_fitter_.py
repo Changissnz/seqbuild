@@ -5,7 +5,7 @@ import unittest
 
 ### lone file test 
 """
-python -m tests.test_poly_output_fitter_
+py -m tests.test_poly_output_fitter_
 """
 ###
 class PolyOutputFitterMethods(unittest.TestCase):

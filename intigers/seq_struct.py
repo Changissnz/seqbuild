@@ -411,7 +411,7 @@ class ModuloDecompRepr:
         # BUG: strange case: empty, no shift 
         if type(index) == type(None): 
             print("STRANGEE")
-            return qx2 
+            return deepcopy(self.afs_prt) 
 
         # adjust the rest 
         while len(qx) > 0: 

@@ -4,7 +4,7 @@ import unittest
 
 ### lone file test 
 """
-python -m tests.test_ag_ext 
+py -m tests.test_ag_ext 
 """
 ###
 class APRNGGaugeV2Methods(unittest.TestCase):
@@ -100,7 +100,7 @@ class APRNGGaugeV2Methods(unittest.TestCase):
         is1 = IntSeq(ag.cycle)
         qx = ag.std_cat_entropy(is1,seg_length=None,start_value=None,\
                 count_type="absdiff")
-        assert max(ag.catvec) == 3 
+        assert max(ag.catvec) == 12,"got {}".format(max(ag.catvec))
 
     def test__APRNGGaugeV2__match_two_intseq(self):
         i1 = IntSeq([2,4,6,10])
