@@ -31,6 +31,7 @@ class CommLangParser:
         # do not output single real numbers for every call. 
         # Detected by parser through 
         self.other_generators = dict()  
+        self.non_generators = dict() 
 
     def __str__(self):
 
@@ -54,6 +55,7 @@ class CommLangParser:
         assert object_type in {"generator","sequence"}
 
         X = None 
+        F = None 
         if object_type == "generator": 
             def F(x): 
                 return MAIN_method_for_object(x) != -1 
@@ -78,7 +80,8 @@ class CommLangParser:
     def single_output_generator_list(self): 
         Q = self.object_list("generator",True) 
 
-        return [q[0] for q in Q if q[0] not in self.other_generators]
+        exclude = set(self.other_generators.keys()) | set(self.non_generators.keys())
+        return [q[0] for q in Q if q[0] not in exclude] 
     
     """
     fetches the name of the object in Comm Lang program
@@ -264,8 +267,13 @@ class CommLangParser:
             else: 
                 self.vartable[n] = self.MRCOW_proc(splitstr_cmd[3:]) 
                 
-                if splitstr_cmd[4] in {"mdr","mdrv2"}: 
-                    self.other_generators[n] = splitstr_cmd[4]                 
+                if splitstr_cmd[4] == "iomaps": 
+                    self.other_generators[n] = "iomaps" 
+
+                elif splitstr_cmd[4] in {"mdr","mdrv2"}: 
+                    self.other_generators[n] = splitstr_cmd[4]  
+                elif splitstr_cmd[4] == "op2": 
+                    self.non_generators[n] = splitstr_cmd[4]                
             if n not in self.varseq: 
                 self.varseq.append(n)
             return n, self.vartable[n] 

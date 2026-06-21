@@ -6,12 +6,16 @@ from morebs2.numerical_generator import prg_seqsort,prg_choose_n
 DEFAULT_FOREST_NEWSEQ_NUMCENTERS = [2,15]
 DEFAULT_FOREST_NEWSEQ_MULTRANGE = [-20,20]
 
+DEFAULT_FOREST_MAX_RESET = 10 
+
+# NOTE: If `no_jam` is set to False, forest will reset a maximum of DEFAULT_FOREST_MAX_RESET 
+#       times every time a mathematical bug is encountered. 
 class IDecForest: 
 
     def __init__(self,s,prng_outputter,cache_size,reprod_rate_range,\
-        tree_cap:int,prg,prg2=None,verbose:bool = True):
+        tree_cap:int,prg,prg2=None,no_jam:bool=False,verbose:bool = True):
         assert type(s) == IntSeq
-        assert len(s) >= 5 
+        assert len(s) >= 5
         assert type(prng_outputter) == ModPRNGOutputter
         assert reprod_rate_range[0] < reprod_rate_range[1] 
         assert reprod_rate_range[0] > 0 
@@ -20,8 +24,10 @@ class IDecForest:
         assert tree_cap > 0 and type(tree_cap) == int 
 
         self.ST = []
-        self.S = IntSeq(intlist_no_dups_no_zero_abs(s,prg)) 
-        
+
+        # NOTE: algorithm will alter `s` if it contains non-unique elements,0, and 1.
+        #       original size is maintained.
+        self.S = IntSeq(intlist_no_dups_no_zero_abs__maintain_size(s.l,prg)) 
         self.l = len(self.S)
         self.default_length_range = \
             IDecForest.default_IDecForest_sequence_range(self.l)
@@ -36,21 +42,27 @@ class IDecForest:
         self.tree_cap = tree_cap 
         self.prg = prg 
         self.prg2 = prg2
+        self.no_jam = no_jam
         self.verbose = verbose 
         self.next_reprod = None 
         self.reprod_ctr = None
         self.reset_reprod_ctr() 
-
         self.bug_in_parameters = False 
+        self.num_resets = 0 
 
     # NOTE: careful w/ this try-except statement. 
     #       some rare cases of `prg`,`prg2` parameters 
     #       result in default `except` outputs. 
     def __next__(self): 
-        if self.bug_in_parameters: 
-            self.ST.clear() 
-            self.T = None 
-            self.bug_in_parameters = False 
+        if not self.no_jam: 
+            if self.bug_in_parameters and self.num_resets < DEFAULT_FOREST_MAX_RESET: 
+                self.ST.clear() 
+                self.T = None 
+                self.bug_in_parameters = False 
+                self.num_resets += 1 
+        else: 
+            if self.bug_in_parameters: 
+                return self.next_ERROR_case() 
 
         try: 
             return self.next_() 
@@ -60,7 +72,8 @@ class IDecForest:
             return self.next_ERROR_case() 
 
     def next_ERROR_case(self): 
-        print("BUGGA") 
+        
+        if self.verbose: print("BUGGA") 
         a0 = self.prg()
         s = int(self.prg()) % 2 
         if not s: s = -1 
@@ -181,7 +194,7 @@ class IDecForest:
             for _ in range(l2):
                 n2 = modulo_in_range(px(),self.default_integer_range)
                 q.append(n2) 
-            q = intlist_no_dups_no_zero_abs(q,px) 
+            q = intlist_no_dups_no_zero_abs__maintain_size(q,px) 
             q = IntSeq(q) 
         else: 
             # choose a sequence 
@@ -189,7 +202,7 @@ class IDecForest:
             i = int(round(self.prg())) % len(self.ST)
             S = self.ST[i][0] 
             q = IDecForest.derive_new_IntSeq__type_fm(S,px,self.default_length_range)
-            q = IntSeq(intlist_no_dups_no_zero_abs(q.l,px))
+            q = IntSeq(intlist_no_dups_no_zero_abs__maintain_size(q.l,px))
             
             # case: add noise
             if gentype == 2:
@@ -200,7 +213,7 @@ class IDecForest:
                 q = q + v
                 v2 = [modulo_in_range(v_,self.default_integer_range) \
                     for v_ in q]
-                v2 = intlist_no_dups_no_zero_abs(v2,px)
+                v2 = intlist_no_dups_no_zero_abs__maintain_size(v2,px)
                 q = IntSeq(v2) 
         return q 
 
@@ -246,7 +259,7 @@ class IDecForest:
             DEFAULT_FOREST_NEWSEQ_MULTRANGE,prg,\
             num_attempts_per_nc=150)
 
-        iseq = intlist_no_dups_no_zero_abs(iseq,prg)
+        iseq = intlist_no_dups_no_zero_abs__maintain_size(iseq,prg)
         return IntSeq(iseq)
 
     #------------------------ output generation

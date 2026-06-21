@@ -7,7 +7,9 @@ from intigers.poly_output_fitter_ import *
 from intigers.extraneous import to_trinary_relation,to_trinary_relation_v2,zero_div0
 from morebs2.matrix_methods import cr 
 
-DEFAULT_SHADOW_FITTERS = {"mdr","mdrv2","tvec","fvec","optri","pofv1","pofv2"}
+DEFAULT_SHADOW_FITTERS = {"mdr","mdrv2","tvec","fvec","optri"} #,"pofv1","pofv2"}
+
+DEFAULT_SHADOW_MDR_MAX_ABSMULT = 44 
 
 class QualVec: 
 
@@ -33,11 +35,12 @@ class QualVec:
             isfso = ISFactorSetOps(np.array(self.vec,dtype=int),int_limit=DEFAULT_INT_MAX_THRESHOLD,str_mode_full=True) 
             isfso.factor_count_() 
             factors = isfso.all_factors()
-            #print("FACTORS: ",factors)
+            ##print("FACTORS: ",factors)
             self.qvec = np.array(sorted(factors),dtype=int) if len(factors) != 0 else None 
             assert type(self.qvec) != type(None) 
             self.qvec_ = deepcopy(self.qvec)
             self.qvec2 = isfso.factor_map() 
+            ##print("\t\tRRR")
         else: 
             self.qvec = stdop_vec(self.vec,self.qual_op,cast_type = float)
         return
@@ -73,7 +76,8 @@ class QualVec:
     def refit__fvec(self): 
 
         def fit_for_one(x_):
-            fs = self.qvec2[x_] 
+            ##print("QVEC2: ",self.qvec2) 
+            fs = self.qvec2[int(x_)] 
             fs2 = [] 
             mfs = []
             for f in fs: 
@@ -159,10 +163,10 @@ class ShadowGen(NSFileReader):
         if self.fitting_struct[:3] == "mdr": 
             t = 1 
             if self.fitting_struct == "mdrv2":  
-                md = ModuloDecompV2(IntSeq(S),False) 
+                md = ModuloDecompV2(IntSeq(S),False,DEFAULT_SHADOW_MDR_MAX_ABSMULT) 
                 t = 2 
             else: 
-                md = ModuloDecomp(IntSeq(S)) 
+                md = ModuloDecomp(IntSeq(S),DEFAULT_SHADOW_MDR_MAX_ABSMULT) 
                 md.merge(False)  
             self.fitter = ModuloDecompRepr(md,t)
         else: 

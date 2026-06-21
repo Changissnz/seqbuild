@@ -25,7 +25,36 @@ class PRNGPairwiseOp:
         i = self.prg() % len(self.operators)
         q = self.operators[i]
         return q(x,x2) 
+
+class BunchedPRNGOutputter: 
+
+    def __init__(self,operators,prg_seq):
+        assert len(prg_seq) > 1 
+        assert len(operators) == len(prg_seq) - 1
+        self.prg_seq = prg_seq
+        self.operators = operators 
     
+    def __next__(self): 
+        i = 1 
+        g_ = self.prg_seq[0]
+        q = g_()
+
+        while i < len(self.prg_seq): 
+            g_ = self.prg_seq[i] 
+
+            q2 = g_() 
+            op = self.operators[i-1]
+            q_ = None 
+            try:
+                q_ = op(q,q2) 
+            except: 
+                print("BUG") 
+                q_ = q 
+                
+            q = q_ 
+            i += 1 
+        return q 
+
 """
 return: 
 - a function built from the base function, `pairwise_op`, and 

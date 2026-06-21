@@ -240,8 +240,10 @@ def MERGE_proc(splitstr_cmd,var_map):
     len_op = len(operators)
     assert len_op in {len(generators) - 1,1} 
 
+    generators = [MAIN_method_for_object(g) for g in generators]
+
+    # case: merge to tree 
     if len_op == 1 and splitstr_cmd[3] == "tree":
-        generators = [MAIN_method_for_object(g) for g in generators]
         prx = ModPRNGOutputter(generators) 
         def fx(): 
             fx_ = next(prx) 
@@ -249,7 +251,8 @@ def MERGE_proc(splitstr_cmd,var_map):
             return fx_() 
         
         return fx 
-        
+    
+    # case: bunched PRNG sequence 
     ops = []
     for o in operators: 
         stat0 = o in ARITHMETIC_OP_STR_MAP
@@ -260,27 +263,7 @@ def MERGE_proc(splitstr_cmd,var_map):
             ops.append(ARITHMETIC_OP_STR_MAP[o]) 
         else: 
             ops.append(var_map[o]) 
-    
-    def amalgamaschwann(): 
-        i = 1 
-        g_ = generators[0]
-        g_= MAIN_method_for_object(g_)
-        q = g_()
-        while i < len(generators): 
-            g_ = generators[i] 
-            g_ = MAIN_method_for_object(g_)
-
-            q2 = g_() 
-            op = ops[i-1]
-            q_ = None 
-            try:
-                q_ = op(q,q2) 
-            except: 
-                q_ = q 
-            i += 1 
-        return q 
-    
-    return amalgamaschwann
+    return BunchedPRNGOutputter(ops,generators).__next__ 
 
 def LOAD_proc(splitstr_cmd): 
     assert splitstr_cmd[0] == "load" 

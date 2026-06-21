@@ -408,6 +408,11 @@ class ModuloDecompRepr:
 
         qx2 = [(tuple(x0),qx1)] 
 
+        # BUG: strange case: empty, no shift 
+        if type(index) == type(None): 
+            print("STRANGEE")
+            return qx2 
+
         # adjust the rest 
         while len(qx) > 0: 
             x = qx.pop(0) 

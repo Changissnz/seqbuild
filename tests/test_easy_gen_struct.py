@@ -22,6 +22,8 @@ def TimeBasedCommLangFileGenerator__case_NULLSRC(filepath,use_prng_for_prng_pr:f
         use_prng_for_prng_pr,vector_files,comm_lang_files)
 
 def assertion_on_TimeBasedCommLangFileGenerator_output(cauto,l,i): 
+    cauto.write_out_to_CL_file()
+
     v = "set TESTVEC = run {} for {} iter.".format(l,i) 
     cauto.update_CL_file([v]) 
     cauto.write_out_to_CL_file() 
@@ -136,6 +138,7 @@ class TimeBasedCommLangFileGeneratorMethods(unittest.TestCase):
         return 
 
     def test__TimeBasedCommLangFileGenerator__generate_CL_rch__case1(self): 
+
         filepath = "test_auto_X.txt"
         i = 31 
 
@@ -153,7 +156,7 @@ class TimeBasedCommLangFileGeneratorMethods(unittest.TestCase):
 
         filepath = "test_auto_X.txt"
 
-        L = [400] * 5 + [200] * 5 
+        L = [40] * 5 + [200] * 5 
 
         for l_ in L: 
             cauto = TimeBasedCommLangFileGenerator__case_BLACKOUT(filepath,0.5)
@@ -165,7 +168,7 @@ class TimeBasedCommLangFileGeneratorMethods(unittest.TestCase):
 
     def test__TimeBasedCommLangFileGenerator__generate_CL_ssino__case1(self):
 
-        filepath = "test_auto_X.txt"
+        filepath = "test_auto_Y.txt"
 
         L = [4000,3000] 
 
@@ -179,18 +182,60 @@ class TimeBasedCommLangFileGeneratorMethods(unittest.TestCase):
 
     def test__TimeBasedCommLangFileGenerator__generate_CL_idforest__case1(self): 
 
-        filepath = "test_auto_X.txt"
+        filepath = "test_auto_Z.txt"
 
         L = [5000,5000] 
 
         for l_ in L: 
             cauto = TimeBasedCommLangFileGenerator__case_NULLSRC(filepath,0.5)
+            print("TT: ",cauto.t) 
             s,g = cauto.generate_CL_idforest() 
             cauto.update_CL_file(s) 
             
             l = cauto.clp.single_output_generator_list()[-1] 
             assertion_on_TimeBasedCommLangFileGenerator_output(cauto,l,l_) 
 
+
+    def test__TimeBasedCommLangFileGenerator__generate_CL_weighted_pwop__case1(self): 
+
+        filepath = "test_auto_X.txt"
+        cauto = TimeBasedCommLangFileGenerator__case_NULLSRC(filepath,0.5)
+
+        s,g = cauto.generate_CL_ssino()
+        s1,g1 = cauto.generate_CL_weighted_pwop() 
+
+        cauto.update_CL_file(s) 
+        cauto.update_CL_file(s1) 
+        cauto.write_out_to_CL_file() 
+
+        assert len(cauto.clp.non_generators) == 1
+
+        cauto.close() 
+
+    def test__TimeBasedCommLangFileGenerator__generate_CL_shadow__case1(self): 
+
+        filepath = "test_auto_A.txt"
+        cauto = TimeBasedCommLangFileGenerator__case_BLACKOUT(filepath,0.5)
+
+        s,g = cauto.generate_CL_shadow() 
+        cauto.update_CL_file(s) 
+        cauto.write_out_to_CL_file() 
+
+        i = 1000 
+        #L = cauto.clp.single_output_generator_list()[-1] 
+        assertion_on_TimeBasedCommLangFileGenerator_output(cauto,g,i) 
+
+    def test__TimeBasedCommLangFileGenerator__generate_CL_LCG_bunch__case1(self): 
+
+        filepath = "test_auto.txt"
+        cauto = TimeBasedCommLangFileGenerator__case_NULLSRC(filepath,0.5)
+        s,g = cauto.generate_CL_LCG_bunch() 
+        cauto.update_CL_file(s) 
+        cauto.write_out_to_CL_file() 
+
+        l = cauto.clp.single_output_generator_list()[-1] 
+        i = 1000
+        assertion_on_TimeBasedCommLangFileGenerator_output(cauto,l,i)
 
 
 

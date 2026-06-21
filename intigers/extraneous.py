@@ -2,7 +2,7 @@ import numpy as np
 from morebs2.matrix_methods import is_vector,is_number,is_valid_range 
 from morebs2.measures import zero_div,to_trinary_relation,to_trinary_relation_v2 
 from morebs2.numerical_generator import modulo_in_range,\
-    prg__LCG,euclidean_point_distance,prg_seqsort,prg__single_to_nvec
+    prg__LCG,euclidean_point_distance,prg_seqsort,prg__single_to_nvec,wrap_ranged_modulo_over_generator
 from types import MethodType,FunctionType
 from operator import add,sub,mul,mod
 from math import ceil
@@ -78,6 +78,16 @@ def round_to_trinary_vector(V,is_distance_roundtype:bool=True):
         for v_ in V]) 
 
 #------------------------- safe division 
+
+"""
+defaults to float f1 if f2 is 0. 
+"""
+def safe_mod(f1,f2):
+    assert is_number(f1) 
+    assert is_number(f2) 
+
+    if f2 == 0: return f1 
+    return f1 % f2 
 
 def safe_div(V1,V2):
 
@@ -319,19 +329,6 @@ def prg__single_to_int(prg):
         return int(round(prg())) 
 
     return f  
-
-"""
-produces a new generator function prg' from 
-prg. Every i'th value output v from prg' is 
-equal to 
-    `modulo_in_range(v,r)`.
-"""
-def wrap_ranged_modulo_over_generator(prg,r): 
-    assert type(prg) in {MethodType,FunctionType} 
-    assert is_valid_range(r,True,False) or is_valid_range(r,False,False) 
-    def f():
-        return modulo_in_range(prg(),r) 
-    return f 
 
 #------------------------------- operations related to euclid's distance
 

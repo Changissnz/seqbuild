@@ -41,6 +41,10 @@ To start off using this project,
 > python3 main.py 
 ```
 
+### Update: 06/20/26 
+Auto-generation of Comm Lang files can now be executed by the program in `face/easy_gen_struct`. 
+It is relatively bug-free, and there are try-except conditions in there to prevent crashes. 
+
 ### Update: 06/19/26 
 
 There are a significant number of Comm Lang file bugs that `CommLangParser` will not 

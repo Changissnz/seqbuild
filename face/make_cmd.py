@@ -16,7 +16,7 @@ BASE_PRNG = ["lcg","lcgv2","lcgv3","mdr","mdrv2",\
         "mdrgen","iomaps","idforest","optri","rch","qval",\
         "pid","echo","shadow","ssino","pddelta"]   
 
-ARITHMETIC_OP_STR_MAP = {"+":add,"-":sub,"/":zero_div0,"*":mul,"%":mod} 
+ARITHMETIC_OP_STR_MAP = {"+":add,"-":sub,"/":zero_div0,"*":mul,"%":safe_mod}  
 
 def is_stringized_number(n): 
     istat = False 
@@ -91,6 +91,7 @@ def MAIN_method_for_object(q):
         return q.__next__ 
 
     return -1 
+    assert False, "{} is not valid".format(q) 
 
 def MAKE_lcgvx(splitstr_cmd,var_map): 
     assert splitstr_cmd[0] == "make" 
@@ -451,7 +452,7 @@ def MAKE_idforest(splitstr_cmd,var_map):
             prg2 = var_map[parameters[6]] 
             assert type(prg2) in {MethodType,FunctionType} 
 
-    idf = IDecForest(IntSeq(V),MO,cache_size,reprod_rate_range,max_trees,G,prg2,False)    
+    idf = IDecForest(IntSeq(V),MO,cache_size,reprod_rate_range,max_trees,G,prg2,True,False)   
     return idf
 
 def MAKE_echo(splitstr_cmd):

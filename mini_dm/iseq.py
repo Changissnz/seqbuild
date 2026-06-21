@@ -1,5 +1,7 @@
 import numpy as np 
-from morebs2.numerical_generator import prg_seqsort
+from morebs2.numerical_generator import prg_seqsort,wrap_ranged_modulo_over_generator,\
+    prg__single_to_int,prg_unique_sequence
+
 from morebs2.matrix_methods import is_vector 
 from operator import add,sub,mul,truediv,floordiv
 from math import ceil 
@@ -56,6 +58,23 @@ def intlist_no_dups_no_zero_abs(il,prg,exclude_one:bool=True):
             il2 -= {-n}
 
     return ex_one(il2)
+
+def intlist_no_dups_no_zero_abs__maintain_size(il,prg,exclude_one:bool=True):
+    l = len(il) 
+
+    prg_ = prg__single_to_int(prg)
+    prg_ = wrap_ranged_modulo_over_generator(prg_,[1,4002]) 
+
+    # first filter 
+    Q = intlist_no_dups_no_zero_abs(il,prg_,exclude_one) 
+
+    d = l - len(Q) 
+    if d == 0: return Q 
+
+    # second: try 
+    R = prg_unique_sequence(prg_,d) 
+
+    return Q + R 
 
 #--------------------------------------------------------------------
 

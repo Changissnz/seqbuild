@@ -1,13 +1,17 @@
 from .comm_lang import * 
-from morebs2.numerical_generator import sign_preserving_modulo
+from morebs2.numerical_generator import sign_preserving_modulo,merge_two_prgs
 import time 
 
 DEFAULT_TBCLF_TIMESTAMP_SEEDSIZE_RANGE = [2,7] 
 
-DEFAULT_TBCLF_LCG_PARAMETER_RANGE = [-10** 4 - 616/617, 10 ** 5 + 666/667]
+DEFAULT_TBCLF_STRUCT_NAMES = ["lcg","mdrgen","optri","qval","rch","pid","ssino","idforest","shadow"]
+DEFAULT_TBCLF_BUNCHED_STRUCT_SIZE = [7,14]  
+DEFAULT_TBCLF_SUBGROUP_DEGREE = 3 
+
+DEFAULT_TBCLF_LCG_PARAMETER_RANGE = [-10** 3 - 616/617, 10 ** 4.2 + 666/667]
 DEFAULT_TBCLF_GEN_LCGBUNCH_SIZE_RANGE = [2,7] 
 DEFAULT_TBCLF_GEN_ZERO_DEFAULT = 59163 + 56/57 
-DEFAULT_TBCLF_GEN_VECTOR_LENGTH_RANGE = [7,19] 
+DEFAULT_TBCLF_GEN_VECTOR_LENGTH_RANGE = [7,15] 
 
 DEFAULT_TBCLF_MODULODECOMP_MAX_ABSMULT_RANGE = [5,50] 
 
@@ -18,7 +22,14 @@ DEFAULT_TBCLF_GEN_SSINO_NODESIZE_RANGE = [10,42]
 
 DEFAULT_TBCLF_GEN_IOMAPS_SIZE_RANGE = [2,7] 
 
-DEFAULT_TBCLF_GEN_IDF_CACHE_SIZE_RANGE = [100,455] 
+DEFAULT_TBCLF_GEN_IDF_CACHE_SIZE_RANGE = [100,455]
+DEFAULT_TBCLF_GEN_PWOP_WEIGHT_RANGE = [-66 - 2/3,66.6 + 2/3]  
+
+
+
+
+# TODO: 
+DEFAULT_TBCLF_TMP_CL_FILE_FOR_VECTORGEN = "tmp_SeqBuild_CL_file"
 
 # NOTE: generator may use vectors of length not in DEFAULT_TBCLF_GEN_VECTOR_LENGTH_RANGE, depending 
 #       on the parameters `vector_files` and `comm_lang_files`. 
@@ -49,12 +60,29 @@ class TimeBasedCommLangFileGenerator:
 
         q = modulo_in_range(int(self.t),DEFAULT_TBCLF_TIMESTAMP_SEEDSIZE_RANGE)
 
+        '''
+        Q = PRNGDecimalDelta(time.time()).__next__ 
+        X = [add,sub]
+        for i in range(q -1): 
+            Q_ = PRNGDecimalDelta(time.time()).__next__
+            x = X[i % 2] 
+            Q = merge_two_prgs(Q,Q_,x) 
+
+        self.pdd = wrap_ranged_modulo_over_generator(Q,[-10**7,10**7])  
+        '''
+        
+        self.t = time.time() 
+        """
         x = -1 
         for _ in range(q -1): 
             self.t += time.time() * x 
-            x *= -1 
+            x *= -1
+        self.t = abs(self.t)
+        """
 
-        self.pdd = PRNGDecimalDelta(self.t)
+        s = float_to_str__type_exclude_EDOT(self.t)[1:] 
+        self.t = float(self.t) % (9.78 ** 7)
+        self.pdd = PRNGDecimalDelta(self.t).__next__
 
         # command lines for Comm Lang file to be generated 
         self.cl_lines = [] 
@@ -75,7 +103,112 @@ class TimeBasedCommLangFileGenerator:
         self.clp = CommLangParser(self.filepath)
 
         self.preproc()
+
+        f = {"shadow"} 
+        if len(self.vfiles) > 0: 
+            f.clear() 
+
+        self.struct_list = sorted(set(DEFAULT_TBCLF_STRUCT_NAMES) - f) 
         return
+
+    #---------------------------------------------------------- main generator functions 
+    '''
+    def write_vector_out_to_file(self): 
+        return -1 
+    '''
+
+    def generate(self): 
+        G = self.fetch_prg(True,True) 
+
+        num_structs = modulo_in_range(int(G()),DEFAULT_TBCLF_BUNCHED_STRUCT_SIZE) 
+
+        # generate all primary structs  
+        S,primary_gen_names = [],[] 
+        for _ in range(num_structs):  
+            s,gen_name = self.generate_one_struct() 
+            #S.extend(s)
+
+            self.update_CL_file(s) 
+            primary_gen_names.append(gen_name)
+        
+        # get number of subgroups 
+        num_subgroups = floor(num_structs / 2)  
+
+        # get the subgroup partition 
+        variance = (G() % 1000.) / 1000.
+        prt = prg_partition_for_sz__n_rounds(num_structs - 3,\
+            3,prg__single_to_int(G),variance,50)
+        prt = [p + 1 for p in prt] 
+            # check to make sure partition is of right size 
+        assert sum(prt) == num_structs 
+
+        # partition to struct names 
+        prted = [] 
+        G_ = prg__single_to_int(G) 
+        for p in prt: 
+            p_ = prg_choose_n(primary_gen_names,p,G_,True)
+            prted.append(p_) 
+
+        # internal merge for every subgroup
+        merged_gen_names = []
+        for p in prted: 
+            i = G_() % 2
+            s,g = None,None 
+
+            if i:                 
+                s,g = self.PRNG_seq_to_merged_PRNG__CL_command(p)
+            else: 
+                s,g = self.PRNG_seq_to_PRNG_tree__CL_command(p)  
+
+            self.update_CL_file(s)
+            merged_gen_names.append(g) 
+
+        # external merge b/t the subgroups 
+        i = G_() % 2 
+        if i:                 
+            s,g = self.PRNG_seq_to_merged_PRNG__CL_command(merged_gen_names)
+        else: 
+            s,g = self.PRNG_seq_to_PRNG_tree__CL_command(merged_gen_names)  
+        
+        self.update_CL_file(s) 
+        self.write_out_to_CL_file() 
+        return
+
+    def generate_one_struct(self): 
+
+        G = self.fetch_prg(True,True) 
+        i = int(G()) % len(self.struct_list)
+
+        n = self.struct_list[i] 
+
+        if n == "lcg": 
+            return self.generate_CL_LCG_bunch() 
+        
+        if n == "mdrgen": 
+            return self.generate_CL_mdrgen() 
+
+        if n == "optri": 
+            return self.generate_CL_optri() 
+
+        if n == "qval": 
+            return self.generate_CL_qval() 
+
+        if n == "rch": 
+            return self.generate_CL_rch() 
+
+        if n == "pid": 
+            return self.generate_CL_pid() 
+
+        if n == "ssino": 
+            return self.generate_CL_ssino() 
+
+        if n == "idforest": 
+            return self.generate_CL_idforest() 
+
+        if n == "shadow": 
+            return self.generate_CL_shadow() 
+
+        assert False 
 
     #---------------------------------------------------------- preprocessing methods 
 
@@ -140,18 +273,38 @@ class TimeBasedCommLangFileGenerator:
 
     def generate_CL_LCG_bunch(self):
 
-        bunch_size = modulo_in_range(int(next(self.pdd)),DEFAULT_TBCLF_GEN_LCGBUNCH_SIZE_RANGE)
+        bunch_size = modulo_in_range(int(self.pdd()),DEFAULT_TBCLF_GEN_LCGBUNCH_SIZE_RANGE)
 
-        return -1 
+        S,gen_names = [],[] 
+
+        # generate the individual LCGs first. 
+        G = self.fetch_prg(True,True) 
+        for _ in range(bunch_size): 
+            i = int(G()) % 3 
+
+            s,g = None,None 
+            if i == 0: 
+                s,g = self.generate_CL_LCG() 
+            elif i == 1: 
+                s,g = self.generate_CL_LCGv2() 
+            else: 
+                s,g = self.generate_CL_LCGv3() 
+            S.extend(s)
+            gen_names.append(g) 
+            
+        # 
+        s,gen_name = self.PRNG_seq_to_merged_PRNG__CL_command(gen_names) 
+        S.extend(s) 
+        return S,gen_name 
 
     def generate_CL_LCG(self): 
 
         prg = self.fetch_prg(True) 
-        r = self.output_n_values(n=4,prg=prg,retry_nonzero=3,nonzero_indices=set(3))
+        r = self.output_n_values(n=4,prg=prg,retry_nonzero=3,nonzero_indices=set({3}))
 
         gen_name = self.next_generator_name() 
         s = "set {} = make lcg with {},{},{},{}.".format(\
-            self.base_gen_name,r[0],r[1],r[2],r[3]) 
+            gen_name,r[0],r[1],r[2],r[3]) 
 
         return [s],gen_name 
 
@@ -172,7 +325,7 @@ class TimeBasedCommLangFileGenerator:
 
         prg = self.fetch_accessory_prg_varname() 
 
-        gen_type = round(next(self.pdd)) % 5 
+        gen_type = round(self.pdd()) % 5 
 
         gen_name = self.next_generator_name() 
         if gen_type == 0: 
@@ -181,7 +334,7 @@ class TimeBasedCommLangFileGenerator:
                 base_numbers[3],base_numbers[4],prg) 
             return [s],gen_name
 
-        b = int(next(self.pdd)) % 2 
+        b = int(self.pdd()) % 2 
         if gen_type == 1: 
             s = "set {} = make lcgv3 with {},{},{},{},{},{},{}.".format(\
                 gen_name,base_numbers[0],base_numbers[1],base_numbers[2],\
@@ -246,14 +399,14 @@ class TimeBasedCommLangFileGenerator:
     def generate_CL_mdrgen(self):  
         
         # generate the `ModuloDecompRepr`
-        mdr_type = modulo_in_range(int(next(self.pdd)),[1,3]) 
+        mdr_type = modulo_in_range(int(self.pdd()),[1,3]) 
         s0,g = self.generate_CL_mdr(mdr_type)
         prg = self.fetch_accessory_prg_varname() 
 
-        exclude_neg = int(next(self.pdd)) % 2 
-        generative_type = modulo_in_range(int(next(self.pdd)),[1,3])
+        exclude_neg = int(self.pdd()) % 2 
+        generative_type = modulo_in_range(int(self.pdd()),[1,3])
 
-        q = int(next(self.pdd)) % 2  
+        q = int(self.pdd()) % 2  
 
         gen_name = self.next_generator_name()
 
@@ -277,12 +430,12 @@ class TimeBasedCommLangFileGenerator:
 
     def generate_CL_optri(self): 
         
-        m = int(modulo_in_range(next(self.pdd),DEFAULT_TBCLF_LCG_PARAMETER_RANGE)) 
+        m = int(modulo_in_range(self.pdd(),DEFAULT_TBCLF_LCG_PARAMETER_RANGE)) 
 
         prg = self.fetch_accessory_prg_varname() 
 
-        generative_type = modulo_in_range(int(next(self.pdd)),[1,3])
-        add_noise = int(next(self.pdd)) % 2 
+        generative_type = modulo_in_range(int(self.pdd()),[1,3])
+        add_noise = int(self.pdd()) % 2 
 
         base_sequence = self.fetch_vector_varname() 
 
@@ -298,24 +451,18 @@ class TimeBasedCommLangFileGenerator:
         l = len(V) 
 
         prg = self.fetch_accessory_prg_varname() 
-        #ndim_gen_name = self.next_generator_name() 
-        #s0 = "set {} = convert {} to ndim with {},{}.".format(ndim_gen_name,prg,l,l) 
         s0,ndim_gen_name = self.convert_prg_output(prg,\
             "ndim with {},{}".format(l,l)) 
 
         lout_gen_name_ = self.fetch_accessory_prg_varname()
-        #lout_gen_name = self.next_generator_name() 
-        #s1 = "set {} = convert {} to int.".format(lout_gen_name,lout_gen_name_) 
         s1,lout_gen_name = self.convert_prg_output(lout_gen_name_,\
             "int") 
 
         prg1 = self.fetch_accessory_prg_varname() 
-        #rout_gen_name = self.next_generator_name() 
-        #s2 = "set {} = convert {} to range.".format(rout_gen_name,prg1) 
         s2,rout_gen_name = self.convert_prg_output(prg1,\
             "range") 
 
-        mode = modulo_in_range(int(next(self.pdd)), [1,3])
+        mode = modulo_in_range(int(self.pdd()), [1,3])
 
         qval_gen_name = self.next_generator_name() 
         s3 = "set {} = make qval with {},{},{},{},{}.".format(\
@@ -327,8 +474,8 @@ class TimeBasedCommLangFileGenerator:
 
     def generate_CL_rch(self): 
 
-        q = int(next(self.pdd)) % 3 
-        num_nodes = modulo_in_range(int(next(self.pdd)),DEFAULT_TBCLF_GEN_RCH_NODESIZE_RANGE)
+        q = int(self.pdd()) % 3 
+        num_nodes = modulo_in_range(int(self.pdd()),DEFAULT_TBCLF_GEN_RCH_NODESIZE_RANGE)
 
         prg = self.fetch_accessory_prg_varname() 
         G = self.fetch_prg(True,True) 
@@ -364,23 +511,10 @@ class TimeBasedCommLangFileGenerator:
         prg3 = self.fetch_accessory_prg_varname() 
         prg4 = self.fetch_accessory_prg_varname()
 
-        #name1 = self.next_generator_name() 
-        #s1 = "set {} = convert {} to nvec with 2.".format(name1,prg1)
         s1,name1 = self.convert_prg_output(prg1,"nvec with 2") 
-
-        #name2 = self.next_generator_name() 
-        #s2 = "set {} = convert {} to int.".format(name2,prg2) 
         s2,name2 = self.convert_prg_output(prg2,"int") 
-
-        #name3 = self.next_generator_name() 
-        #s3 = "set {} = convert {} to int.".format(name3,prg3) 
         s3,name3 = self.convert_prg_output(prg3,"int") 
-
-
-        #name4 = self.next_generator_name() 
-        #s4 = "set {} = convert {} to range.".format(name4,prg4) 
         s4,name4 = self.convert_prg_output(prg4,"range") 
-
 
         G = self.fetch_prg(True,True)  
         adjustment_type = modulo_in_range(int(G()),[1,3])
@@ -413,8 +547,7 @@ class TimeBasedCommLangFileGenerator:
         F = wrap_ranged_modulo_over_generator(F,[0,2]) 
         B = prg__single_to_nvec(F,4)()
         B = [int(b) for b in B]
-        ##print("BBB: ",B)
-        ##for _ in range(10): print(F())
+
         if gen_type == 1:
             s = "set {} = make ssino with {},{},{},{}.".format(gen_name,\
                 num_nodes,gen1,gen2,B[0]) 
@@ -479,13 +612,32 @@ class TimeBasedCommLangFileGenerator:
             cache_size,gen_name_1,gen_name_2)
         return [s0,s1,s2,s],gen_name 
 
+    #--------------------------------------------------------- generate commands for `shadow` 
+
+    def generate_CL_shadow(self): 
+        assert len(self.vfiles) > 0, "cannot generate shadow without a vector file"
+
+        G = self.fetch_prg(True,True) 
+
+        i = int(G()) % len(self.vfiles) 
+        vfpath = self.vfiles[i]
+        
+        L = sorted(DEFAULT_SHADOW_FITTERS) 
+        i = int(G()) % len(L) 
+        t = L[i] 
+
+        prg = self.fetch_accessory_prg_varname()
+        gen_name = self.next_generator_name()
+        s = "set {} = make shadow with {},{},{}.".format(gen_name,prg,t,vfpath) 
+
+        return [s],gen_name 
+
     #--------------------------------------------------------- choose active PRNG 
 
     def convert_prg_output(self,prg,convert_str): 
         convert_type = convert_str.split(" ")[0]  
         assert convert_type in GENFORM_CONVERT_TYPES
 
-        #prg = self.fetch_accessory_prg_varname()
         gen_name = self.next_generator_name() 
         s1 = "set {} = convert {} to {}.".format(gen_name,prg,convert_str)  
         return s1,gen_name 
@@ -498,7 +650,7 @@ class TimeBasedCommLangFileGenerator:
 
     def fetch_prg(self,get_object:bool,resort_to_default:bool=True): 
 
-        use_prng_for_prng = prg_decimal(self.pdd.__next__,[0.,1.]) < self.use_prng_for_prng_pr
+        use_prng_for_prng = prg_decimal(self.pdd,[0.,1.]) < self.use_prng_for_prng_pr
         return self.fetch_prg_(use_prng_for_prng,get_object,resort_to_default)  
 
     def fetch_prg_(self,use_prng_for_prng,get_object:bool,resort_to_default:bool=True): 
@@ -506,7 +658,7 @@ class TimeBasedCommLangFileGenerator:
             if not resort_to_default: return None 
 
             if get_object: 
-                return self.pdd.__next__
+                return self.pdd
             return "DEFAULT"
 
         full = not get_object
@@ -514,10 +666,10 @@ class TimeBasedCommLangFileGenerator:
 
         if len(g_list) == 0:
             if resort_to_default:  
-                return self.pdd.__next__ if get_object else "DEFAULT"  
+                return self.pdd if get_object else "DEFAULT"  
             return None 
 
-        t = round(next(self.pdd)) % len(g_list) 
+        t = round(self.pdd()) % len(g_list) 
         x = g_list[t]
         if get_object: return MAIN_method_for_object(self.clp.vartable[x])
         return x 
@@ -547,15 +699,71 @@ class TimeBasedCommLangFileGenerator:
         if type(gname) == type(None): 
             gname = self.default_PRNG__CL_command() 
 
-        vlength = modulo_in_range(int(next(self.pdd)),DEFAULT_TBCLF_GEN_VECTOR_LENGTH_RANGE)
+        vlength = modulo_in_range(int(self.pdd()),DEFAULT_TBCLF_GEN_VECTOR_LENGTH_RANGE)
         vname = self.next_vector_name()
         s = "set {} = run {} for {} iter.".format(vname,gname,vlength)
         self.update_CL_file([s]) 
         self.available_vectors.append(vname) 
         return vname 
 
-    def PRNG_seq_to_PRNG__CL_command(self): 
-        return -1 
+    def PRNG_seq_to_merged_PRNG__CL_command(self,prg_seq): 
+        assert len(prg_seq) > 1 
+
+        num_operators = len(prg_seq) - 1 
+        S, op_seq = self.fetch_operator_sequence(num_operators) 
+
+        gen_name = self.next_generator_name() 
+
+        prg_seq_ = ",".join(prg_seq) 
+        op_seq_ = ",".join(op_seq)
+        s = "set {} = merge {} with {}.".format(gen_name,prg_seq_,op_seq_)
+
+        return S + [s],gen_name 
+
+    def PRNG_seq_to_PRNG_tree__CL_command(self,prg_seq): 
+        assert len(prg_seq) > 1 
+
+        prg_seq_ = ",".join(prg_seq) 
+        gen_name = self.next_generator_name() 
+        s = "set {} = merge {} to tree.".format(gen_name,prg_seq_)
+        return [s],gen_name 
+
+    def fetch_operator_sequence(self,num_operators): 
+        G = self.fetch_prg(True,True) 
+
+        options = sorted(set(ARITHMETIC_OP_STR_MAP.keys()) | {"custom"}) 
+        
+        S = [] 
+        op_str = [] 
+        for _ in range(num_operators): 
+            q = int(G()) % len(options)
+            q = options[q] 
+
+            if q == "custom": 
+                S_,op_name = self.generate_CL_weighted_pwop() 
+                S.extend(S_)
+                op_str.append(op_name)
+            else: 
+                op_str.append(q) 
+        return S,op_str 
+
+    # TODO: careful, process might confuse this with generator function. 
+    def generate_CL_weighted_pwop(self): 
+        G = self.fetch_prg(True,True) 
+        
+        w = modulo_in_range(G(),DEFAULT_TBCLF_GEN_PWOP_WEIGHT_RANGE)
+        options = sorted(set(ARITHMETIC_OP_STR_MAP.keys())) 
+
+        i1 = int(G()) % len(options)
+        i2 = int(G()) % len(options) 
+
+        o1,o2 = options[i1],options[i2]
+        op_order = int(G()) % 3 
+
+        op_name = self.next_generator_name() 
+        s = "set {} = make op2 with {},{},{},{}.".format(op_name,o1,o2,w,op_order) 
+
+        return [s],op_name 
 
     def generate_CL_iomaps(self):
 
