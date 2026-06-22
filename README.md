@@ -22,16 +22,21 @@ responsible for:
 - tweaking generators and numerical sequences.  
 
 Autonomous capabilities for `seqbuild` to perpetually output values classified 
-as "random", according to certain metrics, have not been implemented. The capabilities 
-of reading generators from and writing generators to files have also not been 
-implemented. This is due to the essential role of the `pickle` library. The 
-`pickle` library does not support the storage of Python objects that are closures 
-or contain closures. A closure in the Python programming language is a function nested 
-inside another function; there are variants with "lambda","method", and "function". 
-The `json` library also does not store objects of or related to closures. Without a 
-convenient methodology for reading generators from and writing generators to files, 
-it is easy to see why these capabilities have not been implemented, however important 
-they are.  
+as "random", according to certain metrics, have not been implemented.  
+
+The `seqbuild` system can read generators from and write generators to files, via 
+a language outside out of the standard Python `pickle` and `json` libraries. 
+These two libraries store and load serialized Python objects, and do not support 
+the storage of Python objects that are closures or contain closures. A closure 
+in the Python programming language is a function nested inside another function; 
+there are variants with "lambda","method", and "function". The `seqbuild` system 
+is equipped with a language called `Comm Lang` (shorthand for command language). 
+`Comm Lang` can be used to instantiate most of the PRNGs provided in this project. 
+It can also load vectors into memory and write them out to file. `Comm Lang` scripts 
+are text files that follow the rules specified by `seqbuild`'s programming. See the 
+folder `face/sample_script` for examples on usage. Also, user can simply run the 
+`main.py` file. A user interface pops up, and the `heLP` button provides an introduction 
+to `Comm Lang` semantics. 
 
 To start off using this project, 
 ```
