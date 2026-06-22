@@ -25,15 +25,35 @@ DEFAULT_TBCLF_GEN_IOMAPS_SIZE_RANGE = [2,7]
 DEFAULT_TBCLF_GEN_IDF_CACHE_SIZE_RANGE = [100,455]
 DEFAULT_TBCLF_GEN_PWOP_WEIGHT_RANGE = [-66 - 2/3,66.6 + 2/3]  
 
-# TODO: 
-DEFAULT_TBCLF_TMP_CL_FILE_FOR_VECTORGEN = "tmp_SeqBuild_CL_file"
 
 # NOTE: generator may use vectors of length not in DEFAULT_TBCLF_GEN_VECTOR_LENGTH_RANGE, depending 
 #       on the parameters `vector_files` and `comm_lang_files`. 
+"""
+Generator that uses the Python float timestamp it calls upon instantiation, as the seed for a 
+PRNG `PRNGDecimalDelta` Q. Q helps with generating x number of primitive Comm Lang structures, x 
+in the range of DEFAULT_TBCLF_BUNCHED_STRUCT_SIZE. When `use_prng_for_prng_pr` is set to 0.0, Q 
+is the lone PRNG used to instantiate the parameters of those x primitives. Otherwise, other PRNGs 
+that Q generated or helped in generating may may be used to instantiate the remaining primitives. 
+
+The `shadow` PRNG requires at least 1 vector file, in order for this generator to generate it. 
+
+When `consistent_prng_output` is set to True, generator excludes these primitive structures: 
+- "pid","qval".
+The mode is used to strictly generate integer values. It is useful for cross-deterministic output 
+(between any two devices running a recent version of Python 3). 
+
+NOTE: The rounding differences between devices that run on differing hardware result in significant 
+    differences in output values from the same Comm Lang scripts, thereby making those scripts 
+    non-deterministic. In general, this class is calculatively deterministic when its PRNG `PRNGDecimalDelta` 
+    Q is set at the exact same time. 
+
+    Setting `consistent_prng_output` makes the Comm Lang scripts produced bear deterministic output 
+    values. 
+"""
 class TimeBasedCommLangFileGenerator: 
 
     def __init__(self,filepath:str,base_gen_name:str,use_prng_for_prng_pr:float,vector_files=[],\
-        comm_lang_files=[]):
+        comm_lang_files=[],consistent_prng_output:bool=False): 
 
         assert type(filepath) == str == type(base_gen_name) 
         assert " " not in filepath
@@ -42,7 +62,8 @@ class TimeBasedCommLangFileGenerator:
         assert type(use_prng_for_prng_pr) in {int,float}  
         assert 0. <= use_prng_for_prng_pr <= 1.0 
         assert type(vector_files) == type(comm_lang_files) == list 
-
+        assert type(consistent_prng_output) == bool 
+        
         self.filepath = filepath 
         self.base_gen_name = base_gen_name 
         self.gen_count = 0 
@@ -57,6 +78,7 @@ class TimeBasedCommLangFileGenerator:
 
         q = modulo_in_range(int(self.t),DEFAULT_TBCLF_TIMESTAMP_SEEDSIZE_RANGE)
 
+        # schema #1: unstable 
         '''
         Q = PRNGDecimalDelta(time.time()).__next__ 
         X = [add,sub]
@@ -69,6 +91,8 @@ class TimeBasedCommLangFileGenerator:
         '''
         
         self.t = time.time() 
+
+        # schema #2: unstable 
         """
         x = -1 
         for _ in range(q -1): 
@@ -97,6 +121,10 @@ class TimeBasedCommLangFileGenerator:
         
         if not self.valid_fp: return 
 
+        self.consistent_prng_output = consistent_prng_output
+        if self.consistent_prng_output:
+            self.pdd = prg__single_to_int(self.pdd) 
+
         self.clp = CommLangParser(self.filepath)
 
         self.preproc()
@@ -104,6 +132,9 @@ class TimeBasedCommLangFileGenerator:
         f = {"shadow"} 
         if len(self.vfiles) > 0: 
             f.clear() 
+
+        if self.consistent_prng_output:
+            f = f | {"pid","qval"}
 
         self.struct_list = sorted(set(DEFAULT_TBCLF_STRUCT_NAMES) - f) 
         return
@@ -114,6 +145,9 @@ class TimeBasedCommLangFileGenerator:
         return -1 
     '''
 
+    """
+    main method 
+    """
     def generate(self): 
         G = self.fetch_prg(True,True) 
 
@@ -168,6 +202,11 @@ class TimeBasedCommLangFileGenerator:
             s,g = self.PRNG_seq_to_PRNG_tree__CL_command(merged_gen_names)  
         
         self.update_CL_file(s) 
+
+        if self.consistent_prng_output:
+            s,g = self.convert_prg_output(g,"int")
+            self.update_CL_file([s]) 
+
         self.write_out_to_CL_file() 
         return
 
@@ -562,6 +601,12 @@ class TimeBasedCommLangFileGenerator:
 
         s = "set {} = make ssino with {},{},{},{}.".format(gen_name,\
             num_nodes,gen1,gen2,B[0],B[1],B[2],B[3]) 
+
+        if self.consistent_prng_output: 
+
+            s2,gen_name2 = self.convert_prg_output(gen_name,"int")
+            return [s,s2],gen_name2 
+
         return [s],gen_name 
 
     # NOTE: does not cover all possible instantiation routes for `idforest`. 
@@ -577,7 +622,7 @@ class TimeBasedCommLangFileGenerator:
 
         gen_name_1 = self.next_generator_name() 
         s1 = "set {} = convert {} to int.".format(gen_name_1,prg) 
-
+        
         if gen_type == 0:         
             s = "set {} = make idforest with {},{},{}.".format(\
                 gen_name,V,ioname,gen_name_1)  
@@ -715,6 +760,10 @@ class TimeBasedCommLangFileGenerator:
         op_seq_ = ",".join(op_seq)
         s = "set {} = merge {} with {}.".format(gen_name,prg_seq_,op_seq_)
 
+        if self.consistent_prng_output: 
+            s2,gen_name2 = self.convert_prg_output(gen_name,"int") 
+            return S + [s,s2],gen_name2 
+
         return S + [s],gen_name 
 
     def PRNG_seq_to_PRNG_tree__CL_command(self,prg_seq): 
@@ -803,6 +852,9 @@ class TimeBasedCommLangFileGenerator:
         if len(nonzero_indices) > 0: 
             assert 0 <= min(nonzero_indices) <= max(nonzero_indices) < n
 
+        if self.consistent_prng_output: 
+            prg = prg__single_to_int(prg) 
+
         def go_with_default_nonzero(): 
             d = prg_decimal(prg,[0.,1.]) 
             q = 1 
@@ -818,8 +870,12 @@ class TimeBasedCommLangFileGenerator:
                     return x 
             return go_with_default_nonzero() 
 
-        r = [round(modulo_in_range(prg(),DEFAULT_TBCLF_LCG_PARAMETER_RANGE),5) \
-            for _ in range(n)]
+        if self.consistent_prng_output: 
+            r = [round(modulo_in_range(prg(),DEFAULT_TBCLF_LCG_PARAMETER_RANGE)) \
+                for _ in range(n)]
+        else: 
+            r = [round(modulo_in_range(prg(),DEFAULT_TBCLF_LCG_PARAMETER_RANGE),5) \
+                for _ in range(n)]
 
         nzi = sorted(nonzero_indices) 
 
