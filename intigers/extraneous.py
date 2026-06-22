@@ -282,8 +282,15 @@ def prg__single_to_range_outputter(prg):
         q2 = prg() 
         if q1 < q2:
             return (q1,q2)
-        q2 = (q1 + 1) + q1 - q2 
+        
+        x = q2 
+        q2 = (q1 + 1) + q1 - x  
+
+        # NOTE: strange case. May have to do with Python install! 
+        if q1 > q2: 
+            return (q2,q1)
         return (q1,q2) 
+
     return f 
 
 def prg__single_to_bounds_outputter(prg,bound_length): 
@@ -307,7 +314,9 @@ def prg__single_to_ndim_index_outputter(lcg,dim):
     def f():
         x = np.zeros((len(dim),),dtype=np.int32) 
         for i in range(len(dim)): 
-            x[i] = int(lcg()) % dim[i] 
+
+            x[i] = int(lcg() % dim[i]) 
+
         return x 
     return f 
 

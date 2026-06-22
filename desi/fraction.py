@@ -45,7 +45,8 @@ class GenericIntSeqOp:
         assert type(i) in {int,np.int32,np.int64}
 
         mrange = self.r_out()
-        assert is_valid_range(mrange,False,False)
+        mrange = (float(mrange[0]),float(mrange[1]))
+        assert is_valid_range(mrange,False,False), "got {}".format(mrange) 
 
         if self.adj_type == 1:
             return self.adjustment_type1(i,mrange)

@@ -36,13 +36,13 @@ class CommLangParser:
     def __str__(self):
 
         def map_str(s): 
-            if s != "method": return s 
+            if s not in {"method","function"}: return s 
             return "generator" 
 
         dx = ""
         for k,v in self.vartable.items(): 
             s = str(k) 
-            s = s + "\t" + map_str(parse_object_to_str(v))
+            s = s + "\t" + map_str(parse_object_to_str(v))            
             dx += s + "\n" 
         return dx 
 
