@@ -39,16 +39,12 @@ The `shadow` PRNG requires at least 1 vector file, in order for this generator t
 
 When `consistent_prng_output` is set to True, generator excludes these primitive structures: 
 - "pid","qval".
-The mode is used to strictly generate integer values. It is useful for cross-deterministic output 
-(between any two devices running a recent version of Python 3). 
+The mode is used to strictly generate integer values. It is useful for guaranteeing cross-deterministic 
+output (between any two devices running a recent version of Python 3), although preliminary tests 
+show virtually no difference given rounding depth of five places. 
 
-NOTE: The rounding differences between devices that run on differing hardware result in significant 
-    differences in output values from the same Comm Lang scripts, thereby making those scripts 
-    non-deterministic. In general, this class is calculatively deterministic when its PRNG `PRNGDecimalDelta` 
+NOTE: In general, this class is calculatively deterministic when its PRNG `PRNGDecimalDelta` 
     Q is set at the exact same time. 
-
-    Setting `consistent_prng_output` makes the Comm Lang scripts produced bear deterministic output 
-    values. 
 """
 class TimeBasedCommLangFileGenerator: 
 
