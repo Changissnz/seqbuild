@@ -112,7 +112,9 @@ class LCGV3(LCGV2):
             R[1] = modulo_in_range(R[1],self.super_range) 
             R = sorted(R)
 
-        assert R[0] != R[1] 
+        #assert R[0] != R[1] 
+        if R[0] == R[1]: 
+            R[1] += 1 
         self.r = R 
 
     def ternary_adjustment(self,q): 

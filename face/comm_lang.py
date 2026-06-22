@@ -263,7 +263,9 @@ class CommLangParser:
         if splitstr_cmd[2] == "=": 
             if splitstr_cmd[3] == "convert": 
                 self.vartable[n],gentype = self.MRCOW_proc(splitstr_cmd[3:]) 
-                self.other_generators[n] = gentype 
+
+                if splitstr_cmd[6] != "int": 
+                    self.other_generators[n] = gentype
             else: 
                 self.vartable[n] = self.MRCOW_proc(splitstr_cmd[3:]) 
                 

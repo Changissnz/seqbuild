@@ -777,8 +777,13 @@ class TimeBasedCommLangFileGenerator:
     def fetch_operator_sequence(self,num_operators): 
         G = self.fetch_prg(True,True) 
 
-        options = sorted(set(ARITHMETIC_OP_STR_MAP.keys()) | {"custom"}) 
-        
+        options = set(ARITHMETIC_OP_STR_MAP.keys()) | {"custom"}
+
+        if self.consistent_prng_output: 
+            options -= {"custom","/"}
+
+        options = sorted(options)
+
         S = [] 
         op_str = [] 
         for _ in range(num_operators): 
@@ -855,26 +860,31 @@ class TimeBasedCommLangFileGenerator:
         if self.consistent_prng_output: 
             prg = prg__single_to_int(prg) 
 
+        X = int(DEFAULT_TBCLF_GEN_ZERO_DEFAULT) if self.consistent_prng_output else \
+            DEFAULT_TBCLF_GEN_ZERO_DEFAULT
+        X2 = DEFAULT_TBCLF_LCG_PARAMETER_RANGE if self.consistent_prng_output else \
+            (int(DEFAULT_TBCLF_LCG_PARAMETER_RANGE[0]),int(DEFAULT_TBCLF_LCG_PARAMETER_RANGE[1]))
+
         def go_with_default_nonzero(): 
             d = prg_decimal(prg,[0.,1.]) 
             q = 1 
             if d < 0.5: 
                 q *= -1 
-            return q * DEFAULT_TBCLF_GEN_ZERO_DEFAULT 
+            return q * X 
 
         def retry_nonzero_output():  
             for _ in range(retry_nonzero): 
-                x = modulo_in_range(prg(),DEFAULT_TBCLF_LCG_PARAMETER_RANGE) 
+                x = modulo_in_range(prg(),X2) 
                 x = round(x,5) 
                 if x != 0: 
                     return x 
             return go_with_default_nonzero() 
 
         if self.consistent_prng_output: 
-            r = [round(modulo_in_range(prg(),DEFAULT_TBCLF_LCG_PARAMETER_RANGE)) \
+            r = [round(modulo_in_range(prg(),X2)) \
                 for _ in range(n)]
         else: 
-            r = [round(modulo_in_range(prg(),DEFAULT_TBCLF_LCG_PARAMETER_RANGE),5) \
+            r = [round(modulo_in_range(prg(),X2),5) \
                 for _ in range(n)]
 
         nzi = sorted(nonzero_indices) 
