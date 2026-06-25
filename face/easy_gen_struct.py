@@ -34,14 +34,16 @@ PRNG `PRNGDecimalDelta` Q. Q helps with generating x number of primitive Comm La
 in the range of DEFAULT_TBCLF_BUNCHED_STRUCT_SIZE. When `use_prng_for_prng_pr` is set to 0.0, Q 
 is the lone PRNG used to instantiate the parameters of those x primitives. Otherwise, other PRNGs 
 that Q generated or helped in generating may may be used to instantiate the remaining primitives. 
+Those x primitive structures are merged into 3 disjoint subgroups. Then those 3 subgroups are 
+merged into a final one.
 
 The `shadow` PRNG requires at least 1 vector file, in order for this generator to generate it. 
 
 When `consistent_prng_output` is set to True, generator excludes these primitive structures: 
 - "pid","qval".
 The mode is used to strictly generate integer values. It is useful for guaranteeing cross-deterministic 
-output (between any two devices running a recent version of Python 3), although preliminary tests 
-show virtually no difference given rounding depth of five places. 
+output (between any two devices running a recent version of Python 3). Preliminary tests show intermittent 
+non-zero output differences b/t two different devices on the same Comm Lang files. 
 
 NOTE: In general, this class is calculatively deterministic when its PRNG `PRNGDecimalDelta` 
     Q is set at the exact same time. 
@@ -164,7 +166,7 @@ class TimeBasedCommLangFileGenerator:
         # get the subgroup partition 
         variance = (G() % 1000.) / 1000.
         prt = prg_partition_for_sz__n_rounds(num_structs - 3,\
-            3,prg__single_to_int(G),variance,50)
+            DEFAULT_TBCLF_SUBGROUP_DEGREE,prg__single_to_int(G),variance,50)
         prt = [p + 1 for p in prt] 
             # check to make sure partition is of right size 
         assert sum(prt) == num_structs 
@@ -858,8 +860,8 @@ class TimeBasedCommLangFileGenerator:
 
         X = int(DEFAULT_TBCLF_GEN_ZERO_DEFAULT) if self.consistent_prng_output else \
             DEFAULT_TBCLF_GEN_ZERO_DEFAULT
-        X2 = DEFAULT_TBCLF_LCG_PARAMETER_RANGE if self.consistent_prng_output else \
-            (int(DEFAULT_TBCLF_LCG_PARAMETER_RANGE[0]),int(DEFAULT_TBCLF_LCG_PARAMETER_RANGE[1]))
+        X2 = (int(DEFAULT_TBCLF_LCG_PARAMETER_RANGE[0]),int(DEFAULT_TBCLF_LCG_PARAMETER_RANGE[1])) \
+            if self.consistent_prng_output else DEFAULT_TBCLF_LCG_PARAMETER_RANGE
 
         def go_with_default_nonzero(): 
             d = prg_decimal(prg,[0.,1.]) 

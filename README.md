@@ -43,7 +43,25 @@ To start off using this project,
 > git clone https://www.github.com/changissnz/seqbuild.git 
 > cd seqbuild 
 > pip install -r requirements.txt
-> python3 main.py 
+> py main.py 
+```
+
+There is also a convenient way to auto-generate Comm Lang files, which can then be loaded up 
+into the user interface at `py main.py`, or used for other purposes. 
+```
+from face.easy_gen_struct import * 
+
+filepath = "Your_Comm_Lang_filepath.txt"
+base_gen_name = "name"
+use_prng_for_prng_pr = 0.5
+
+vector_files = ["your_vector_files.txt"]
+cl_files = ["other_Comm_Lang_files_you_want_to_load_up.txt"]
+consistent_PRNG_output = True | False 
+
+cauto = TimeBasedCommLangFileGenerator(filepath,base_gen_name,\
+    use_prng_for_prng_pr,vector_files,cl_files,consistent_PRNG_output)  
+cauto.generate()
 ```
 
 ### Update: 06/20/26 
