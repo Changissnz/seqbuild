@@ -88,7 +88,7 @@ rtype := (s)ymmetric or (a)symmetric
 parameter := primary parameter used; 
             if `s` -> [0,1], 
             if `a` -> [min 1.0,max 1.0].
-parameter2 := used if rtype is `s`; 
+parameter2 := used if rtype is `a`; 
                 [-1,0,1]
 parameter3 := dict, used for `auto` rtype. 
                 key is `s`|`a`,

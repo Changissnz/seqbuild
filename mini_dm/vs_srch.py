@@ -188,7 +188,7 @@ class VSSearch(IOFit):
     def move_one_hyp__uc(self,unit=10**-1,err_type:int=2,\
         num_attempts:int=1000): 
         assert err_type in {1,2}
-        q = self.search_queue.pop(0) 
+        q = self.search_queue.pop(0)        
         
         self.save_soln_to_log()
 
@@ -215,6 +215,8 @@ class VSSearch(IOFit):
     """
     def move_one_hyp__ac(self,unit=10**-1,err_type:int=1,\
         num_attempts:int=1000): 
+        if len(self.search_queue) == 0: return 
+
         q = self.search_queue.pop(0) 
 
         self.save_soln_to_log()
@@ -464,7 +466,6 @@ class VSSearch(IOFit):
 
         q = deepcopy(self.soln)
         self.soln_log.append(q) 
-
         sz = len(self.soln_log) - self.soln_log_size
         while sz > 0:
             self.soln_log.pop(0)

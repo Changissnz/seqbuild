@@ -64,6 +64,10 @@ cauto = TimeBasedCommLangFileGenerator(filepath,base_gen_name,\
 cauto.generate()
 ```
 
+### Update: 06/29/26 
+Planning for full rewrite of class<VSSearch> and related code. Infrastructure for this portion \
+was unused for number generation, and suffered from overcomplications in design. 
+
 ### Update: 06/20/26 
 Auto-generation of Comm Lang files can now be executed by the program in `face/easy_gen_struct`. 
 It is relatively bug-free, and there are try-except conditions in there to prevent crashes. 
