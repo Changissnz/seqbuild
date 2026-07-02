@@ -66,7 +66,7 @@ class N2MVectorFunctionGenMethods(unittest.TestCase):
         q = nvfg.one_N2MVF() 
 
         x = np.array([4,14,3,13,32])
-        r1 =q.apply(x)
+        r1 = q.apply(x)
         sol1 = np.array([ 300.,596.,2316.,596.,4980.,\
             2316.,424.,596.,443.,808.,596.,596.])
         assert np.all(r1 == sol1)

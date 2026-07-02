@@ -24,6 +24,15 @@ def vs_dim(L):
     if is_number(L,set()): return 0  
     return len(L)
 
+def dim2_to_output_dim(d): 
+    assert len(d) == 2 
+    assert min(d) > 0 
+
+    if 1 not in d: 
+        assert d[0] == d[1] 
+        return d[0] 
+    return max(d)
+
 #-------------------- some methods on ratios 
 
 # parameters for method<ratio_vector> 
@@ -638,6 +647,21 @@ class AffineDelta:
         t1 = np.abs(x - q1)
         t2 = np.abs(q2 - q1)
         return t1,t2 
+
+    @staticmethod 
+    def mean_of_AffineDelta_sequence(aseq,ma_dim,ma_order): 
+
+        assert len(aseq) > 0 
+
+        # get the mean of M and A 
+        ad = AffineDelta.null_case(ma_dim,ma_order) 
+
+        for a in aseq: 
+            ad = ad + a 
+
+        ad.m = ad.m / len(aseq)
+        ad.a = ad.a / len(aseq)
+        return ad
     
     #------------------------------ instantiation methods      
 
@@ -707,3 +731,116 @@ class AffineDelta:
         A = output_one_value(1,sz)  
 
         return M,A 
+
+    #------------------------------- instantiation from I/O pair 
+
+    """
+    x := input n-vector 
+    y := output n-vector
+    cv := contribution vector, 
+    ma_dim := (multiple dimension, additive dimension)
+    ma_order := 0|1 
+    """
+    @staticmethod 
+    def io_to_AffineDelta(x,y,cv,ma_dim,ma_order): 
+        q = np.abs(y - x)
+
+        # set the initial MA pair 
+        ma = [None,None]
+
+        if ma_dim[0] == 0: 
+            ma[0] = 0.0
+        else: 
+            ma[0] = np.zeros((len(q),),dtype=float)
+
+        if ma_dim[1] == 0: 
+            ma[1] = 0.0
+        else: 
+            ma[1] = np.zeros((len(q),),dtype=float)
+
+        sz_ma = []
+        for x_ in ma:
+            if is_number(x_,set()):
+                sz_ma.append(0)
+            else:
+                sz_ma.append(len(x_))
+
+        if is_number(y,set()): assert max(sz_ma) == 0
+        else: 
+            assert max(sz_ma) == len(y) 
+
+        """
+        adds an element according to the index arguments. 
+        """
+        def place_element(ma_index,e_index,element):
+            if is_number(ma[ma_index],set()):
+                ma[ma_index] = element 
+                return 
+            ma[ma_index][e_index] = element
+            return   
+                
+        # iterate through and solve for every index 
+
+        # get the 2 contribution vectors 
+
+            # actual 
+        mcon,acon = cv[0] * q, cv[1] * q 
+
+            # multiple 
+
+        # case: ma_order is (M,A) 
+        if ma_order == 0:
+            mcon_ = safe_div(mcon+x,x) 
+
+            # subcase: ma_dim[0] = 0 
+                # get the mean 
+            if ma_dim[0] == 0: 
+                M = np.mean(mcon_) 
+                place_element(0,0,M) 
+            else: 
+                for i in range(ma_dim[0]): 
+                    place_element(0,i,mcon_[i]) 
+            
+            A = y - (x * ma[0])
+
+            # now place the additive 
+            # subcase: ma_dim[1] = 0 
+                # get the mean 
+            if ma_dim[1] == 0: 
+                A = np.mean(A) 
+                place_element(1,0,A) 
+            else: 
+                for i in range(ma_dim[1]):  
+                    place_element(1,i,A[i])  
+        
+        else: 
+
+            # subcase: ma_dim[1] = 1 
+                # get the mean 
+            if ma_dim[1] == 0: 
+                A = np.mean(acon) 
+                place_element(1,0,A) 
+            else: 
+                for i in range(ma_dim[1]): 
+                    place_element(1,i,acon[i])
+
+            M = y - (x + ma[1]) 
+            M = safe_div(y,(x + ma[1]))
+
+            if ma_dim[0] == 0: 
+                M = np.mean(M) 
+                place_element(0,0,M) 
+            else: 
+            # subcase: ma_dim[0] = 0 
+                # get the mean 
+                for i in range(ma_dim[0]): 
+                    place_element(0,i,M[i]) 
+        
+        return AffineDelta(ma[0],ma[1],ma_order) 
+
+    @staticmethod 
+    def null_case(ma_dim,ma_order): 
+        m = 0 if ma_dim[0] == 0 else np.zeros((ma_dim[0],))
+        a = 0 if ma_dim[1] == 0 else np.zeros((ma_dim[1],))
+        return AffineDelta(m,a,ma_order) 
+

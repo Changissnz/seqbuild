@@ -1,12 +1,12 @@
 from intigers.tvec import * 
-from morebs2.numerical_generator import prg__LCG
+from morebs2.numerical_generator import prg__LCG,prg__constant
 from intigers.mod_prng import * 
 from mini_dm.minmax_freq import * 
 import unittest
 
 ### lone file test 
 """
-python -m tests.test_tvec
+py -m tests.test_tvec
 """
 ###
 class TrinaryVectorMethods(unittest.TestCase):
@@ -35,6 +35,25 @@ class TrinaryVectorMethods(unittest.TestCase):
         tv2 = TrinaryVec.one_instance__v2(20,fm,prg2)
         q2 = vec_to_frequency_map(np.array(tv2.l,dtype=np.int32))
         assert q2 == {-1:4,1:14,0:2}
+
+    def test__generate_m_unique_trinary_vectors__case_1(self): 
+
+        prg = prg__constant(1) 
+        prg2 = prg__LCG(-57,12,312,-311) 
+
+        ndim = 5  
+        m = 15 
+
+        T = generate_m_unique_trinary_vectors(ndim,m,prg,attempt_ratio=2.0)
+        T2 = generate_m_unique_trinary_vectors(ndim,m,prg2,attempt_ratio=2.0)
+
+        assert len(list(T)) == len(list(T2)) == m 
+
+        T3 = generate_m_unique_trinary_vectors(ndim,m,prg,attempt_ratio=1.0) 
+        T4 = generate_m_unique_trinary_vectors(ndim,m,prg2,attempt_ratio=1.0)
+
+        assert len(list(T3)) == 11 
+        assert len(list(T4)) == 15  
 
 if __name__ == '__main__':
     unittest.main()

@@ -6,6 +6,23 @@ from copy import deepcopy
 """
 class that operates an n-to-m vector function to map 
 any n-vector to an m-vector, both of real numbers. 
+
+This is not an abstract n-to-m space function. It operates 
+using <LCPVectorMap__TypeCShift>. Specifically, the 
+`indexset_pair_seq` is a sequence s.t. every element is an 
+(index set of n-vector,index set of m-vector). 
+
+To calculate the m-vector output from an n-vector, function 
+first sets m-vector to V = <0> * `default_value`. Then it iterates 
+through every pair (p_n,p_m) in `indexset_pair_seq`, and first 
+fetches the subvector input `V[p_n]`. It applies the corresponding 
+function f, in `function_map` for the pair (p_n,p_m), to `V[p_n]`, 
+for an p_m-vector. It then either, according to `mode`, replace the 
+elements at the p_m indices with the p_m-vector output or adds p_m 
+to V. 
+
+All functions in `function_map` are <apply> functions of 
+<LCPVectorMap__TypeCShift> instances. 
 """
 class N2MVectorFunction:
 
@@ -44,11 +61,7 @@ class N2MVectorFunction:
         qx = set([type(k) in {MethodType,FunctionType} for k in qx]) 
         assert qx == {True}
 
-        qx2 = list(f_map.values()) 
-        qx2_ = []
-        for qx22 in qx2: qx2_.extend(qx22) 
-        qx2_ = sorted(qx2_)
-        qx2 = np.array(qx2_,dtype=np.int32)
+        qx2 = np.array(sorted(f_map.values())) 
         assert np.all(qx2 == np.arange(len(ip_seq),dtype=np.int32)) 
         return
 
@@ -77,7 +90,7 @@ class N2MVectorFunction:
         assert type(f) != type(None)
 
         vx2 = f(vx)
-
+        print("VX2 {}: {}".format(ip_index,vx2)) 
         if self.mode == "replace":
             mvec[indices1] = vx2
         else: 
@@ -86,6 +99,6 @@ class N2MVectorFunction:
 
     def ip_index_to_function(self,ip_index:int):
         for k,v in self.function_map.items():
-            if ip_index in v: 
+            if ip_index == v: 
                 return k 
         return None

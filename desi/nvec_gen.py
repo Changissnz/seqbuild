@@ -1,6 +1,7 @@
-from mini_dm.vs_fit_op import * 
+from mini_dm.affine_ops import * 
 from math import ceil 
 from morebs2.numerical_generator import prg_partition_for_sz__n_rounds
+from types import MethodType,FunctionType
 
 DEFAULT_POINTSET_PARTSIZE_RATIO_RANGE = (0.15,0.23)
 
@@ -11,6 +12,9 @@ the <AffineDelta> sequence, or be unordered.
 
 Main method is `generate_points`. Main variables are 
 `input_seq` and `point_seq`. 
+
+The dimension of the input space is either 1 or the dimension of the 
+output space. 
 """
 class PointSetGen__TypeAffine:
 

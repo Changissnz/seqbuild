@@ -1,4 +1,4 @@
-from mini_dm.vs_fit import * 
+from mini_dm.affine_ops import * 
 from morebs2.numerical_generator import prg__LCG, prg__constant,prg__n_ary_alternator
 from morebs2.matrix_methods import equal_iterables
 import unittest
@@ -17,10 +17,10 @@ def AffineDelta__sampleA():
 
 ### lone file test 
 """
-python -m tests.test_vs_fit
+py -m tests.test_affine_ops
 """
 ###
-class VSFitMethods(unittest.TestCase):
+class AffineOpsMethods(unittest.TestCase):
 
 
     def test__ratio__type_asymmetricANDsymmetric(self): 
@@ -391,6 +391,74 @@ class VSFitMethods(unittest.TestCase):
 
         assert np.all(md3.rv_vec == 0.5)
         assert np.all(md3.rvt_vec == 's')
+
+    """
+    case is MA-order of (multiply then add) 
+    """
+    def test__AffineDelta__io_to_AffineDelta__case1(self): 
+
+        x = np.array([55.3,-23,100])
+        y = np.array([165.9,50,200])
+
+        d = (y - x) * 1.2 
+        cv = (0.5,0.5) 
+
+        ma_dim = (3,0) 
+        ma_order = 0 
+
+        # case: x-to-y mapping not precise 
+        R = AffineDelta.io_to_AffineDelta(x,y,cv,ma_dim,ma_order)
+
+        op1_diff = np.array([55.3,36.5,50.])
+        assert equal_iterables(op1_diff,R.op1(x) - x) 
+
+        fit_diff = np.array([47.267, 47.267, 47.267]) 
+        assert equal_iterables(R.fit(x) - R.op1(x),fit_diff,3)
+
+        # case: x-to-y mapping is precise, satisfies cv ratios 
+        ma_dim2 = (3,3) 
+        R2 = AffineDelta.io_to_AffineDelta(x,y,cv,ma_dim2,ma_order)
+        assert equal_iterables(R2.fit(x) - R2.op1(x),R2.op1(x) - x) 
+        assert equal_iterables(R2.fit(x),y) 
+
+        # case: x-to-y mapping is precise, does not satisfy cv ratios 
+        ma_dim3 = (0,3) 
+        R3 = AffineDelta.io_to_AffineDelta(x,y,cv,ma_dim3,ma_order)
+        assert equal_iterables(R3.fit(x),y) 
+        assert not equal_iterables(R3.fit(x) - R3.op1(x),R3.op1(x) - x) 
+
+    def test__AffineDelta__io_to_AffineDelta__case2(self): 
+
+        x = np.array([55.3,-23,100])
+        y = np.array([165.9,50,200])
+
+        cv = (0.5,0.5) 
+
+        ma_dim = (3,0) 
+        ma_order = 1 
+
+        # case: x-to-y mapping precise, does not satisfy cv ratios  
+        R = AffineDelta.io_to_AffineDelta(x,y,cv,ma_dim,ma_order)
+        assert equal_iterables(R.fit(x),y)
+
+        op1_diff = np.array([47.267, 47.267, 47.267]) 
+        assert equal_iterables(op1_diff,R.op1(x) - x,3) 
+
+        fit_diff = np.array([63.333, 25.733, 52.733])
+        assert equal_iterables(R.fit(x) - R.op1(x),fit_diff,3)
+
+        # case: x-to-y mapping precise, satisfies cv ratios 
+        ma_dim2 = (3,3) 
+        R2 = AffineDelta.io_to_AffineDelta(x,y,cv,ma_dim2,ma_order)
+        assert equal_iterables(R2.fit(x) - R2.op1(x),R2.op1(x) - x) 
+        assert equal_iterables(R2.fit(x),y) 
+
+        # case: x-to-y mapping imprecise 
+        ma_dim3 = (0,3) 
+        R3 = AffineDelta.io_to_AffineDelta(x,y,cv,ma_dim3,ma_order)
+        ans = np.array([240.999,  29.417, 326.852])
+        assert equal_iterables(R3.fit(x),ans,3)  
+
 
 
 if __name__ == '__main__':

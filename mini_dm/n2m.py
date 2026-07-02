@@ -29,6 +29,9 @@ def n2m_delta_correlate__orderedproportional(delta_x_relation,delta_err):
         q.append(t) 
     return np.array(q) * delta_err  
 
+"""
+mean of vector 
+"""
 def default_cfunc1(S): 
     S_ = None 
     try:
@@ -40,6 +43,9 @@ def default_cfunc1(S):
         return np.mean(S_) 
     return np.mean(S_,axis=0)
 
+"""
+mean of absolute vector 
+"""
 def default_cfunc2(S): 
     S = np.abs(S) 
     return default_cfunc1(S) 
@@ -133,6 +139,28 @@ class N2MAutocorrelator:
         assert_nm(nm) 
         self.nm = nm 
 
+    def average_weighted_change(self,k): 
+        if k not in self.wtable: return 0 
+
+        F = self.ftable[k] 
+        W = self.wtable[k] 
+
+        s = 0 
+        d = 0 
+
+        for k,v in F.items(): 
+            s += (W[k] * v) 
+            d += v 
+        return s / d
+
+    def rank_input_delta_vectors(self,ascending:bool): 
+        K = sorted(self.wtable.keys()) 
+        L = [(k,self.average_weighted_change(k)) for k in K]
+        L = sorted(L,key=lambda x:x[1])
+        if not ascending: 
+            return L[::-1]
+        return L 
+
     """
     adds a pair of (x_i,e_i) to memory; e_i the error term for input x_i. 
 
@@ -140,50 +168,49 @@ class N2MAutocorrelator:
     input variables. This status is calculated through mean-based 
     functions.     
     """
-    def add(self,x0,x1,e0,e1,save_weight:bool=False):
-        assert len(x0) == len(x1) 
-        assert len(x0) == self.nm[0] 
-        assert len(e0) == len(e1) 
-        assert len(e0) == self.nm[1] 
+    def add(self,x0,x1,e0,e1):
+        if is_number(x0): 
+            assert is_number(x1) 
+            assert self.nm[0] == 0 
+        else: 
+            assert len(x0) == len(x1) == self.nm[0] 
+            assert len(e0) == len(e1) == self.nm[1] 
 
         # get the trinary vector for 
         r1 = to_trinary_relation_v2(e1,e0,True,False)  
-        self.add_v2(x0,x1,r1,save_weight)
-
+        self.add_v2(x0,x1,r1,e1 - e0)
         return
     
-    def add_v2(self,x0,x1,dx_err,save_weight:bool=False): 
+    def add_v2(self,x0,x1,dx_err,dx_err_abs): 
         r0 = to_trinary_relation_v2(x1,x0,True,False)
         r1 = dx_err 
         dx_err2 = None 
-        if is_number(r1):
-            dx_err2 = r1
-            r1 = [r1] 
-        else: 
-            dx_err2 = default_cfunc2(r1) 
 
-        s0 = vector_to_string(r0,int)
-        s1 = vector_to_string(r1,int)
+        if not is_number(r1): 
+            dx_err_abs = default_cfunc2(dx_err_abs)
 
+        s0 = vector_to_string(r0,int) if not is_number(r0) else str(int(r0))
+
+        s1 = vector_to_string(r1,int) if not is_number(r1) else str(int(r1)) 
+         
         if s0 not in self.ftable: 
             self.ftable[s0] = defaultdict(int) 
             self.wtable[s0] = defaultdict(None)
 
         self.ftable[s0][s1] += 1
 
-        if save_weight:
-            if s1 in self.wtable[s0]:
-                q = (self.ftable[s0][s1] - 1) * self.wtable[s0][s1] 
-                q = (q + dx_err2) / self.ftable[s0][s1]
-                self.wtable[s0][s1] = q 
-            else: 
-                self.wtable[s0][s1] = dx_err2 
+        if s1 in self.wtable[s0]:
+            q = (self.ftable[s0][s1] - 1) * self.wtable[s0][s1] 
+            q = (q + dx_err_abs) / self.ftable[s0][s1]
+            self.wtable[s0][s1] = q 
+        else: 
+            self.wtable[s0][s1] = dx_err_abs 
 
         if self.seq_stat: 
             self.seqc[s0].append(s1)
 
     """
-    guesses the difference 
+    guesses the trinary vector of  
         `e1 -e0`, 
     `e1` error-term for `x1` and `e0` 
     for `x0`. Guess is based on the 
@@ -204,6 +231,10 @@ class N2MAutocorrelator:
             qs.append(o) 
         return cfunc2(qs)
     
+    """
+    uses a different process than `induce_derivative` for 
+    prediction on the same problem 
+    """
     def induce_derivative_v2(self,x0,x1):
         ## NOTE: v v 
         r0 = to_trinary_relation_v2(x1,x0,True,False)
@@ -219,6 +250,26 @@ class N2MAutocorrelator:
             c += 1 
         q = safe_div(q,m)
         return round_to_trinary_vector(q) 
+
+    """
+    calculates the closest set S of trinary vectors to 
+    that of (x1 - x0). Then calculates the expected 
+    change in error as the average of the trinary vectors 
+    S, given the `wtable` on it.
+    """
+    def induce_derivative_v3(self,x0,x1):
+        r0 = to_trinary_relation_v2(x1,x0,True,False)
+        return self.induce_derivative_v3_(r0) 
+    
+    def induce_derivative_v3_(self,r0): 
+        ks = self.closest_keyset(r0)
+        
+        if type(ks) == type(None): return 0.0 
+
+        if len(ks) == 0: 
+            return 0.0 
+     
+        return np.mean([self.average_weighted_change(k) for k in ks]) 
         
     def sample_support_for_dvec(self,skey,d,coefficient = 1.0): 
         vx = string_to_vector(skey,int) 
@@ -238,7 +289,7 @@ class N2MAutocorrelator:
     """
     Calculates the set of closest elements to 
 
-    d := stringized vector, difference vector between two inputs x1,x0 (x1-x0). 
+    d := vector, difference vector between two inputs x1,x0 (x1-x0). 
     dfunc := distance function F(point1,point2); usually set to 
                 `invertible_trinary_euclidean_distance` or 
                 `euclidean_point_distance`. 
@@ -315,5 +366,22 @@ class N2MAutocorrelator:
         q = [(q_[0],safe_div(q_[1],s)) for q_ in q] 
         return q 
 
-    def cycle_patterns(self): 
-        return -1 
+    def clear_frequent_key(self,x0,x1,min_freq:int=0): 
+        r0 = to_trinary_relation_v2(x1,x0,True,False)
+        s0 = vector_to_string(r0,int) if not is_number(r0) else str(int(r0))
+
+        stat = False 
+
+        if s0 in self.ftable: 
+            A = sum(self.ftable[s0].values()) 
+            if A >= min_freq: 
+                del self.ftable[s0] 
+                stat = True 
+
+        if not stat: return 
+    
+        if s0 in self.wtable: 
+            del self.wtable[s0] 
+
+        if s0 in self.seqc: 
+            del self.seqc[s0] 

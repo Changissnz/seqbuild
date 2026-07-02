@@ -3,7 +3,7 @@ import unittest
 
 ### lone file test 
 """
-python -m tests.test_n2m
+py -m tests.test_n2m
 """
 ###
 class N2MAutocorrelatorMethods(unittest.TestCase):
@@ -147,6 +147,40 @@ class N2MAutocorrelatorMethods(unittest.TestCase):
         sol78 = np.array([0])
         assert np.all(q7 == sol78)
         assert np.all(q8 == sol78) 
+
+    def test__N2MAutocorrelator__induce_derivative_case3(self): 
+
+        nm = (3,5) 
+        nc = N2MAutocorrelator(nm,is_active_seqc=True)
+
+        x0 = np.array([10,15,22])
+        x1 = np.array([15,5,100]) 
+
+        e0 = np.array([1,1,1,1,1]) 
+        e1 = np.array([10,1,0,10,0]) 
+
+        nc.add(x0,x1,e0,e1) 
+
+        x1_ = np.array([12,10,200]) 
+        X = nc.induce_derivative(x0,x1_,frequency_type="ratio") 
+
+        nc.add(x0,x1,e0,e1*5) 
+        nc.add(x0,x1,e0,e1*10) 
+        nc.add(x0,x1,e0,e1*-20) 
+
+        assert nc.induce_derivative_v3_(np.array([1,0,-1])) == 37.9 
+
+    def test__N2MAutocorrelator__add_case1(self): 
+
+        nm = (0,0) 
+        nc2 = N2MAutocorrelator(nm,is_active_seqc=True)
+
+        x0,x1 = 10,22 
+        e0,e1 = 5,200 
+        nc2.add(x0,x1,e0,e1) 
+
+        assert nc2.ftable == defaultdict(None, {'1': defaultdict(int, {'1': 1})})
+        assert nc2.wtable == defaultdict(None, {'1': defaultdict(None, {'1': 195})})
 
 
 

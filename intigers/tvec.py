@@ -1,7 +1,7 @@
 from .seq_struct import * 
 from morebs2.numerical_generator import prg_choose_n,modulo_in_range
-from morebs2.matrix_methods import is_valid_range
-from .extraneous import round_to_trinary_vector,prg__single_to_int
+from morebs2.matrix_methods import is_valid_range,vector_to_string,subvec 
+from .extraneous import round_to_trinary_vector,prg__single_to_int,prg__single_to_trinary_vector
 from types import MethodType,FunctionType
 
 
@@ -110,3 +110,104 @@ class TrinaryVec(IntSeq):
         if type(end) == type(None):
             end = len(self.l) 
         return [start,end] 
+
+
+#--------------------------------------------------
+
+DEFAULT_TRINARY_VEC_DELTA_FUNCTION = [\
+    np.array]
+
+def std_trinary_vec__oscillating(ndim): 
+    s = ceil(ndim / 3)
+    q = [-1,0,1] * s
+    return np.array(q[:ndim]) 
+
+def std_trinary_vec__two_halves(ndim,half1,half2): 
+    assert half1 != half2 
+    assert half1 in {-1,0,1}
+    assert half2 in {-1,0,1} 
+
+    l = ceil(ndim / 2) 
+    q0 = [half1] * l 
+    q1 = [half2] * (ndim - l) 
+    return np.array(q0 + q1) 
+
+"""
+generates 8 trinary vectors derived from `V`, 
+a trinary vector. These trinary vectors are 
+for the goal of (u)nique (o)bjective.  
+"""
+def trinary_vec_delta_sequence__type_UO(V):
+    assert set(V).issubset({-1,0,1}) 
+
+    #S0_ = np.ones((len(V),))
+    S0 = std_trinary_vec__oscillating(len(V))
+    S1 = std_trinary_vec__two_halves(len(V),-1,0)
+    S2 = std_trinary_vec__two_halves(len(V),0,1)
+
+    #yield modulo_in_range(V + S0_,[-1,2])
+    #yield modulo_in_range(V * -S0_,[-1,2])
+
+    yield modulo_in_range(V + S0,[-1,2])  
+    yield modulo_in_range(V + S1,[-1,2]) 
+
+    yield modulo_in_range(V - S0,[-1,2])  
+    yield modulo_in_range(V + S2,[-1,2])  
+
+    l = ceil(len(V) / 3)
+    
+    yield modulo_in_range(V + subvec(S0,l,len(V)),[-1,2])  
+    yield modulo_in_range(V + subvec(S1,l,len(V)),[-1,2]) 
+
+    yield modulo_in_range(V - subvec(S0,l,len(V)),[-1,2])  
+    yield modulo_in_range(V + subvec(S2,l,len(V)),[-1,2])  
+
+# NOTE: this is an attempt-to-generate process; 
+#       not guaranteed to produce the wanted `m`
+#       unique trinary vectors. For the `m` wanted 
+#       vectors, makes ceil(`attempt_ratio`` * `m`) 
+#       attempts. 
+# NOTE: do NOT call this function for large parameters 
+#       `ndim` and `m`, since all generated trinary vectors 
+#       are stored in memory.  
+def generate_m_unique_trinary_vectors(ndim,m,prg,attempt_ratio=2.0):  
+
+    if m > 3 ** ndim: 
+        m = 3 ** ndim
+        
+    num_attempts = ceil(attempt_ratio * m)
+
+    L = set() 
+    prev_unique = None 
+    prg_ = prg__single_to_trinary_vector(prg,ndim)
+
+    while num_attempts > 0 and m > 0: 
+        l = prg_() 
+        x = vector_to_string(l,int) 
+        
+        # case: unique
+        if x not in L:
+            L |= {x}
+            prev_unique = l 
+            num_attempts -= 1 
+            m -= 1 
+            yield l
+        else: 
+            # try looking for a unique one through derivation sequence on 
+            # l 
+            Q = trinary_vec_delta_sequence__type_UO(prev_unique) 
+            for q in Q: 
+                x = vector_to_string(q,int) 
+                num_attempts -= 1
+                if x not in L: 
+                    L |= {x}
+                    prev_unique = q 
+                    m -= 1  
+                    yield q 
+                    break 
+            
+
+
+
+
+

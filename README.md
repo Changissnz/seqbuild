@@ -65,7 +65,7 @@ cauto.generate()
 ```
 
 ### Update: 06/29/26 
-Planning for full rewrite of class<VSSearch> and related code. Infrastructure for this portion \
+Planning for full rewrite of class<VSSearch> and related code. Infrastructure for this portion 
 was unused for number generation, and suffered from overcomplications in design. 
 
 ### Update: 06/20/26 

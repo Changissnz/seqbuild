@@ -88,6 +88,16 @@ are parameter-less functions that return integers. They
 effectively determine each contiguous subvector of the 
 input n-vector `x` that corresponds to each index in the 
 output m-vector.
+
+For every n-vector input, function calculates an m-vector 
+(see the parameter `nm` for these two dimensions) by iterating 
+i in [0,m): 
+- select the contiguous subvector v_s of the n-vector for the input to the 
+  linear combination or polynomial expression. Subvector is selected by 
+  `subvec_size_shifter` PRNG, and the reference `index`, by which the 
+  subvector's 0-index is, is updated after the subvector selection 
+  through `index_shifter`. 
+- apply `fmap[i](v_s)` to produce the i'th value for the m-vector. 
 """
 class LCPVectorMap__TypeCShift: 
 
@@ -186,7 +196,7 @@ class N2MVectorFunctionGen:
         assert_nm(nm) 
         assert type(prg) in {MethodType,FunctionType}
         assert type(prg2) in {MethodType,FunctionType}
-        assert mode in {"replace","cumulative"}
+        assert mode in {"replace","accumulate"}
 
         self.nm = nm  
         self.prg = prg 
@@ -227,7 +237,7 @@ class N2MVectorFunctionGen:
             fx = self.nm_to_vmap(n0,m1,is_lcpvm).apply 
             fmap.append(fx) 
             
-        fmap = {fx: [i] for (i,fx) in enumerate(fmap)}
+        fmap = {fx: i for (i,fx) in enumerate(fmap)}
         return N2MVectorFunction(self.nm,M,fmap,self.mode)
 
     """
