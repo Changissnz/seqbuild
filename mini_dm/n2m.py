@@ -114,6 +114,28 @@ def N2M_AC__setdiff_weighted_support_function(coeff=2.0):
 
     return f  
 
+"""
+A predictor based on the running log of delta data it stores. 
+
+The problem is for X of n-space and Y of m-space, determine the 
+sign-change [trinary vector] of (Y' - Y) when X is shifted to X', 
+or in mathematical terms, 
+
+    T(X' - X) -?-?-> T(Y' - Y). 
+
+The `ftable` keeps track of the frequency that a sign-change vector 
+output occurs from a sign-change vector input. The `wtable` stores 
+the actual float values at the value place in the key-value map, instead 
+of merely the trinary vector. 
+
+Call method<add> to update these two tables with (x,x',y,y'). To 
+predict the sign-change vector, call method<induce_derivative> or 
+method<induce_derivative_v2>. To predict the vector of literal float 
+values for (y' - y ) from (x' - x), call method<induce_derivative_v3>. 
+
+The prediction mechanism is relatively simplistic. It relies on variants 
+of the mean function. See code for more details. 
+"""
 class N2MAutocorrelator:
 
     def __init__(self,nm,is_active_seqc:bool=True):
