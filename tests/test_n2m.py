@@ -168,7 +168,8 @@ class N2MAutocorrelatorMethods(unittest.TestCase):
         nc.add(x0,x1,e0,e1*10) 
         nc.add(x0,x1,e0,e1*-20) 
 
-        assert nc.induce_derivative_v3_(np.array([1,0,-1])) == 37.9 
+        q = nc.induce_derivative_v3_(np.array([1,0,-1]))
+        assert round(q,5) == -5.2, "got {}".format(q)
 
     def test__N2MAutocorrelator__add_case1(self): 
 

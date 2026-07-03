@@ -206,15 +206,14 @@ class N2MAutocorrelator:
     def add_v2(self,x0,x1,dx_err,dx_err_abs): 
         r0 = to_trinary_relation_v2(x1,x0,True,False)
         r1 = dx_err 
-        dx_err2 = None 
 
         if not is_number(r1): 
-            dx_err_abs = default_cfunc2(dx_err_abs)
+            dx_err_abs = default_cfunc1(dx_err_abs)
 
         s0 = vector_to_string(r0,int) if not is_number(r0) else str(int(r0))
 
         s1 = vector_to_string(r1,int) if not is_number(r1) else str(int(r1)) 
-         
+
         if s0 not in self.ftable: 
             self.ftable[s0] = defaultdict(int) 
             self.wtable[s0] = defaultdict(None)

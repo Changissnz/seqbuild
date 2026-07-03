@@ -116,10 +116,7 @@ class PointSetGen__TypeAffine:
             x = self.prg() 
             y = ad.fit(x) 
         else: 
-            x = [] 
-            for _ in range(self.gen_ad_parameters[2]): 
-                x.append(self.prg()) 
-            x = np.array(x) 
+            x = prg__single_to_nvec(self.prg,self.gen_ad_parameters[2])() 
             y = ad.fit(x) 
         return x,y 
          

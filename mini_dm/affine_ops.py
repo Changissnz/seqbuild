@@ -4,7 +4,7 @@ Planned file that works on vector-singleton fits between vectors.
 
 from morebs2.matrix_methods import is_number,is_vector,\
     is_valid_range,equal_iterables
-from morebs2.numerical_generator import modulo_in_range
+from morebs2.numerical_generator import modulo_in_range,prg__single_to_nvec,prg_decimal 
 from morebs2.measures import zero_div 
 from intigers.extraneous import to_trinary_relation_v2,safe_div
 from operator import sub 
@@ -683,53 +683,49 @@ class AffineDelta:
         else: 
             ma_order = prg() % 2 
 
-        return AffineDelta(M,A,ma_order)        
-    
+        return AffineDelta(M,A,ma_order)
+
     @staticmethod 
     def one_instance_vars(m_type,a_type,prg,r_out1,r_out2,dim_range=None):
         assert m_type in {"vec","float"}
         assert a_type in {"vec","float"}
 
-        if (m_type == "vec" or a_type == "vec") and \
-            type(dim_range) == type(None): 
+        if type(dim_range) == type(None): 
             dim_range = DEFAULT_AFFINEVEC_DIMRANGE
-        #else: 
-        #    assert is_valid_range(dim_range)
 
-        def output_one_value(value_idn,sz=None):
-            assert value_idn in {0,1} 
+        target_dim = modulo_in_range(int(prg()),dim_range)
 
-            vtype = None
-            if value_idn == 0:
-                rx = r_out1() 
-                vtype = m_type
-            else: 
-                rx = r_out2()
-                vtype = a_type
-                    
-            if vtype == "vec":
-                if type(sz) == type(None): 
-                    ql = modulo_in_range(prg(),dim_range) 
+        # check for appropriate m_type and a_type, based on target_dim 
+
+            # case: both M and A should be floats 
+        if target_dim == 0: 
+            m_type,a_type = "float","float"
+        else: 
+            # case: at least one of M and A should be a vec  
+            if m_type == a_type == "float": 
+                if prg_decimal(prg,[0.,1.]) > 0.5: 
+                    m_type = "vec" 
                 else: 
-                    ql = sz 
+                    a_type = "vec" 
+        
+        # generate M and A 
+        def generate_M_OR_A(is_M:bool): 
+            if is_M: 
+                t = m_type 
+                G = r_out1 
+            else: 
+                t = a_type 
+                G = r_out2
 
-                q = np.zeros((ql,),dtype=np.float64) 
-                assert is_valid_range(rx,False)
+            rx = G() 
+            if t == "float": 
+                return modulo_in_range(prg(),rx) 
 
-                for i in range(len(q)):
-                    v = modulo_in_range(prg(),rx) 
-                    q[i] = v 
-            else:
-                q = modulo_in_range(prg(),rx) 
-            return q 
+            prg_ = prg__single_to_nvec(prg,target_dim) 
+            return modulo_in_range(prg_(),rx)  
 
-
-        M = output_one_value(0)
-        sz = None
-        if m_type == "vec":
-            sz = len(M) 
-        A = output_one_value(1,sz)  
-
+        M = generate_M_OR_A(True)
+        A = generate_M_OR_A(False)
         return M,A 
 
     #------------------------------- instantiation from I/O pair 

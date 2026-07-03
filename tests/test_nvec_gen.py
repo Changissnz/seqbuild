@@ -6,7 +6,7 @@ import unittest
 
 ### lone file test 
 """
-python3 -m tests.test_nvec_gen 
+py -m tests.test_nvec_gen 
 """
 ###
 class PointSetGen__TypeAffineMethods(unittest.TestCase):

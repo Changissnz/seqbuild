@@ -46,7 +46,6 @@ class AffineDeltaHyp:
 
     def apply_delta_vector(self,delta_vector,unit): 
         delta = delta_vector * unit
-        print("DELTA VECTOR: ",delta_vector)
 
         i = 0 
         m,a = None,None 
@@ -95,7 +94,7 @@ The correlator logs the relation
 F(x') = y', F an affine delta function for this ML algorithm to 
 improve on, y is the actual output. 
 
-T a function the difference vector input into a trinary vector. 
+T a function, the difference vector input into a trinary vector. 
 -------------------------------------------------------------------- 
 
 This ML-algorithm is essentially a reduced brute-force searcher for 
@@ -140,6 +139,34 @@ if A' is not an improvement, its lifespan is deducted by 1. If that lifespan is 
 NOTE: 
 Parameters 5-7 pertain to how the class<IOAffineFit> calculates the initial 
 |X| <AffineDelta> hypotheses. 
+
+------------------------------------------------------------------------------------------
+
+Noting the span that a derivation chain of candidate solutions from the same candidate is 
+based on the number of non-improvements, the general pattern of queue size S_q (synonymously, 
+the number of solution candidates) is 
+    S_q(lone) > S_q(local) > S_q(global). 
+This is to say that a candidate solution has higher likelihood that its derivation is an 
+improvement over itself than that derivation is to the best solution of the local subspace 
+(a k-means centroid), and likewise for the relation b/t the local and global: a derivation 
+has higher likelihood of being an improvement over the local than over the global. 
+
+NOTE: 
+when the `score_improvement_type` is set to "greedy" at instantiation, sometimes the number of 
+candidate solutions (queue size) to remain at around `k` at the beginning of the search 
+process (calling method<__next__>) and then to monotonically decline to 0. This contrasts 
+with "stochastic" set at instantiation, where the queue size will explode in size. When 
+"greedy" is set at instantiation, since the process relies on the <N2MAutocorrelator> and 
+the correlator starts off empty of relations, the predictor will choose the first 
+trinary vector as the most likely improvement. This eliminates the other trinary vector 
+candidates for the proceeding rounds and because of this, the entire probable search space 
+taken when the `score_improvement_type` is instantiated with "greedy" mode is greatly reduced. 
+
+To accomodate for this deficit, searcher should be instantiated with "stochastic", and after 
+some x number of calls to method<__next__>, for the auto-correlator to sufficiently fill up 
+with trinary input-to-output relations, the searcher can be set to "greedy". In this way, the 
+search has a sufficient base by which it can narrow down candidates through the auto-correlator's 
+predictive recommendations. 
 """ 
 class AffineFitSearch__TypeN2NA(IOAffineFit):
 
@@ -324,7 +351,7 @@ class AffineFitSearch__TypeN2NA(IOAffineFit):
 
     def process_one_guess(self,H,T): 
         # inch 
-        H2 = self.cmp_one_guess(H,T,True) 
+        H2 = self.cmp_one_guess(H,T,True)
         self.log_soln(H2) 
 
         # possible foot 
@@ -384,6 +411,9 @@ class AffineFitSearch__TypeN2NA(IOAffineFit):
         if idn not in self.local_best: 
             return np.ones((self.output_dim,)) * float('inf') 
         return self.local_best[idn].error_term 
+
+    def soln_error_vec(self): 
+        return np.round(np.array([s.c_error() for s in self.soln]),5)
 
     #---------------------------------------------- logging solutions and delta correlations 
 

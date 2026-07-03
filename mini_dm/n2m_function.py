@@ -17,7 +17,7 @@ first sets m-vector to V = <0> * `default_value`. Then it iterates
 through every pair (p_n,p_m) in `indexset_pair_seq`, and first 
 fetches the subvector input `V[p_n]`. It applies the corresponding 
 function f, in `function_map` for the pair (p_n,p_m), to `V[p_n]`, 
-for an p_m-vector. It then either, according to `mode`, replace the 
+for a p_m-vector. It then either, according to `mode`, replaces the 
 elements at the p_m indices with the p_m-vector output or adds p_m 
 to V. 
 
@@ -90,7 +90,7 @@ class N2MVectorFunction:
         assert type(f) != type(None)
 
         vx2 = f(vx)
-        print("VX2 {}: {}".format(ip_index,vx2)) 
+
         if self.mode == "replace":
             mvec[indices1] = vx2
         else: 
