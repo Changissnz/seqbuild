@@ -37,6 +37,8 @@ class QualVec:
             factors = isfso.all_factors()
             ##print("FACTORS: ",factors)
             self.qvec = np.array(sorted(factors),dtype=int) if len(factors) != 0 else None 
+            print("VVVVV: ",self.vec) 
+            print("QQQQ: ",self.qvec)
             assert type(self.qvec) != type(None) 
             self.qvec_ = deepcopy(self.qvec)
             self.qvec2 = isfso.factor_map() 
@@ -94,8 +96,14 @@ class QualVec:
             return np.mean(mfs * fs2)
 
         v2 = [] 
+        print("QV")
+        print(self.qvec2) 
+        print("BEFORE: ")
+        print(self.vec) 
         for x in self.vec: 
             v2.append(fit_for_one(x))
+        print("AFTER: ")
+        print(v2)
         return np.array(v2)
 
     def refit__optri(self): 

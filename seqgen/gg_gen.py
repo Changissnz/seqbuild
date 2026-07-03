@@ -210,8 +210,6 @@ class AGV2GuidedGen:
         self.ngram_length = ngram_length
         self.is_context_fed = is_context_fed
 
-        self.output_mode = "base" 
-
         self.init_density_log() 
         self.inspect_base_seq()
 
@@ -239,10 +237,13 @@ class AGV2GuidedGen:
             assert type(epsilon) in {float,np.float64,np.float32}
 
         q = self.agd_log.refvar
-        super_range = (self.bseq_min,self.bseq_max) 
+        super_range = (float(self.bseq_min),float(self.bseq_max)) 
 
         if q == "cov": 
             super_range = (min(self.base_seq),max(self.base_seq))
+
+        if super_range[0] == super_range[1]: 
+            super_range = (super_range[0],super_range[1] + 1)
 
         if type(epsilon) == type(None):
             delta = (self.aux_prg() % 10000.) / 10000.
@@ -270,7 +271,6 @@ class AGV2GuidedGen:
     #---------------------------- next functions 
 
     def next__base(self):
-        assert self.output_mode == "base" 
 
         self.base_seq.clear() 
         for _ in range(self.bspan): 
@@ -312,7 +312,6 @@ class AGV2GuidedGen:
 
     def next__guidedrepl(self,update_base_seq:bool=True,num_attempts:int=10):
         if update_base_seq:  
-            q = self.base_seq 
             self.next__base() 
 
         if not self.is_context_fed: 
@@ -338,7 +337,7 @@ class AGV2GuidedGen:
                     score = fmap[cl] 
             else:
                 return qs,cl 
-            num_attempts -= 1         
+            num_attempts -= 1    
         return v,cl 
 
     def context_fed_permutation(self): 

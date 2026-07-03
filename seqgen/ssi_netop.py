@@ -57,6 +57,7 @@ If `mainstream_queue` is empty, <SSINetOp> adds more numbers to queue by this pr
 - Additionally, each of these nodes may update their base `struct` by first passing values from their 
   `tmp_queue`s to `base_queue`s, depending on if their counters pass their `activation_size` and 
   `termination_length` parameters. 
+- The `mainstream_queue` appends the entire `tmp_queue` to it. 
 
     NOTE: there are two primary types for updating: `rapid` and `slow`. See 
     method<SSINetOp.update_node__type_*> for details on this update. 

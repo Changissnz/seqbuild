@@ -13,7 +13,7 @@ def AGV2GuidedGen__sample_z():
 
 ### lone file test 
 """
-python -m tests.test_gg_gen
+py -m tests.test_gg_gen
 """
 ###
 class AGV2GuidedGenMethods(unittest.TestCase):
