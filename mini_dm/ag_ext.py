@@ -153,6 +153,9 @@ The new value of S[i], if `c` is possible to achieve, is in the confines of
 the super-range `rv`, which is (min(S),max(S)) if set to None. 
 """
 def adjust_for_uwpd_change(S,i,c,rv=None,d_priority=1,recurse:bool=True): 
+    if type(rv) != type(None): 
+        S = modulo_in_range(S,rv)
+        
     rdd = ranged_delta_decomposition(S,i,rv,d_priority)
 
     di,rx,delta = rdd_index_for_delta(rdd,c) 

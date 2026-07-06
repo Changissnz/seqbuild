@@ -1,6 +1,7 @@
 from .seq_struct import * 
 from morebs2.numerical_generator import prg_choose_n,modulo_in_range
 from morebs2.matrix_methods import is_valid_range,vector_to_string,subvec 
+from morebs2.measures import to_trinary_relation
 from .extraneous import round_to_trinary_vector,prg__single_to_int,prg__single_to_trinary_vector
 from types import MethodType,FunctionType
 
@@ -114,9 +115,6 @@ class TrinaryVec(IntSeq):
 
 #--------------------------------------------------
 
-DEFAULT_TRINARY_VEC_DELTA_FUNCTION = [\
-    np.array]
-
 def std_trinary_vec__oscillating(ndim): 
     s = ceil(ndim / 3)
     q = [-1,0,1] * s
@@ -206,6 +204,42 @@ def generate_m_unique_trinary_vectors(ndim,m,prg,attempt_ratio=2.0):
                     yield q 
                     break 
             
+# standalone function, outside of class<LCGV3> that also employs an adjustment scheme 
+# for this same objective: adjusting the values of v, if need be, to suit the trinary vector t 
+def ternary_adjustment(v,t,prg):
+    assert len(v) - 1 == len(t)
+
+    if len(v) < 2: return v 
+
+    def next_from_prg(v1_,r): 
+        x = abs(prg())
+
+        if x == 0: x = 1 
+        return x * r 
+
+    def adjust(v0_,v1_,r): 
+        c = 50 
+        while to_trinary_relation(v1_,v0_) != r: 
+            q = next_from_prg(v1_,r) 
+            v1_ = v1_ + q            
+
+        return v1_ 
+    
+    v_ = np.copy(v) 
+
+    for i in range(1,len(v_)):
+        v0,v1 = v_[i-1],v_[i]  
+        R = to_trinary_relation(v1,v0)
+        R_ = t[i - 1] 
+        if R == R_: continue 
+
+        if R_ == 0: 
+            v_[i] = v0 
+            continue 
+
+        v2 = adjust(v0,v1,R_) 
+        v_[i] = v2 
+    return v_  
 
 
 

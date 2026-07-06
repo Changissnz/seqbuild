@@ -1,120 +1,52 @@
 from intigers.mdr_v2 import * 
 from intigers.tvec import * 
 from intigers.intfactor import * 
+from intigers.extraneous import DEFAULT_PAIRWISE_OPS
 from mini_dm.iseq import * 
 from mini_dm.nsfr import * 
-from intigers.poly_output_fitter_ import * 
 from intigers.extraneous import to_trinary_relation,to_trinary_relation_v2,zero_div0
 from morebs2.matrix_methods import cr 
+from collections import deque 
+from morebs2.numerical_generator import sign_preserving_modulo,prg_decimal
+from .ssi_load import OpTriGenLite
 
-DEFAULT_SHADOW_FITTERS = {"mdr","mdrv2","tvec","fvec","optri"} #,"pofv1","pofv2"}
-
-DEFAULT_SHADOW_MDR_MAX_ABSMULT = 44 
-
-class QualVec: 
-
-    def __init__(self,vec,qual,qual_op=sub,inverted_qual_op=add):
-        assert len(vec) >= 2 
-        if not is_vector(vec): 
-            vec = np.array(vec) 
-        assert qual in {"tvec","fvec","optri"} 
-        self.vec = vec 
-        self.qual = qual 
-        self.qual_op = qual_op 
-        self.inverted_qual_op = inverted_qual_op
-        self.qvec,self.qvec_,self.qvec2 = None,None,None
-        self.qualvec() 
-        return 
-
-    def qualvec(self): 
-        if self.qual == "tvec": 
-            V0 = stdop_vec(self.vec,sub,np.float32)
-            self.qvec = to_trinary_relation_v2(V0,None,zero_feature=True,abs_feature=False)
-            #self.qvec = TrinaryVec(V) 
-        elif self.qual == "fvec":
-            isfso = ISFactorSetOps(np.array(self.vec,dtype=int),int_limit=DEFAULT_INT_MAX_THRESHOLD,str_mode_full=True) 
-            isfso.factor_count_() 
-            factors = isfso.all_factors()
-            ##print("FACTORS: ",factors)
-            self.qvec = np.array(sorted(factors),dtype=int) if len(factors) != 0 else None 
-            print("VVVVV: ",self.vec) 
-            print("QQQQ: ",self.qvec)
-            assert type(self.qvec) != type(None) 
-            self.qvec_ = deepcopy(self.qvec)
-            self.qvec2 = isfso.factor_map() 
-            ##print("\t\tRRR")
-        else: 
-            self.qvec = stdop_vec(self.vec,self.qual_op,cast_type = float)
-        return
-
-    def apply_noise(self,prg): 
-
-        for i in range(len(self.qvec)): 
-            self.qvec[i] = self.qvec[i] + prg() 
-
-        # case: tvec 
-        if self.qual == "tvec": 
-            self.qvec = round_to_trinary_vector(self.qvec,is_distance_roundtype=True)
-            return self.refit__tvec() 
-        # case: fvec 
-        if self.qual == "fvec":
-            return self.refit__fvec() 
-        return self.refit__optri()
-
-    def refit__tvec(self):
-        rx = [self.vec[0]]  
-        for i in range(1,len(self.vec)): 
-            ij = to_trinary_relation(self.vec[i],self.vec[i-1])
-            if ij != self.qvec[i-1]: 
-                if self.qvec[i-1] == 0: 
-                    rx.append(rx[-1]) 
-                    continue 
-                diff = abs(self.vec[i] - self.vec[i-1]) 
-                rx.append(rx[-1] + diff if self.qvec[i-1] == 1 else -diff) 
-                continue 
-            rx.append(self.vec[i])
-        return rx 
-
-    def refit__fvec(self): 
-
-        def fit_for_one(x_):
-            ##print("QVEC2: ",self.qvec2) 
-            fs = self.qvec2[int(x_)] 
-            fs2 = [] 
-            mfs = []
-            for f in fs: 
-                i = np.where(self.qvec_ == f)[0] 
-                assert len(i) == 1 
-                i = i[0] 
-                f2 = self.qvec_[i] 
-                fs2.append(f2) 
-
-                mfs_ = zero_div0(x_,f) 
-                mfs.append(mfs_) 
-
-            fs2,mfs = np.array(fs2),np.array(mfs) 
-            return np.mean(mfs * fs2)
-
-        v2 = [] 
-        print("QV")
-        print(self.qvec2) 
-        print("BEFORE: ")
-        print(self.vec) 
-        for x in self.vec: 
-            v2.append(fit_for_one(x))
-        print("AFTER: ")
-        print(v2)
-        return np.array(v2)
-
-    def refit__optri(self): 
-        v2 = [self.vec[0]] 
-        for v in self.qvec: 
-            v2.append(self.inverted_qual_op(v2[-1],v)) 
-        return v2 
-
+DEFAULT_SHADOW_FITTERS = {"mdr","mdrv2","tvec","fvec","optri"}
 DEFAULT_SHADOWGEN_BASESEQ_LENGTH_RANGE = [7,91]
+DEFAULT_SHADOWGEN_NUM_SHADOWS_RANGE = [2,8]
+DEFAULT_SHADOWGEN_VECTOR_CACHE_SIZE = 52543
+DEFAULT_SHADOWGEN_MDR_MAX_ABSMULT = 44 
+DEFAULT_SHADOWGEN_FVEC_MAX_ABSMULT = 59
 
-class ShadowGen(NSFileReader): 
+DEFAULT_SHADOWGEN_MAX_ABS = ceil(9.97 ** 6) 
+
+"""
+Shadown Pseudo-Random Number Generator. 
+
+Named because of "shadowing" process over cyclical streaming of `file_path` containing a numerical 
+sequence. There are these 5 types of fitters: `mdr`,`mdrv2`,`tvec`,`fvec`,`optri`. 
+
+For every one of these five fitters, uses an auxiliary PRNG `prg` to make decisions that add noise 
+to the underlying form of some (x in DEFAULT_SHADOWGEN_BASESEQ_LENGTH_RANGE) numbers from the 
+`file_path` stream. With the parameters of the underlying form changed, this PRNG then outputs a 
+typically differing number sequence from that of `base_vec`. 
+
+For `mdr` and `mdrv2` (modulo decomposition representation), the underlying form is the segments of 
+(multiple,additive,modulo) connecting the contiguous elements of the current `base_vec`. 
+
+For `tvec`, the ternary vector of the current `base_vec` is changed. 
+
+For `fvec`, the factors of every element in `base_vec` are changed into a new factor set F, and the 
+resulting output element from that element is the cumulative product of F. 
+
+For `optri`, this PRNG selects a forward function and backward function from (+,-,*,/). Then it 
+forms a matrix of dimension |base_vec| x |base_vec|, roughly half of the elements comprised from the 
+forward function and the remainder from the backward function. This matrix is flattened into a sequence 
+and then shuffled using the `prg`. The resultant is the expressed output values from the `base_vec`. 
+
+NOTE: `fvec`, due to the process collecting factor sets for every element of the current `base_vec`, 
+    runs considerably slower than the other `fitting_struct`s, on a scale of at least 50X. 
+"""
+class ShadowGen:
 
     def __init__(self,prg,file_path,fitting_struct,cast_func = cr):
         assert type(prg) in {MethodType,FunctionType}
@@ -128,73 +60,169 @@ class ShadowGen(NSFileReader):
         is_periodic = True 
         self.nsfr = NSFileReader(file_obj,cast_func,is_periodic)
         self.fitting_struct = fitting_struct 
+        self.cast_func = cast_func 
+
         self.fitter = None 
 
-        self.queue = [] 
+        self.queue = deque() 
+        self.vec_cache = deque()  
+        self.pv_size = 0 
+
+        self.base_vec = None 
         return
 
-    def close(self): 
-        self.nsfr.close()
-
     def __next__(self): 
+
         if len(self.queue) == 0: 
-            self.load_next_fitter()
-        
-        x = self.queue.pop(0) 
+            self.load_next_fitter() 
 
-        # ensures no np.nan values are output 
-        stat = np.isnan(x) 
-        while stat: 
-            if len(self.queue) == 0: 
-                stat = False 
-                continue 
-
-            x = self.queue.pop(0) 
-            stat = np.isnan(x) 
-
-        if np.isnan(x): 
-            return self.__next__() 
-
-        return x
+        r = self.queue.popleft() 
+        return self.cast_func(\
+            sign_preserving_modulo(r,DEFAULT_SHADOWGEN_MAX_ABS)) 
 
     def load_next_fitter(self): 
-        L = int(round(modulo_in_range(self.prg(),DEFAULT_SHADOWGEN_BASESEQ_LENGTH_RANGE)))
-        S = [] 
-        for _ in range(L): 
-            S.append(next(self.nsfr)) 
-        self.fit_sequence(S)
 
-        q = self.mod_sequence()
-        self.queue.extend(q) 
+        self.load_next_base_vec()
 
-    def fit_sequence(self,S): 
-        if self.fitting_struct[:3] == "mdr": 
-            t = 1 
-            if self.fitting_struct == "mdrv2":  
-                md = ModuloDecompV2(IntSeq(S),False,DEFAULT_SHADOW_MDR_MAX_ABSMULT) 
-                t = 2 
-            else: 
-                md = ModuloDecomp(IntSeq(S),DEFAULT_SHADOW_MDR_MAX_ABSMULT) 
-                md.merge(False)  
-            self.fitter = ModuloDecompRepr(md,t)
+        V = None 
+        if self.fitting_struct in {"mdr","mdrv2"}:  
+            V = self.mdr_derivation() 
+        elif self.fitting_struct == "tvec": 
+            V = self.tvec_derivation() 
+        elif self.fitting_struct == "fvec": 
+            V = self.fvec_derivation() 
+        elif self.fitting_struct == "optri":
+            V = self.optri_derivation() 
         else: 
-            self.fitter = QualVec(deepcopy(S),self.fitting_struct,qual_op=sub)
+            assert False 
+
+        self.queue.extend(V) 
+        self.update_vec_cache(V) 
+
+    def update_vec_cache(self,V): 
+        q = len(V) 
+        self.pv_size += q 
+
+        V = np.array([sign_preserving_modulo(v,DEFAULT_SHADOWGEN_MAX_ABS) for v in V])
+        self.vec_cache.append(V) 
+
+        while self.pv_size > DEFAULT_SHADOWGEN_VECTOR_CACHE_SIZE: 
+            x = self.vec_cache.popleft() 
+            self.pv_size -= len(x)
+
+    def close(self): 
+        self.nsfr.close() 
+        del self 
+
+    #---------------------------------------- methods for loading up next base vector 
+
+    def load_next_base_vec(self): 
+        l = modulo_in_range(int(self.prg()),DEFAULT_SHADOWGEN_BASESEQ_LENGTH_RANGE)
+        self.base_vec = np.array([next(self.nsfr) for _ in range(l)])
+        self.add_shadows_to_base_vec() 
+
+    def add_shadows_to_base_vec(self): 
+        l_ = len(self.vec_cache)
+        if l_ == 0: 
+            return 
+
+        l = modulo_in_range(int(self.prg()),DEFAULT_SHADOWGEN_NUM_SHADOWS_RANGE) 
+        l = min([l_,l])
+
+        indices = [i for i in range(l_)] 
+        prg_ = prg__single_to_int(self.prg)
+
+        indices = prg_choose_n(indices,l,prg_,is_unique_picker=True)
+
+        Q = [self.vec_cache[i] for i in indices]
+        
+        original_length = len(self.base_vec)
+        for q in Q: 
+            self.base_vec = modulated_vec_op(self.base_vec,q,add)
+            self.base_vec = self.base_vec[:original_length] 
         return 
 
-    def mod_sequence(self): 
+    #----------------------------------------------------- derivations on fitters for current base vector 
 
-        if type(self.fitter) == ModuloDecompRepr:
-            d = int(round(self.prg() % 2)) 
+    def load_mdr(self): 
 
-            # case: shift the partition 
-            if d: 
-                lx = len(self.fitter.afs_prt) 
-                lx = lx ** 2 
-                s = int(round(self.prg() % lx))
-                q = self.fitter.shift_afs_prt_(s) 
-                self.fitter.afs_prt = q 
-            # case: add noise to partition 
+        V = [sign_preserving_modulo(v,DEFAULT_SHADOWGEN_MAX_ABS) for v in self.base_vec]  
+        t = 1 
+        if self.fitting_struct == "mdrv2":  
+            md = ModuloDecompV2(IntSeq(V),False,DEFAULT_SHADOWGEN_MDR_MAX_ABSMULT) 
+            t = 2 
+        else: 
+            md = ModuloDecomp(IntSeq(V),DEFAULT_SHADOWGEN_MDR_MAX_ABSMULT) 
+            md.merge(False)  
+        self.fitter = ModuloDecompRepr(md,t)
+        return 
+
+    def mdr_derivation(self): 
+        self.load_mdr() 
+
+        d = prg_decimal(self.prg,[0.,1.])
+
+        # case: shift the partition 
+        if d > 0.5: 
+            lx = len(self.fitter.afs_prt) 
+            lx = lx ** 2 
+            s = int(round(self.prg() % lx))
+            q = self.fitter.shift_afs_prt_(s) 
+            self.fitter.afs_prt = q 
+        # case: add noise to partition 
+        else: 
+            self.fitter.noise_to_afs_prt(self.prg,True)
+        return self.fitter.reconstruct() 
+
+    def tvec_derivation(self): 
+        # get the current trinary vector 
+        T = gleqvec(self.base_vec)
+
+        # get a trinary vector different from this one 
+        Q = list(generate_m_unique_trinary_vectors(len(T),2,self.prg,attempt_ratio=3.0)) 
+        if np.all(T == Q[0]):
+            T = Q[1] 
+        else: 
+            T = Q[0] 
+
+        return ternary_adjustment(self.base_vec,T,self.prg)
+
+    def fvec_derivation(self): 
+
+        V = np.array(self.base_vec,dtype=int)
+        isfso = ISFactorSetOps(V,int_limit=DEFAULT_INT_MAX_THRESHOLD,str_mode_full=True) 
+        isfso.factor_count_() 
+        factors = isfso.factors 
+
+        L = []
+        for (i,b) in enumerate(V): 
+            # get factors for value 
+            if len(factors[i]) == 0: 
+                q = np.array([10,7,3]) 
             else: 
-                self.fitter.noise_to_afs_prt(self.prg,True)
-            return self.fitter.reconstruct() 
-        return self.fitter.apply_noise(self.prg) 
+                q = np.array(sorted(factors[i])) 
+
+            # add noise to factors by a unique vector 
+            U = prg_unique_sequence(self.prg,len(q))
+            q = q + np.array(U) 
+
+            # cumulative product of q 
+            L.append(np.cumprod(q)[-1]) 
+        return np.array(L) 
+
+    def optri_derivation(self): 
+        L = IntSeq(self.base_vec)
+
+        i = int(self.prg()) % len(DEFAULT_PAIRWISE_OPS) 
+        j = int(self.prg()) % len(DEFAULT_PAIRWISE_OPS) 
+
+        op1 = DEFAULT_PAIRWISE_OPS[i]
+        op2 = DEFAULT_PAIRWISE_OPS[j]
+
+        # make the square matrix of |base_vec| x |base_vec| 
+        otl = OpTriGenLite(L,op1,op2) 
+        V = list(otl.m.flatten()) 
+
+        # shuffle the flattened matrix 
+        V = prg_seqsort(V,self.prg) 
+        return np.array(V) 

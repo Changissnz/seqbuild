@@ -55,5 +55,18 @@ class TrinaryVectorMethods(unittest.TestCase):
         assert len(list(T3)) == 11 
         assert len(list(T4)) == 15  
 
+    def test__ternary_adjustment__case_1(self): 
+        V = np.array([24,-31,12,31,31,45,17]) 
+        T = np.array([1,-1,-1,1,1,1])
+
+        prg = prg__constant(0)
+        V2 = ternary_adjustment(V,T,prg)
+        assert np.all(gleqvec(V2) == T)
+
+        prg = prg__constant(3) 
+        T2 = np.array([1,0,1,0,-1,-1]) 
+        V3 = ternary_adjustment(V,T2,prg)
+        assert np.all(gleqvec(V3) == T2)
+
 if __name__ == '__main__':
     unittest.main()

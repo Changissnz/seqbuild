@@ -4,7 +4,7 @@ import unittest
 
 ### lone file test 
 """
-python -m tests.test_seqcov_perm
+py -m tests.test_seqcov_perm
 """
 ###
 class SeqCoveragePermuterMethods(unittest.TestCase):

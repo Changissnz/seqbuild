@@ -48,7 +48,10 @@ class ModChar:
     def __init__(self,l): 
         assert type(l) == list or is_vector(l) 
         self.l = np.array(l,dtype="int32") 
-        self.factors,self.complexity_map = None,None 
+        # every i'th set is factor set for i'th element of `l` 
+        self.factors = None 
+        # factor -> (1st order, 2nd order) K-complexity of ternary difference 
+        self.complexity_map = None
         self.init_factors()
         return
 

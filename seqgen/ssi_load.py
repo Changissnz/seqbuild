@@ -13,7 +13,7 @@ SSIBL_PARAMETER_MAP = {'lcg':[float,float,float,float],\
 
 DEFAULT_SSINET_HOP_RANGE = (4,10) 
 DEFAULT_BASE_QUEUE_ACTIVATION_RANGE = (5,24)    
-DEFAULT_SSINETNODE__TYPE_FITTER_NUM_ITER = (5,12.5) #(0.5,4.1)  
+DEFAULT_SSINETNODE__TYPE_FITTER_NUM_ITER = (5,12.5) 
 DEFAULT_SSINETNODE_TMPCACHE_RATIO = 4.9  
 
 def npint32__mod__Q(v):
@@ -35,6 +35,9 @@ def index1_to_index2(i,dim2d):
     i2[1] = r 
     return i2
 
+"""
+a lite version of generator class<OpTriGen>. 
+"""
 class OpTriGenLite: 
 
     def __init__(self,iseq,forward_func,backward_func):

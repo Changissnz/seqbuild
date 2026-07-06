@@ -55,12 +55,13 @@ class ISFactorSetOps:
 
     def __init__(self,l,int_limit=DEFAULT_INT_MAX_THRESHOLD,str_mode_full:bool=True):  
         assert len(l) >= 2
+        assert int_limit > 0 and type(int_limit) == int 
 
         min0,max0 = min(l),max(l)
-        stat = abs(min0) <= DEFAULT_INT_MAX_THRESHOLD and abs(max0) <= DEFAULT_INT_MAX_THRESHOLD
+        stat = abs(min0) <= int_limit and abs(max0) <= int_limit
 
         if not stat: 
-            l = [modulo_in_range(l_,[-DEFAULT_INT_MAX_THRESHOLD,DEFAULT_INT_MAX_THRESHOLD]) \
+            l = [modulo_in_range(l_,[-int_limit,int_limit]) \
                 for l_ in l] 
 
         self.iseq = IntSeq(l) 

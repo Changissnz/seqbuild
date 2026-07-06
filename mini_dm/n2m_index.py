@@ -242,7 +242,7 @@ class N2MIndexMapGen:
         return stat 
     
     def available_indices(self):
-        diffvec = []
+        diffvec_ = []
 
         for k,v in self.dmap.items():
             v2 = self.target_index_degree_map[k]
@@ -251,6 +251,6 @@ class N2MIndexMapGen:
                 if q <= 0:
                     continue 
 
-            diffvec.append((k,q))
-        diffvec = sorted(diffvec,key=lambda x:x[1],reverse=True) 
-        return [d[0] for d in diffvec]
+            diffvec_.append((k,q))
+        diffvec_ = sorted(diffvec_,key=lambda x:x[1],reverse=True) 
+        return [d[0] for d in diffvec_]

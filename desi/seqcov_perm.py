@@ -1,6 +1,27 @@
 from mini_dm.ag_ext import * 
 from morebs2.numerical_generator import prg_partition_for_float
+from morebs2.point_sorter import * 
 from .multi_metric import * 
+
+"""
+Outputs `num_ternaries` * 2 vectors, each either 
+[-] V + A * t 
+[-] (V[|V|//2:].append(V[:|V|//2])) + A * t; 
+    t a unique trinary vector 
+
+V := target vector 
+A := adder vector, to be multiplied by every trinary vector 
+"""
+def add_trinary_vector_based_noise(V,A,prg,num_ternaries): 
+    assert is_vector(V) 
+    assert is_vector(A) 
+    assert len(V) == len(A)
+
+    T = generate_m_unique_trinary_vectors(len(V),num_ternaries,prg,attempt_ratio = 3.1) 
+
+    for t in T: 
+        yield V + A * t 
+        yield subvec(V,len(V) // 2,len(V)) + A * t 
 
 """
 super-class for <SeqUWPDPermuter> and <SeqCoveragePermuter>. 
@@ -135,13 +156,16 @@ calculation of coverage.
 """
 class SeqCoveragePermuter(AGV2SeqQualPermuter): 
 
-    def __init__(self,sequence,coverage_delta,max_radius,super_range,prg): 
+    def __init__(self,sequence,coverage_delta,max_radius,super_range,prg,delta_type=0): 
+        sequence = np.round(sequence,5)
+
         super().__init__(sequence,coverage_delta,super_range,prg)
 
         self.mradius = max_radius 
         self.cov_typeabs,self.cov_typeabs_ = None,None
 
         self.ocov_typeabs = None 
+        self.delta_type = delta_type 
         self.preproc(self.l)
         return
 
@@ -173,6 +197,8 @@ class SeqCoveragePermuter(AGV2SeqQualPermuter):
         assert type(self.mradius) in {float,np.float32,np.float64}
 
         rs = floatseq_to_rangeseq(S,self.srange,self.mradius)
+        rs = PointSorter(np.array(rs)).newData 
+
         self.rs = np.round(to_noncontiguous_ranges(rs),7)
         self.vci = vector_to_noncontiguous_range_indices(S,self.rs)
         self.crs = np.round(complement_of_noncontiguous_ranges(self.rs,self.srange),7)
@@ -217,17 +243,13 @@ class SeqCoveragePermuter(AGV2SeqQualPermuter):
         self.prt = np.array(self.prt) / f 
 
     def apply_pos_delta(self): 
-
         for p in self.prt: 
             if p < 0: 
-                #print("NEG?") 
                 continue 
-
             self.apply_one_pos_delta(p)
             self.format_ranges()
 
     def apply_one_pos_delta(self,v):
-
         q = self.pos_delta(v)
 
         # case: cannot apply delta
@@ -240,11 +262,10 @@ class SeqCoveragePermuter(AGV2SeqQualPermuter):
 
         # find for `rs`
         ix = self.where_is(np.array(q0),True)
-        
         self.rs[ix] = q2 
         ix2 = self.where_is(np.array(q1),False) 
         self.crs[ix2] = q3
-        
+
         self.update_cov_value()
         return
 
@@ -337,9 +358,15 @@ class SeqCoveragePermuter(AGV2SeqQualPermuter):
         lx = len(self.l)
 
         seq = []
-        for _ in range(lx):
+        for i in range(lx):
             v2 = self.one_value_in_noncontiguous_range_sequence(False)  
             seq.append(v2) 
+
+        if len(set(seq)) < 2: 
+            seq = prg_unique_sequence(self.prg,len(seq)) + np.array(seq) 
+
+        if self.delta_type == 1: 
+            seq = seq + self.l 
         return np.array(seq) 
 
     def one_value_in_noncontiguous_range_sequence(self,is_complement:bool=False):
@@ -357,9 +384,10 @@ class SeqCoveragePermuter(AGV2SeqQualPermuter):
         return None 
     
     def format_ranges(self): 
-        self.rs = to_noncontiguous_ranges(self.rs,is_sorted=True)
+        self.rs = to_noncontiguous_ranges(list(self.rs),is_sorted=False)
         self.rs = np.round(self.rs,7)
-        self.crs = to_noncontiguous_ranges(list(self.crs),is_sorted=True)
+
+        self.crs = to_noncontiguous_ranges(list(self.crs),is_sorted=False)
         self.crs = np.round(self.crs,7)
 
         def filter_0range(rseq): 
@@ -370,7 +398,7 @@ class SeqCoveragePermuter(AGV2SeqQualPermuter):
                 else: 
                     rs.append(rs_) 
             return rs 
-        
+
         self.rs = filter_0range(self.rs) 
         self.crs = filter_0range(self.crs)
 
@@ -386,7 +414,6 @@ class SeqCoveragePermuter(AGV2SeqQualPermuter):
         fx()
 
         self.format_ranges() 
-
         return self.change_sequence()
 
     def apply_neg_delta(self): 
