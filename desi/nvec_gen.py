@@ -1,6 +1,7 @@
 from mini_dm.affine_ops import * 
 from math import ceil 
-from morebs2.numerical_generator import prg_partition_for_sz__n_rounds
+from morebs2.numerical_generator import prg_partition_for_sz__n_rounds,prg__single_to_int
+from intigers.extraneous import prg__single_to_range_outputter
 from types import MethodType,FunctionType
 
 DEFAULT_POINTSET_PARTSIZE_RATIO_RANGE = (0.15,0.23)
@@ -20,9 +21,15 @@ class PointSetGen__TypeAffine:
 
     def __init__(self,num_points,prg,ro_prg,ro_prg2,ro_prg3=None):
         assert type(prg) in {FunctionType,MethodType}
-        assert type(ro_prg) in {FunctionType,MethodType}
-        assert type(ro_prg2) in {FunctionType,MethodType}
+        assert type(ro_prg) in {FunctionType,MethodType,type(None)}
+        assert type(ro_prg2) in {FunctionType,MethodType,type(None)} 
         assert type(ro_prg3) in {FunctionType,MethodType,type(None)}
+
+        if type(ro_prg) == type(None): 
+            ro_prg = prg__single_to_range_outputter(deepcopy(prg))
+        if type(ro_prg2) == type(None): 
+            ro_prg2 = prg__single_to_range_outputter(deepcopy(prg)) 
+        
 
         self.num_points = None 
         self.set_num_points(num_points)
@@ -65,7 +72,7 @@ class PointSetGen__TypeAffine:
         rx = int(ceil(n * r))
         var = 0.5 
         num_rounds = 5 
-        prt = prg_partition_for_sz__n_rounds(n,rx,self.prg,var,num_rounds)
+        prt = prg_partition_for_sz__n_rounds(n,rx,prg__single_to_int(self.prg),var,num_rounds)
         return prt 
     
     def set_num_points(self,n): 
@@ -92,7 +99,7 @@ class PointSetGen__TypeAffine:
         self.gen_ad_parameters = [None,None,None]
 
     def one_new_AffineDelta(self):
-        return AffineDelta.one_instance_(self.prg,\
+        return AffineDelta.one_instance_(prg__single_to_int(self.prg),\
             self.ro_prg,self.ro_prg2,dim_range=self.gen_ad_parameters[0],\
             ma_order=self.gen_ad_parameters[1])
     
@@ -100,7 +107,7 @@ class PointSetGen__TypeAffine:
         assert is_valid_range(size_range,inclusive=False)   
         
         ad = self.one_new_AffineDelta()
-        num_points = modulo_in_range(self.prg(), size_range)
+        num_points = modulo_in_range(int(self.prg()), size_range)
         L = []
         L0 = [] 
         for _ in range(num_points):
@@ -162,9 +169,12 @@ class PointSetGen__TypeAffine:
         lx = len(self.point_seq) 
         for i in range(self.num_points): 
             adi = modulo_in_range(int(self.prg()),index_range)
-            p = self.ad_seq[adi].fit(self.prg())
-            p = self.modulate_point(p) 
-            self.point_seq.append(p) 
+
+            x,q = self.one_io_pair(self.ad_seq[adi]) 
+            q = self.modulate_point(q) 
+
+            self.input_seq.append(x)
+            self.point_seq.append(q)  
             self.ad_indices_seq[adi].append(i+lx)
             
         return

@@ -220,12 +220,7 @@ class GaugeGuidedGen:
         scp = SeqCoveragePermuter(V,coverage_delta,\
             DEFAULT_AGV2GG_COVERAGE_RADIUS,sub_range,self.base_prg,delta_type=1)
         scp.set_partition(self.cat_size) 
-        return scp.apply() 
-
-    def permute_uwpd(self,V): 
-        sub_range = self.active_ranges[int(self.base_prg()) % len(self.active_ranges)]
-        sup = SeqUWPDPermuter(V,uwpd_delta,sub_range,self.base_prg)
-        return sup.apply()
+        return scp.apply()
 
     def compare_with_previous(self,V): 
         if len(self.mvec) == 0: return None,None,None 

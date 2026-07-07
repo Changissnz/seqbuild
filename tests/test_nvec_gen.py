@@ -84,7 +84,17 @@ class PointSetGen__TypeAffineMethods(unittest.TestCase):
         psg.generate_points(is_ordered=True,clear_data=False)
 
         qx = np.array(psg.input_seq[-12:]) 
-        assert qx.shape == (12,9)  
+        assert qx.shape == (12,9)
+
+    def test__PointSetGen__TypeAffine_generate_points__case3(self): 
+        num_points = 150 
+        prg = prg__LCG(14.5,-166.5,432.1,321.66)
+
+        psg = PointSetGen__TypeAffine(num_points,prg,None,None)
+        psg.generate_points(False,True) 
+
+        assert np.array(psg.input_seq).shape == (150,) 
+        assert np.array(psg.point_seq).shape == (150,16) 
     
 
 if __name__ == '__main__':

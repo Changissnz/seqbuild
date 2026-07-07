@@ -8,17 +8,39 @@ DEFAULT_FIT22_PARTITION_SIZE_RANGE = (5,103)
 DEFAULT_POLYNOMIAL_PARTITION_SIZE_RANGE = (50,1000)
 DEFAULT_POLYNOMIAL_POINT_SIZE_RANGE = (5,21) 
 
+def default_length_outputter(prg_2vec): 
+    x = list(prg_2vec()) + list(prg_2vec()) 
+    q = prg__LCG(x[0],x[1],x[2],x[3])
+    return prg__single_to_int(q) 
+
+def default_range_outputter(prg_2vec): 
+    x = list(prg_2vec()) + list(prg_2vec()) 
+    q = prg__LCG(x[0],x[1],x[2],x[3])
+    return prg__single_to_range_outputter(q)
+
+def default_bool_outputter(prg_2vec): 
+    return wrap_ranged_modulo_over_generator(\
+        default_length_outputter(prg_2vec),[0,2])
+
+def prg__nvec_to_int_type(px): 
+
+    def f(): 
+        return np.array(px(),dtype=int)
+    return f  
+
 class Fit22ValueOutputter(GenericIntSeqOp): 
 
     def __init__(self,px,length_outputter,range_outputter,bool_outputter,\
             point_conn_type:int,adjustment_type:int=1):  
         assert type(px) in {MethodType,FunctionType}
-        assert point_conn_type in {1,2}
-        assert type(bool_outputter) in {MethodType,FunctionType}
+        assert type(length_outputter) in {type(None),MethodType,FunctionType}
+        assert type(range_outputter) in {type(None),MethodType,FunctionType}
+        assert type(bool_outputter) in {type(None),MethodType,FunctionType}
 
-        self.px = px 
+        assert point_conn_type in {1,2}
+
+        self.px = px  
         self.point_conn_type = point_conn_type
-        self.b_out = bool_outputter
 
         self.p0 = None
         self.p1 = None
@@ -29,6 +51,21 @@ class Fit22ValueOutputter(GenericIntSeqOp):
         self.a_ = None
         self.ax = None 
         
+        if type(length_outputter) != type(None): 
+            length_outputter = prg__single_to_int(length_outputter)
+        else: 
+            length_outputter = default_length_outputter(px) 
+
+        if type(range_outputter) == type(None): 
+            range_outputter = default_range_outputter(px)  
+
+        if type(bool_outputter) == type(None): 
+            bool_outputter = default_bool_outputter(px) 
+        else: 
+            bool_outputter = wrap_ranged_modulo_over_generator(\
+                prg__single_to_int(bool_outputter),[0,2]) 
+
+        self.b_out = bool_outputter 
         super().__init__(length_outputter,range_outputter,adjustment_type)
         return
     
@@ -39,10 +76,18 @@ class Fit22ValueOutputter(GenericIntSeqOp):
             self.update_points() 
         else: pass 
 
-        if self.ax: 
-            sx = self.H.f(self.x_)
-        else: 
-            sx = self.H.g(self.x_) 
+        # do check on input before function apply 
+        A = (self.ax + 1) % 2 
+        qmin = np.min(self.H.ps[:,A]) 
+        qmax = np.max(self.H.ps[:,A]) 
+        x_ = modulo_in_range(self.x_,[qmin,qmax]) 
+
+        QF = self.H.f if self.ax else self.H.g 
+        try: 
+            sx = QF(self.x_)
+        except: 
+            sx = QF(x_)
+
         self.x_ += self.a_ 
 
         sx_ = float_to_string(sx,True,True)
@@ -105,10 +150,20 @@ class LPSValueOutputter(GenericIntSeqOp):
         adjustment_type:int=1): 
         
         assert type(px) in {MethodType,FunctionType}
+        assert type(length_outputter) in {type(None),MethodType,FunctionType}
+        assert type(range_outputter) in {type(None),MethodType,FunctionType}
         self.px = px 
 
         self.p0,self.p1 = None,None 
         self.adder_end,self.adder,self.adder_i = None,None,None
+
+        if type(length_outputter) != type(None): 
+            length_outputter = prg__single_to_int(length_outputter)
+        else: 
+            length_outputter = default_length_outputter(px) 
+
+        if type(range_outputter) == type(None): 
+            range_outputter = default_range_outputter(px)  
 
         super().__init__(length_outputter,range_outputter,adjustment_type)
 
