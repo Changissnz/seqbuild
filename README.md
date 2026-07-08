@@ -64,6 +64,11 @@ cauto = TimeBasedCommLangFileGenerator(filepath,base_gen_name,\
 cauto.generate()
 ```
 
+### Update: 07/08/26 
+Added the following generators to Comm Lang: `n2m`,`gg`,`afs`,`fit22`, and `lps`. 
+Noticing performance issues in time-based auto-generation with the addition of these 
+generators. 
+
 ### Update: 07/03/26 
 Planning for full rewrite of `class<AGV2GuidedGen>` and revisions for  
 `class<ShadowGen>`. 

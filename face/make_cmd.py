@@ -208,7 +208,7 @@ def MAKE_afs(splitstr_cmd,var_map):
     x = int(q[4]) 
     return AFSGen(prg,prg2,prg3,prg4,x) 
 
-#------------------------------------------- class T PRNGs: differentials of fitters between pairs of two-dimensional points 
+#------------------------------------------- class D PRNGs: differentials of fitters between pairs of two-dimensional points 
 
 
 def MAKE_fit22(splitstr_cmd,var_map): 
