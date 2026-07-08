@@ -64,6 +64,29 @@ cauto = TimeBasedCommLangFileGenerator(filepath,base_gen_name,\
 cauto.generate()
 ```
 
+### PRNG Categories in Comm Lang 
+
+As of 07/08/2026, here is a table of PRNGs and their categories available for use in Comm Lang.  
+
+- Class 0: LCGs and LCG form-fitters  
+    - `lcg`, `lcgv2`, `lcgv3`, `mdrgen`  
+- Class 1: linear combination and polynomial-based  
+    - `rch`, `idforest`  
+- Class I: identity  
+    - `echo`  
+- Class 2: multi-factored form-fitters + noise adders  
+    - `ssino`, `gg`, `shadow`  
+- Class T: time-based (or 'real number exploder`)     
+    - `pdd`  
+- Class D: differentials of form-fitters b/t two-dimensional points  
+    - `fit22`, `lps`  
+- Class 3: stacked vector-based form-fitters + noise adders  
+    - `n2m`, `afs`  
+- Class O: operation-based  
+    - `optri`  
+- Class V: quotient and polynomial form-fitters of vector inputs  
+    - `qval`, `pid`.  
+
 ### Update: 07/08/26 
 Added the following generators to Comm Lang: `n2m`,`gg`,`afs`,`fit22`, and `lps`. 
 Noticing performance issues in time-based auto-generation with the addition of these 
