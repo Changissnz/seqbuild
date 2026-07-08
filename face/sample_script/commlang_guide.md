@@ -227,6 +227,86 @@ as well as their instantiation parameters in Comm Lang.
     5. (integer,generator,generator)  
     * (number of nodes,primary generator,secondary generator) 
 
+[o] n2m  
+
+- instantiation: 
+
+    1. (prg)
+    * (primary generator) 
+
+    2. (prg,prg)
+    * (primary generator, secondary generator) 
+
+    3. (prg,prg,range)
+    * (primary generator, secondary generator, NM-dimension range) 
+
+    4. (prg,prg,range,range)
+    * (primary generator, secondary generator, NM-dimension range, update frequency range) 
+
+[o] gg  
+
+- instantiation:  
+
+    1. (prg,range) 
+    * (primary generator,super-range) 
+
+    2. (primary generator,range,0|1) 
+    * (primary generator,super-range,cov|uwpd) 
+
+    3. (primary generator,range,0|1,0|1) 
+    * (primary generator,super-range,cov|uwpd,allow subrange drift) 
+
+    4. (primary generator,range,0|1,0|1,range) 
+    * (primary generator,super-range,cov|uwpd,allow subrange drift,base output span) 
+
+    5. (primary generator,range,0|1,0|1,range,int) 
+    * (primary generator,super-range,cov|uwpd,allow subrange drift,base output span,density) 
+
+[o] afs   
+
+- instantiation:  
+
+    1. (prg, int) 
+    * (primary generator, vector size) 
+
+    2. (prg, prg, int) 
+    * (primary generator, secondary generator, vector size) 
+
+    3. (prg, prg, prg, int) 
+    * (primary generator, secondary generator, third generator, vector size ) 
+
+    4. (prg, prg, prg, prg, int) 
+    * (primary generator, secondary generator, third generator, fourth generator, vector size) 
+
+[o] fit22   
+
+- instantiation:  
+
+    1. (prg) 
+    * (primary generator) 
+
+    2. (prg, prg) 
+    * (primary generator, secondary generator) 
+
+    3. (prg, prg) 
+    * (primary generator, secondary generator, third generator) 
+
+    4. (prg, prg, prg, prg) 
+    * (primary generator, secondary generator, third generator, fourth generator) 
+
+[o] lps   
+
+- instantiation:  
+
+    1. (prg) 
+    * (primary generator) 
+
+    2. (prg, prg) 
+    * (primary generator, secondary generator) 
+
+    3. (prg, prg) 
+    * (primary generator, secondary generator, third generator) 
+
 [o] pddelta  
 
 - instantiation:  

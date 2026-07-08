@@ -1,0 +1,12 @@
+set G = make lcg with 546,252,-221,1142.
+set G2 = make n2m with G. 
+set V0 = run G2 for 30 iter. 
+
+set G_ = merge G,G2 with -. 
+set G3 = make n2m with G2,G_. 
+
+set G4 = make n2m with G,G_,3,20. 
+set V = run G4 for 30 iter. 
+
+set G4 = make n2m with G,G_,3,20,43,90. 
+set V2 = run G4 for 30 iter. 

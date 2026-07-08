@@ -4,6 +4,11 @@ from seqgen.optri_gen import *
 from seqgen.rch_gen import * 
 from seqgen.idt_gen import * 
 from seqgen.shadow_gen import * 
+from seqgen.n2mv_gen import * 
+from seqgen.gg_gen import * 
+from seqgen.afs_gen import * 
+from seqgen.fit22_gen import * 
+from seqgen.lps_gen import * 
 from desi.fraction import * 
 from desi.differentials import * 
 from desi.prng_dec_delta import * 
@@ -14,7 +19,8 @@ from seqgen.ssi_netop import *
 
 BASE_PRNG = ["lcg","lcgv2","lcgv3","mdr","mdrv2",\
         "mdrgen","iomaps","idforest","optri","rch","qval",\
-        "pid","echo","shadow","ssino","pddelta"]   
+        "pid","echo","shadow","ssino","n2m","gg","afs","fit22",\
+        "pddelta"]   
 
 ARITHMETIC_OP_STR_MAP = {"+":add,"-":sub,"/":zero_div0,"*":mul,"%":safe_mod}  
 
@@ -90,8 +96,171 @@ def MAIN_method_for_object(q):
     if type(q) == PRNGDecimalDelta: 
         return q.__next__ 
 
+    if type(q) == N2MVGen: 
+        return q.__next__
+
+    if type(q) == GaugeGuidedGen: 
+        return q.__next__ 
+
+    if type(q) == AFSGen: 
+        return q.__next__
+
+    if type(q) == Fit22Gen: 
+        return q.__next__ 
+
+    if type(q) == LPSGen:
+        return q.__next__ 
+
     return -1 
     assert False, "{} is not valid".format(q) 
+
+#------------------------------------------- class 4 PRNGs: differential form-fitters
+
+#------------------------------------------- class 3 PRNGs: stacked vector-based form-fitters + noise adders 
+
+"""
+prg
+primary generator 
+
+prg,prg
+primary generator, secondary generator 
+
+prg,prg,range
+primary generator, secondary generator, NM-dimension range
+
+prg,prg,range,range
+primary generator, secondary generator, NM-dimension range, update frequency range 
+"""
+def MAKE_n2m(splitstr_cmd,var_map): 
+    assert splitstr_cmd[0] == "make" 
+    assert "n2m" == splitstr_cmd[1] 
+    assert "with" == splitstr_cmd[2] 
+
+    q = splitstr_cmd[3].split(",")
+    l = len(q)
+    assert 1 <= l <= 6, "invalid parameters"
+
+    assert q[0] in var_map 
+    prg = var_map[q[0]] 
+    prg = MAIN_method_for_object(prg) 
+
+    if l == 1: 
+        return N2MVGen(DEFAULT_N2MV_NM_DIMENSION_RANGE,prg,None,DEFAULT_N2MV_NM_UPDATE_FREQUENCY_RANGE)
+
+    assert q[1] in var_map 
+    prg2 = MAIN_method_for_object(var_map[q[1]]) 
+    if l == 2: 
+        return N2MVGen(DEFAULT_N2MV_NM_DIMENSION_RANGE,prg,prg2,DEFAULT_N2MV_NM_UPDATE_FREQUENCY_RANGE)
+
+    assert l in {4,6}, "invalid parameters" 
+
+    r0,r1 = int(q[2]),int(q[3])
+    assert is_valid_range((r0,r1),True,False) 
+
+    if l == 4: 
+        return N2MVGen((r0,r1),prg,prg2,DEFAULT_N2MV_NM_UPDATE_FREQUENCY_RANGE)
+
+    s0,s1 = int(q[4]),int(q[5])
+    return N2MVGen((r0,r1),prg,prg2,(s0,s1))
+
+"""
+prg, int
+primary generator, vector size 
+
+prg, prg2, int
+primary generator, secondary generator, vector size 
+
+prg, prg2, prg3, int
+primary generator, secondary generator, third generator, vector size 
+
+prg, prg2, prg3, prg4, int
+primary generator, secondary generator, third generator, fourth generator, vector size 
+
+"""
+def MAKE_afs(splitstr_cmd,var_map): 
+    assert splitstr_cmd[0] == "make" 
+    assert "afs" == splitstr_cmd[1] 
+    assert "with" == splitstr_cmd[2] 
+
+    q = splitstr_cmd[3].split(",")
+    l = len(q)
+    assert 2 <= l <= 5, "invalid parameters"
+
+    prg = MAIN_method_for_object(var_map[q[0]]) 
+
+    if l == 2: 
+        x = int(q[1]) 
+        return AFSGen(prg,None,None,None,x) 
+
+    prg2 = MAIN_method_for_object(var_map[q[1]]) 
+
+    if l == 3: 
+        x = int(q[2]) 
+        return AFSGen(prg,prg2,None,None,x) 
+
+    prg3 = MAIN_method_for_object(var_map[q[2]]) 
+
+    if l == 4: 
+        x = int(q[3]) 
+        return AFSGen(prg,prg2,prg3,None,x) 
+
+    prg4 = MAIN_method_for_object(var_map[q[3]]) 
+    x = int(q[4]) 
+    return AFSGen(prg,prg2,prg3,prg4,x) 
+
+#------------------------------------------- class T PRNGs: differentials of fitters between pairs of two-dimensional points 
+
+
+def MAKE_fit22(splitstr_cmd,var_map): 
+
+    assert splitstr_cmd[0] == "make" 
+    assert "fit22" == splitstr_cmd[1] 
+    assert "with" == splitstr_cmd[2] 
+
+    q = splitstr_cmd[3].split(",")
+    l = len(q)
+    assert 1 <= l <= 4, "invalid parameters"
+
+    prg = MAIN_method_for_object(var_map[q[0]]) 
+
+    if l == 1: 
+        return Fit22Gen(prg,None,None,None) 
+
+    prg2 = MAIN_method_for_object(var_map[q[1]]) 
+
+    if l == 2: 
+        return Fit22Gen(prg,prg2,None,None) 
+
+    prg3 = MAIN_method_for_object(var_map[q[2]]) 
+
+    if l == 3: 
+        return Fit22Gen(prg,prg2,prg3,None) 
+
+    prg4 = MAIN_method_for_object(var_map[q[3]]) 
+    return Fit22Gen(prg,prg2,prg3,prg4)
+
+def MAKE_lps(splitstr_cmd,var_map): 
+
+    assert splitstr_cmd[0] == "make" 
+    assert "lps" == splitstr_cmd[1] 
+    assert "with" == splitstr_cmd[2]
+
+    q = splitstr_cmd[3].split(",")
+    l = len(q)
+    assert 1 <= l <= 3, "invalid parameters"
+
+    prg = MAIN_method_for_object(var_map[q[0]]) 
+    if l == 1: 
+        return LPSGen(prg,None,None) 
+
+    prg2 = MAIN_method_for_object(var_map[q[1]]) 
+    if l == 2: 
+        return LPSGen(prg,prg2,None)
+
+    prg3 = MAIN_method_for_object(var_map[q[2]]) 
+    return LPSGen(prg,prg2,prg3) 
+
+#-------------------------------------------- class 0 PRNGs: LCGs and LCG form-fitters 
 
 def MAKE_lcgvx(splitstr_cmd,var_map): 
     assert splitstr_cmd[0] == "make" 
@@ -145,18 +314,18 @@ def MAKE_lcgvx(splitstr_cmd,var_map):
         if len(parameters) == 6:
             g3 = LCGV3(px[0],px[1],px[2],px[3],px[4],prg,super_range=None)
         elif len(parameters) == 7: 
-            add_noise = bool(parameters[6])
+            add_noise = bool(int(parameters[6])) 
             g3 = LCGV3(px[0],px[1],px[2],px[3],px[4],prg,super_range=None,add_noise=add_noise)
 
         elif len(parameters) == 9: 
             r0,r1 = float(parameters[6]),float(parameters[7])
-            add_noise = bool(parameters[8])
+            add_noise = bool(int(parameters[8])) 
             g3 = LCGV3(px[0],px[1],px[2],px[3],px[4],prg,super_range=(r0,r1),add_noise=add_noise)
 
         elif len(parameters) == 11: 
             r0,r1 = float(parameters[6]),float(parameters[7])
             ternary_size_range = (int(parameters[8]),int(parameters[9]))
-            add_noise = bool(parameters[10])
+            add_noise = bool(int(parameters[10]))
             g3 = LCGV3(px[0],px[1],px[2],px[3],px[4],prg,super_range=(r0,r1),ternary_size_range=ternary_size_range,\
                 add_noise=add_noise)
         else: 
@@ -164,7 +333,7 @@ def MAKE_lcgvx(splitstr_cmd,var_map):
             ternary_size_range = (int(parameters[8]),int(parameters[9]))
             ternary_delta_timestamp_range = (int(parameters[8]),int(parameters[9]))
 
-            add_noise = bool(parameters[12])
+            add_noise = bool(int(parameters[12]))
             g3 = LCGV3(px[0],px[1],px[2],px[3],px[4],prg,super_range=(r0,r1),ternary_size_range=ternary_size_range,\
                 ternary_delta_timestamp_range = ternary_delta_timestamp_range,add_noise=add_noise)
         return g3
@@ -235,37 +404,7 @@ def MAKE_mdrvx(splitstr_cmd,var_map):
 
     assert False 
 
-def MAKE_op2(splitstr_cmd,var_map): 
-    assert splitstr_cmd[0] == "make"
-    assert splitstr_cmd[1] == "op2" 
-    assert splitstr_cmd[2] == "with" 
-
-    parameters = splitstr_cmd[3].split(",") 
-    assert len(parameters) in {1,3,4}
-
-    if len(parameters) == 1:
-        assert parameters[0] in ARITHMETIC_OP_STR_MAP,"NOO." 
-        return ARITHMETIC_OP_STR_MAP[parameters[0]] 
-
-    if parameters[0] in ARITHMETIC_OP_STR_MAP:
-        op1 = ARITHMETIC_OP_STR_MAP[parameters[0]] 
-    else: 
-        assert parameters[0] in var_map,"wrongo"
-        op1 = var_map[parameters[0]] 
-
-    if parameters[1] in ARITHMETIC_OP_STR_MAP:
-        op2 = ARITHMETIC_OP_STR_MAP[parameters[1]] 
-    else: 
-        assert parameters[1] in var_map,"wrongo #2"
-        op2 = var_map[parameters[1]] 
-
-    weight = float(parameters[2]) 
-    order = 0 
-    if len(parameters) == 4: 
-        order = int(parameters[3]) 
-        assert order in {0,1,2} 
-    return one_weighted_pairwise_operator(op1,op2,weight,order)
-
+#-------------------------------------------- class 1 PRNGs: linear combination/polynomial based 
 """
 int,prg,float
 num nodes,prg,mutation rate  
@@ -311,26 +450,6 @@ def MAKE_rch(splitstr_cmd,var_map):
         ufreq_range,mut_rate,queue_capacity)
     rch.output_range = output_range
     return rch 
-
-"""
-G_1,G_2,...,G_j
-""" 
-def MAKE_iomaps(splitstr_cmd,var_map): 
-    assert splitstr_cmd[1] == "iomaps" 
-    assert splitstr_cmd[2] == "with" 
-
-    X = splitstr_cmd[3].split(",") 
-    assert len(X) > 0 
-
-    G = [] 
-    for x in X: 
-        assert x in var_map 
-        r = MAIN_method_for_object(var_map[x])
-        rx = lambda x2: r() + x2
-        G.append(rx)  
-
-    mpo = ModPRNGOutputter(G)
-    return mpo
 
 """
 list,ModPRNGOutputter,int,int range,max number of trees,prg,prg2
@@ -455,6 +574,8 @@ def MAKE_idforest(splitstr_cmd,var_map):
     idf = IDecForest(IntSeq(V),MO,cache_size,reprod_rate_range,max_trees,G,prg2,True,False)   
     return idf
 
+#-------------------------------------------------------- class I: identity PRNGs (cycling of file)
+
 def MAKE_echo(splitstr_cmd):
     assert splitstr_cmd[1] == "echo" 
     assert splitstr_cmd[2] == "with" 
@@ -475,6 +596,8 @@ def MAKE_echo(splitstr_cmd):
     nsfr = NSFileReader(fi_obj,float,is_periodic)
     return nsfr 
 
+#---------------------------------------------------------- class 2: multi-factored form-fitters + noise-adders 
+
 def MAKE_shadow(splitstr_cmd,var_map):
     assert splitstr_cmd[1] == "shadow" 
     assert splitstr_cmd[2] == "with" 
@@ -491,6 +614,69 @@ def MAKE_shadow(splitstr_cmd,var_map):
 
     sg = ShadowGen(prg,file_path,fitting_struct)
     return sg 
+
+"""
+prg,range 
+primary generator, super-range 
+
+prg,range, 0|1
+primary generator, super-range, mode::(cov|uwpd) 
+
+prg,range, 0|1,0|1
+primary generator, super-range, mode::(cov|uwpd),allow subrange drift
+
+prg,range, 0|1,0|1,range
+primary generator, super-range, mode::(cov|uwpd),allow subrange drift, base output span 
+
+prg,range, 0|1,0|1,range,density measure 
+primary generator, super-range, mode::(cov|uwpd),allow subrange drift, base output span 
+"""
+def MAKE_gg(splitstr_cmd,var_map): 
+    assert splitstr_cmd[1] == "gg" 
+    assert splitstr_cmd[2] == "with" 
+
+    q = splitstr_cmd[3].split(",")
+    assert len(q) >= 3 
+
+    assert q[0] in var_map 
+    prg = MAIN_method_for_object(var_map[q[0]]) 
+    r0,r1 = int(float(q[1])),int(float(q[2])) 
+
+    r0 = modulo_in_range(r0,DEFAULT_AGV2GG_BASE_OUTPUT_SPAN)
+    r1 = modulo_in_range(r1,DEFAULT_AGV2GG_BASE_OUTPUT_SPAN)
+    if r0 == r1: r1 += 1 
+    r0,r1 = sorted([r0,r1])
+    if len(q) == 3: 
+        return GaugeGuidedGen(prg,DEFAULT_AGV2GG_BASE_OUTPUT_SPAN,DEFAULT_AGV2GG_DENSITY_MEASURE,\
+            (r0,r1),target_measure="cov",allow_subrange_drift=True) 
+
+    x =  int(q[3]) 
+    assert x in {0,1}
+    target_measure = "cov" if x == 0 else "uwpd"
+
+    if len(q) == 4: 
+        return GaugeGuidedGen(prg,DEFAULT_AGV2GG_BASE_OUTPUT_SPAN,DEFAULT_AGV2GG_DENSITY_MEASURE,\
+            (r0,r1),target_measure=target_measure,allow_subrange_drift=True) 
+
+    x = int(q[4]) 
+    assert x in {0,1}
+    allow_subrange_drift = bool(int(x)) 
+
+    if len(q) == 5: 
+        return GaugeGuidedGen(prg,DEFAULT_AGV2GG_BASE_OUTPUT_SPAN,DEFAULT_AGV2GG_DENSITY_MEASURE,\
+            (r0,r1),target_measure=target_measure,allow_subrange_drift=allow_subrange_drift) 
+
+    s0,s1 = int(q[5]),int(q[6]) 
+    if len(q) == 7: 
+        return GaugeGuidedGen(prg,(s0,s1),DEFAULT_AGV2GG_DENSITY_MEASURE,\
+            (r0,r1),target_measure=target_measure,allow_subrange_drift=allow_subrange_drift) 
+
+    density_measure = int(q[7]) 
+
+    if len(q) == 8: 
+        return GaugeGuidedGen(prg,(s0,s1),density_measure,\
+            (r0,r1),target_measure=target_measure,allow_subrange_drift=allow_subrange_drift) 
+    assert False, "invalid parameters" 
 
 def MAKE_ssino(splitstr_cmd,var_map):
     assert splitstr_cmd[1] == "ssino" 
@@ -536,12 +722,71 @@ def MAKE_ssino(splitstr_cmd,var_map):
 
     return sno  
 
+#---------------------------------------------- class T PRNGs: time-based
+
 def MAKE_pddelta(splitstr_cmd,var_map): 
     assert splitstr_cmd[1] == "pddelta" 
     assert splitstr_cmd[2] == "with" 
 
     r1 = float(splitstr_cmd[3]) 
     return PRNGDecimalDelta(r1)  
+
+
+#--------------------------------------------- extra structures for use as PRNG parameters 
+
+
+def MAKE_op2(splitstr_cmd,var_map): 
+    assert splitstr_cmd[0] == "make"
+    assert splitstr_cmd[1] == "op2" 
+    assert splitstr_cmd[2] == "with" 
+
+    parameters = splitstr_cmd[3].split(",") 
+    assert len(parameters) in {1,3,4}
+
+    if len(parameters) == 1:
+        assert parameters[0] in ARITHMETIC_OP_STR_MAP,"NOO." 
+        return ARITHMETIC_OP_STR_MAP[parameters[0]] 
+
+    if parameters[0] in ARITHMETIC_OP_STR_MAP:
+        op1 = ARITHMETIC_OP_STR_MAP[parameters[0]] 
+    else: 
+        assert parameters[0] in var_map,"wrongo"
+        op1 = var_map[parameters[0]] 
+
+    if parameters[1] in ARITHMETIC_OP_STR_MAP:
+        op2 = ARITHMETIC_OP_STR_MAP[parameters[1]] 
+    else: 
+        assert parameters[1] in var_map,"wrongo #2"
+        op2 = var_map[parameters[1]] 
+
+    weight = float(parameters[2]) 
+    order = 0 
+    if len(parameters) == 4: 
+        order = int(parameters[3]) 
+        assert order in {0,1,2} 
+    return one_weighted_pairwise_operator(op1,op2,weight,order)
+
+"""
+G_1,G_2,...,G_j
+""" 
+def MAKE_iomaps(splitstr_cmd,var_map): 
+    assert splitstr_cmd[1] == "iomaps" 
+    assert splitstr_cmd[2] == "with" 
+
+    X = splitstr_cmd[3].split(",") 
+    assert len(X) > 0 
+
+    G = [] 
+    for x in X: 
+        assert x in var_map 
+        r = MAIN_method_for_object(var_map[x])
+        rx = lambda x2: r() + x2
+        G.append(rx)  
+
+    mpo = ModPRNGOutputter(G)
+    return mpo
+
+#------------------------------------------------------------------------------------- 
 
 # TODO: incomplete 
 def MAKE_proc(splitstr_cmd,var_map): 
@@ -664,6 +909,21 @@ def MAKE_proc(splitstr_cmd,var_map):
 
     if splitstr_cmd[1] == "ssino": 
         return MAKE_ssino(splitstr_cmd,var_map) 
+
+    if splitstr_cmd[1] == "n2m": 
+        return MAKE_n2m(splitstr_cmd,var_map)
+
+    if splitstr_cmd[1] == "gg": 
+        return MAKE_gg(splitstr_cmd,var_map) 
+
+    if splitstr_cmd[1] == "afs": 
+        return MAKE_afs(splitstr_cmd,var_map) 
+
+    if splitstr_cmd[1] == "fit22":
+        return MAKE_fit22(splitstr_cmd,var_map) 
+
+    if splitstr_cmd[1] == "lps": 
+        return MAKE_lps(splitstr_cmd,var_map) 
 
     if splitstr_cmd[1] == "pddelta": 
         return MAKE_pddelta(splitstr_cmd,var_map) 

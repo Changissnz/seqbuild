@@ -4,7 +4,9 @@ import time
 
 DEFAULT_TBCLF_TIMESTAMP_SEEDSIZE_RANGE = [2,7] 
 
-DEFAULT_TBCLF_STRUCT_NAMES = ["lcg","mdrgen","optri","qval","rch","pid","ssino","idforest","shadow"]
+DEFAULT_TBCLF_STRUCT_NAMES = ["lcg","mdrgen","optri","qval","rch","pid","ssino","idforest","shadow",\
+    "n2m","gg","afs","fit22","lps"]
+
 DEFAULT_TBCLF_BUNCHED_STRUCT_SIZE = [7,14]  
 DEFAULT_TBCLF_SUBGROUP_DEGREE = 3 
 
@@ -47,6 +49,9 @@ non-zero output differences b/t two different devices on the same Comm Lang file
 
 NOTE: In general, this class is calculatively deterministic when its PRNG `PRNGDecimalDelta` 
     Q is set at the exact same time. 
+
+NOTE: method<generate> cannot be guaranteed to produce a primary generator (the last one) that 
+    passes certain randomness tests. 
 """
 class TimeBasedCommLangFileGenerator: 
 
@@ -132,7 +137,7 @@ class TimeBasedCommLangFileGenerator:
             f.clear() 
 
         if self.consistent_prng_output:
-            f = f | {"pid","qval"}
+            f = f | {"pid","qval","afs"} 
 
         self.struct_list = sorted(set(DEFAULT_TBCLF_STRUCT_NAMES) - f) 
         return
@@ -241,6 +246,21 @@ class TimeBasedCommLangFileGenerator:
 
         if n == "shadow": 
             return self.generate_CL_shadow() 
+
+        if n == "n2m": 
+            return self.generate_CL_n2m() 
+
+        if n == "gg": 
+            return self.generate_CL_gg() 
+
+        if n == "afs": 
+            return self.generate_CL_afs() 
+
+        if n == "fit22": 
+            return self.generate_CL_fit22() 
+
+        if n == "lps": 
+            return self.generate_CL_lps() 
 
         assert False 
 
@@ -825,6 +845,83 @@ class TimeBasedCommLangFileGenerator:
         gen_name = self.next_generator_name() 
         s = "set {} = make iomaps with {}.".format(gen_name,S_)
         return s,gen_name
+
+    #------------------------------------------------- generate commands for stacked vector-based generators
+    #-------------------------------------------------      n2m,afs.
+
+    def generate_CL_n2m(self): 
+
+        prg0 = self.fetch_accessory_prg_varname() 
+        prg1 = self.fetch_accessory_prg_varname()
+
+        gen_name = self.next_generator_name()
+        s = "set {} = make n2m with {},{}.".format(gen_name,prg0,prg1) 
+
+        if self.consistent_prng_output: 
+
+            s2,gen_name2 = self.convert_prg_output(gen_name,"int")
+            return [s,s2],gen_name2 
+        return [s],gen_name 
+
+    def generate_CL_afs(self): 
+
+        G = self.fetch_prg(True,True) 
+        vector_size = 15 # modulo_in_range(int(G()),DEFAULT_AFSGEN_MAX_VECTOR_SIZE_RANGE) // 3 
+
+        gen_name = self.next_generator_name() 
+
+        prg0 = self.fetch_accessory_prg_varname() 
+        prg1 = self.fetch_accessory_prg_varname() 
+        prg2 = self.fetch_accessory_prg_varname() 
+        prg3 = self.fetch_accessory_prg_varname() 
+
+        s = "set {} = make afs with {},{},{},{},{}.".format(gen_name,prg0,prg1,prg2,prg3,vector_size)
+
+        return [s],gen_name 
+
+    def generate_CL_gg(self): 
+
+        '''
+(primary generator,range,0|1,0|1)
+(primary generator,super-range,cov|uwpd,allow subrange drift)
+        ''' 
+        gen_name = self.next_generator_name() 
+
+        prg = self.fetch_accessory_prg_varname() 
+        r0,r1 = DEFAULT_TBCLF_LCG_PARAMETER_RANGE[0],DEFAULT_TBCLF_LCG_PARAMETER_RANGE[1]
+
+        G = self.fetch_prg(True,True) 
+        b0 = int(G()) % 2 
+        b1 = int(G()) % 2 
+
+        s = "set {} = make gg with {},{},{},{},{}.".format(gen_name,prg,r0,r1,b0,b1) 
+
+        return [s],gen_name 
+
+    def generate_CL_fit22(self): 
+
+        gen_name = self.next_generator_name() 
+
+        prg0 = self.fetch_accessory_prg_varname() 
+        prg1 = self.fetch_accessory_prg_varname() 
+        prg2 = self.fetch_accessory_prg_varname() 
+        prg3 = self.fetch_accessory_prg_varname() 
+
+        s = "set {} = make fit22 with {},{},{},{}.".format(gen_name,prg0,prg1,prg2,prg3)
+
+        return [s],gen_name
+    
+    def generate_CL_lps(self): 
+
+        gen_name = self.next_generator_name() 
+
+        prg0 = self.fetch_accessory_prg_varname() 
+        prg1 = self.fetch_accessory_prg_varname() 
+        prg2 = self.fetch_accessory_prg_varname() 
+
+        s = "set {} = make lps with {},{},{}.".format(gen_name,prg0,prg1,prg2)
+
+        return [s],gen_name 
 
     #----------------------------------------------------------- loading commands to Comm Lang cache and writing out to file 
 

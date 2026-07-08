@@ -25,9 +25,12 @@ def uwpdcov_of_modded_sequence(S,m):
     covseq = coverage_of_sequence(mseq,[0,m],max_radius=0.5)
     return pdseq,covseq 
 
+DEFAULT_AGV2GG_BASE_OUTPUT_SPAN = (15,75) 
+DEFAULT_AGV2GG_DENSITY_MEASURE = 31 
+
 """
 
-base_output_span := int, positive value specifying the length of the vector from the 
+base_output_span := range, positive value specifying the length of the vector from the 
                 `base_prg` to use.
 density_measure := int, positive value specifying the maximum length of the category 
                 vector used by this PRNG for output to satisfy metric objectives.

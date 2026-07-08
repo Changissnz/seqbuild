@@ -332,6 +332,13 @@ class AffineFitSearch__TypeN2NA(IOAffineFit):
         best_tv = self.expected_best_trinary_delta(T3) 
         self.process_one_guess(H,best_tv)
 
+    def map_input(self,x):
+
+        Q = []
+        for s in self.soln: 
+            Q.append(s.ad.fit(x))
+        return np.array(Q) 
+
     #----------------------------------------- for guess derivation
 
     """

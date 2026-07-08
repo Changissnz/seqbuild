@@ -1,0 +1,16 @@
+set G = make lcg with 15.46,-125.2,228.55,1142.333. 
+set G2 = make afs with G,78. 
+set V = run G2 for 30 iter. 
+
+set G30 = make lcg with 15.46,-125.2,228.55,1142.333. 
+set G31 = merge G30,G with -.  
+set G3 = make afs with G,G31,78. 
+set V2 = run G3 for 30 iter. 
+
+set G4 = make afs with G,G30,G,78. 
+set V3 = run G4 for 30 iter. 
+
+set G40 = merge G31,G with +. 
+set G41 = merge G40,G30 with -. 
+set G5 = make afs with G,G30,G40,G41,78. 
+set V4 = run G5 for 30 iter. 

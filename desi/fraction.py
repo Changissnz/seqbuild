@@ -29,7 +29,7 @@ class GenericIntSeqOp:
             s_ = s_ + self.s[:dx]
             diff = diff - dx
             self.s = self.s[dx:]
-        
+    
         # BUG: CAUTION!!  
         s1 = 5 
         try: 

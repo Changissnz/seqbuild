@@ -1,0 +1,14 @@
+set G = make lcg with 15.46,-125.2,228.55,1142.333. 
+set V = run G for 100 iter. 
+
+set G2 = make fit22 with G. 
+set V2 = run G2 for 100 iter. 
+
+set G3 = make fit22 with G,G2.
+set V3 = run G3 for 100 iter. 
+
+set G4 = make fit22 with G,G2,G3.
+set V4 = run G4 for 100 iter. 
+
+set G5 = make fit22 with G,G2,G3,G4. 
+set V5 = run G5 for 100 iter. 

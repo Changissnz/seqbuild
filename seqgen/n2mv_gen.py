@@ -3,11 +3,16 @@ from morebs2.numerical_generator import prg__LCG,prg__single_to_nvec
 from collections import deque 
 
 DEFAULT_N2MV_GEN_FILLER_PRG2_MODULO = 7891
+DEFAULT_N2MV_NM_DIMENSION_RANGE = (3,18) 
+DEFAULT_N2MV_NM_UPDATE_FREQUENCY_RANGE = (38,103)
 
 """
+N-to-M Vector Generator. 
+
 The PRNG `prg` is the primary generator: this generator uses `prg` 
 to produce input vectors of dimension n to output m-vectors from the 
-current <N2MVectorFunction>. 
+current <N2MVectorFunction>. The values from these m-vectors are the 
+output values of this generator. 
 
 The main `__next__` function outputs values from its queue. 
 
@@ -51,6 +56,18 @@ class N2MVGen:
             self.next_vector() 
         return self.queue.popleft()
 
+    def next_vector(self): 
+        q = prg__single_to_nvec(self.prg,self.current_input_dim)() 
+        F = self.nvfg.one_N2MVF() 
+        mvec = F.apply(q)
+
+        self.update_ctr += len(mvec)  
+
+        self.queue.extend(mvec)  
+
+        if self.update_ctr >= self.update_threshold: 
+            self.next_NVMVFGen()
+
     def next_NVMVFGen(self): 
 
         n = modulo_in_range(int(self.prg()),self.nm_range) 
@@ -63,19 +80,7 @@ class N2MVGen:
         self.nvfg = N2MVectorFunctionGen(nm,self.prg,self.prg2,mode)
 
         self.update_threshold = modulo_in_range(int(self.prg()),self.uf_range) 
-        self.update_ctr = 0 
-
-    def next_vector(self): 
-        q = prg__single_to_nvec(self.prg,self.current_input_dim)() 
-        F = self.nvfg.one_N2MVF() 
-        mvec = F.apply(q)
-
-        self.update_ctr += len(mvec)  
-
-        self.queue.extend(mvec)  
-
-        if self.update_ctr >= self.update_threshold: 
-            self.next_NVMVFGen()
+        self.update_ctr = 0
 
     """
     an LCG, in cases where `prg2` is null.

@@ -30,6 +30,11 @@ SAMPLE_USE_FILE_MAP = {"multimetric": BASE_COMM_LANG_FOLDER + "commond_one.txt",
     "iomaps": BASE_COMM_LANG_FOLDER + "commond_29.txt",\
     "idforest": BASE_COMM_LANG_FOLDER + "commond_30.txt",\
     "ssino": BASE_COMM_LANG_FOLDER + "commond_33.txt",\
+    "n2m": BASE_COMM_LANG_FOLDER + "commond_n2m.txt",\
+    "gg": BASE_COMM_LANG_FOLDER + "commond_gg.txt",\
+    "afs": BASE_COMM_LANG_FOLDER + "commond_afs.txt",\
+    "fit22": BASE_COMM_LANG_FOLDER + "commond_fit22.txt",\
+    "lps": BASE_COMM_LANG_FOLDER + "commond_lps.txt",\
     "pddelta": BASE_COMM_LANG_FOLDER + "commond_34.txt"}    
 
 def stringize_CLGuideParser_keywords(clgp): 

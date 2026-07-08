@@ -1,0 +1,21 @@
+set G = make lcg with 15.46,-125.2,228.55,1142.333. 
+
+set G2 = make gg with G,-100,100. 
+set V = run G2 for 30 iter. 
+
+set G3 = make gg with G,-200,100,0. 
+set V2 = run G3 for 30 iter. 
+
+set G4 = make gg with G3,-200,1000,1,1. 
+set V3 = run G4 for 30 iter. 
+
+set G5 = make gg with G3,-200,1000,1,1,7,13.
+set V4 = run G5 for 30 iter. 
+
+set G6 = make gg with G,-200,1000,1,1,7,13.
+set V5 = run G6 for 30 iter. 
+
+set G7 = make gg with G,-200,1000,1,1,7,13,12.
+set V6 = run G7 for 30 iter. 
+
+set G8 = make gg with G,-1000,20000.

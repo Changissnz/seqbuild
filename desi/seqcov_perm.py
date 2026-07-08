@@ -239,7 +239,7 @@ class SeqCoveragePermuter(AGV2SeqQualPermuter):
                 i += 1
             f = 10 * (i - 1)
 
-        self.prt = prg_partition_for_float(q_ * f,m,self.prg,variance,n=1000,rounding_depth=8)
+        self.prt = prg_partition_for_float(q_ * f,m,prg__single_to_int(self.prg),variance,n=1000,rounding_depth=8)
         self.prt = np.array(self.prt) / f 
 
     def apply_pos_delta(self): 
