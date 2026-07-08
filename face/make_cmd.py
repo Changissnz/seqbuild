@@ -114,7 +114,6 @@ def MAIN_method_for_object(q):
     return -1 
     assert False, "{} is not valid".format(q) 
 
-#------------------------------------------- class 4 PRNGs: differential form-fitters
 
 #------------------------------------------- class 3 PRNGs: stacked vector-based form-fitters + noise adders 
 
@@ -786,6 +785,99 @@ def MAKE_iomaps(splitstr_cmd,var_map):
     mpo = ModPRNGOutputter(G)
     return mpo
 
+#---------------------------------------------- class V PRNGs: quotient and polynomial form-fitters of vector inputs. 
+
+def MAKE_qval(splitstr_cmd,var_map): 
+    assert splitstr_cmd[1] == "qval" 
+    assert splitstr_cmd[2] == "with" 
+
+    parameters = splitstr_cmd[3].split(",")
+
+    assert parameters[0] in var_map 
+    V = var_map[parameters[0]] 
+
+    assert parameters[1] in var_map 
+    index_selector = var_map[parameters[1]] 
+
+    assert parameters[2] in var_map 
+
+    def length_outputter(): 
+        q = var_map[parameters[2]] 
+        return int(round(q()))
+
+    assert parameters[3] in var_map 
+    range_outputter = var_map[parameters[3]] 
+
+    try: 
+        adj_type = int(parameters[4])
+    except: 
+        raise ValueError("invalid adjustment type {}".format(parameters[4])) 
+
+    assert adj_type in {1,2} 
+
+    return QValueOutputter(IntSeq(V),index_selector,length_outputter,\
+        range_outputter,adj_type) 
+
+def MAKE_pid(splitstr_cmd,var_map): 
+
+    assert splitstr_cmd[2] == "with" 
+
+    parameters = splitstr_cmd[3].split(",")
+    assert parameters[0] in var_map 
+    prg = var_map[parameters[0]] 
+    prg = MAIN_method_for_object(prg) 
+
+    assert parameters[1] in var_map 
+    f_out = var_map[parameters[1]] 
+    f_out = MAIN_method_for_object(f_out) 
+    def f_out_(): return int(round(f_out()))
+
+    assert parameters[2] in var_map 
+    l_out = var_map[parameters[2]] 
+    l_out = MAIN_method_for_object(l_out) 
+    def l_out_(): return int(round(l_out()))
+
+    assert parameters[3] in var_map 
+    r_out = var_map[parameters[3]] 
+    r_out = MAIN_method_for_object(r_out)
+
+    adjustment_type = int(parameters[4]) 
+    assert adjustment_type in {1,2} 
+
+    return PIDValueOutputter(prg,f_out_,\
+        l_out_,r_out,adjustment_type)
+
+#--------------------------------------------- class O PRNGs: pairwise arithmetic operations on vector inputs. 
+
+def MAKE_optri(splitstr_cmd,var_map): 
+    
+    assert splitstr_cmd[1] == "optri" 
+    assert splitstr_cmd[2] == "with" 
+    
+    parameters = splitstr_cmd[3].split(",") 
+    assert len(parameters) == 5 
+
+    int_seed = int(parameters[0])
+
+    assert parameters[1] in var_map 
+    prg = var_map[parameters[1]] 
+    prg = MAIN_method_for_object(prg) 
+    
+    prg_ = prg__single_to_int(prg)
+    gen_type = int(parameters[2]) 
+    assert gen_type in {1,2} 
+
+    add_noise = bool(int(parameters[3]))
+
+    assert parameters[4] in var_map
+    base_sequence = var_map[parameters[4]]
+    assert type(base_sequence) == list and len(base_sequence) >= 2 
+    base_sequence = IntSeq(base_sequence) 
+    M = base_sequence.difftri(cast_type=np.int32)
+
+    return OpTriGen(int_seed,M,prg_,gen_type,forward_func=add,\
+        backward_func=sub,add_noise=add_noise) 
+
 #------------------------------------------------------------------------------------- 
 
 # TODO: incomplete 
@@ -799,31 +891,7 @@ def MAKE_proc(splitstr_cmd,var_map):
         return MAKE_mdrvx(splitstr_cmd,var_map) 
 
     if splitstr_cmd[1] == "optri":
-        assert splitstr_cmd[2] == "with" 
-        
-        parameters = splitstr_cmd[3].split(",") 
-        assert len(parameters) == 5 
-
-        int_seed = int(parameters[0])
-
-        assert parameters[1] in var_map 
-        prg = var_map[parameters[1]] 
-        prg = MAIN_method_for_object(prg) 
-        
-        prg_ = prg__single_to_int(prg)
-        gen_type = int(parameters[2]) 
-        assert gen_type in {1,2} 
-
-        add_noise = bool(int(parameters[3]))
-
-        assert parameters[4] in var_map
-        base_sequence = var_map[parameters[4]]
-        assert type(base_sequence) == list and len(base_sequence) >= 2 
-        base_sequence = IntSeq(base_sequence) 
-        M = base_sequence.difftri(cast_type=np.int32)
-
-        return OpTriGen(int_seed,M,prg_,gen_type,forward_func=add,\
-            backward_func=sub,add_noise=add_noise) 
+        return MAKE_optri(splitstr_cmd,var_map)
 
     if splitstr_cmd[1] == "multimetric": 
         assert splitstr_cmd[2] == "with" 
@@ -832,62 +900,10 @@ def MAKE_proc(splitstr_cmd,var_map):
         return MultiMetric(lx)
 
     if splitstr_cmd[1] == "qval":
-        assert splitstr_cmd[2] == "with" 
-
-        parameters = splitstr_cmd[3].split(",")
-
-        assert parameters[0] in var_map 
-        V = var_map[parameters[0]] 
-
-        assert parameters[1] in var_map 
-        index_selector = var_map[parameters[1]] 
-
-        assert parameters[2] in var_map 
-
-        def length_outputter(): 
-            q = var_map[parameters[2]] 
-            return int(round(q()))
-
-        assert parameters[3] in var_map 
-        range_outputter = var_map[parameters[3]] 
-
-        try: 
-            adj_type = int(parameters[4])
-        except: 
-            raise ValueError("invalid adjustment type {}".format(parameters[4])) 
-
-        assert adj_type in {1,2} 
-
-        return QValueOutputter(IntSeq(V),index_selector,length_outputter,\
-            range_outputter,adj_type) 
+        return MAKE_qval(splitstr_cmd,var_map)
 
     if splitstr_cmd[1] == "pid":
-        assert splitstr_cmd[2] == "with" 
-
-        parameters = splitstr_cmd[3].split(",")
-        assert parameters[0] in var_map 
-        prg = var_map[parameters[0]] 
-        prg = MAIN_method_for_object(prg) 
-    
-        assert parameters[1] in var_map 
-        f_out = var_map[parameters[1]] 
-        f_out = MAIN_method_for_object(f_out) 
-        def f_out_(): return int(round(f_out()))
-
-        assert parameters[2] in var_map 
-        l_out = var_map[parameters[2]] 
-        l_out = MAIN_method_for_object(l_out) 
-        def l_out_(): return int(round(l_out()))
-
-        assert parameters[3] in var_map 
-        r_out = var_map[parameters[3]] 
-        r_out = MAIN_method_for_object(r_out)
-
-        adjustment_type = int(parameters[4]) 
-        assert adjustment_type in {1,2} 
-
-        return PIDValueOutputter(prg,f_out_,\
-            l_out_,r_out,adjustment_type)
+        return MAKE_pid(splitstr_cmd,var_map)
 
     if splitstr_cmd[1] == "op2": 
         return MAKE_op2(splitstr_cmd,var_map) 
