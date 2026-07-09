@@ -66,7 +66,7 @@ cauto.generate()
 
 ### PRNG Categories in Comm Lang 
 
-As of 07/08/2026, here is a table of PRNGs and their categories available for use in Comm Lang.  
+As of 07/08/2026, here is a list of PRNGs and their categories available for use in Comm Lang.  
 
 - Class 0: LCGs and LCG form-fitters  
     - `lcg`, `lcgv2`, `lcgv3`, `mdrgen`  
@@ -84,7 +84,7 @@ As of 07/08/2026, here is a table of PRNGs and their categories available for us
     - `n2m`, `afs`  
 - Class O: operation-based  
     - `optri`  
-- Class V: quotient and polynomial form-fitters of vector inputs  
+- Class V: quotient and polynomial differential form-fitters of vector inputs  
     - `qval`, `pid`.  
 
 ### Update: 07/08/26 
