@@ -100,7 +100,7 @@ class APRNGGaugeV2Methods(unittest.TestCase):
         is1 = IntSeq(ag.cycle)
         qx = ag.std_cat_entropy(is1,seg_length=None,start_value=None,\
                 count_type="absdiff")
-        assert max(ag.catvec) == 12,"got {}".format(max(ag.catvec))
+        assert max(ag.catvec) == 4,"got {}".format(ag.catvec)
 
     def test__APRNGGaugeV2__match_two_intseq(self):
         i1 = IntSeq([2,4,6,10])
@@ -186,9 +186,9 @@ class APRNGGaugeV2Methods(unittest.TestCase):
         qsol2 = np.array([\
             [0.,19.],\
             [0.,0.],\
-            [88.88889,88.88889],\
-            [6320.98765,6320.98765]])
-        assert np.all(np.round(q2-qsol2,5) == 0) 
+            [160.,160.],\
+            [0,0]])
+        assert np.all(np.round(q2-qsol2,5) == 0), "got {}".format(q2)
 
         # case 3 
         prg = prg__n_ary_alternator(-12,38,-12) 

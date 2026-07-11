@@ -321,7 +321,7 @@ def QUALTEST_proc(splitstr_cmd,var_map):
         q.extend(S[0][1])
         q.append(S[0][2]) 
         q = np.array(q) 
-        s += str(np.round(q)) + "\n"
+        s += str(q) + "\n"
     else: 
         S = cmp_generators__MultiMetric(G,G2,num_iter,gauge_depth,deg_vec,\
             set_frange=True)

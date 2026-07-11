@@ -159,7 +159,7 @@ be integers:
 """
 class LCGV2:
 
-    def __init__(self,start,m,a,n0,n1,sc_size:int,preproc_gd:bool=False):
+    def __init__(self,start,m,a,n0,n1,sc_size:int=0,preproc_gd:bool=False):
         assert n0 < n1
         assert not (m == 0 and a == 0)
         assert type(sc_size) == int 
@@ -222,6 +222,27 @@ class LCGV2:
             self.cycle.clear()
         self.cycle.append(s_)
         return self.s 
+
+    def __eq__(self,G):
+        assert type(G) == LCGV2
+
+        if G.s_ != self.s_: 
+            return False 
+
+        if G.m != self.m: 
+            return False 
+
+        if G.a != self.a: 
+            return False 
+
+        if G.r != self.r: 
+            return False 
+
+        return True 
+
+    def __str__(self): 
+        s = "start: {}\ncurrent: {}\nM: {}\nA: {}\nR: {}".format(self.s_,self.s,self.m,self.a,self.r)
+        return s 
 
     #-------------- functions to discover LCG attributes 
 
@@ -293,6 +314,7 @@ class LCGV2:
             qx[k] = set([v]) 
 
         self.gd = GraphComponentDecomposition(qx) 
+        self.gd.is_directed = True 
         self.gd.decompose()
 
     def io_map_summary(self):
@@ -307,16 +329,12 @@ class LCGV2:
         is_closed = True
         sub_cycle = set()
         for q_ in q:
-            print("travelling: {} of {}".format(q_,q)) 
             p = travel_io_map_till_repeat(self.map_io,q_)
             px = set(p)
-            print("[X]: ",px) 
 
             if px != q: 
                 sub_cycle |= {q_} 
-            print("sub-cycle: ")
-            print(sub_cycle)
-            print("-------------------------")
+
             if not is_closed: continue 
 
             if not px.issubset(q): 
@@ -331,4 +349,26 @@ class LCGV2:
         cd.update_full_cycle(q) 
         return cd 
 
-        
+    #------------------------------------------------------------------------
+
+    """
+    outputs x <= `num` unique LCGV2s from original LCGV2 `G`. Every one of these 
+    LCGV2s have the same modulo range. Their `start`,`m`, and `a` are 
+    the contiguous output values from `G`. 
+    """
+    @staticmethod 
+    def LCGV2_to_LCGV2_sequence(G,num,preproc_gd=False): 
+        assert type(G) == LCGV2
+        L = [] 
+
+        for _ in range(num): 
+            s = next(G) 
+            m = next(G) 
+            a = next(G) 
+
+            G2 = LCGV2(s,m,a,G.r[0],G.r[1],G.sc_size,preproc_gd) 
+            if G2 in L: continue 
+
+            L.append(G2) 
+
+        return L 

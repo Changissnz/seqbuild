@@ -453,6 +453,8 @@ class APRNGGaugeV2(APRNGGauge):
             n1 = accum_factor_frequency_map(dx2) 
             tx2.append((n0,n1)) 
 
+            isf = isf2 
+
         tx,tx2 = np.array(tx),np.array(tx2)
 
         minmax_mean = np.mean(tx,axis=0)

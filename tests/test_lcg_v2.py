@@ -11,7 +11,7 @@ class LCGV2Methods(unittest.TestCase):
     def test__LCGV2__basefunctions__case1(self):
 
         # case 1
-        l2 = LCGV2(2,2,0,0,10,0) 
+        l2 = LCGV2(2,2,0,0,10) 
 
         d1 = l2.init_dir()
         d2 = l2.gen_dir() 
@@ -25,7 +25,7 @@ class LCGV2Methods(unittest.TestCase):
         assert cl == 4 
 
         # case 2 
-        l2 = LCGV2(0,2,1,0,10,0) 
+        l2 = LCGV2(0,2,1,0,10) 
 
         d1 = l2.init_dir()
         d2 = l2.gen_dir() 
@@ -40,7 +40,7 @@ class LCGV2Methods(unittest.TestCase):
 
     def test__LCGV2__io_map_summary__case1(self):
 
-        l2 = LCGV2(0,2,1,0,10,0) 
+        l2 = LCGV2(0,2,1,0,10) 
         l2.io_map()
         l2.io_map_partition()
         l2.io_map_summary()
@@ -65,7 +65,7 @@ class LCGV2Methods(unittest.TestCase):
             assert ld.d["sub-cycle"] == dheads[i]
 
     def test__LCGV2__io_map_summary__case2(self):
-        l2 = LCGV2(0,1,2,0,10,0) 
+        l2 = LCGV2(0,1,2,0,10) 
         l2.io_map()
         l2.io_map_partition()
         l2.io_map_summary()

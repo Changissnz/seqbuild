@@ -105,7 +105,7 @@ class MultiMetric:
     """
     def agv2_measures__ngrammer(self,ref_index,length,\
             l2,set_frange:bool=True,external_frange=None): 
-        assert l2 <= length, "length,l2 is {}".format((length,l2))
+        assert l2 <= length, "length {},l2 is {}".format((length,l2))
 
         # init the <NGrammer> 
         sv = subvec(self.l,ref_index,length) 
@@ -128,6 +128,7 @@ class MultiMetric:
         agv2 = APRNGGaugeV2(f,(fmin,fmax),0.5) 
 
         ce_vec = []
+        ##print("NUM CHUNKS: ",len(chunks))
         for c in chunks:  
             cs = c.flatten()
             agv2.assign_cycle(cs)
@@ -186,9 +187,12 @@ class MultiMetric:
     def summarize(self,ngram,condense_ngram_output:bool=True,set_frange:bool=True):
         m1 = self.agv2_measures__ngrammer(0,len(self.l),\
             ngram,set_frange=set_frange)
+
         if condense_ngram_output:
             m1 = np.mean(m1,axis=0)
-            
+            if np.isnan(m1[0]): m1[0] = 0. 
+            if np.isnan(m1[1]): m1[1] = 0. 
+
         m2 = self.diff_measures()
         m3 = self.mcs_kcomplexity()
         return m1,m2,m3
@@ -226,13 +230,19 @@ iterations. On personal computing systems, the argument `num_iter`
 normally should not exceed 1000. This rule translates to this method 
 having a size limit for measuring sequences. 
 
+Set exactly one of (`gauge_depth`, `deg_vec`) to null. Two output subtypes
+- non-null `gauge_depth` -> specifies max ngram length: 10 + `gauge_depth`.
+- non-null `deg_vec` -> vector of ngram lengths. 
+
 Function outputs the following measures. 
 [0] average or list of measures from method<MultiMetric.summarize>,
 [1] modular characteristic map,
 [2] element frequency map.
+
+If `full_output` is set to False, outputs only [0]. 
 """
 def gauge_generator__MultiMetric(prg,num_iter,gauge_depth:int,deg_vec:list,\
-    set_frange:bool=True,condense_ngram_output:bool=True): 
+    set_frange:bool=True,condense_ngram_output:bool=True,full_output:bool=True): 
     assert num_iter >= 5 
     
     stat0 = type(gauge_depth) == type(None) 
@@ -283,6 +293,12 @@ def gauge_generator__MultiMetric(prg,num_iter,gauge_depth:int,deg_vec:list,\
         A = mm.summarize(ngx,condense_ngram_output=True,set_frange=set_frange)
         R.append(A) 
 
+    if condense_ngram_output: 
+        R = average_MultiMetric_summaries(R)
+
+    if not full_output:
+        return R 
+    
     fm = vec_to_frequency_map(np.array(q,dtype=int))
 
     cmap = None 
@@ -292,24 +308,17 @@ def gauge_generator__MultiMetric(prg,num_iter,gauge_depth:int,deg_vec:list,\
     except: 
         pass 
 
-    if condense_ngram_output: 
-        R = average_MultiMetric_summaries(R)
-
     return R,cmap,fm 
 
 """
-a comparator between generators `prg` and `prg2`. Function is 
-based on function<gauge_generator__MultiMetric>. Calculates 
-the difference 
+Performs a subtraction operation `prg1_measures` - `prg2_measures`. 
 
-`gauge_generator__MultiMetric(prg,...) - gauge_generator__MultiMetric(prg2,...)`. 
+prg1_measures := output from <gauge_generator__MultiMetric> for PRNG #1. 
+prg2_measures := output from <gauge_generator__MultiMetric> for PRNG #2. 
 """
-def cmp_generators__MultiMetric(prg,prg2,num_iter,gauge_depth,deg_vec,\
-    set_frange:bool=True): 
-    q0 = gauge_generator__MultiMetric(prg,num_iter,gauge_depth,deg_vec,set_frange)
-    q1 = gauge_generator__MultiMetric(prg2,num_iter,gauge_depth,deg_vec,set_frange)
+def cmp_generators__MultiMetric_(prg1_measures,prg2_measures): 
 
-    def diff_mm_output():
+    def diff_mm_output(q0,q1):
         x0,x1 = q0[0],q1[0] 
 
         d0 = list(x0[0]) 
@@ -323,7 +332,7 @@ def cmp_generators__MultiMetric(prg,prg2,num_iter,gauge_depth,deg_vec,\
         d1 = np.array(d1) 
         return d0 - d1 
 
-    def diff_mc_map():
+    def diff_mc_map(q0,q1):
         x0,x1 = q0[1],q1[1] 
         if type(x0) == type(None) or type(x1) == type(None): 
             return dict() 
@@ -346,7 +355,7 @@ def cmp_generators__MultiMetric(prg,prg2,num_iter,gauge_depth,deg_vec,\
 
         return diff_map 
 
-    def diff_fmap(): 
+    def diff_fmap(q0,q1): 
         x0,x1 = q0[2],q1[2] 
         
         l0,l1 = len(x0),len(x1) 
@@ -361,8 +370,22 @@ def cmp_generators__MultiMetric(prg,prg2,num_iter,gauge_depth,deg_vec,\
             dx1[fx_] = abs(c0-c1) 
 
         return dx1 
-
-    dx0 = diff_mm_output()
-    dx1 = diff_mc_map() 
-    dx2 = diff_fmap() 
+    
+    dx0 = diff_mm_output(prg1_measures,prg2_measures)
+    dx1 = diff_mc_map(prg1_measures,prg2_measures) 
+    dx2 = diff_fmap(prg1_measures,prg2_measures) 
     return dx0,dx1,dx2 
+    
+"""
+a comparator between generators `prg` and `prg2`. Function is 
+based on function<gauge_generator__MultiMetric>. Calculates 
+the difference 
+
+`gauge_generator__MultiMetric(prg,...) - gauge_generator__MultiMetric(prg2,...)`. 
+"""
+def cmp_generators__MultiMetric(prg,prg2,num_iter,gauge_depth,deg_vec,\
+    set_frange:bool=True): 
+    q0 = gauge_generator__MultiMetric(prg,num_iter,gauge_depth,deg_vec,set_frange)
+    q1 = gauge_generator__MultiMetric(prg2,num_iter,gauge_depth,deg_vec,set_frange)
+
+    return cmp_generators__MultiMetric_(q0,q1)

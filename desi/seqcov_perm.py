@@ -196,7 +196,7 @@ class SeqCoveragePermuter(AGV2SeqQualPermuter):
             self.mradius = 0.5  
         assert type(self.mradius) in {float,np.float32,np.float64}
 
-        rs = floatseq_to_rangeseq(S,self.srange,self.mradius)
+        rs = np.array(floatseq_to_rangeseq(S,self.srange,self.mradius))
         rs = PointSorter(np.array(rs)).newData 
 
         self.rs = np.round(to_noncontiguous_ranges(rs),7)
@@ -384,7 +384,12 @@ class SeqCoveragePermuter(AGV2SeqQualPermuter):
         return None 
     
     def format_ranges(self): 
-        self.rs = to_noncontiguous_ranges(list(self.rs),is_sorted=False)
+        self.rs = np.array(self.rs)
+
+        if not is_2dmatrix(self.rs): 
+            return 
+
+        self.rs = to_noncontiguous_ranges(np.array(self.rs),is_sorted=False)
         self.rs = np.round(self.rs,7)
 
         self.crs = to_noncontiguous_ranges(list(self.crs),is_sorted=False)
@@ -399,7 +404,7 @@ class SeqCoveragePermuter(AGV2SeqQualPermuter):
                     rs.append(rs_) 
             return rs 
 
-        self.rs = filter_0range(self.rs) 
+        self.rs = np.array(filter_0range(self.rs))
         self.crs = filter_0range(self.crs)
 
 
