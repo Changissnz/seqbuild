@@ -1,15 +1,18 @@
 """
 data structures used to simplify QUALTEST and CHAINTEST b/t and w/in generators. 
 """
-
-from desi.multi_metric import * 
-from collections import deque 
-from intigers.mod_prng import prg__iterable 
+from .prng_bool_cmp import * 
 
 DEFAULT_QUALTEST_SEGMENT_LENGTH = 200 
 DEFAULT_CHAINTEST_SEGMENT_LENGTH = 1000 
 DEFAULT_CHAINTEST_RADIUS = 0.5 
 
+"""
+Method<run> conducts QUALTEST and CHAINTEST for their respective 
+iteration numbers a.k.a segments (see the default variables in this file). 
+The segments are split into `partition_size` chunks, and `ngram_info` 
+specifies the n-gram length/s for the measurement processes. 
+"""
 class PRNGStats: 
 
     def __init__(self,prg,ngram_info,partition_size): 
@@ -104,23 +107,44 @@ class PRNGStats:
             Q.append(x) 
             Q2.append(x) 
 
+'''
+A comparator class for input PRNGs, of `input_prg_list`, when they are each used as a 
+PRNG variable in an output (secondary) PRNG, `output_prg_struct`. The `output_prg_struct` 
+is a Python class, such that its `__next__` method is a PRNG function. 
+
+This algorithm starts off by creating |`input_prg_list`| versions of the `output_prg_struct`, 
+each i'th one fitted its `input_prg_varname` the i'th input PRNG. 
+
+Class is built on top of class<PRNGStats>, serving as a comparator of QUALTEST and CHAINTEST 
+scores. These are the four primary comparisons: 
+- pairwise comparison between input PRNGs. 
+- comparison between input PRNG and its corresponding output PRNG. 
+- pairwise comparison between output PRNGs. 
+- pairwise comparison between two (input,output) PRNG differences. 
+
+If the method variable<metric_numbers> is non-null (a set of integers specifying the 
+boolean metrics from file<face.prng_bool_cmp> to use), these comparisons output 
+1 (more random)|0 (equally random)|-1 (less random).
+'''
 class PRNGIOStats: 
 
     '''
     ''' 
     def __init__(self,input_prg_list,input_prg_varname,output_prg_struct,ngram_info,\
-        partition_size): 
+        partition_size,absdiff:bool=True): 
         
         assert len(input_prg_list) > 0 
         
         for x in input_prg_list: 
             assert type(x) in {MethodType,FunctionType}
+        assert type(absdiff) == bool 
 
         self.input_prg_list = input_prg_list
         self.input_prg_varname = input_prg_varname
         self.output_prg_struct = output_prg_struct
         self.ngram_info = ngram_info 
         self.psize = partition_size
+        self.absdiff = absdiff 
 
         self.input_prng_stats = [] 
         self.output_prng_stats = []  
@@ -134,7 +158,7 @@ class PRNGIOStats:
 
             G = deepcopy(self.output_prg_struct) 
             setattr(G,self.input_prg_varname,deepcopy(x))
-            G1 = PRNGStats(G.__next__,deepcopy(self.ngram_info),self.psize)
+            G1 = PRNGStats(deepcopy(G.__next__),deepcopy(self.ngram_info),self.psize)
             self.output_prng_stats.append(G1) 
 
     def run(self): 
@@ -146,18 +170,66 @@ class PRNGIOStats:
             print("* running output prng #{}".format(i))
             y.run() 
 
-    def input_cmp(self,index0,index1):
+    """
+    input PRNG#0 - input PRNG#1 
+
+        XOR [if `metric_numbers` != NULL]
+
+    is input PRNG#0 more random? 
+    """
+    def input_cmp(self,index0,index1,metric_numbers:set=None):
         G0 = self.input_prng_stats[index0]
         G1 = self.input_prng_stats[index1]
 
+        if type(metric_numbers) == set: 
+            return self.boolcmp_stats(G0,G1,metric_numbers)
+        
+        assert type(metric_numbers) == type(None)
+        return self.cmp_stats(G0,G1)
+
+    """
+    output PRNG#0 - output PRNG#1 
+
+        XOR [if `metric_numbers` != NULL]
+
+    is output PRNG#0 more random? 
+    """
+    def output_cmp(self,index0,index1,metric_numbers:set=None):
+        G0 = self.output_prng_stats[index0]
+        G1 = self.output_prng_stats[index1]
+
+        if type(metric_numbers) == set: 
+            return self.boolcmp_stats(G0,G1,metric_numbers)
+        
+        assert type(metric_numbers) == type(None)
         return self.cmp_stats(G0,G1)
         
-    def io_cmp(self,input_index): 
+    """
+    output PRNG - input PRNG 
+
+        XOR [if `metric_numbers` != NULL]
+
+    is output PRNG more random? 
+    """
+    def io_cmp(self,input_index,metric_numbers:set=None): 
         G0 = self.input_prng_stats[input_index]
         G1 = self.output_prng_stats[input_index]
-        return self.cmp_stats(G1,G0) 
 
-    def pairwise_io_cmp(self,index0,index1):
+        if type(metric_numbers) == set: 
+            return self.boolcmp_stats(G1,G0,metric_numbers)
+        
+        assert type(metric_numbers) == type(None)
+        return self.cmp_stats(G1,G0)
+
+
+    """
+    (output PRNG#0 - input PRNG#0) - (output PRNG#1 - input PRNG#1)
+
+        XOR [if `metric_numbers` != NULL]
+
+    is (output PRNG#0 - input PRNG#0) more random? 
+    """
+    def pairwise_io_cmp(self,index0,index1,metric_numbers:set=None):
 
         q0,c0 = self.io_cmp(index0)
         q1,c1 = self.io_cmp(index1) 
@@ -169,7 +241,10 @@ class PRNGIOStats:
         q0 = (x0,q0[1],q0[2]) 
         q1 = (x1,q1[1],q1[2]) 
 
-        D0 = cmp_generators__MultiMetric_(q0,q1)
+        if type(metric_numbers) == set: 
+            return is_PRNG_more_QC_random((q0,c0),(q1,c1),metric_numbers)
+
+        D0 = cmp_generators__MultiMetric_(q0,q1,self.absdiff)
         D1 = c0 - c1 
     
         return D0,D1 
@@ -180,7 +255,18 @@ class PRNGIOStats:
         q0,c0 = G0.latest_results() 
         q1,c1 = G1.latest_results() 
 
-        D0 = cmp_generators__MultiMetric_(q0,q1)
+        D0 = cmp_generators__MultiMetric_(q0,q1,self.absdiff)
         D1 = c0 - c1 
 
         return D0,D1 
+
+    """
+    return: 
+    1(more random)|-1(less random)|0(equally random)
+    """
+    def boolcmp_stats(self,G0,G1,metric_numbers:set):
+        assert type(G0) == type(G1) == PRNGStats 
+        q0,c0 = G0.latest_results() 
+        q1,c1 = G1.latest_results() 
+
+        return is_PRNG_more_QC_random((q0,c0),(q1,c1),metric_numbers)

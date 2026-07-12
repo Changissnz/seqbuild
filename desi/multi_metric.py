@@ -310,70 +310,123 @@ def gauge_generator__MultiMetric(prg,num_iter,gauge_depth:int,deg_vec:list,\
 
     return R,cmap,fm 
 
+#----------------------------------- for comparing two PRNG gauge measures 
+
+"""
+difference between two gauge measures for 
+
+[0] coverage 
+[1] unidirectional weighted point distance
+[2] categorical entropy
+[3] 1st order K-complexity of ternary difference 
+[4] 2nd order K-complexity of ternary difference
+[5] K-complexity of (sequence - most common subsequence) ternary difference 
+"""
+def diff_mm_output(q0,q1): 
+
+    x0,x1 = q0[0],q1[0] 
+    d0 = list(x0[0]) 
+    d0.extend(x0[1]) 
+    d0.append(x0[2]) 
+    d0 = np.array(d0) 
+
+    d1 = list(x1[0]) 
+    d1.extend(x1[1]) 
+    d1.append(x1[2]) 
+    d1 = np.array(d1) 
+    return d0 - d1 
+
+"""
+difference between two gauge measures for 1st and 2nd order modular characteristic, 
+a.k.a factor modulo k-complexity).  
+
+
+"""
+def diff_mc_map(q0,q1,absdiff:bool=True):
+    x0,x1 = q0[1],q1[1] 
+    if type(x0) == type(None) or type(x1) == type(None): 
+        
+        if absdiff: 
+            return dict() 
+
+        if not x0 and not x1: 
+            return dict() 
+        
+        if x0: 
+            return x0 
+        return {k: (-v[0],-v[1]) for k,v in x1.items()} 
+
+    #if absdiff: 
+    ks = set(x0.keys()) | set(x1.keys()) 
+    #else: 
+    #    ks = set(x0.keys())
+
+    diff_map = dict() 
+
+    for k in ks: 
+
+        # case: not absdiff, difference can be negative 
+#        if not absdiff: 
+#        if stat0 and stat1: 
+
+        d0 = np.array(x0[k]) if k in x0 else np.array((0,0))
+        d1 = np.array(x1[k]) if k in x1 else np.array((0,0)) 
+
+        if absdiff: 
+            diff_map[k] = tuple(np.abs(d0 - d1)) 
+        else: 
+            diff_map[k] = tuple(d0 - d1) 
+
+
+
+        '''
+        stat0 = k in x0 
+        stat1 = k in x1 
+
+        if stat0 and stat1: 
+            d0,d1 = x0[k],x1[k] 
+            diff_map[k] = tuple(np.abs(np.array(d0)-np.array(d1)))
+        elif stat0:
+            diff_map[k] = x0[k] 
+        elif stat1:
+            diff_map[k] = x1[k] 
+        ''' 
+
+
+    return diff_map 
+
+def diff_fmap(q0,q1,absdiff:bool): 
+    x0,x1 = q0[2],q1[2] 
+    
+    l0,l1 = len(x0),len(x1) 
+    dx0 = l0 - l1 
+
+    fx = set(x0.keys()) | set(x1.keys()) 
+
+    dx1 = dict()
+    for fx_ in fx: 
+        c0 = x0[fx_] if fx_ in x0 else 0 
+        c1 = x1[fx_] if fx_ in x1 else 0 
+
+        if absdiff: 
+            dx1[fx_] = abs(c0-c1) 
+        else: 
+            dx1[fx_] = c0 - c1
+
+    return dx1 
+
+
 """
 Performs a subtraction operation `prg1_measures` - `prg2_measures`. 
 
 prg1_measures := output from <gauge_generator__MultiMetric> for PRNG #1. 
 prg2_measures := output from <gauge_generator__MultiMetric> for PRNG #2. 
 """
-def cmp_generators__MultiMetric_(prg1_measures,prg2_measures): 
-
-    def diff_mm_output(q0,q1):
-        x0,x1 = q0[0],q1[0] 
-
-        d0 = list(x0[0]) 
-        d0.extend(x0[1]) 
-        d0.append(x0[2]) 
-        d0 = np.array(d0) 
-
-        d1 = list(x1[0]) 
-        d1.extend(x1[1]) 
-        d1.append(x1[2]) 
-        d1 = np.array(d1) 
-        return d0 - d1 
-
-    def diff_mc_map(q0,q1):
-        x0,x1 = q0[1],q1[1] 
-        if type(x0) == type(None) or type(x1) == type(None): 
-            return dict() 
-
-        ks = set(x0.keys()) | set(x1.keys()) 
-
-        diff_map = dict() 
-
-        for k in ks: 
-            stat0 = k in x0 
-            stat1 = k in x1 
-
-            if stat0 and stat1: 
-                d0,d1 = x0[k],x1[k] 
-                diff_map[k] = tuple(np.abs(np.array(d0)-np.array(d1)))
-            elif stat0:
-                diff_map[k] = x0[k] 
-            elif stat1:
-                diff_map[k] = x1[k] 
-
-        return diff_map 
-
-    def diff_fmap(q0,q1): 
-        x0,x1 = q0[2],q1[2] 
-        
-        l0,l1 = len(x0),len(x1) 
-        dx0 = l0 - l1 
-
-        fx = set(x0.keys()) | set(x1.keys()) 
-
-        dx1 = dict()
-        for fx_ in fx: 
-            c0 = x0[fx_] if fx_ in x0 else 0 
-            c1 = x1[fx_] if fx_ in x1 else 0 
-            dx1[fx_] = abs(c0-c1) 
-
-        return dx1 
+def cmp_generators__MultiMetric_(prg1_measures,prg2_measures,absdiff:bool=True): 
     
     dx0 = diff_mm_output(prg1_measures,prg2_measures)
-    dx1 = diff_mc_map(prg1_measures,prg2_measures) 
-    dx2 = diff_fmap(prg1_measures,prg2_measures) 
+    dx1 = diff_mc_map(prg1_measures,prg2_measures,absdiff) 
+    dx2 = diff_fmap(prg1_measures,prg2_measures,absdiff) 
     return dx0,dx1,dx2 
     
 """
@@ -384,8 +437,8 @@ the difference
 `gauge_generator__MultiMetric(prg,...) - gauge_generator__MultiMetric(prg2,...)`. 
 """
 def cmp_generators__MultiMetric(prg,prg2,num_iter,gauge_depth,deg_vec,\
-    set_frange:bool=True): 
+    set_frange:bool=True,is_absdiff:bool=True): 
     q0 = gauge_generator__MultiMetric(prg,num_iter,gauge_depth,deg_vec,set_frange)
     q1 = gauge_generator__MultiMetric(prg2,num_iter,gauge_depth,deg_vec,set_frange)
 
-    return cmp_generators__MultiMetric_(q0,q1)
+    return cmp_generators__MultiMetric_(q0,q1,is_absdiff) 
