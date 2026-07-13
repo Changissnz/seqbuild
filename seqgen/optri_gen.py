@@ -215,7 +215,7 @@ class OpTriFlipDerivation:
         assert type(intseed) in {int,np.int32}
         # 0 -> lower right triangle 
         # 1 -> upper left triangle 
-        assert axis in {0,1}
+        assert axis in {0,1}, "axis {}".format(axis)
 
         self.mf = np.flip(m,axis=axis)
         self.m_ = np.zeros((self.mf.shape[0],self.mf.shape[0]),dtype=np.int32) 

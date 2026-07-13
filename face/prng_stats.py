@@ -128,8 +128,6 @@ boolean metrics from file<face.prng_bool_cmp> to use), these comparisons output
 '''
 class PRNGIOStats: 
 
-    '''
-    ''' 
     def __init__(self,input_prg_list,input_prg_varname,output_prg_struct,ngram_info,\
         partition_size,absdiff:bool=True): 
         

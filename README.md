@@ -85,7 +85,34 @@ As of 07/08/2026, here is a list of PRNGs and their categories available for use
 - Class O: operation-based  
     - `optri`  
 - Class V: quotient and polynomial differential form-fitters of vector inputs  
-    - `qval`, `pid`.  
+    - `qval`, `pid`. 
+
+### Statistical Tests for Randomness 
+
+In `seqbuild`, there are two primary tests to measure randomness of PRNGs: `QUALTEST` 
+and `CHAINTEST`. The simplified usage of these two tests, besides from being commands in 
+the Comm Lang user interface, is done through `file<face.prng_stats>`. Here is an example. 
+
+```
+from face.prng_stats import * 
+
+G = "your PRNG" 
+ngram_info = "relatively small positive intiger or intigers" 
+partition_size = "relatively small positive intiger" 
+
+S = PRNGStats(G,ngram_info,partition_size)
+S.run() 
+
+q,c = S.latest_results()
+
+print("QUALTEST SCORE")
+print(q) 
+
+print("CHAINTEST SCORE")
+print(c) 
+```
+
+There are also input PRNG/output PRNG comparators in that file. 
 
 ### Update: 07/08/26 
 Added the following generators to Comm Lang: `n2m`,`gg`,`afs`,`fit22`, and `lps`. 

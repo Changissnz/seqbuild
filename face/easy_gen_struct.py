@@ -1,5 +1,5 @@
 from .comm_lang import * 
-from morebs2.numerical_generator import sign_preserving_modulo,merge_two_prgs
+from morebs2.numerical_generator import merge_two_prgs
 import time 
 
 DEFAULT_TBCLF_TIMESTAMP_SEEDSIZE_RANGE = [2,7] 
@@ -27,6 +27,8 @@ DEFAULT_TBCLF_GEN_IOMAPS_SIZE_RANGE = [2,7]
 DEFAULT_TBCLF_GEN_IDF_CACHE_SIZE_RANGE = [100,455]
 DEFAULT_TBCLF_GEN_PWOP_WEIGHT_RANGE = [-66 - 2/3,66.6 + 2/3]  
 
+# used in the case of `consistent_prng_output`
+DEFAULT_TBCLF_PRIMARY_GEN_OUTPUT_RANGE = [-10**6.5,10**6.1]
 
 # NOTE: generator may use vectors of length not in DEFAULT_TBCLF_GEN_VECTOR_LENGTH_RANGE, depending 
 #       on the parameters `vector_files` and `comm_lang_files`. 
@@ -52,11 +54,14 @@ NOTE: In general, this class is calculatively deterministic when its PRNG `PRNGD
 
 NOTE: method<generate> cannot be guaranteed to produce a primary generator (the last one) that 
     passes certain randomness tests. 
+
+NOTE: when `consistent_prng_output` is set to False, the process of generating a Comm Lang file 
+      may be untimely in completion. 
 """
 class TimeBasedCommLangFileGenerator: 
 
     def __init__(self,filepath:str,base_gen_name:str,use_prng_for_prng_pr:float,vector_files=[],\
-        comm_lang_files=[],consistent_prng_output:bool=False): 
+        comm_lang_files=[],consistent_prng_output:bool=False,verbose:bool=False): 
 
         assert type(filepath) == str == type(base_gen_name) 
         assert " " not in filepath
@@ -66,7 +71,8 @@ class TimeBasedCommLangFileGenerator:
         assert 0. <= use_prng_for_prng_pr <= 1.0 
         assert type(vector_files) == type(comm_lang_files) == list 
         assert type(consistent_prng_output) == bool 
-        
+        assert type(verbose) == bool 
+
         self.filepath = filepath 
         self.base_gen_name = base_gen_name 
         self.gen_count = 0 
@@ -125,6 +131,8 @@ class TimeBasedCommLangFileGenerator:
         if not self.valid_fp: return 
 
         self.consistent_prng_output = consistent_prng_output
+        self.verbose = verbose 
+
         if self.consistent_prng_output:
             self.pdd = prg__single_to_int(self.pdd) 
 
@@ -137,7 +145,7 @@ class TimeBasedCommLangFileGenerator:
             f.clear() 
 
         if self.consistent_prng_output:
-            f = f | {"pid","qval","afs"} 
+            f = f | {"pid","qval","afs","lps"} 
 
         self.struct_list = sorted(set(DEFAULT_TBCLF_STRUCT_NAMES) - f) 
         return
@@ -206,6 +214,9 @@ class TimeBasedCommLangFileGenerator:
         
         self.update_CL_file(s) 
 
+        s = self.generate_CL_span_for_generator(g) 
+        self.update_CL_file(s)
+
         if self.consistent_prng_output:
             s,g = self.convert_prg_output(g,"int")
             self.update_CL_file([s]) 
@@ -219,7 +230,11 @@ class TimeBasedCommLangFileGenerator:
         i = int(G()) % len(self.struct_list)
 
         n = self.struct_list[i] 
+        return self.generate_one_struct_(n) 
 
+    def generate_one_struct_(self,n):
+        if self.verbose: 
+            print("* generating {} command".format(n))
         if n == "lcg": 
             return self.generate_CL_LCG_bunch() 
         
@@ -867,7 +882,6 @@ class TimeBasedCommLangFileGenerator:
 
         G = self.fetch_prg(True,True) 
         vector_size = 15 # modulo_in_range(int(G()),DEFAULT_AFSGEN_MAX_VECTOR_SIZE_RANGE) // 3 
-
         gen_name = self.next_generator_name() 
 
         prg0 = self.fetch_accessory_prg_varname() 
@@ -1009,6 +1023,13 @@ class TimeBasedCommLangFileGenerator:
 
         S,E = sorted([S,E])
         return S,E 
+
+    def generate_CL_span_for_generator(self,prg_name): 
+        gen_name = self.next_generator_name()
+
+        s = "set {} span to {},{}.".format(prg_name,DEFAULT_TBCLF_PRIMARY_GEN_OUTPUT_RANGE[0],\
+            DEFAULT_TBCLF_PRIMARY_GEN_OUTPUT_RANGE[1])
+        return [s] 
 
         
 ################################################

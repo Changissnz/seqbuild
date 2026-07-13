@@ -109,7 +109,7 @@ def PRNG_process_metrics(qc_info1,qc_info2,variables):
     for v in variables: 
         s0 = qc1.retrieve(v)
         s1 = qc2.retrieve(v) 
-        ##print("V: {}\t{},{}".format(v,s0,s1))
+        print("variable: {} \t{},{}".format(v,s0,s1))
         x = cmp_PRNG_test_scores(s0,s1)
         l.append(x) 
 
@@ -183,7 +183,10 @@ def is_PRNG_more_QC_random(qc_info1,qc_info2,metric_numbers:set):
         assert m in PRNG_RANDOMNESS_METRIC_MAP
 
         F = PRNG_RANDOMNESS_METRIC_MAP[m] 
+        print("\t\t** metric {}:  **".format(m))
         x = F(qc_info1,qc_info2)
         l.append(x) 
+        print("\t more random? {}".format(x))
+        print()  
 
     return to_trinary_relation_v2(sum(l),None,True,False)

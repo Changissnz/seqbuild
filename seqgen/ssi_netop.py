@@ -206,7 +206,11 @@ class SSINetOp:
 
         b = int(round(self.io_prg())) % 2 
         if b: 
-            return q + self.io_prg() 
+            try: 
+                return q + self.io_prg() 
+            except: 
+                pass 
+
         return q 
 
     def choose_tree(self,exclude_trees=set()):
@@ -228,7 +232,11 @@ class SSINetOp:
             if type(q) == type(None): 
                 continue 
 
-            if np.isnan(q) or np.isinf(q): 
+            try: 
+                if np.isnan(q) or np.isinf(q): 
+                    continue 
+            # subcase: number too large 
+            except: 
                 continue 
 
             self.tmp_queue.append(q) 

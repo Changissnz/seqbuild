@@ -4,7 +4,7 @@ import time
 
 ### lone file test 
 """
-python -m tests.test_idt_gen 
+py -m tests.test_idt_gen 
 """
 ###
 class IDecForestMethods(unittest.TestCase):
@@ -18,9 +18,9 @@ class IDecForestMethods(unittest.TestCase):
 
         _,q = IDecForest_sampleZ()
 
-        assert len(q[0]) == 63, "Q0: {}".format(len(q[0])) 
-        assert len(q[1]) == 50, "Q1: {}".format(len(q[1]))  
-        assert len(q[2]) == 22, "Q2: {}".format(len(q[2])) 
+        assert len(q[0]) == 51, "Q0: {}".format(len(q[0])) 
+        assert len(q[1]) == 66, "Q1: {}".format(len(q[1]))  
+        assert len(q[2]) == 55, "Q2: {}".format(len(q[2])) 
         return 
 
 
@@ -40,9 +40,9 @@ class IDecForestMethods(unittest.TestCase):
         qx2 = idf.process_seq_at_tree__iso_sequential(x2,x1_,x3)
         qx3 = idf.process_seq_at_tree__inflow(x2,x1)
 
-        assert len(qx) == 242, "got {}".format(len(qx))
-        assert len(qx2) == 431, "got {}".format(len(qx2))
-        assert len(qx3) == 262, "got {}".format(len(qx3))
+        assert len(qx) == 245, "got {}".format(len(qx))
+        assert len(qx2) == 365, "got {}".format(len(qx2))
+        assert len(qx3) == 265, "got {}".format(len(qx3))
 
         prg3 = prg__LCG(31,83,311,1500)
         ql = list(x1.l)

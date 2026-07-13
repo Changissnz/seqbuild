@@ -6,7 +6,7 @@ import unittest
 
 ### lone file test 
 """
-python -m tests.test_rch_gen
+py -m tests.test_rch_gen
 """
 ###
 class RCHAccuGenMethods(unittest.TestCase):
@@ -31,7 +31,8 @@ class RCHAccuGenMethods(unittest.TestCase):
         rg.apply(52) 
 
         # counter check for update 
-        D =  {0: {0: 2}, 1: {0: 2}}
+        D =  {0: {1: 2}, 1: {0: 2}}
+#defaultdict(<class 'collections.defaultdict'>, {0: defaultdict(<class 'int'>, {1: 2}), 1: defaultdict(<class 'int'>, {0: 2})})
         assert rg.update_log == D,"GOT : {}".format(rg.update_log)
 
         # size check for queue

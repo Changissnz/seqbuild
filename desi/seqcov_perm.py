@@ -392,8 +392,9 @@ class SeqCoveragePermuter(AGV2SeqQualPermuter):
         self.rs = to_noncontiguous_ranges(np.array(self.rs),is_sorted=False)
         self.rs = np.round(self.rs,7)
 
-        self.crs = to_noncontiguous_ranges(list(self.crs),is_sorted=False)
-        self.crs = np.round(self.crs,7)
+        if len(self.crs) > 0: 
+            self.crs = to_noncontiguous_ranges(np.array(self.crs),is_sorted=False)
+            self.crs = np.round(self.crs,7)
 
         def filter_0range(rseq): 
             rs = [] 

@@ -121,6 +121,7 @@ class RCHAccuGen:
         else: 
             assert is_vector(x)
 
+        ##self.rch.vpath.clear() 
         try: 
             self.rch.apply(x)
         except: 
@@ -160,10 +161,10 @@ class RCHAccuGen:
 
     @staticmethod
     def one_new_RCHAccuGen__v1(num_nodes,dim_range,prg,\
-        ufreq_range,mutrate=0.5,queue_capacity=1000):         
+        ufreq_range,mutrate=0.5,queue_capacity=1000,verbose:bool=False):         
         # declare the RChainHead 
         rch,FX = RCHAccuGen.one_new_RChainHead__v1(\
-            num_nodes,dim_range,prg)
+            num_nodes,dim_range,prg,verbose)
 
         # declare the generator 
         rg = RCHAccuGen(rch,prg,acc_queue=[],\
@@ -176,20 +177,25 @@ class RCHAccuGen:
         prg_ = prg__single_to_int(prg)
         Q_ = prg_choose_n(Q,n,prg_,is_unique_picker=True)
 
-        for q in Q_: 
+        for (i,q) in enumerate(Q_): 
             uf = int(round(modulo_in_range(prg(),ufreq_range)))
             fx = FX[q] 
-            mf = MutableRInstFunction(fx,uf,idn=0)
+            mf = MutableRInstFunction(fx,uf,idn=i)
             rg.add_mutable(q,mf)
         return rg 
 
     @staticmethod
-    def one_new_RChainHead__v1(num_nodes,dim_range,prg):
+    def one_new_RChainHead__v1(num_nodes,dim_range,prg,verbose=False):
         # declare the RChainHead 
         rch = RChainHead()
         FX = [] 
         for _ in range(num_nodes): 
             rcia,fx = RCHAccuGen.one_new_RCInst_args__v1(dim_range,prg)
+
+            if verbose: 
+                print("add node")
+                print(rcia) 
+                print("\t\t----------------")
             rch.add_node_at(rcia)
             FX.append(fx)
         return rch,FX
@@ -205,6 +211,9 @@ class RCHAccuGen:
         # case: referential, uses <LinCombo> 
         if zero == 'r':
             V = safe_npint32__prg_vec(prg,dim)
+            
+            ##?? 
+            V = modulo_in_range(V,DEFAULT_RCH_ACCUGEN_RANGE)
             kwargz.append(V) 
 
             fi = int(prg()) % len(DM_FUNC_LIST)
@@ -219,6 +228,9 @@ class RCHAccuGen:
         # case: non-referential, uses <CEPoly>
         else: 
             V = safe_npint32__prg_vec(prg,dim + 1)
+
+            ##??
+            V = modulo_in_range(V,DEFAULT_RCH_ACCUGEN_RANGE)
             V2 = [(v,i) for i,v in enumerate(V[::-1])]
             cep = CEPoly(np.array(V2,dtype=np.int32))
 

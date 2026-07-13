@@ -1,5 +1,6 @@
 from morebs2.search_space_iterator import * 
 from morebs2.matrix_methods import is_2dmatrix 
+from morebs2.numerical_generator import sign_preserving_modulo
 
 from intigers.lcg_v3 import *  
 from intigers.prng_pw_op import * 
@@ -247,10 +248,17 @@ class SSINetNode__TypeLCGNet:
             excess-= 1
         return
 
-    def load_first(self,v): 
+    def load_first(self,v,recurse_for_failure:bool=True): 
         assert is_number(v) 
         self.struct.reset_first(v,False)
-        self.rvalues = self.struct.reconstruct()
+        
+        try: 
+            self.rvalues = self.struct.reconstruct()
+        except: 
+            if recurse_for_failure: 
+                v = sign_preserving_modulo(v,2048)
+                return self.load_first(v,False) 
+            
         return
 
 """

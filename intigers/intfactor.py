@@ -55,7 +55,7 @@ class ISFactorSetOps:
 
     def __init__(self,l,int_limit=DEFAULT_INT_MAX_THRESHOLD,str_mode_full:bool=True):  
         assert len(l) >= 2
-        assert int_limit > 0 and type(int_limit) == int 
+        assert int_limit > 0 and type(int_limit) in {int,np.int32,np.int64} 
 
         min0,max0 = min(l),max(l)
         stat = abs(min0) <= int_limit and abs(max0) <= int_limit

@@ -38,7 +38,7 @@ def integer_sequence__caseY():
 
 ### lone file test 
 """
-python -m tests.test_idt_proc
+py -m tests.test_idt_proc
 """
 ###
 class IDTProcMethods(unittest.TestCase):
