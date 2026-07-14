@@ -114,9 +114,10 @@ def unimodular_number__modulo_range_adjustment(wv,av,cv,modrange):
 Calculates a new modrange M_r such that for the actual 
 value `av`, `modulo_in_range(av,M_r) == pv`. 
 """
+# NOTE: some cases yield wrong modranges 
 def modrange_for_congruence(pv,av,modrange):
-    assert type(pv) in {int,np.int32,np.int64}
-    assert type(av) in {int,np.int32,np.int64}
+    assert is_number(pv,{complex,np.complex128})
+    assert is_number(av,{complex,np.complex128})
     assert is_valid_range(modrange,True,False) or is_valid_range(modrange,False,False)
 
     if not is_value_below_modulo_range_length(av,modrange): 
@@ -134,6 +135,10 @@ def modrange_for_congruence(pv,av,modrange):
             mr2 = [av_ + 1,0] 
             mr2[0] = mr2[0] + s * pv - 1
         return mr2 
+    elif not is_value_below_modulo_range_length(pv,modrange): 
+        start = (pv - av)
+        end = start + modrange[1] - modrange[0]
+        return (start,end) 
 
     cv = modulo_in_range(av,modrange)
     difference = cv - pv 

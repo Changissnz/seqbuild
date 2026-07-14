@@ -189,23 +189,23 @@ def MAKE_afs(splitstr_cmd,var_map):
 
     if l == 2: 
         x = int(q[1]) 
-        return AFSGen(prg,None,None,None,x) 
+        return AFSGen(prg,None,None,None,x,True) 
 
     prg2 = MAIN_method_for_object(var_map[q[1]]) 
 
     if l == 3: 
         x = int(q[2]) 
-        return AFSGen(prg,prg2,None,None,x) 
+        return AFSGen(prg,prg2,None,None,x,True) 
 
     prg3 = MAIN_method_for_object(var_map[q[2]]) 
 
     if l == 4: 
         x = int(q[3]) 
-        return AFSGen(prg,prg2,prg3,None,x) 
+        return AFSGen(prg,prg2,prg3,None,x,True) 
 
     prg4 = MAIN_method_for_object(var_map[q[3]]) 
     x = int(q[4]) 
-    return AFSGen(prg,prg2,prg3,prg4,x) 
+    return AFSGen(prg,prg2,prg3,prg4,x,True) 
 
 #------------------------------------------- class D PRNGs: differentials of fitters between pairs of two-dimensional points 
 

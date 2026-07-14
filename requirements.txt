@@ -1,5 +1,5 @@
 numpy>=1.22.1
 matplotlib>=3.5.3
 scipy>=1.14.1
-morebs2>=0.1.96
+morebs2>=0.1.99
 python-resources>=0.3

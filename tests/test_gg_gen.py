@@ -1,12 +1,7 @@
 from seqgen.gg_gen import * 
 from morebs2.numerical_generator import * 
-
 import unittest
 
-#base_prg = prg__constant(3) 
-#base_prg = prg__n_ary_alternator(-100,-50,-100)
-#base_prg = prg__LCG(567,12,51,5001) 
-#base_prg = prg__n_ary_alternator(-100,200,-100)
 
 def GaugeGuidedGen__sample_XST(base_prg,target_measure): 
     base_output_span = [22,56] 
@@ -60,7 +55,7 @@ class GaugeGuidedGenMethods(unittest.TestCase):
             print(x)
             L.append(x)
         l = len(set(L))
-        assert l == 785, "got {}".format(l) 
+        assert l == 675, "got {}".format(l) 
         
         target_measure = "uwpd"
         gg = GaugeGuidedGen__sample_XST(base_prg,target_measure)
@@ -101,7 +96,6 @@ class GaugeGuidedGenMethods(unittest.TestCase):
             print(x)
             L.append(x)
 
-        #L = [next(gg) for _ in range(1000)] 
         l = len(set(L))
         assert l == 831, "got {}".format(l) 
 

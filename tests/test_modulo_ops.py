@@ -45,6 +45,29 @@ class ModuloOpsMethods(unittest.TestCase):
 
         qx11 = modrange_for_congruence(-1500,111321,modrange)
         assert modulo_in_range(111321,qx11) == -1500 
+
+            ##
+        modrange2 = [-5,201]
+        qx2 = modrange_for_congruence(1000,22,modrange2)
+        assert modulo_in_range(22,qx2) == 1000 
+
+        qx3 = modrange_for_congruence(1000,122,modrange2)
+        assert modulo_in_range(122,qx3) == 1000 
+
+            ## 
+        modrange3 = [-15.3,25.5]
+        qx4 = modrange_for_congruence(1000.333,22.4545,modrange3)
+        assert modulo_in_range(22.4545,qx4) == 1000.333 
+
+        qx5 = modrange_for_congruence(7.333,22.4545,modrange3)
+        assert modulo_in_range(22.4545,qx5) == 7.333, "got {}".format(modulo_in_range(22.4545,qx5))
+
+        qx6 = modrange_for_congruence(7.333,-122.4545,modrange3)
+        assert round(modulo_in_range(-122.4545,qx6),3) == 7.333 
+
+        qx7 = modrange_for_congruence(700.333,-1122.4545,modrange3)
+        assert round(modulo_in_range(-1122.4545,qx7),3) == 700.333 
+
         return  
 
     def test__unimodular_number__modulo_range_adjustment__case1(self):

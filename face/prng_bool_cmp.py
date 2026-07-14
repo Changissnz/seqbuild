@@ -83,15 +83,15 @@ class QCInfo:
             return len([k for k,v in self.q[2].items() if v > 0])
 
         if term == "vmean":
-            return (self.c[0,1] - self.c[0,0])
+            return abs(self.c[0,1] - self.c[0,0])
 
         if term == "vvar":
-            return (self.c[1,1] - self.c[1,0]) / 2.0
+            return abs(self.c[1,1] - self.c[1,0]) / 2.0
 
         if term == "fmean":
-            return (self.c[2,1] - self.c[2,0])
+            return abs(self.c[2,1] - self.c[2,0])
 
-        return (self.c[3,1] - self.c[3,0]) / 2.0
+        return abs(self.c[3,1] - self.c[3,0]) / 2.0
 
 def cmp_PRNG_test_scores(s0,s1): 
 

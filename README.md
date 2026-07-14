@@ -3,10 +3,9 @@
 Sequentete...sequentete, my son. 
 
 Project is being developed in conjunction with 
-that of dependency library, `morebs2`. Started out 
-as a research project, and I am starting to wrap 
-ends to it before the project branches off into 
-development hell terrain. 
+that of dependency library, `morebs2`. 
+
+**Project is in rolling development.**
 
 
 ### Brief Description (Current State)  
@@ -71,19 +70,19 @@ As of 07/08/2026, here is a list of PRNGs and their categories available for use
 - Class 0: LCGs and LCG form-fitters  
     - `lcg`, `lcgv2`, `lcgv3`, `mdrgen`  
 - Class 1: linear combination and polynomial-based  
-    - `rch`, `idforest`  
+    - `rch`, `idforest`
 - Class I: identity  
     - `echo`  
-- Class 2: multi-factored form-fitters + noise adders  
+- Class 2: multi-factored form-fitters with noise adders  
     - `ssino`, `gg`, `shadow`  
 - Class T: time-based (or 'real number exploder`)     
     - `pdd`  
 - Class D: differentials of form-fitters b/t two-dimensional points  
     - `fit22`, `lps`  
-- Class 3: stacked vector-based form-fitters + noise adders  
+- Class 3: stacked vector-based form-fitters with noise adders  
     - `n2m`, `afs`  
 - Class O: operation-based  
-    - `optri`  
+    - `optri`
 - Class V: quotient and polynomial differential form-fitters of vector inputs  
     - `qval`, `pid`. 
 
@@ -113,6 +112,12 @@ print(c)
 ```
 
 There are also input PRNG/output PRNG comparators in that file. 
+
+### Update: 07/14/26
+
+The generators `CongruenceShifterGen`,`UDLSGen`, and `PartitionedMultiGen` have just 
+been developed, using previous code infrastructure developed. These three generators 
+are going to be part of Comm Lang. 
 
 ### Update: 07/08/26 
 Added the following generators to Comm Lang: `n2m`,`gg`,`afs`,`fit22`, and `lps`. 

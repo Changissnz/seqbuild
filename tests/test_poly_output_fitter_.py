@@ -1,5 +1,6 @@
 from intigers.poly_output_fitter_ import * 
-from morebs2.numerical_generator import prg__constant,prg__n_ary_alternator
+from morebs2.numerical_generator import prg__constant,prg__n_ary_alternator,\
+    prg__LCG,prg__single_to_nvec
 
 import unittest
 
@@ -289,6 +290,37 @@ class UDLinSysSolverMethods(unittest.TestCase):
         d = {2:23}
         ulss.set_freevar_values(d,2) 
         assert not ulss.constat
+
+    def test__UDLinSysSolver__apply_case4(self):
+        G = prg__LCG(45.6,110.5,-3124.3,10651.66) 
+        G = prg__single_to_int(G) 
+        G = wrap_ranged_modulo_over_generator(G,(-1000,1000))
+
+        prg = prg__single_to_nvec(G,5) 
+
+        m = np.array([prg() for _ in range(3)],dtype=int)
+        y = np.array([G() for _ in range(3)],dtype=int)
+
+        udls = UDLinSysSolver(m,y)
+
+        udls.solve()
+
+        fx = {0:1345,1:4005}
+        udls.set_freevar_values(fx)
+
+        Q = prg() 
+
+        Y0 = udls.apply(Q)
+        Z0 = udls.apply(m[0])
+
+        fx = {0:-3345,1:105} 
+        udls.set_freevar_values(fx)
+
+        Y1 = udls.apply(Q)
+        Z1 = udls.apply(m[0])
+
+        assert Z0 == Z1 == 693 
+        assert round(abs(Y0 - Y1)) > 0 
 
 
 if __name__ == '__main__':

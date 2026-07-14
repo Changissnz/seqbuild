@@ -52,7 +52,7 @@ class PRNGIOStatsMethods(unittest.TestCase):
 
         # compaire pairwise I/O
         assert pios.pairwise_io_cmp(0,1,{1,2,3,4,5,6,7}) == 1 
-        assert pios.pairwise_io_cmp(0,2,{1,2,3,4,5,6,7}) == 1
+        assert pios.pairwise_io_cmp(0,2,{1,2,3,4,5,6,7}) == 0, "got {}".format(pios.pairwise_io_cmp(0,2,{1,2,3,4,5,6,7}))
         assert pios.pairwise_io_cmp(1,2,{1,2,3,4,5,6,7}) == -1 
 
     """
@@ -74,14 +74,14 @@ class PRNGIOStatsMethods(unittest.TestCase):
 
         assert pios.output_cmp(0,1,{1,2,3,4,5,6,7})  == -1 
         assert pios.output_cmp(0,2,{1,2,3,4,5,6,7})  == -1 
-        assert pios.output_cmp(1,2,{1,2,3,4,5,6,7}) == 1 
+        assert pios.output_cmp(1,2,{1,2,3,4,5,6,7}) == 0, "got {}".format(pios.output_cmp(1,2,{1,2,3,4,5,6,7}))
 
         assert pios.io_cmp(0,{1,2,3,4,5,6,7}) == 0 
         assert pios.io_cmp(1,{1,2,3,4,5,6,7}) == 1 
         assert pios.io_cmp(2,{1,2,3,4,5,6,7}) == -1
 
         assert pios.pairwise_io_cmp(0,1,{1,2,3,4,5,6,7}) == -1 
-        assert pios.pairwise_io_cmp(1,2,{1,2,3,4,5,6,7}) == 1 
+        assert pios.pairwise_io_cmp(1,2,{1,2,3,4,5,6,7}) == -1, "got {}".format(pios.pairwise_io_cmp(1,2,{1,2,3,4,5,6,7}))
         assert pios.pairwise_io_cmp(0,1,{1,2,3,4,5,6,7}) == -1
 
     """
@@ -104,8 +104,8 @@ class PRNGIOStatsMethods(unittest.TestCase):
         assert pios.io_cmp(1,{1,2,3,4,5,6,7}) == -1 
         assert pios.io_cmp(2,{1,2,3,4,5,6,7}) == -1 
 
-        assert pios.pairwise_io_cmp(0,1,{1,2,3,4,5,6,7}) == 1 
-        assert pios.pairwise_io_cmp(0,2,{1,2,3,4,5,6,7}) == 1 
+        assert pios.pairwise_io_cmp(0,1,{1,2,3,4,5,6,7}) == -1, "got {}".format(pios.pairwise_io_cmp(0,1,{1,2,3,4,5,6,7}))
+        assert pios.pairwise_io_cmp(0,2,{1,2,3,4,5,6,7}) == 0, "got {}".format(pios.pairwise_io_cmp(0,2,{1,2,3,4,5,6,7}))
         assert pios.pairwise_io_cmp(1,2,{1,2,3,4,5,6,7}) == -1 
 
     """
@@ -113,8 +113,6 @@ class PRNGIOStatsMethods(unittest.TestCase):
     as more rnadom than input PRNG
     """
     def test__PRNGIOStats__cmp__case4(self):
-        
-        prg = prg__LCG(451.11,-155.44,546.222,2001.004) # 0,-1,1 
 
         l = [2,6,4,3,8,10]
         seq = IntSeq(l) 
@@ -135,18 +133,16 @@ class PRNGIOStatsMethods(unittest.TestCase):
 
         assert pios.io_cmp(0,{1,2,3,4,5,6,7}) == 1 
         assert pios.io_cmp(1,{1,2,3,4,5,6,7}) == 1 
-        assert pios.io_cmp(2,{1,2,3,4,5,6,7}) == 0  
+        assert pios.io_cmp(2,{1,2,3,4,5,6,7}) == 1, "got {}".format(pios.io_cmp(2,{1,2,3,4,5,6,7}))
 
         assert pios.pairwise_io_cmp(0,1,{1,2,3,4,5,6,7}) == 1
         assert pios.pairwise_io_cmp(0,2,{1,2,3,4,5,6,7}) == 1
-        assert pios.pairwise_io_cmp(1,2,{1,2,3,4,5,6,7}) == 1 
+        assert pios.pairwise_io_cmp(1,2,{1,2,3,4,5,6,7}) == -1, "got {}".format(pios.pairwise_io_cmp(1,2,{1,2,3,4,5,6,7}))
 
     """
     same OpTriGen> as in case 4, except `add_noise` is set to True 
     """
     def test__PRNGIOStats__cmp__case5(self):
-        
-        prg = prg__LCG(451.11,-155.44,546.222,2001.004) 
 
         l = [2,6,4,3,8,10]
         seq = IntSeq(l) 
@@ -162,16 +158,16 @@ class PRNGIOStatsMethods(unittest.TestCase):
         pios.run()    
 
         assert pios.output_cmp(0,1,{1,2,3,4,5,6,7}) == 1 
-        assert pios.output_cmp(0,2,{1,2,3,4,5,6,7}) == 0 
+        assert pios.output_cmp(0,2,{1,2,3,4,5,6,7}) == 1, "got {}".format(pios.output_cmp(0,2,{1,2,3,4,5,6,7})) 
         assert pios.output_cmp(1,2,{1,2,3,4,5,6,7}) == -1 
 
         assert pios.io_cmp(0,{1,2,3,4,5,6,7}) == 1 
         assert pios.io_cmp(1,{1,2,3,4,5,6,7}) == 1 
-        assert pios.io_cmp(2,{1,2,3,4,5,6,7}) == 0  
+        assert pios.io_cmp(2,{1,2,3,4,5,6,7}) == 1, "got {}".format(pios.io_cmp(2,{1,2,3,4,5,6,7}))
 
         assert pios.pairwise_io_cmp(0,1,{1,2,3,4,5,6,7}) == 1
         assert pios.pairwise_io_cmp(0,2,{1,2,3,4,5,6,7}) == 1
-        assert pios.pairwise_io_cmp(1,2,{1,2,3,4,5,6,7}) == 1 
+        assert pios.pairwise_io_cmp(1,2,{1,2,3,4,5,6,7}) == -1, "got {}".format(pios.pairwise_io_cmp(1,2,{1,2,3,4,5,6,7}))
 
 
 if __name__ == '__main__':
