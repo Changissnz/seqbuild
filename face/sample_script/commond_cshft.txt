@@ -1,0 +1,3 @@
+set G = make lcg with -27.46,-223.2,5229.55,-42349.333. 
+set G2 = make cshift with G,-2000.05,1999.95. 
+set G3 = make cshift with G,-2000.05,1999.95,1. 

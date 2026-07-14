@@ -20,22 +20,24 @@ DEFAULT_UDLSGEN_NEW_UDLS_RATE2_RANGE = (5,18)
 class UDLSGen: 
 
     def __init__(self,prg,varsize_range,allow_rate1_change:bool,allow_rate2_change:bool,\
-        coeff_absmax=DEFAULT_UDLSGEN_COEFF_ABSMAX,draw_values_from_cache:bool=True): 
+        coeff_absmax=DEFAULT_UDLSGEN_COEFF_ABSMAX,draw_values_from_cache:bool=True,\
+        verbose:bool=False): 
 
         assert type(prg) in {MethodType,FunctionType}
         assert is_valid_range(varsize_range,True,False) 
 
         # NOTE: max variable size is 8, min is 2 
-        if not 1 < varsize_range[0] < varsize_range[1] <= 8: 
-            start = modulo_in_range(varsize_range[0],[1,9]) 
-            end = modulo_in_range(varsize_range[1],[1,9]) 
+        if not 2 < varsize_range[0] < varsize_range[1] <= 8: 
+            start = modulo_in_range(varsize_range[0],[2,9]) 
+            end = modulo_in_range(varsize_range[1],[2,9]) 
 
             if start == end: 
                 end += 1 
             varsize_range = (start,end) 
 
         assert coeff_absmax > 0 and type(coeff_absmax) == int 
-        assert type(allow_rate1_change) == type(allow_rate2_change) == bool 
+        assert type(allow_rate1_change) == type(allow_rate2_change) == bool == \
+            type(draw_values_from_cache) == type(verbose) 
 
         self.prg = prg__single_to_int(prg) 
         self.vs_range = varsize_range
@@ -43,6 +45,7 @@ class UDLSGen:
         self.allow_rate1_change = allow_rate1_change 
         self.allow_rate2_change = allow_rate2_change
         self.draw_values_from_cache = draw_values_from_cache
+        self.verbose = verbose 
 
         self.udls = None 
 
@@ -79,13 +82,17 @@ class UDLSGen:
     def load_udls(self,draw_from_cache:bool=False,num_attempts_remaining=3): 
 
         X,Y = self.new_XY_dataset(draw_from_cache)
-        '''
-        print("X,Y")
-        print(X)
-        print()
-        print(Y) 
-        print("-----")
-        '''
+        
+        if self.verbose: 
+            print("\t\t** new dataset")
+            print("-- input")
+            print(X)
+            print()
+            print("-- output")
+            print(Y) 
+            print()
+            print("-----")
+        
         try: 
             udls = UDLinSysSolver(X,Y) 
             udls.solve()
@@ -101,7 +108,7 @@ class UDLSGen:
     def new_XY_dataset(self,draw_from_cache:bool=False): 
 
         num_vars = modulo_in_range(self.prg(),self.vs_range) 
-        num_samples = modulo_in_range(self.prg(),[1,num_vars]) 
+        num_samples = modulo_in_range(self.prg(),[2,num_vars]) 
         num_x = num_vars * num_samples 
         prg_ = wrap_sp_modulo_over_generator(self.prg,self.coeff_absmax)
 

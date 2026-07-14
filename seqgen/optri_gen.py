@@ -418,10 +418,10 @@ class OpTriGen:
 
         row_indices = [] 
         for i in range(self.m.shape[0]): 
-            j = self.prg() % (i +1) 
+            j = int(self.prg()) % (i +1) 
             row_indices.append(j)
 
-        split_index = self.prg() % len(row_indices) +1 
+        split_index = int(self.prg()) % len(row_indices) +1 
         return self.jagged_split_(row_indices,split_index) 
 
     def set_jagged_split(self): 
@@ -451,21 +451,21 @@ class OpTriGen:
         if type(self.prg) == type(None): 
             i = 0 
         else: 
-            i = self.prg() % len(self.ots_available_rows)
+            i = int(self.prg()) % len(self.ots_available_rows)
         s = self.ots_available_rows.pop(i)
         self.store_ots_row_(s,store_seq)  
 
     def reproduce_OpTri_jagged45N90(self): 
-        p45_seqsize = (self.prg() % self.ots.degree()) + 1 
-        p90_seqsize = (self.prg() % self.ots.degree()) + 1 
+        p45_seqsize = (int(self.prg()) % self.ots.degree()) + 1 
+        p90_seqsize = (int(self.prg()) % self.ots.degree()) + 1 
 
         p45_indices,p90_indices = [],[] 
 
         for _ in range(p45_seqsize): 
-            s = (self.prg() % self.ots.degree()) + 1 
+            s = (int(self.prg()) % self.ots.degree()) + 1 
             p45_indices.append(s)
         for _ in range(p90_seqsize): 
-            s = (self.prg() % self.ots.degree()) + 1 
+            s = (int(self.prg()) % self.ots.degree()) + 1 
             p90_indices.append(s)
         ots = self.ots.reproduce(p45_indices,p90_indices)
         self.load_data_struct(ots)
@@ -487,7 +487,7 @@ class OpTriGen:
         if type(self.prg) == type(None): 
             axis = 0 
         else: 
-            axis = self.prg() % 2 
+            axis = int(self.prg()) % 2 
 
         otfd = OpTriFlipDerivation(self.m,self.intseed,self.ffunc,axis)
         self.load_data_struct(otfd)
@@ -500,7 +500,7 @@ class OpTriGen:
                 self.new_default_FlipDerivation()
             # case: flip onto another axis
             elif len(self.otfd_prev_axis) < 2 and \
-                self.prg() % 2 == 1: 
+                int(self.prg()) % 2 == 1: 
                 self.otherflip_OpTriFlipDerivation()
             # case: reproduce from previous <OpTriFlipDerivation>
             else: 
@@ -512,7 +512,7 @@ class OpTriGen:
         if type(self.prg) == type(None): 
             i = 0 
         else: 
-            i = self.prg() % len(self.otfd_available_rows)
+            i = int(self.prg()) % len(self.otfd_available_rows)
         
         s = self.otfd_available_rows.pop(i)
         seq = self.otfd.m_[s,s:]
@@ -527,7 +527,7 @@ class OpTriGen:
 
     def reproduce_OpTriFlipDerivation(self): 
         self.otfd = self.otfd.reproduce(self.bfunc)
-        axis = self.prg() % 2 if type(self.prg) != type(None) else 0 
+        axis = int(self.prg()) % 2 if type(self.prg) != type(None) else 0 
         if self.otfd.axis != axis: 
             self.otfd.reset_axis(axis)  
         self.otfd.construct() 

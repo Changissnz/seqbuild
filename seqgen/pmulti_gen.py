@@ -6,9 +6,11 @@ from morebs2.matrix_methods import is_valid_range
 from types import MethodType,FunctionType
 import numpy as np 
 
+DEFAULT_PARTMULTIGEN_SEGSIZE_RANGE = [21,213]
+
 class PartitionedMultiGen: 
 
-    def __init__(self,prg_seq,super_range,segment_size_range):
+    def __init__(self,prg_seq,super_range,segment_size_range=DEFAULT_PARTMULTIGEN_SEGSIZE_RANGE):
         assert len(prg_seq) > 1 
         for x in prg_seq: assert type(x) in {MethodType,FunctionType} 
 

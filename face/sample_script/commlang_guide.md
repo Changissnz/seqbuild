@@ -307,6 +307,40 @@ as well as their instantiation parameters in Comm Lang.
     3. (prg, prg) 
     * (primary generator, secondary generator, third generator) 
 
+[o] cshift   
+
+- instantiation:  
+
+    1. (prg, range) 
+    * (primary generator, super-range) 
+
+    2. (prg, range, 0|1) 
+    * (primary generator, super-range, allow stretch&shrink) 
+
+[o] udls   
+
+- instantiation:  
+
+    1. (prg, integer range) 
+    * (primary generator, super-range) 
+
+    2. (prg, integer range, 0|1) 
+    * (primary generator, variable size range, allow rate change 1)
+
+    3. (prg, integer range, 0|1,0|1) 
+    * (primary generator, variable size range, allow rate change 1,allow rate change 2)
+
+    4. (prg, integer range, 0|1,0|1,0|1) 
+    * (primary generator, variable size range, allow rate change 1,allow rate change 2,draw from cache)
+
+[o] pmulti 
+
+    1. (prg_1,prg_2,...,prg_k,range)
+    * (generator 1, ...,generator k,super-range) 
+
+    2. (prg_1,prg_2,...,prg_k,range,range)
+    * (generator 1, ...,generator k,super-range,positive integer range) 
+
 [o] pddelta  
 
 - instantiation:  

@@ -1,0 +1,14 @@
+set G = make lcg with -27.46,-223.2,5229.55,-42349.333. 
+set G2 = make lcg with 4,5,60,200.1. 
+set G3 = merge G,G2 with /. 
+
+set P = make pmulti with G,G2,-5005.67,2323.776.
+set P2 = make pmulti with G,G2,P,-5005.67,2323.776.
+set P3 = make pmulti with G,G2,G3,P2,-5005.67,2323.776.
+set P4 = make pmulti with G,G2,G3,P3,-5005.67,2323.776,20,300.
+
+set V = run P for 30 iter. 
+set V2 = run P2 for 30 iter. 
+set V3 = run P3 for 30 iter. 
+set V4 = run P4 for 30 iter. 
+

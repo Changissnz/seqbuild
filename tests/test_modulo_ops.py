@@ -70,6 +70,14 @@ class ModuloOpsMethods(unittest.TestCase):
 
         return  
 
+    # NOTE: wrong output 
+    def test__modrange_for_congruence__case2(self): 
+        pv = 281
+        av = 218.1922999999
+        r = [212.4384599999994, 293.7192299999997]
+        m = list(np.round(modrange_for_congruence(pv,av,r),5)) 
+        assert m == [0,-62.8077]
+
     def test__unimodular_number__modulo_range_adjustment__case1(self):
         # case 1 
         wv = 38 

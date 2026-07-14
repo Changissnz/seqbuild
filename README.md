@@ -65,12 +65,12 @@ cauto.generate()
 
 ### PRNG Categories in Comm Lang 
 
-As of 07/08/2026, here is a list of PRNGs and their categories available for use in Comm Lang.  
+Here is a list of PRNGs and their categories available for use in Comm Lang.  
 
 - Class 0: LCGs and LCG form-fitters  
     - `lcg`, `lcgv2`, `lcgv3`, `mdrgen`  
 - Class 1: linear combination and polynomial-based  
-    - `rch`, `idforest`
+    - `rch`, `idforest`, `udls` 
 - Class I: identity  
     - `echo`  
 - Class 2: multi-factored form-fitters with noise adders  
@@ -82,7 +82,7 @@ As of 07/08/2026, here is a list of PRNGs and their categories available for use
 - Class 3: stacked vector-based form-fitters with noise adders  
     - `n2m`, `afs`  
 - Class O: operation-based  
-    - `optri`
+    - `optri`, `cshift`, `pmulti` 
 - Class V: quotient and polynomial differential form-fitters of vector inputs  
     - `qval`, `pid`. 
 
@@ -96,8 +96,8 @@ the Comm Lang user interface, is done through `file<face.prng_stats>`. Here is a
 from face.prng_stats import * 
 
 G = "your PRNG" 
-ngram_info = "relatively small positive intiger or intigers" 
-partition_size = "relatively small positive intiger" 
+ngram_info = "relatively small positive integer or integers" 
+partition_size = "relatively small positive integer" 
 
 S = PRNGStats(G,ngram_info,partition_size)
 S.run() 

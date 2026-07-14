@@ -39,19 +39,20 @@ class CongruenceShifterGenMethods(unittest.TestCase):
         assert pios.io_cmp(1,{1,2,3,4,5,6,7}) == 0 
         assert pios.io_cmp(2,{1,2,3,4,5,6,7}) == -1 
 
+    """
+    demonstrates PRNG output differences from mode<allow_stretch_and_shrink>. 
+    """
+    def test__CongruenceShifterGen__next__case2(self): 
+        prg = prg__LCG(5,1121,17,5342)
+        super_range = [-1000,1000]
+
+        csg = CongruenceShifterGen(deepcopy(prg),deepcopy(super_range),allow_stretch_and_shrink=True)
+        csg2 = CongruenceShifterGen(deepcopy(prg),deepcopy(super_range),allow_stretch_and_shrink=False)
+
+        X1 = np.round([next(csg) for _ in range(1000)],5)
+        X2 = np.round([next(csg2) for _ in range(1000)],5) 
+
+        assert len(np.where(X1 == X2)[0]) == 0 
 
 if __name__ == '__main__':
     unittest.main()
-
-
-
-##csg2 = CongruenceShifterGen(deepcopy(prg),super_range,allow_stretch_and_shrink=True)
-
-'''
->>> pv = 281
->>> av = 218.1922999999
->>> modrange_for_congruence(pv,av,[212.4384599999994, 293.7192299999997])
-[0, -62.8077000001]
->>>
-'''
-

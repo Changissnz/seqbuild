@@ -9,6 +9,9 @@ from seqgen.gg_gen import *
 from seqgen.afs_gen import * 
 from seqgen.fit22_gen import * 
 from seqgen.lps_gen import * 
+from seqgen.cs_gen import * 
+from seqgen.udls_gen import * 
+from seqgen.pmulti_gen import * 
 from desi.fraction import * 
 from desi.differentials import * 
 from desi.prng_dec_delta import * 
@@ -20,7 +23,7 @@ from seqgen.ssi_netop import *
 BASE_PRNG = ["lcg","lcgv2","lcgv3","mdr","mdrv2",\
         "mdrgen","iomaps","idforest","optri","rch","qval",\
         "pid","echo","shadow","ssino","n2m","gg","afs","fit22",\
-        "pddelta"]   
+        "cshift","udls","pddelta"]   
 
 ARITHMETIC_OP_STR_MAP = {"+":add,"-":sub,"/":zero_div0,"*":mul,"%":safe_mod}  
 
@@ -109,6 +112,15 @@ def MAIN_method_for_object(q):
         return q.__next__ 
 
     if type(q) == LPSGen:
+        return q.__next__ 
+
+    if type(q) == CongruenceShifterGen:
+        return q.__next__ 
+
+    if type(q) == UDLSGen:
+        return q.__next__ 
+
+    if type(q) == PartitionedMultiGen:
         return q.__next__ 
 
     return -1 
@@ -573,6 +585,55 @@ def MAKE_idforest(splitstr_cmd,var_map):
     idf = IDecForest(IntSeq(V),MO,cache_size,reprod_rate_range,max_trees,G,prg2,True,False)   
     return idf
 
+"""
+prg,range 
+primary generator, variable size range 
+
+prg,range,bool
+primary generator, variable size range,allow rate change 1
+
+prg,range,bool,bool
+primary generator, variable size range,allow rate change 1,allow rate change 2
+
+prg,range,bool,bool,bool,
+primary generator, variable size range,allow rate change 1,allow rate change 2,draw from cache
+"""
+def MAKE_udls(splitstr_cmd,var_map):
+
+    assert splitstr_cmd[1] == "udls" 
+    assert splitstr_cmd[2] == "with"
+
+    parameters = splitstr_cmd[3].split(",") 
+    l = len(parameters)
+
+    assert l in {3,4,5,6} 
+    assert parameters[0] in var_map 
+
+    prg = var_map[parameters[0]] 
+    prg = MAIN_method_for_object(prg) 
+
+    r0,r1 = int(float(parameters[1])),int(float(parameters[2])) 
+
+    assert r0 < r1 
+
+    if l == 3: 
+        return UDLSGen(prg,(r0,r1),allow_rate1_change=True,allow_rate2_change=False,\
+            draw_values_from_cache=False) 
+    
+    b0 = bool(int(parameters[3])) 
+    if l == 4: 
+        return UDLSGen(prg,(r0,r1),allow_rate1_change=b0,allow_rate2_change=False,\
+            draw_values_from_cache=False) 
+
+    b1 = bool(int(parameters[4])) 
+    if l == 5: 
+        return UDLSGen(prg,(r0,r1),allow_rate1_change=b0,allow_rate2_change=b1,\
+            draw_values_from_cache=False) 
+
+    b2 = bool(int(parameters[5]))  
+    return UDLSGen(prg,(r0,r1),allow_rate1_change=b0,allow_rate2_change=b1,\
+        draw_values_from_cache=b2) 
+
 #-------------------------------------------------------- class I: identity PRNGs (cycling of file)
 
 def MAKE_echo(splitstr_cmd):
@@ -863,7 +924,7 @@ def MAKE_optri(splitstr_cmd,var_map):
     prg = var_map[parameters[1]] 
     prg = MAIN_method_for_object(prg) 
     
-    prg_ = prg__single_to_int(prg)
+    #prg_ = prg__single_to_int(prg)
     gen_type = int(parameters[2]) 
     assert gen_type in {1,2} 
 
@@ -875,8 +936,83 @@ def MAKE_optri(splitstr_cmd,var_map):
     base_sequence = IntSeq(base_sequence) 
     M = base_sequence.difftri(cast_type=np.int32)
 
-    return OpTriGen(int_seed,M,prg_,gen_type,forward_func=add,\
+    return OpTriGen(int_seed,M,prg,gen_type,forward_func=add,\
         backward_func=sub,add_noise=add_noise) 
+
+"""
+prg,range
+prg,super-range 
+
+prg,range,bool 
+prg,super-range,allow stretch&shrink
+"""
+def MAKE_cshift(splitstr_cmd,var_map): 
+
+    assert splitstr_cmd[1] == "cshift" 
+    assert splitstr_cmd[2] == "with" 
+    
+    parameters = splitstr_cmd[3].split(",") 
+
+    l = len(parameters)
+
+    assert l in {3,4} 
+
+    assert parameters[0] in var_map 
+    prg = var_map[parameters[0]] 
+    prg = MAIN_method_for_object(prg) 
+
+    r0,r1 = float(parameters[1]),float(parameters[2])
+    assert r0 < r1 
+
+    if l == 3: 
+        return CongruenceShifterGen(prg,(r0,r1),allow_stretch_and_shrink=False) 
+    
+    b = bool(int(parameters[3])) 
+    return CongruenceShifterGen(prg,(r0,r1),allow_stretch_and_shrink=b)  
+
+"""
+(prg_1,prg_2,...,prg_k,range)
+(prg_1,prg_2,...,prg_k,super-range)
+
+(prg_1,prg_2,...,prg_k,range,range)
+(prg_1,prg_2,...,prg_k,super-range,segment size range)
+"""
+def MAKE_pmulti(splitstr_cmd,var_map): 
+
+    assert splitstr_cmd[1] == "pmulti" 
+    assert splitstr_cmd[2] == "with" 
+    
+    parameters = splitstr_cmd[3].split(",") 
+    assert len(parameters) >= 4 
+
+    gs = [] 
+
+    index = 0 
+    for (i,p) in enumerate(parameters): 
+        try: 
+            assert p in var_map 
+            prg = var_map[p] 
+            
+            prg = MAIN_method_for_object(prg) 
+            index = i 
+
+            gs.append(prg)
+        except: 
+            break 
+
+    assert len(gs) > 1 
+    parameters = parameters[index + 1:] 
+    assert len(parameters) in {2,4} 
+
+    s0,s1 = float(parameters[0]),float(parameters[1]) 
+    assert s0 < s1 
+
+    if len(parameters) == 2: 
+        return PartitionedMultiGen(gs,(s0,s1)) 
+
+    r0,r1 = int(float(parameters[2])),int(float(parameters[3]))
+    assert 0 < r0 < r1 
+    return PartitionedMultiGen(gs,(s0,s1),(r0,r1))
 
 #------------------------------------------------------------------------------------- 
 
@@ -940,6 +1076,15 @@ def MAKE_proc(splitstr_cmd,var_map):
 
     if splitstr_cmd[1] == "lps": 
         return MAKE_lps(splitstr_cmd,var_map) 
+
+    if splitstr_cmd[1] == "cshift": 
+        return MAKE_cshift(splitstr_cmd,var_map)
+
+    if splitstr_cmd[1] == "udls": 
+        return MAKE_udls(splitstr_cmd,var_map)
+
+    if splitstr_cmd[1] == "pmulti": 
+        return MAKE_pmulti(splitstr_cmd,var_map)
 
     if splitstr_cmd[1] == "pddelta": 
         return MAKE_pddelta(splitstr_cmd,var_map) 

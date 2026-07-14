@@ -1,0 +1,16 @@
+set G = make lcg with -27.46,-223.2,5229.55,-42349.333. 
+set G2 = make lcg with 4,5,60,200.1. 
+set G3 = merge G,G2 with /. 
+
+set U = make udls with G3,-12222.05,2999.95. 
+set U2 = make udls with U,-12222.05,2999.95,1. 
+set U3 = make udls with G3,-12222.05,2999.95,0,1. 
+set U4 = make udls with G3,-12222.05,2999.95,1,0,1.  
+
+set V = run U for 200 iter. 
+set V2 = run U2 for 200 iter. 
+
+run U3 for 250 iter. 
+
+set V3 = run U3 for 100 iter. 
+set V4 = run U4 for 400 iter. 

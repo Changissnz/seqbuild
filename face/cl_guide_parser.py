@@ -35,6 +35,9 @@ SAMPLE_USE_FILE_MAP = {"multimetric": BASE_COMM_LANG_FOLDER + "commond_one.txt",
     "afs": BASE_COMM_LANG_FOLDER + "commond_afs.txt",\
     "fit22": BASE_COMM_LANG_FOLDER + "commond_fit22.txt",\
     "lps": BASE_COMM_LANG_FOLDER + "commond_lps.txt",\
+    "cshift": BASE_COMM_LANG_FOLDER + "commond_cshft.txt",\
+    "udls": BASE_COMM_LANG_FOLDER + "commond_udls.txt",\
+    "pmulti": BASE_COMM_LANG_FOLDER + "commond_pm.txt",\
     "pddelta": BASE_COMM_LANG_FOLDER + "commond_34.txt"}    
 
 def stringize_CLGuideParser_keywords(clgp): 
