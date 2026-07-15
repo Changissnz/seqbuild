@@ -6,7 +6,7 @@ import time
 DEFAULT_TBCLF_TIMESTAMP_SEEDSIZE_RANGE = [2,7] 
 
 DEFAULT_TBCLF_STRUCT_NAMES = ["lcg","mdrgen","optri","qval","rch","pid","ssino","idforest","shadow",\
-    "n2m","gg","afs","fit22","lps"]
+    "n2m","gg","afs","fit22","lps","cshift","udls","pmulti"]
 
 DEFAULT_TBCLF_BUNCHED_STRUCT_SIZE = [7,14]  
 DEFAULT_TBCLF_SUBGROUP_DEGREE = 3 
@@ -26,6 +26,9 @@ DEFAULT_TBCLF_GEN_SSINO_NODESIZE_RANGE = [10,42]
 DEFAULT_TBCLF_GEN_IOMAPS_SIZE_RANGE = [2,7] 
 
 DEFAULT_TBCLF_GEN_IDF_CACHE_SIZE_RANGE = [100,455]
+
+DEFAULT_TBCLF_PMULTI_GENERATOR_SIZE_RANGE = [3,7] 
+
 DEFAULT_TBCLF_GEN_PWOP_WEIGHT_RANGE = [-66 - 2/3,66.6 + 2/3]  
 
 # used in the case of `consistent_prng_output`
@@ -278,6 +281,15 @@ class TimeBasedCommLangFileGenerator:
         if n == "lps": 
             return self.generate_CL_lps() 
 
+        if n == "cshift": 
+            return self.generate_CL_cshift() 
+
+        if n == "udls": 
+            return self.generate_CL_udls() 
+
+        if n == "pmulti": 
+            return self.generate_CL_pmulti() 
+
         assert False 
 
     #---------------------------------------------------------- preprocessing methods 
@@ -363,15 +375,15 @@ class TimeBasedCommLangFileGenerator:
                 s,g = self.generate_CL_LCGv3() 
             S.extend(s)
             gen_names.append(g) 
-            
+        
+        self.update_CL_file(S) 
         # 
-        s,gen_name = self.PRNG_seq_to_merged_PRNG__CL_command(gen_names) 
-        S.extend(s) 
+        S,gen_name = self.PRNG_seq_to_merged_PRNG__CL_command(gen_names) 
         return S,gen_name 
 
     def generate_CL_LCG(self): 
 
-        prg = self.fetch_prg(True) 
+        prg = self.fetch_prg(True,True) 
         r = self.output_n_values(n=4,prg=prg,retry_nonzero=3,nonzero_indices=set({3}))
 
         gen_name = self.next_generator_name() 
@@ -382,7 +394,7 @@ class TimeBasedCommLangFileGenerator:
 
     def generate_CL_LCGv2(self): 
 
-        prg = self.fetch_prg(True)
+        prg = self.fetch_prg(True,True)
         r = self.generate_base5_LCG_numbers(prg)            
 
         gen_name = self.next_generator_name() 
@@ -392,7 +404,7 @@ class TimeBasedCommLangFileGenerator:
         return [s],gen_name
 
     def generate_CL_LCGv3(self): 
-        prg_ = self.fetch_prg(True)
+        prg_ = self.fetch_prg(True,True)
         base_numbers = self.generate_base5_LCG_numbers(prg_)
 
         prg = self.fetch_accessory_prg_varname() 
@@ -424,7 +436,7 @@ class TimeBasedCommLangFileGenerator:
         sr_start,sr_end = Q[0],Q[3]
 
         if gen_type == 2: 
-            s = "set {} = make lcgv3 with {},{},{},{},{},{},{}.".format(\
+            s = "set {} = make lcgv3 with {},{},{},{},{},{},{},{},{}.".format(\
                 gen_name,base_numbers[0],base_numbers[1],base_numbers[2],\
                 base_numbers[3],base_numbers[4],prg,sr_start,sr_end,b)  
             return [s],gen_name 
@@ -432,13 +444,13 @@ class TimeBasedCommLangFileGenerator:
         ts_range_start,ts_range_end = self.generate_int_range(prg_,DEFAULT_LCGV3_TERNARY_SIZE_RANGE)
         if gen_type == 3:  
 
-            s = "set {} = make lcgv3 with {},{},{},{},{},{},{},{},{}.".format(\
+            s = "set {} = make lcgv3 with {},{},{},{},{},{},{},{},{},{},{}.".format(\
                 gen_name,base_numbers[0],base_numbers[1],base_numbers[2],\
                 base_numbers[3],base_numbers[4],prg,sr_start,sr_end,ts_range_start,ts_range_end,b) 
             return [s],gen_name 
 
         tdt_start,tdt_end = self.generate_int_range(prg_,DEFAULT_LCGV3_TERNARY_DELTA_TIMESTAMP_RANGE)
-        s = "set {} = make lcgv3 with {},{},{},{},{},{},{},{},{}.".format(\
+        s = "set {} = make lcgv3 with {},{},{},{},{},{},{},{},{},{},{},{},{}.".format(\
             gen_name,base_numbers[0],base_numbers[1],base_numbers[2],\
             base_numbers[3],base_numbers[4],prg,sr_start,sr_end,ts_range_start,\
             ts_range_end,tdt_start,tdt_end,b) 
@@ -722,7 +734,7 @@ class TimeBasedCommLangFileGenerator:
 
     def fetch_accessory_prg_varname(self): 
         prg = self.fetch_prg(False,False) 
-        if type(prg) == type(None): 
+        if type(prg) == type(None) or prg == "DEFAULT": 
             prg = self.default_PRNG__CL_command()
         return prg 
 
@@ -736,7 +748,7 @@ class TimeBasedCommLangFileGenerator:
             if not resort_to_default: return None 
 
             if get_object: 
-                return MAIN_method_for_object(self.pdd) 
+                return self.pdd
             return "DEFAULT"
 
         full = not get_object
@@ -744,7 +756,7 @@ class TimeBasedCommLangFileGenerator:
 
         if len(g_list) == 0:
             if resort_to_default:  
-                return MAIN_method_for_object(self.pdd) if get_object else "DEFAULT"  
+                return self.pdd if get_object else "DEFAULT"  
             return None 
 
         t = round(self.pdd()) % len(g_list) 
@@ -837,7 +849,7 @@ class TimeBasedCommLangFileGenerator:
     # TODO: careful, process might confuse this with generator function. 
     def generate_CL_weighted_pwop(self): 
         G = self.fetch_prg(True,True) 
-        
+
         w = modulo_in_range(G(),DEFAULT_TBCLF_GEN_PWOP_WEIGHT_RANGE)
         options = sorted(set(ARITHMETIC_OP_STR_MAP.keys())) 
 
@@ -934,6 +946,52 @@ class TimeBasedCommLangFileGenerator:
         s = "set {} = make lps with {},{},{}.".format(gen_name,prg0,prg1,prg2)
 
         return [s],gen_name 
+
+    def generate_CL_cshift(self): 
+        gen_name = self.next_generator_name() 
+
+        G = self.fetch_prg(True,True) 
+        r0,r1 = prg__single_to_range_outputter(G)()
+        b = int(G()) % 2
+
+        prg0 = self.fetch_accessory_prg_varname() 
+        s = "set {} = make cshift with {},{},{},{}.".format(gen_name,prg0,r0,r1,b) 
+
+        return [s],gen_name  
+
+    def generate_CL_udls(self): 
+
+        gen_name = self.next_generator_name() 
+
+        G = self.fetch_prg(True,True) 
+        r0,r1 = prg__single_to_range_outputter(prg__single_to_int(G))()
+        b0 = int(G()) % 2
+        b1 = int(G()) % 2
+        b2 = int(G()) % 2
+
+        prg0 = self.fetch_accessory_prg_varname() 
+        s = "set {} = make udls with {},{},{},{},{},{}.".format(gen_name,prg0,r0,r1,b0,b1,b2)  
+        return [s],gen_name 
+
+    def generate_CL_pmulti(self): 
+
+        gen_name = self.next_generator_name() 
+        
+        G = self.fetch_prg(True,True) 
+        r0,r1 = prg__single_to_range_outputter(G)() 
+
+        num_generators = modulo_in_range(int(G()),DEFAULT_TBCLF_PMULTI_GENERATOR_SIZE_RANGE)
+
+        gen_seq = [self.fetch_accessory_prg_varname() for _ in range(num_generators)] 
+
+        s = "set {} = make pmulti with ".format(gen_name) 
+
+        for x in gen_seq: 
+            s += "{},".format(x) 
+        
+        s += "{},{}.".format(r0,r1) 
+
+        return [s],gen_name
 
     #----------------------------------------------------------- loading commands to Comm Lang cache and writing out to file 
 

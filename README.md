@@ -63,6 +63,17 @@ cauto = TimeBasedCommLangFileGenerator(filepath,base_gen_name,\
 cauto.generate()
 ```
 
+Last but not least, the `TimeBasedCommLangFileGenerator` can also be used to generate single 
+PRNGs, from the list of PRNGs in the next section. 
+
+```
+from face.easy_gen_struct import * 
+
+S = one_T_random_struct("prng_name")
+```
+
+NOTE: `lcgv2` and `lcgv3` are lumped under `lcg`. 
+
 ### PRNG Categories in Comm Lang 
 
 Here is a list of PRNGs and their categories available for use in Comm Lang.  

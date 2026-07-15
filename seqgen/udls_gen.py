@@ -30,9 +30,8 @@ class UDLSGen:
         if not 2 < varsize_range[0] < varsize_range[1] <= 8: 
             start = modulo_in_range(varsize_range[0],[2,9]) 
             end = modulo_in_range(varsize_range[1],[2,9]) 
-
-            if start == end: 
-                end += 1 
+            if end <= start: 
+                end = start + 1 
             varsize_range = (start,end) 
 
         assert coeff_absmax > 0 and type(coeff_absmax) == int 
@@ -108,6 +107,8 @@ class UDLSGen:
     def new_XY_dataset(self,draw_from_cache:bool=False): 
 
         num_vars = modulo_in_range(self.prg(),self.vs_range) 
+        if num_vars == 2: num_vars = 3 
+
         num_samples = modulo_in_range(self.prg(),[2,num_vars]) 
         num_x = num_vars * num_samples 
         prg_ = wrap_sp_modulo_over_generator(self.prg,self.coeff_absmax)
