@@ -350,7 +350,7 @@ class TimeBasedCommLangFileGenerator:
         # generate the individual LCGs first. 
         G = self.fetch_accessory_prg_varname()
         G = MAIN_method_for_object(self.clp.vartable[G])
-        
+
         for _ in range(bunch_size): 
             i = int(G()) % 3 
 
@@ -722,10 +722,8 @@ class TimeBasedCommLangFileGenerator:
 
     def fetch_accessory_prg_varname(self): 
         prg = self.fetch_prg(False,False) 
-        print("PRGGGG: ",prg)
         if type(prg) == type(None): 
             prg = self.default_PRNG__CL_command()
-        print("PRGGGGG2: ",prg) 
         return prg 
 
     def fetch_prg(self,get_object:bool,resort_to_default:bool=True): 
