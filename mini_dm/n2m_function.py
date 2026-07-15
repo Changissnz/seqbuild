@@ -62,7 +62,8 @@ class N2MVectorFunction:
         assert qx == {True}
 
         qx2 = np.array(sorted(f_map.values())) 
-        assert np.all(qx2 == np.arange(len(ip_seq),dtype=np.int32)) 
+        assert np.all(qx2 == np.arange(len(ip_seq),dtype=np.int32)),"got {}, expected {}".format(\
+            qx2,np.arange(len(ip_seq),dtype=np.int32))
         return
 
     """

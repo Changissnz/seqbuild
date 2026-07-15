@@ -1,4 +1,5 @@
 from .comm_lang import * 
+from .cl_guide_parser import BASE_COMM_LANG_FOLDER
 from morebs2.numerical_generator import merge_two_prgs
 import time 
 
@@ -347,7 +348,9 @@ class TimeBasedCommLangFileGenerator:
         S,gen_names = [],[] 
 
         # generate the individual LCGs first. 
-        G = self.fetch_prg(True,True) 
+        G = self.fetch_accessory_prg_varname()
+        G = MAIN_method_for_object(self.clp.vartable[G])
+        
         for _ in range(bunch_size): 
             i = int(G()) % 3 
 
@@ -719,8 +722,10 @@ class TimeBasedCommLangFileGenerator:
 
     def fetch_accessory_prg_varname(self): 
         prg = self.fetch_prg(False,False) 
+        print("PRGGGG: ",prg)
         if type(prg) == type(None): 
             prg = self.default_PRNG__CL_command()
+        print("PRGGGGG2: ",prg) 
         return prg 
 
     def fetch_prg(self,get_object:bool,resort_to_default:bool=True): 
@@ -733,7 +738,7 @@ class TimeBasedCommLangFileGenerator:
             if not resort_to_default: return None 
 
             if get_object: 
-                return self.pdd
+                return MAIN_method_for_object(self.pdd) 
             return "DEFAULT"
 
         full = not get_object
@@ -741,7 +746,7 @@ class TimeBasedCommLangFileGenerator:
 
         if len(g_list) == 0:
             if resort_to_default:  
-                return self.pdd if get_object else "DEFAULT"  
+                return MAIN_method_for_object(self.pdd) if get_object else "DEFAULT"  
             return None 
 
         t = round(self.pdd()) % len(g_list) 
@@ -894,11 +899,6 @@ class TimeBasedCommLangFileGenerator:
         return [s],gen_name 
 
     def generate_CL_gg(self): 
-
-        '''
-(primary generator,range,0|1,0|1)
-(primary generator,super-range,cov|uwpd,allow subrange drift)
-        ''' 
         gen_name = self.next_generator_name() 
 
         prg = self.fetch_accessory_prg_varname() 
@@ -1033,3 +1033,35 @@ class TimeBasedCommLangFileGenerator:
 
         
 ################################################
+
+DEFAULT_TBCLF_TMP_FILE_PATH = os.path.join(BASE_COMM_LANG_FOLDER,"tmp_file_that_no_one_should_use__HIOTRNGINRE.txt")
+
+"""
+outputs a time-based pseudo-random generated PRNG Python object 
+"""
+def one_T_random_struct(struct_name,tmp_filepath=DEFAULT_TBCLF_TMP_FILE_PATH):
+
+    assert struct_name in DEFAULT_TBCLF_STRUCT_NAMES
+
+    base_gen_name = "rxx"
+    use_prng_for_prng_pr = 0.5 
+    vector_files = [] 
+    comm_lang_files = [] 
+    consistent_prng_output = False 
+    verbose = False 
+
+    tbclf = TimeBasedCommLangFileGenerator(tmp_filepath,base_gen_name,use_prng_for_prng_pr,\
+        vector_files,comm_lang_files,consistent_prng_output,verbose) 
+
+    for _ in range(3): 
+        S,g = tbclf.generate_CL_LCG_bunch() 
+        tbclf.update_CL_file(S) 
+
+    S,g = tbclf.generate_one_struct_(struct_name)
+    tbclf.update_CL_file(S) 
+    tbclf.write_out_to_CL_file() 
+
+    q = tbclf.clp.vartable[g] 
+    tbclf.close() 
+
+    return q 

@@ -1,44 +1,45 @@
 import os 
 
-BASE_COMM_LANG_FOLDER = "face/sample_script/"
-COMM_LANG_GUIDE_FILE = BASE_COMM_LANG_FOLDER + "commlang_guide.md"
+base_dir = os.path.dirname(os.path.abspath(__file__))
+BASE_COMM_LANG_FOLDER = os.path.join(base_dir, "sample_script")
+COMM_LANG_GUIDE_FILE = os.path.join(BASE_COMM_LANG_FOLDER,"commlang_guide.md")
 
-SAMPLE_USE_FILE_MAP = {"multimetric": BASE_COMM_LANG_FOLDER + "commond_one.txt",\
-    "lcg":BASE_COMM_LANG_FOLDER + "commond_one.txt",\
-    "mdr":BASE_COMM_LANG_FOLDER + "commond_two.txt",\
-    "lcgv3":BASE_COMM_LANG_FOLDER + "commond_three.txt",\
-    "convert":BASE_COMM_LANG_FOLDER + "commond_four.txt",\
-    "qval":BASE_COMM_LANG_FOLDER + "commond_five.txt",\
-    "lcgv2":BASE_COMM_LANG_FOLDER + "commond_six.txt",\
-    "mdrv2":BASE_COMM_LANG_FOLDER + "commond_six.txt",\
-    "mdrgen":BASE_COMM_LANG_FOLDER + "commond_seven.txt",\
-    "optri":BASE_COMM_LANG_FOLDER + "commond_eight.txt",\
-    "pid":BASE_COMM_LANG_FOLDER + "commond_nine.txt",\
-    "open":BASE_COMM_LANG_FOLDER + "commond_ten.txt",\
-    "write":BASE_COMM_LANG_FOLDER + "commond_ten.txt",\
-    "set":BASE_COMM_LANG_FOLDER + "commond_13.txt",\
-    "span":BASE_COMM_LANG_FOLDER + "commond_13.txt",\
-    "make":BASE_COMM_LANG_FOLDER + "commond_14.txt",\
-    "op2":BASE_COMM_LANG_FOLDER + "commond_14.txt",\
-    "merge":BASE_COMM_LANG_FOLDER + "commond_15.txt",\
-    "tree":BASE_COMM_LANG_FOLDER + "commond_28.txt",\
-    "load":BASE_COMM_LANG_FOLDER + "commond_16.txt",\
-    "rch":BASE_COMM_LANG_FOLDER + "commond_20.txt",\
-    "echo":BASE_COMM_LANG_FOLDER + "commond_21.txt",\
-    "shadow":BASE_COMM_LANG_FOLDER + "commond_23.txt",\
-    "encrypt":BASE_COMM_LANG_FOLDER + "commond_25.txt",\
-    "iomaps": BASE_COMM_LANG_FOLDER + "commond_29.txt",\
-    "idforest": BASE_COMM_LANG_FOLDER + "commond_30.txt",\
-    "ssino": BASE_COMM_LANG_FOLDER + "commond_33.txt",\
-    "n2m": BASE_COMM_LANG_FOLDER + "commond_n2m.txt",\
-    "gg": BASE_COMM_LANG_FOLDER + "commond_gg.txt",\
-    "afs": BASE_COMM_LANG_FOLDER + "commond_afs.txt",\
-    "fit22": BASE_COMM_LANG_FOLDER + "commond_fit22.txt",\
-    "lps": BASE_COMM_LANG_FOLDER + "commond_lps.txt",\
-    "cshift": BASE_COMM_LANG_FOLDER + "commond_cshft.txt",\
-    "udls": BASE_COMM_LANG_FOLDER + "commond_udls.txt",\
-    "pmulti": BASE_COMM_LANG_FOLDER + "commond_pm.txt",\
-    "pddelta": BASE_COMM_LANG_FOLDER + "commond_34.txt"}    
+SAMPLE_USE_FILE_MAP = {"multimetric": os.path.join(BASE_COMM_LANG_FOLDER,"commond_one.txt"),\
+    "lcg": os.path.join(BASE_COMM_LANG_FOLDER,"commond_one.txt"),\
+    "mdr": os.path.join(BASE_COMM_LANG_FOLDER,"commond_two.txt"),\
+    "lcgv3": os.path.join(BASE_COMM_LANG_FOLDER,"commond_three.txt"),\
+    "convert": os.path.join(BASE_COMM_LANG_FOLDER,"commond_four.txt"),\
+    "qval": os.path.join(BASE_COMM_LANG_FOLDER,"commond_five.txt"),\
+    "lcgv2": os.path.join(BASE_COMM_LANG_FOLDER,"commond_six.txt"),\
+    "mdrv2":os.path.join(BASE_COMM_LANG_FOLDER,"commond_six.txt"),\
+    "mdrgen":os.path.join(BASE_COMM_LANG_FOLDER,"commond_seven.txt"),\
+    "optri":os.path.join(BASE_COMM_LANG_FOLDER,"commond_eight.txt"),\
+    "pid":os.path.join(BASE_COMM_LANG_FOLDER,"commond_nine.txt"),\
+    "open":os.path.join(BASE_COMM_LANG_FOLDER,"commond_ten.txt"),\
+    "write":os.path.join(BASE_COMM_LANG_FOLDER,"commond_ten.txt"),\
+    "set":os.path.join(BASE_COMM_LANG_FOLDER,"commond_13.txt"),\
+    "span":os.path.join(BASE_COMM_LANG_FOLDER,"commond_13.txt"),\
+    "make":os.path.join(BASE_COMM_LANG_FOLDER,"commond_14.txt"),\
+    "op2":os.path.join(BASE_COMM_LANG_FOLDER,"commond_14.txt"),\
+    "merge":os.path.join(BASE_COMM_LANG_FOLDER,"commond_15.txt"),\
+    "tree":os.path.join(BASE_COMM_LANG_FOLDER,"commond_28.txt"),\
+    "load":os.path.join(BASE_COMM_LANG_FOLDER,"commond_16.txt"),\
+    "rch":os.path.join(BASE_COMM_LANG_FOLDER,"commond_20.txt"),\
+    "echo":os.path.join(BASE_COMM_LANG_FOLDER,"commond_21.txt"),\
+    "shadow":os.path.join(BASE_COMM_LANG_FOLDER,"commond_23.txt"),\
+    "encrypt":os.path.join(BASE_COMM_LANG_FOLDER,"commond_25.txt"),\
+    "iomaps": os.path.join(BASE_COMM_LANG_FOLDER,"commond_29.txt"),\
+    "idforest": os.path.join(BASE_COMM_LANG_FOLDER,"commond_30.txt"),\
+    "ssino": os.path.join(BASE_COMM_LANG_FOLDER,"commond_33.txt"),\
+    "n2m": os.path.join(BASE_COMM_LANG_FOLDER,"commond_n2m.txt"),\
+    "gg": os.path.join(BASE_COMM_LANG_FOLDER,"commond_gg.txt"),\
+    "afs": os.path.join(BASE_COMM_LANG_FOLDER,"commond_afs.txt"),\
+    "fit22": os.path.join(BASE_COMM_LANG_FOLDER,"commond_fit22.txt"),\
+    "lps": os.path.join(BASE_COMM_LANG_FOLDER,"commond_lps.txt"),\
+    "cshift": os.path.join(BASE_COMM_LANG_FOLDER,"commond_cshft.txt"),\
+    "udls": os.path.join(BASE_COMM_LANG_FOLDER,"commond_udls.txt"),\
+    "pmulti": os.path.join(BASE_COMM_LANG_FOLDER,"commond_pm.txt"),\
+    "pddelta": os.path.join(BASE_COMM_LANG_FOLDER,"commond_34.txt")}   
 
 def stringize_CLGuideParser_keywords(clgp): 
     term_map = {0:"Primary",1:"Secondary",2:"Tertiary"}
