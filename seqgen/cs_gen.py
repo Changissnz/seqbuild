@@ -72,6 +72,8 @@ class CongruenceShifterGen:
             self.super_range = (start,end) 
             ##print('after: ',self.super_range)
 
+            self.c2 = 0 
+
 
     def set_next_shift(self):
         self.next_shift = modulo_in_range(int(self.prg()),self.cshift_frange) 
