@@ -353,7 +353,15 @@ class TimeBasedCommLangFileGenerator:
 
     #----------------------------------- generate LCG* commands 
 
-    def generate_CL_LCG_bunch(self):
+    def generate_CL_LCG_bunch(self): 
+        while True: 
+            try: 
+                return self.generate_CL_LCG_bunch_()
+            except: 
+                continue  
+
+    # NOTE: there is an intermittently occurring bug in this method. 
+    def generate_CL_LCG_bunch_(self):
 
         bunch_size = modulo_in_range(int(self.pdd()),DEFAULT_TBCLF_GEN_LCGBUNCH_SIZE_RANGE)
 
