@@ -83,15 +83,31 @@ to these specifications:
   the `prg` as an index generator. 
 - all values stored in `acc_queue` as well as the output value from `apply` 
   are in the bounds of DEFAULT_RCH_ACCUGEN_RANGE. 
+
+The `output_type` parameter determines the indices of the value sequence, from the 
+<RChainHead> nodes, for output every time the `apply` function is 
+called. 
+- output_type := -1 -> output only the value from the last <RChainHead> node.
+- output_type := 0 -> output all values except from the last <RChainhead> node. 
+- output_type := 1 -> output values from every <RChainHead> node. 
+
+NOTE: this generator, given certain parameters, repeats values in contiguous order. 
+      Repeating of values is most common when `output_type` is set to -1 and least 
+      common when `output_type` is set to 0. 
 """
 class RCHAccuGen: 
 
     def __init__(self,rch,prg,acc_queue=[],\
         queue_capacity:int=1000,dim_range=(3,8),\
-        output_range=DEFAULT_RCH_ACCUGEN_RANGE):
+        output_range=DEFAULT_RCH_ACCUGEN_RANGE,output_type= -1,\
+        verbose:bool = False):
 
         assert type(acc_queue) == list 
         assert type(queue_capacity) == int and queue_capacity > 1
+        assert is_valid_range(output_range,True,False) or is_valid_range(output_range,False,False) 
+        assert output_type in {-1,0,1} 
+        assert type(verbose) == bool 
+
         self.rch = rch 
 
         
@@ -106,6 +122,8 @@ class RCHAccuGen:
         self.qcap = queue_capacity
         self.dim_range = dim_range
         self.output_range = DEFAULT_RCH_ACCUGEN_RANGE
+        self.output_type = output_type 
+        self.verbose = verbose 
 
         self.mutgen = [set() for _ in range(len(self.rch.s))] 
         self.update_log = defaultdict(defaultdict)
@@ -128,20 +146,44 @@ class RCHAccuGen:
             print("erroneous <RCHAccuGen>")
             return self.prg() 
         vx = deepcopy(self.rch.vpath)
+
+        tmp_queue = [] 
+        last_length = 0 
+
+        if self.verbose: 
+            print("\t\t** CHAIN VALUES W/: ",x) 
+
         for v in self.rch.vpath: 
             if type(v) != np.ndarray: 
                 v = safe_npint32_value(v) 
                 v = modulo_in_range(v,self.output_range) 
-                self.acc_queue.append(v)
+
+                if self.verbose: 
+                    print("-- ",v)
+                tmp_queue.append(v)
+                last_length = 1 
             else: 
                 v = v.flatten() 
                 v = safe_npint32_vec(v) 
                 v = [modulo_in_range(v_,self.output_range) \
-                    for v_ in v] 
-                self.acc_queue.extend(v) 
+                    for v_ in v]
+
+                if self.verbose: 
+                    print("-- ",v) 
+
+                tmp_queue.extend(v) 
+                last_length = len(v) 
+
+        self.acc_queue.extend(tmp_queue)  
         self.ctr += 1 
         self.update()
-        return self.acc_queue[-1] 
+
+        if self.output_type == 0:
+            while last_length > 0: 
+                self.acc_queue.pop(-1) 
+                last_length -= 1 
+
+        return self.acc_queue.pop(-1) 
 
     # TODO: test 
     @staticmethod
@@ -329,8 +371,18 @@ class RCHAccuGen:
         return 
 
     def __next__(self):
-        x = self.prg() #% 1000 
-        return self.apply(x)
+
+        # case: output type is -1, always output the last chain node 
+        #       output from another `prg` input 
+        if self.output_type == -1: 
+            x = self.prg() 
+            return self.apply(x) 
+
+        if len(self.acc_queue) > 0: 
+            return self.acc_queue.pop(-1) 
+
+        x = self.prg()
+        return self.apply(x) 
 
     def change_dim(self): 
         return -1 
