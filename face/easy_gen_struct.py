@@ -980,7 +980,8 @@ class TimeBasedCommLangFileGenerator:
         prg0 = self.fetch_accessory_prg_varname() 
         s = "set {} = make udls with {},{},{},{},{},{}.".format(gen_name,prg0,r0,r1,b0,b1,b2)  
         return [s],gen_name 
-
+    
+    # NOTE: intermittent bug here? 
     def generate_CL_pmulti(self): 
 
         gen_name = self.next_generator_name() 
@@ -1100,10 +1101,18 @@ class TimeBasedCommLangFileGenerator:
 
 DEFAULT_TBCLF_TMP_FILE_PATH = os.path.join(BASE_COMM_LANG_FOLDER,"tmp_file_that_no_one_should_use__HIOTRNGINRE.txt")
 
+def one_T_random_struct(struct_name,tmp_filepath=DEFAULT_TBCLF_TMP_FILE_PATH):
+
+    q = None 
+
+    while not q: 
+        q = one_T_random_struct_(struct_name,tmp_filepath) 
+    return q 
+
 """
 outputs a time-based pseudo-random generated PRNG Python object 
 """
-def one_T_random_struct(struct_name,tmp_filepath=DEFAULT_TBCLF_TMP_FILE_PATH):
+def one_T_random_struct_(struct_name,tmp_filepath=DEFAULT_TBCLF_TMP_FILE_PATH):
 
     assert struct_name in DEFAULT_TBCLF_STRUCT_NAMES
 
