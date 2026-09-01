@@ -573,6 +573,21 @@ generators, such that the output is the difference between their associated
 
 -----------------------------------------------------------------  
 
+
+[+] cycletest  
+[-] usage  
+```  
+cycletest <generator> with <number of iterations,pre n-gram int,post n-gram int>.  
+```
+[-] description  
+Test based on Markov Model. Calculates relations between prefix n-grams and 
+suffix m-grams. Outputs averages over all prefixes collected from test sequence. 
+
+WARNING: for timely use, set iterations to at most 500.  
+
+------------------------------------------------------------------ 
+
+
 [+] read  
 [-] usage  
 ```  

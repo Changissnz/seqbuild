@@ -10,7 +10,7 @@ repeat on the values of these two tests:
     categorical entropy: 0 <= x <= 1
     K-complexity of 1st order ternary difference 
     K-complexity of 2nd order ternary difference
-    K-complexity of (sequence - most common subsequence) 
+    complexity of (sequence - most common subsequence) 
 [1] factor modular k-complexity: 
         factor -> (1st order k-complexity, 2nd order k-complexity)  
 [2] element -> frequency map 

@@ -182,6 +182,8 @@ class SBApplication(tk.Frame):
             t1 = time.time() 
             s = CHAINTEST_DESCRIPTOR + "\n\n" + str(s_) + \
                 "\nelapsed time: " + str(t1 - t0) + " seconds."
+        elif q[0] == "cycletest": 
+            s = CYCLETEST_proc(q,self.clp.vartable) 
 
         self.text_widget.delete(1.0, tk.END)
         self.text_widget.insert(tk.END, s)  

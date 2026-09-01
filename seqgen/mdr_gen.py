@@ -189,7 +189,7 @@ class MDRGen:
         q1 = modulo_in_range(int(self.prg()),DEFAULT_MDRGEN_INTSEED_CYCLE_ITERRANGE) 
         max_sequences = q0 * q1 
 
-        icycle = [signed_modulo(int(self.prg()),DEFAULT_MDRGEN_ABSMAX)for _ in range(q0)] 
+        icycle = [signed_modulo(int(self.prg()),DEFAULT_MDRGEN_ABSMAX) for _ in range(q0)] 
         self.generate_sequence__type_novelgen(icycle,max_sequences,True) 
         
     """
@@ -220,14 +220,19 @@ class MDRGen:
         intseed_cycle.insert(0,self.mdr2.first) 
         i = 0 
         c = 0 
+        # NOTE: c2 is to prevent infinite loops for rare cases 
+        c2 = 0 
         while len(terminated_seeds) < len(intseed_cycle) and \
-            c < max_sequences: 
+            c < max_sequences and c2 < max_sequences * 2.5: 
+            print("TT: ",terminated_seeds,len(intseed_cycle))
+            print("CC: ",c,max_sequences)
             r, stat = self.add_sequence__type_novelgen_(intseed_cycle[i])
 
             if not stat: 
                 terminated_seeds = terminated_seeds | {intseed_cycle[i]}
             else: 
                 c += 1 
+            c2 += 1 
 
             r = [signed_modulo(r_,DEFAULT_MDRGEN_ABSMAX) for r_ in r]
             intsq = IntSeq(r) 

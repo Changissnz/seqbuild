@@ -412,8 +412,8 @@ class APRNGGaugeV2(APRNGGauge):
 
     mean(min),mean(max),
     var(min),var(max),
-    mean(D_i - D_(i+1)),mean(D_(i+1)-D_i),   
-    var(D_i - D_(i+1)),var(D_(i+1)-D_i).
+    mean(f_i - f_(i+1)),mean(f_(i+1)-f_i),   
+    var(f_i - f_(i+1)),var(f_(i+1)-f_i).
     """
     def chaintest(self,num_iter,chain_length):
         assert type(num_iter) in {int,np.int32,np.int64} 

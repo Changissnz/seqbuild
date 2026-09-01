@@ -380,6 +380,7 @@ class OpTriGen:
         else:
             assert False 
     
+    # NOTE: unused 
     def switch_gentype(self): 
         if len(self.cache2) < self.switch_sz:
             print("[!] not enough cache values to declare new matrix")

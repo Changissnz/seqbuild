@@ -9,7 +9,7 @@ random.seed(100)
 
 ### lone file test 
 """
-python3 -m tests.test_mdr_gen
+py -m tests.test_mdr_gen
 """
 ###
 class MDRGenMethods(unittest.TestCase):

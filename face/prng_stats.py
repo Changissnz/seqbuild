@@ -129,13 +129,17 @@ boolean metrics from file<face.prng_bool_cmp> to use), these comparisons output
 class PRNGIOStats: 
 
     def __init__(self,input_prg_list,input_prg_varname,output_prg_struct,ngram_info,\
-        partition_size,absdiff:bool=True): 
+        partition_size,absdiff:bool=True,output_prg_range=None): 
         
         assert len(input_prg_list) > 0 
         
         for x in input_prg_list: 
             assert type(x) in {MethodType,FunctionType}
         assert type(absdiff) == bool 
+
+        if type(output_prg_range) != type(None): 
+            assert is_valid_range(output_prg_range,True,False) or \
+            is_valid_range(output_prg_range,False,False)
 
         self.input_prg_list = input_prg_list
         self.input_prg_varname = input_prg_varname
@@ -146,17 +150,26 @@ class PRNGIOStats:
 
         self.input_prng_stats = [] 
         self.output_prng_stats = []  
+        self.output_prg_range = output_prg_range
         self.preproc() 
         return  
 
     def preproc(self):
         for x in self.input_prg_list:
-            G0 = PRNGStats(x,deepcopy(self.ngram_info),self.psize)
-            self.input_prng_stats.append(G0)
 
             G = deepcopy(self.output_prg_struct) 
             setattr(G,self.input_prg_varname,deepcopy(x))
-            G1 = PRNGStats(deepcopy(G.__next__),deepcopy(self.ngram_info),self.psize)
+
+            x_ = x 
+            Q = deepcopy(G.__next__)
+            if type(self.output_prg_range) != type(None): 
+                x_ = wrap_ranged_modulo_over_generator(x_,self.output_prg_range)
+                Q = wrap_ranged_modulo_over_generator(Q,self.output_prg_range)
+
+            G0 = PRNGStats(x_,deepcopy(self.ngram_info),self.psize)
+            self.input_prng_stats.append(G0)
+
+            G1 = PRNGStats(Q,deepcopy(self.ngram_info),self.psize)
             self.output_prng_stats.append(G1) 
 
     def run(self): 

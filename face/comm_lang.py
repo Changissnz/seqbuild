@@ -232,6 +232,10 @@ class CommLangParser:
             self.extra_commands.append(c) 
             return 
 
+        if c[0] == "cycletest": 
+            self.extra_commands.append(c) 
+            return 
+
         self.commond = [c_ for c_ in c if len(c_) > 0]
         return self.process_command_()
 

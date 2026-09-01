@@ -8,6 +8,7 @@ from .make_cmd import *
 from morebs2.matrix_methods import cr 
 from mini_dm.nsfr import * 
 from intigers.mod_prng import * 
+from desi.cy_metric import * 
 
 import io 
 import pickle 
@@ -375,6 +376,35 @@ def CHAINTEST_proc(splitstr_cmd,var_map):
         q2 = q2 - q2_ 
 
     return q2 
+
+def CYCLETEST_proc(splitstr_cmd,var_map): 
+    assert splitstr_cmd[0] == "cycletest" 
+
+    assert splitstr_cmd[1] in var_map
+    G = MAIN_method_for_object(var_map[splitstr_cmd[1]])
+
+    assert splitstr_cmd[2] == "with" 
+
+    qx = splitstr_cmd[3].split(',') 
+    assert len(qx) == 3 
+
+    num_iter = int(qx[0])
+    pre_size = int(qx[1]) 
+    post_size = int(qx[2])
+
+    C = CycleMetric(G,num_iter,pre_size,post_size) 
+
+    C.process() 
+    S,s0,s1 = C.summarize() 
+
+    keys = sorted(S.keys()) 
+
+    Q = ""
+    for k in keys: 
+        Q += k + " : mcs_k= {},cy_diff= {}\n".format(S[k][0],S[k][1]) 
+    Q += "idiff_mean: {}\n".format(s0)
+    Q += "nvar_mean: {}\n".format(s1) 
+    return Q 
 
 """
 reads a file containing a numerical sequence 
