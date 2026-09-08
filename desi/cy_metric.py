@@ -76,10 +76,13 @@ class CycleMetric:
 
         prefixes = set(self.M_.M.keys())
         S = dict() 
+        print("num prefixes: ",len(prefixes))
         for p in prefixes: 
+            print("processing: ",p)
             P,d0,v0 = self.process_prefix(p) 
             self.prefix2mcs_map[p] = P 
             self.prefix2score_map[p] = (d0,v0) 
+        print("")
         return
 
     """
@@ -149,6 +152,7 @@ class CycleMetric:
 
         prefix_info = self.M_.key_to_seq_by_type(prefix,measure_type) 
         ##print("PREFIX: ",prefix_info)
+        ## print("MCS LEN: ",len(prefix_info))
         ms = MCSSearch(prefix_info,self.cast_func)
         ms.search() 
 

@@ -224,8 +224,6 @@ class MDRGen:
         c2 = 0 
         while len(terminated_seeds) < len(intseed_cycle) and \
             c < max_sequences and c2 < max_sequences * 2.5: 
-            print("TT: ",terminated_seeds,len(intseed_cycle))
-            print("CC: ",c,max_sequences)
             r, stat = self.add_sequence__type_novelgen_(intseed_cycle[i])
 
             if not stat: 

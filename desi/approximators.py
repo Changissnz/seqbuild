@@ -186,8 +186,10 @@ class LPSValueOutputter(GenericIntSeqOp):
         return 
     
     def update_points(self):
+        # NOTE: add ranged moduli over PRNG to ensure timely Lagrange Polynomial solve. 
+        q = wrap_ranged_modulo_over_generator(self.px,[-100-2/3,100+1/3])
+        self.q = LPSValueOutputter.new_pointset(q,self.l_out) 
 
-        self.q = LPSValueOutputter.new_pointset(self.px,self.l_out) 
 
         # assumes q is a proper set of points for 
         # fitting via <LagrangePolySolver>

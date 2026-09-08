@@ -67,7 +67,7 @@ class ApproximatorsMethods(unittest.TestCase):
             cx.append(q)
             qx |= {q}
 
-        assert len(qx) == 338, "got {}".format(len(qx))
+        assert len(qx) == 325, "got {}".format(len(qx))
 
     def test__LPSValueOutputter__next__case3(self): 
         # case 1: integer LCG w/ output in [0,907]
@@ -85,7 +85,7 @@ class ApproximatorsMethods(unittest.TestCase):
         L = [] 
         for _ in range(1000): 
             L.append(next(lvo)) 
-        assert len(set(L)) == 517, "got {}".format( len(set(L)))
+        assert len(set(L)) == 537, "got {}".format( len(set(L)))
 
         # case 2: float version of the PRNG in case 1 
         xr = prg__single_to_nvec(lcg_px,2)

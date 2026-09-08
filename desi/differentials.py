@@ -75,7 +75,10 @@ class PIDValueOutputter(GenericIntSeqOp):
         stat = (self.adder_i % self.fvec_frequency) == 0
 
         if stat:
-            self.pic.modulate_dcurve_of_point(x) 
+            try: 
+                self.pic.modulate_dcurve_of_point(x) 
+            except: 
+                print("...strange...")
 
         q = self.pic.differential_at(x,lps_first=True)
         self.adder_i += 1 

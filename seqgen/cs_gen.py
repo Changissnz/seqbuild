@@ -43,9 +43,11 @@ class CongruenceShifterGen:
         if self.c == self.next_shift: 
             if x_ != self.prev: 
                 self.super_range = modrange_for_congruence(x_,self.prev,self.super_range)
-                if self.super_range[0] >= self.super_range[1]:
+                if self.super_range[0] > self.super_range[1]:
                     print("...strange...")
                     self.super_range = sorted(self.super_range)
+                elif self.super_range[0] == self.super_range[1]: 
+                    self.super_range = (self.super_range[0],self.super_range[1] + 5.0)
 
             self.c = 0
             self.set_next_shift() 
@@ -68,8 +70,12 @@ class CongruenceShifterGen:
 
             start = self.super_range[0] + (s0 * l / 2) 
             end = self.super_range[1] + (s1 * l / 2) 
+            
+            # NOTE: null range case 
+            if start == end: end += 5.0 
+
             ##print('before: ',self.super_range)
-            self.super_range = (start,end) 
+            self.super_range = (start,end)             
             ##print('after: ',self.super_range)
 
             self.c2 = 0 

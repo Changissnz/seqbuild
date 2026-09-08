@@ -72,9 +72,14 @@ from face.easy_gen_struct import *
 S = one_T_random_struct("prng_name")
 ```
 
-NOTE: `lcgv2` and `lcgv3` are lumped under `lcg`. 
+### Mathematical Papers on System 
+
+See the contents of the folder `info`. 
+
 
 ### PRNG Categories in Comm Lang 
+
+NOTE: `lcgv2` and `lcgv3` are lumped under `lcg`. 
 
 Here is a list of PRNGs and their categories available for use in Comm Lang.  
 

@@ -139,6 +139,21 @@ class RCHAccuGen:
         else: 
             assert is_vector(x)
 
+        if self.verbose: 
+            print("\t\t** CHAIN VALUES W/: ",x) 
+
+            ## NOTE: for viewing input-output values before actual calculation 
+            """
+            x2 = x 
+            for s_ in self.rch.s: 
+                print(s_)
+                x2 = deepcopy(s_.f)(x2) 
+                x2_ = safe_npint32_value(x2) 
+                x2_ = modulo_in_range(x2_,self.output_range) 
+                print("$ $ $ $ $:      ",x2,x2_)  
+            #print("== ",self.rch.s[i]) 
+            """ 
+
         ##self.rch.vpath.clear() 
         try: 
             self.rch.apply(x)
@@ -150,16 +165,13 @@ class RCHAccuGen:
         tmp_queue = [] 
         last_length = 0 
 
-        if self.verbose: 
-            print("\t\t** CHAIN VALUES W/: ",x) 
-
-        for v in self.rch.vpath: 
+        for (i,v) in enumerate(self.rch.vpath): 
             if type(v) != np.ndarray: 
                 v = safe_npint32_value(v) 
                 v = modulo_in_range(v,self.output_range) 
 
                 if self.verbose: 
-                    print("-- ",v)
+                    print("-- {}: {}".format(i,v)) 
                 tmp_queue.append(v)
                 last_length = 1 
             else: 
@@ -169,7 +181,7 @@ class RCHAccuGen:
                     for v_ in v]
 
                 if self.verbose: 
-                    print("-- ",v) 
+                    print("-- {}: {}".format(i,v)) 
 
                 tmp_queue.extend(v) 
                 last_length = len(v) 
@@ -307,12 +319,13 @@ class RCHAccuGen:
         else:
             d = modulo_in_range(self.prg(),self.dim_range)
 
-        q1 = np.array(prg_choose_n(self.acc_queue,d,self.prg))
+        prg_ = prg__single_to_int(self.prg) 
+        q1 = np.array(prg_choose_n(self.acc_queue,d,prg_))
 
         # case: LinCombo, change both 'rf' and 'cf' 
         if type(mg.base_func) == LinCombo: 
             d2 = d - 1
-            q2 = np.array(prg_choose_n(self.acc_queue,d2,self.prg))
+            q2 = np.array(prg_choose_n(self.acc_queue,d2,prg_))
             self.tmpset_rch_updatepath(rci_index,q2)
             self.rch.s[rci_index].inst_update_var() 
 

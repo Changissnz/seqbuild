@@ -69,7 +69,10 @@ class GaugeGuidedGen:
         self.allow_subrange_drift = allow_subrange_drift
 
         self.queue = deque() 
+
+        # element is (cov,uwpd)
         self.mvec = deque()  
+        # element is category 
         self.catvec = deque() 
 
         self.cat_size = None 

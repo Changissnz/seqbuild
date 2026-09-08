@@ -1,6 +1,6 @@
 from morebs2.poly_struct import CEPoly 
 from morebs2.matrix_methods import is_valid_range,vector_to_string,string_to_vector
-from morebs2.numerical_generator import modulo_in_range,prg_choose_n
+from morebs2.numerical_generator import modulo_in_range,prg_choose_n,prg__single_to_int
 from math import floor 
 from intigers.extraneous import zero_div0
 from collections import defaultdict
@@ -191,15 +191,18 @@ class N2MIndexMapGen:
         
         msize = int(modulo_in_range(self.prg(),self.ms_range)) 
         msize = min([msize,len(ai)])
+
+        prg_ = prg__single_to_int(self.prg)
         mset_index = prg_choose_n([i for i in range(len(ai))],\
-            msize,self.prg,is_unique_picker=True) 
+            msize,prg_,is_unique_picker=True) 
         mset = sorted([ai[mi] for mi in mset_index])
         mset = sorted(mset)
 
         # nset is from static even distribution 
         nsize = int(modulo_in_range(self.prg(),self.ns_range)) 
         sx = [i for i in range(self.nm[0])]
-        nset = prg_choose_n(sx,nsize,self.prg,is_unique_picker=True)
+
+        nset = prg_choose_n(sx,nsize,prg_,is_unique_picker=True)
         nset = sorted(nset) 
 
         # try adding the generated (nset,mset)

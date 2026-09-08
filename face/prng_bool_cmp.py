@@ -54,6 +54,9 @@ class QCInfo:
 
         self.c = qc[1] 
 
+    def retrieve_all(self): 
+        return {t:self.retrieve(t) for t in SCORE_TERMS}
+
     def retrieve(self,term):
         assert term in SCORE_TERMS 
 

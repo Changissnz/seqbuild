@@ -47,6 +47,7 @@ class UDLSGen:
         self.verbose = verbose 
 
         self.udls = None 
+        self.udls_ = None 
 
         self.cache = deque()  
 
@@ -59,8 +60,15 @@ class UDLSGen:
         self.set_next_shift(2) 
 
     def __next__(self):
-        V = self.one_input_vector()
-        x = self.udls.apply(V)
+        V,x = None,None 
+
+        try: 
+            V = self.one_input_vector()
+            x = self.udls.apply(V)
+        # NOTE: for catching cases where `prg` cannot produce a UDLinSysSolver 
+        except: 
+            self.cache.append(self.prg())
+            return self.cache.popleft() 
 
         self.cache.extend(V) 
         self.cache.append(x) 
@@ -81,7 +89,8 @@ class UDLSGen:
     def load_udls(self,draw_from_cache:bool=False,num_attempts_remaining=3): 
 
         X,Y = self.new_XY_dataset(draw_from_cache)
-        
+        self.udls_ = deepcopy(self.udls) 
+
         if self.verbose: 
             print("\t\t** new dataset")
             print("-- input")
@@ -101,7 +110,8 @@ class UDLSGen:
         except: 
             if num_attempts_remaining > 0: 
                 return self.load_udls(draw_from_cache,num_attempts_remaining - 1) 
-            
+            else: 
+                self.udls = self.udls_ 
         return 
 
     def new_XY_dataset(self,draw_from_cache:bool=False): 

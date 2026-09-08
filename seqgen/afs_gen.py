@@ -4,7 +4,8 @@ from collections import deque
 
 DEFAULT_AFSGEN_NUM_CENTROIDS = 5 
 
-DEFAULT_AFSGEN_CENTROID_UPDATE_RANGE = [2,13] 
+DEFAULT_AFSGEN_CENTROID_UPDATE_RANGE = [2,7]#13] 
+DEFAULT_AFSGEN_CENTROID_UPDATE_FREQUENCY = 12  
 
 """
 (A)ffine (F)it (S)earch (Gen)erator.
@@ -32,7 +33,8 @@ diff_mode := ~
 """
 class AFSGen: 
 
-    def __init__(self,prg,prg2,prg3,prg4,num_vectors,diff_mode:bool=True):
+    def __init__(self,prg,prg2,prg3,prg4,num_vectors,diff_mode:bool=True,\
+        update_frequency=DEFAULT_AFSGEN_CENTROID_UPDATE_FREQUENCY):
         assert type(prg) in {MethodType,FunctionType}
         assert type(prg2) in {MethodType,FunctionType,type(None)}
         assert type(prg3) in {MethodType,FunctionType,type(None)}
@@ -40,9 +42,11 @@ class AFSGen:
         
         assert type(num_vectors) == int and num_vectors > 0 
         assert type(diff_mode) == bool 
+        assert update_frequency > 0 and type(update_frequency) == int 
 
         self.num_vectors = num_vectors
         self.diff_mode = diff_mode 
+        self.update_frequency = update_frequency
 
         self.prg = prg 
         self.prg2 = prg2 
@@ -57,19 +61,25 @@ class AFSGen:
         self.instantiate_AFSearch()
 
         self.queue = deque() 
+
+        self.c = 0 
         return 
 
     def __next__(self): 
 
         if len(self.queue) == 0: 
             q = self.prg() 
+            ##print("mapping")
             x = self.afsearch.map_input(q)
+            ##print("got ",x)
             x = self.output_difference(x) 
             v = list(x.flatten()) 
             v = prg_seqsort(v,self.prg)
 
             self.queue.extend(v) 
+            ##print('adjusting')
             self.adjust_centroids() 
+            ##print('post')
         return self.queue.popleft() 
 
     def output_difference(self,q):
@@ -81,6 +91,12 @@ class AFSGen:
         return q - L 
 
     def adjust_centroids(self): 
+        self.c += 1 
+
+        if self.c % self.update_frequency: 
+            return 
+        self.c = 0 
+
         x = modulo_in_range(int(self.prg()),DEFAULT_AFSGEN_CENTROID_UPDATE_RANGE) 
         for _ in range(x): 
             next(self.afsearch)
