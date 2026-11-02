@@ -1,4 +1,5 @@
 from types import MethodType,FunctionType
+from numpy import add,ufunc,array 
 
 """
 outputs a function for every `next` call, according to 
@@ -39,6 +40,30 @@ class BasicIterableContainer:
         if self.cycle_on: 
             self.i = self.i % len(self.l)
         return q 
+
+"""
+Extension of class<BasicIterableContainer>. After every full iteration 
+of `l`, the base vector, updates `l` to 
+`l` := f(`l`,v). 
+"""
+class NoiseAddedIterableContainer(BasicIterableContainer): 
+
+    def __init__(self,L,v,f=add):
+        super().__init__(L,cycle_on=True)
+        assert type(f) in {FunctionType,MethodType,ufunc}
+
+        self.l = array(L)
+        self.v = v 
+        self.f = f  
+        self.started = False 
+        return 
+
+    def __next__(self): 
+        if self.started and self.i == 0: 
+            self.l = self.f(self.l,self.v)
+
+        self.started = True 
+        return super().__next__() 
 
 def prg__iterable(L,cycle_on:bool=True):
     bic = BasicIterableContainer(L,cycle_on)
