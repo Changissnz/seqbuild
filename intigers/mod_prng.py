@@ -1,5 +1,6 @@
 from types import MethodType,FunctionType
 from numpy import add,ufunc,array 
+from copy import deepcopy
 
 """
 outputs a function for every `next` call, according to 
@@ -48,14 +49,18 @@ of `l`, the base vector, updates `l` to
 """
 class NoiseAddedIterableContainer(BasicIterableContainer): 
 
-    def __init__(self,L,v,f=add):
+    def __init__(self,L,v,f=add,op_first:bool=True):
         super().__init__(L,cycle_on=True)
         assert type(f) in {FunctionType,MethodType,ufunc}
+        assert type(op_first) == bool
 
         self.l = array(L)
+        self.l_ = deepcopy(self.l)
         self.v = v 
         self.f = f  
+
         self.started = False 
+        if op_first: self.started = True 
         return 
 
     def __next__(self): 
@@ -64,6 +69,19 @@ class NoiseAddedIterableContainer(BasicIterableContainer):
 
         self.started = True 
         return super().__next__() 
+
+    def reset(self,reset_index:bool=True,v=None): 
+        assert type(reset_index) == bool 
+        if reset_index:
+            self.l = deepcopy(self.l_)
+            self.i = 0 
+
+        if type(v) != type(None):
+            self.v = v 
+        
+        if not reset_index and type(v) != type(None):
+            self.l = self.f(self.l,self.v)
+
 
 def prg__iterable(L,cycle_on:bool=True):
     bic = BasicIterableContainer(L,cycle_on)
