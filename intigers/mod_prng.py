@@ -2,7 +2,7 @@ from types import MethodType,FunctionType,BuiltinFunctionType
 from numpy import add,ufunc,array 
 from copy import deepcopy
 
-from morebs2.numerical_generator import modulo_in_range
+from morebs2.numerical_generator import safe_modulo_in_range
 from morebs2.matrix_methods import is_valid_range
 
 """
@@ -103,7 +103,7 @@ class NoiseAddedIterableContainerV2(BasicIterableContainer):
     def __init__(self,L,l_range,v,function_vec,op_first:bool=True):
 
         super().__init__(L,cycle_on=True)
-        assert is_valid_range(l_range,True,False) and l_range[0] > 0 
+        assert is_valid_range(l_range,True,True) and l_range[0] > 0 
         assert type(function_vec) == list 
         for f in function_vec: 
             assert type(f) in {FunctionType,MethodType,ufunc,BuiltinFunctionType}, "got {}".format(type(f)) 
@@ -152,7 +152,7 @@ class NoiseAddedIterableContainerV2(BasicIterableContainer):
             self.update_vector() 
 
     def update_vector(self): 
-        new_length = modulo_in_range(int(self.prev_output),self.l_range)
+        new_length = safe_modulo_in_range(int(self.prev_output),self.l_range)
 
         l2 = [] 
         for i in range(new_length): 
