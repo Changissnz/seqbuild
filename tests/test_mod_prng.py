@@ -1,4 +1,6 @@
 from intigers.mod_prng import * 
+from intigers.prng_pw_op import * 
+from morebs2.numerical_generator import * 
 import unittest
 
 ### lone file test 
@@ -73,6 +75,25 @@ class ModPRNGClasses(unittest.TestCase):
         # check for correct reset, w/ index 
         P.reset(reset_index=True,v=v3)
         assert next(P) == L[0] + v3 
+
+    """
+    uses <PRNGPairwiseOp> instead of standard pairwise op. 
+    """
+    def test__NoiseAddedIterableContainer__next__case3(self):
+
+        L = [414,54,76,91,231,451,-26,-96,64]
+        v = 23 
+
+        q = prg__LCG(5625.24,-241.51,6252.532,45156.33)
+        F = PRNGPairwiseOp([add,mul,sub],q) 
+
+        P = NoiseAddedIterableContainer(L,v,f=F.apply,op_first=True) 
+
+        X = [next(P) for _ in range(20)] 
+        P.reset(reset_index=True) 
+        X2 = [next(P) for _ in range(20)] 
+        assert X == X2 
+        return 
 
 if __name__ == '__main__':
     unittest.main()

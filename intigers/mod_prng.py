@@ -58,6 +58,9 @@ class NoiseAddedIterableContainer(BasicIterableContainer):
         self.l_ = deepcopy(self.l)
         self.v = v 
         self.f = f  
+        # makes copy of function, in case function is 
+        # not constant. 
+        self.f_ = deepcopy(f) 
 
         self.started = False 
         if op_first: self.started = True 
@@ -75,6 +78,7 @@ class NoiseAddedIterableContainer(BasicIterableContainer):
         if reset_index:
             self.l = deepcopy(self.l_)
             self.i = 0 
+            self.f = deepcopy(self.f_)
 
         if type(v) != type(None):
             self.v = v 
