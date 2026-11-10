@@ -95,5 +95,37 @@ class ModPRNGClasses(unittest.TestCase):
         assert X == X2 
         return 
 
+    def test__NoiseAddedIterableContainerV2__next__case1(self):
+
+        L = [414,54,76,91,231,451,-26,-96,64]
+        l_range = [6,24] 
+        v = 341 
+        func_vec = [add,mul,sub,add]
+
+        P = NoiseAddedIterableContainerV2(L,l_range,v,func_vec,op_first=True)
+
+        assert len(P) == 9 
+
+        X = [] 
+        for _ in range(9): 
+            X.append(next(P))
+
+        # check for base vector of different length after cycle
+        assert len(P) == 16 
+        for _ in range(16): 
+            X.append(next(P))
+
+        P.reset(reset_index=True)
+
+        # check for repeat after reset 
+        X2 = [] 
+        for _ in range(9): 
+            X2.append(next(P))
+        assert len(P) == 16 
+        for _ in range(16): 
+            X2.append(next(P))
+
+        assert X == X2 
+
 if __name__ == '__main__':
     unittest.main()
