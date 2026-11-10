@@ -9,7 +9,7 @@ from morebs2.matrix_methods import is_valid_range
 outputs a function for every `next` call, according to 
 the counter `i` modulated by |prngs|. 
 """
-class ModPRNGOutputter:
+class ModPRNGOutputter: 
 
     def __init__(self,prngs):
         for x in prngs: 
